@@ -42,9 +42,7 @@
                 {{ session('UserType') }} Account
             </div>
         </div>
-        <div class="welcome-image">
-            <img src="{{ asset('assets/images/welcome-illustration.png') }}" alt="Welcome">
-        </div>
+        
     </div>
 
     <!-- ── Quick actions ── -->
@@ -71,7 +69,7 @@
             <div class="card-arrow"><i class="fas fa-arrow-right"></i> Manage</div>
         </a>
 
-        <a href="manage_jobs.php" class="action-card">
+        <a href="{{ url('/admin/manage-jobs') }}" class="action-card">
             <div class="card-icon"><i class="fas fa-briefcase"></i></div>
             <div>
                 <div class="card-title">Manage Jobs</div>

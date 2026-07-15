@@ -8,6 +8,9 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Employer\EmployerController;
 use App\Http\Controllers\JobSeeker\JobSeekerController;
 use App\Http\Controllers\Admin\ManageUsersController;
+use App\Http\Controllers\Admin\ManageJobsController;
+
+// Route
 
 // Home Page Route
 Route::get('/', [HomeController::class, 'index']);
@@ -38,16 +41,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])
         ->name('dashboard');
 
-    Route::get('/manage-users', [ManageUsersController::class, 'index'])
-        ->name('manageUsers');
-
-    Route::get('/manage-jobs', [AdminController::class, 'manageJobs'])
-        ->name('manageJobs');
-
     Route::get('/manage-documents', [AdminController::class, 'manageDocuments'])
         ->name('manageDocuments');
 
     //Manage Users
+    Route::get('/manage-users', [ManageUsersController::class, 'index'])
+        ->name('manageUsers');
+
     Route::post(
         '/manage-users/{type}/{id}/confirm',
         [ManageUsersController::class, 'confirm']
@@ -62,6 +62,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         '/manage-users/{type}/{id}',
         [ManageUsersController::class, 'destroy']
     )->name('users.delete');
+
+    //Manage Jobs
+    Route::get('/manage-jobs', [ManageJobsController::class, 'index'])
+        ->name('manage.jobs');
+
+    Route::post('/manage-jobs/{id}/approve', [ManageJobsController::class, 'approve'])
+        ->name('jobs.approve');
+
+    Route::post('/manage-jobs/{id}/reject', [ManageJobsController::class, 'reject'])
+        ->name('jobs.reject');
 });
 
 Route::get('/employer', [EmployerController::class, 'dashboard'])
