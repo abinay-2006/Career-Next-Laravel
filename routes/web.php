@@ -9,6 +9,16 @@ use App\Http\Controllers\Employer\EmployerController;
 use App\Http\Controllers\JobSeeker\JobSeekerController;
 use App\Http\Controllers\Admin\ManageUsersController;
 use App\Http\Controllers\Admin\ManageJobsController;
+use App\Http\Controllers\Admin\ManageDocumentsController;
+use App\Http\Controllers\Employer\EmployerJobController;
+use App\Http\Controllers\Employer\WalkinController;
+use App\Http\Controllers\Employer\EmployerApplicationController;
+use App\Http\Controllers\JobSeeker\EducationController;
+use App\Http\Controllers\JobSeeker\JobSearchController;
+use App\Http\Controllers\JobSeeker\JobSeekerWalkinController;
+use App\Http\Controllers\JobSeeker\JobApplicationController;
+use App\Http\Controllers\Employer\EmployerProfileController;
+use App\Http\Controllers\JobSeeker\JobSeekerProfileController;
 
 // Route
 
@@ -41,9 +51,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])
         ->name('dashboard');
 
-    Route::get('/manage-documents', [AdminController::class, 'manageDocuments'])
-        ->name('manageDocuments');
-
     //Manage Users
     Route::get('/manage-users', [ManageUsersController::class, 'index'])
         ->name('manageUsers');
@@ -72,10 +79,143 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::post('/manage-jobs/{id}/reject', [ManageJobsController::class, 'reject'])
         ->name('jobs.reject');
+
+    // Manage Documents
+    Route::get(
+        '/manage-documents',
+        [ManageDocumentsController::class, 'index']
+    )->name('manage.documents');
+
+    Route::get(
+        '/manage-documents/view/{id}',
+        [ManageDocumentsController::class, 'view']
+    )->name('documents.view');
+
+    Route::post('/manage-documents/{id}/approve', [ManageDocumentsController::class, 'approve'])
+        ->name('documents.approve');
+
+    Route::post('/manage-documents/{id}/reject', [ManageDocumentsController::class, 'reject'])
+        ->name('documents.reject');
 });
+//Employer Routes
+Route::prefix('employer')
+    ->name('employer.')
+    ->group(function () {
 
-Route::get('/employer', [EmployerController::class, 'dashboard'])
-    ->name('employer.dashboard');
+        Route::get('/', [EmployerController::class, 'index'])
+            ->name('dashboard');
 
-Route::get('/jobseeker', [JobSeekerController::class, 'dashboard'])
-    ->name('jobseeker.dashboard');
+        //Profile Routes
+
+        Route::get('/profile', [EmployerController::class, 'profile'])
+            ->name('profile');
+
+        //Job Routes
+        Route::get('/jobs', [EmployerJobController::class, 'index'])
+            ->name('jobs.index');
+
+        Route::post('/jobs', [EmployerJobController::class, 'store'])
+            ->name('jobs.store');
+
+        Route::put('/jobs/{id}', [EmployerJobController::class, 'update'])
+            ->name('jobs.update');
+
+        Route::delete('/jobs/{id}', [EmployerJobController::class, 'destroy'])
+            ->name('jobs.destroy');
+
+        //Walkin Routes
+        Route::get('/walkins', [WalkinController::class, 'index'])
+            ->name('walkins.index');
+
+        Route::post('/walkins', [WalkinController::class, 'store'])
+            ->name('walkins.store');
+
+        Route::put('/walkins/{walkin}', [WalkinController::class, 'update'])
+            ->name('walkins.update');
+
+        Route::delete('/walkins/{walkin}', [WalkinController::class, 'destroy'])
+            ->name('walkins.destroy');
+
+        //Application Routes
+        Route::get(
+            '/applications',
+            [EmployerApplicationController::class, 'index']
+        )->name('applications.index');
+
+        Route::get('/employer/applications/{application}', [EmployerApplicationController::class, 'show'])
+            ->name('applications.show');
+
+        Route::put('/employer/applications/{application}', [EmployerApplicationController::class, 'update'])
+            ->name('applications.update');
+
+        //Profile Routes
+        Route::get('/profile', [EmployerProfileController::class, 'index'])
+            ->name('profile.index');
+
+        Route::put('/profile', [EmployerProfileController::class, 'update'])
+            ->name('profile.update');
+    });
+
+Route::prefix('jobseeker')
+    ->name('jobseeker.')
+    ->group(function () {
+
+        Route::get('/', [JobSeekerController::class, 'index'])
+            ->name('index');
+
+        //Education Routes
+        Route::get('/education', [EducationController::class, 'index'])
+            ->name('education');
+
+        Route::post('/education', [EducationController::class, 'store'])
+            ->name('education.store');
+
+        Route::put('/education/{id}', [EducationController::class, 'update'])
+            ->name('education.update');
+
+        Route::delete('/education/{id}', [EducationController::class, 'destroy'])
+            ->name('education.destroy');
+
+        Route::post('/school', [EducationController::class, 'storeSchool'])
+            ->name('school.store');
+
+        Route::put('/school/{id}', [EducationController::class, 'updateSchool'])
+            ->name('school.update');
+
+        Route::delete('/school/{id}', [EducationController::class, 'destroySchool'])
+            ->name('school.destroy');
+
+        Route::post('/documents', [EducationController::class, 'uploadDocument'])
+            ->name('documents.store');
+
+        Route::delete('/documents/{id}', [EducationController::class, 'deleteDocument'])
+            ->name('documents.destroy');
+
+        //Apply job
+        Route::get('/jobs', [JobSearchController::class, 'index'])
+            ->name('jobs');
+
+        Route::post('/jobs/{job}/apply', [JobApplicationController::class, 'apply'])
+            ->name('jobs.apply');
+
+        Route::get('/walkins', [JobSeekerWalkinController::class, 'index'])
+            ->name('walkins');
+
+        //Profile Routes
+        Route::get(
+            '/profile',
+            [JobSeekerProfileController::class, 'index']
+        )->name('profile.index');
+
+        Route::put(
+            '/profile',
+            [JobSeekerProfileController::class, 'update']
+        )->name('profile.update');
+
+        // Resume Upload
+        Route::put('/profile/resume', [JobSeekerProfileController::class, 'updateResume'])
+            ->name('profile.resume.update');
+
+        Route::delete('/profile/resume', [JobSeekerProfileController::class, 'removeResume'])
+            ->name('profile.resume.remove');
+    });

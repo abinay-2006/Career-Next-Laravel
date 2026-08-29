@@ -4,29 +4,6 @@
 
 @section('content')
 
-<!-- ══════════ NAVBAR ══════════ -->
-<nav class="navbar">
-    <a href="{{ url('/admin/dashboard') }}" class="navbar-brand brand-logo">
-        <img src="{{ asset('assets/images/CareerNext.png') }}" alt="Career Next">
-        <span>Career Next</span>
-    </a>
-    <div class="navbar-user">
-        <div class="user-badge">
-            <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
-            <div class="user-info">
-                <div class="user-name">{{ session('Name') }}</div>
-                <div class="user-role">{{ session('UserType') }}</div>
-            </div>
-        </div>
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" class="btn-logout">
-                <i class="fas fa-right-from-bracket"></i>
-                Logout
-            </button>
-        </form>
-    </div>
-</nav>
 
 <!-- ══════════ MAIN ══════════ -->
 <div class="main-content">

@@ -13,13 +13,39 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
 </head>
 
 <body>
+    <!-- ══════════ NAVBAR ══════════ -->
+    <nav class="navbar">
+        <a href="{{ route('admin.index') }}" class="navbar-brand brand-logo">
+            <img src="../images/CareerNext.png" alt="Career Next" onerror="this.style.display='none'">
+            <span style="color: white;">Career Next</span>
+        </a>
+        <div class="navbar-user">
+            <div class="user-badge">
+                <div class="user-avatar"><i class="fas fa-shield-halved"></i></div>
+                <div class="user-info">
+                    <div class="user-name">{{ session('Name') }}</div>
+                    <div class="user-role">{{ session('UserType') }}</div>
+                </div>
+            </div>
+            <a href="{{ route('logout') }}" class="btn-logout">
+                <i class="fas fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </nav>
+
 
     @yield('content')
     @yield('scripts')
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+    &copy; <?php echo date('Y'); ?> Career Next. All rights reserved.
+</footer>
 
 </html>

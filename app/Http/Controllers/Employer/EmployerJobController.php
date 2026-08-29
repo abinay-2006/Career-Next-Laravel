@@ -1,0 +1,105 @@
+<?php
+
+namespace App\Http\Controllers\Employer;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\Job;
+use Illuminate\Support\Facades\Auth;
+
+class EmployerJobController extends Controller
+{
+    public function index()
+    {
+        $companyName = session('Name');
+
+        $jobs = Job::where('CompanyName', $companyName)
+            ->orderByDesc('JobId')
+            ->get();
+
+        $totalRecords = $jobs->count();
+
+        $degrees = [
+            'B.C.A',
+            'M.C.A',
+            'B.Sc.I.T',
+            'B.Sc.C.S',
+            'M.Sc.I.T',
+            'M.Sc.C.S',
+            'B.E / B.Tech',
+            'M.E / M.Tech',
+            'B.Com',
+            'M.Com',
+            'B.A',
+            'M.A',
+            'M.B.A',
+            'B.B.A',
+            'B.Pharm',
+            'M.Pharm',
+            'MBBS',
+            'LLB',
+            'LLM',
+            'Diploma',
+            'Ph.D',
+            'Other'
+        ];
+
+        return view('employer.jobs.index', compact(
+            'jobs',
+            'totalRecords',
+            'degrees'
+        ));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'txtTitle' => 'required',
+            'txtTotal' => 'required|integer|min:1',
+            'cmbQual' => 'required',
+            'txtDesc' => 'required',
+        ]);
+
+        Job::create([
+            'CompanyName' => session('Name'),
+            'JobTitle' => $request->txtTitle,
+            'Vacancy' => $request->txtTotal,
+            'SalaryFrom' => $request->txtSalaryFrom,
+            'SalaryTo' => $request->txtSalaryTo,
+            'MinQualification' => $request->cmbQual == 'Other'
+                ? $request->txtOther
+                : $request->cmbQual,
+            'Description' => $request->txtDesc,
+            'Status' => 'Pending',
+        ]);
+
+        return back()->with('success', 'Job Posted Successfully.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $job = Job::findOrFail($id);
+
+        $job->update([
+            'JobTitle' => $request->txtTitle,
+            'Vacancy' => $request->txtTotal,
+            'SalaryFrom' => $request->txtSalaryFrom,
+            'SalaryTo' => $request->txtSalaryTo,
+            'MinQualification' => $request->cmbQual == 'Other'
+                ? $request->txtOther
+                : $request->cmbQual,
+            'Description' => $request->txtDesc,
+        ]);
+
+        return back()->with('success', 'Job Updated Successfully.');
+    }
+
+    public function destroy($id)
+{
+    Job::findOrFail($id)->delete();
+
+    return redirect()
+        ->route('employer.jobs.index')
+        ->with('success', 'Job deleted successfully.');
+}
+}

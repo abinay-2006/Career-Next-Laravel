@@ -27,7 +27,7 @@ class JobSeeker extends Authenticatable
         'Password',
         'Question',
         'Answer',
-        'Photo'
+        'Photo',
     ];
 
     protected $hidden = [
@@ -37,5 +37,29 @@ class JobSeeker extends Authenticatable
     public function getAuthPassword()
     {
         return $this->Password;
+    }
+
+    /**
+     * Higher Education
+     */
+    public function educations()
+    {
+        return $this->hasMany(JobSeekerEducation::class, 'JobSeekId', 'JobSeekId');
+    }
+
+    /**
+     * School Education
+     */
+    public function schoolEducations()
+    {
+        return $this->hasMany(JobSeekerSchoolEducation::class, 'JobSeekId', 'JobSeekId');
+    }
+
+    /**
+     * Uploaded Documents
+     */
+    public function documents()
+    {
+        return $this->hasMany(JobSeekerDocument::class, 'JobSeekId', 'JobSeekId');
     }
 }

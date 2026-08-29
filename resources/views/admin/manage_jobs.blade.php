@@ -4,25 +4,7 @@
 
 @section('content')
 
-<!-- ══════════ NAVBAR ══════════ -->
-<nav class="navbar">
-    <a href="{{ route('admin.index') }}" class="navbar-brand brand-logo">
-        <img src="../images/CareerNext.png" alt="Career Next" onerror="this.style.display='none'">
-        <span>Career Next</span>
-    </a>
-    <div class="navbar-user">
-        <div class="user-badge">
-            <div class="user-avatar"><i class="fas fa-shield-halved"></i></div>
-            <div class="user-info">
-                <div class="user-name">{{ session('Name') }}</div>
-                <div class="user-role">{{ session('UserType') }}</div>
-            </div>
-        </div>
-        <a href="{{ route('logout') }}" class="btn-logout">
-            <i class="fas fa-right-from-bracket"></i> Logout
-        </a>
-    </div>
-</nav>
+
 
 <!-- ══════════ MAIN ══════════ -->
 <div class="main-content">
@@ -274,7 +256,7 @@
     </div>
 </div>
 @endsection
-@section('scripts')
+@yield('scripts')
 <script>
     const jobs = @json($jobs->values());
     let activeJobId = null;

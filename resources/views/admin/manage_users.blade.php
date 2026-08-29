@@ -353,7 +353,7 @@
     </div>
 </div>
 @endsection
-@section('scripts')
+@yield('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 

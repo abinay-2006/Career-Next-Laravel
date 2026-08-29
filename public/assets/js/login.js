@@ -164,8 +164,8 @@ function validateRegister() {
         showError("reg-error", "Please enter a valid email address.");
         return false;
     }
-    if (pass.length < 6) {
-        showError("reg-error", "Password must be at least 6 characters.");
+    if (pass.length < 8) {
+        showError("reg-error", "Password must be at least 8 characters.");
         return false;
     }
     if (pass !== conf) {
@@ -181,14 +181,19 @@ function validateRegister() {
 
 function handleRegisterSubmit(event) {
     event.preventDefault();
-    if (!validateRegister()) return false;
+
+    if (!validateRegister()) {
+        return false;
+    }
 
     const form = event.target;
     const formData = new FormData(form);
     const submitBtn = form.querySelector('button[type="submit"]');
+
     const originalBtnText = submitBtn.innerHTML;
 
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+
     submitBtn.disabled = true;
 
     fetch(form.action, {
@@ -196,36 +201,87 @@ function handleRegisterSubmit(event) {
         body: formData,
         headers: {
             "X-Requested-With": "XMLHttpRequest",
+            Accept: "application/json",
         },
     })
-        .then((response) => response.json())
+        .then(async (response) => {
+            const contentType = response.headers.get("content-type") || "";
+
+            if (contentType.includes("application/json")) {
+                const data = await response.json(); // Define data here
+
+                // Check response.ok after parsing JSON
+                if (!response.ok) {
+                    throw {
+                        validation: true,
+                        data: data,
+                    };
+                }
+
+                return data;
+            }
+
+            const text = await response.text();
+
+            console.error("Server returned non-JSON response:", text);
+
+            throw {
+                serverError: true,
+                status: response.status,
+                message:
+                    "Server error (" +
+                    response.status +
+                    "). Check Laravel logs.",
+            };
+        })
         .then((data) => {
             if (data.success) {
+                form.reset();
+
                 switchTab("login");
+
                 showToast(
                     "success",
-                    "Approval requested! Your account will be activated soon.",
+                    data.message || "Account created successfully.",
                 );
+
                 showSuccess(
                     "reg-success",
-                    data.message || "Account created! You can now sign in.",
+                    data.message || "Account created successfully.",
                 );
-                form.reset();
             } else {
                 showError("reg-error", data.message || "Registration failed.");
             }
+
             submitBtn.innerHTML = originalBtnText;
             submitBtn.disabled = false;
         })
         .catch((error) => {
-            console.error("Error:", error);
-            showError(
-                "reg-error",
-                "A network error occurred. Please try again.",
-            );
+            console.error("Registration error:", error);
+
+            let message = "Registration failed. Please try again.";
+
+            if (error.validation && error.data) {
+                if (error.data.message) {
+                    message = error.data.message;
+                }
+
+                if (error.data.errors) {
+                    const firstField = Object.keys(error.data.errors)[0];
+
+                    if (firstField) {
+                        message = error.data.errors[firstField][0];
+                    }
+                }
+            }
+
+            showError("reg-error", message);
+
             submitBtn.innerHTML = originalBtnText;
             submitBtn.disabled = false;
         });
+
+    return false;
 }
 
 function handleForgotSubmit(event) {
@@ -348,22 +404,124 @@ window.addEventListener("DOMContentLoaded", function () {
     if (p.get("tab") === "register") switchTab("register");
     if (p.get("tab") === "forgot") switchTab("forgot");
 
-    // ── Auto-select user type from URL ──
+    /* ── Auto-select account type from URL ───────────────────────────────────── */
+
     const type = p.get("type");
+
     if (type) {
-        document
-            .querySelectorAll('select[name="cmbUser"]')
-            .forEach((select) => {
-                for (let i = 0; i < select.options.length; i++) {
-                    if (
-                        select.options[i].value.toLowerCase() ===
-                        type.toLowerCase()
-                    ) {
-                        select.selectedIndex = i;
-                        if (select.id === "reg-type") toggleRegFields();
-                        break;
-                    }
-                }
-            });
+        const normalizedType = type.toLowerCase();
+
+        if (normalizedType === "jobseeker") {
+            selectAccountType("JobSeeker");
+        } else if (normalizedType === "employer") {
+            selectAccountType("Employer");
+        }
     }
 });
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PHASE 1A — ACCOUNT TYPE SELECTION
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+let selectedAccountType = null;
+
+/**
+ * Select Job Seeker / Employer
+ */
+function selectAccountType(type) {
+    selectedAccountType = type;
+
+    const jobSeekerCard = document.getElementById("account-jobseeker");
+    const employerCard = document.getElementById("account-employer");
+
+    const message = document.getElementById("selected-account-message");
+    const continueButton = document.getElementById("account-continue");
+
+    // Remove previous selection
+    jobSeekerCard.classList.remove("selected");
+    employerCard.classList.remove("selected");
+
+    // Select current card
+    if (type === "JobSeeker") {
+        jobSeekerCard.classList.add("selected");
+
+        message.innerHTML =
+            '<i class="fas fa-user-tie"></i>' +
+            "<span>Great! Let's create your Job Seeker account.</span>";
+    } else if (type === "Employer") {
+        employerCard.classList.add("selected");
+
+        message.innerHTML =
+            '<i class="fas fa-building"></i>' +
+            "<span>Great! Let's create your Employer account.</span>";
+    }
+
+    // Style message as selected
+    message.classList.add("selected");
+
+    // Enable continue
+    continueButton.disabled = false;
+}
+
+/**
+ * Continue to registration form
+ */
+function continueRegistration() {
+    if (!selectedAccountType) {
+        return;
+    }
+
+    const typeScreen = document.getElementById("register-type-screen");
+
+    const formScreen = document.getElementById("registration-form-screen");
+
+    const typeInput = document.getElementById("reg-type");
+
+    const title = document.getElementById("registration-form-title");
+
+    const subtitle = document.getElementById("registration-form-subtitle");
+
+    const nameLabel = document.getElementById("fname-label");
+
+    const nameInput = document.getElementById("reg-name");
+
+    // Store selected account type
+    typeInput.value = selectedAccountType;
+
+    // Customize form based on account type
+    if (selectedAccountType === "JobSeeker") {
+        title.textContent = "Create your Job Seeker account";
+
+        subtitle.textContent = "Let's get you started with the basics";
+
+        nameLabel.textContent = "Full Name";
+
+        nameInput.placeholder = "Enter your full name";
+    } else if (selectedAccountType === "Employer") {
+        title.textContent = "Create your Employer account";
+
+        subtitle.textContent = "Let's get your company started";
+
+        nameLabel.textContent = "Company Name";
+
+        nameInput.placeholder = "Enter your company name";
+    }
+
+    // Hide account selection
+    typeScreen.style.display = "none";
+
+    // Show registration form
+    formScreen.style.display = "block";
+}
+
+/**
+ * Go back to account selection
+ */
+function backToAccountType() {
+    const typeScreen = document.getElementById("register-type-screen");
+
+    const formScreen = document.getElementById("registration-form-screen");
+
+    formScreen.style.display = "none";
+    typeScreen.style.display = "block";
+}

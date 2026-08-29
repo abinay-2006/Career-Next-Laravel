@@ -222,7 +222,7 @@
 
 </div>
 @endsection
-@section('scripts')
+@yield('scripts')
 <script>
     function switchTab(name, btn) {
         document.querySelectorAll('.tab-panel').forEach(panel => {

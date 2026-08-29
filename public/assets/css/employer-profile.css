@@ -1,0 +1,1967 @@
+/* ==========================================================
+   CAREER NEXT
+   EMPLOYER PROFILE
+   MATCHES JOB SEEKER PROFILE UI
+   ========================================================== */
+
+/* ==========================================================
+   GLOBAL PROFILE PAGE
+   ========================================================== */
+
+.employer-profile-page,
+.main-content {
+    position: relative;
+    z-index: 1;
+}
+
+/* ==========================================================
+   MAIN CONTENT
+   Same sizing as Job Seeker Profile
+   ========================================================== */
+
+.main-content {
+    flex: 1;
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+/* ==========================================================
+   ALERTS
+   ========================================================== */
+
+.alert {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+
+    border-radius: 14px;
+
+    font-family: "Poppins", sans-serif;
+    font-size: 0.82rem;
+
+    box-sizing: border-box;
+
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.alert-success {
+    color: #d1fae5;
+
+    background: rgba(34, 197, 94, 0.14);
+
+    border: 1px solid rgba(134, 239, 172, 0.25);
+}
+
+.alert-danger {
+    color: #fecaca;
+
+    background: rgba(239, 68, 68, 0.14);
+
+    border: 1px solid rgba(252, 165, 165, 0.25);
+}
+
+.alert i {
+    margin-right: 7px;
+}
+
+.alert ul {
+    margin: 8px 0 0 20px;
+}
+
+.alert li {
+    margin-bottom: 3px;
+}
+
+/* ==========================================================
+   PAGE HEADER
+   SAME AS JOB SEEKER PROFILE
+   ========================================================== */
+
+.page-header {
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    margin-bottom: 28px;
+
+    animation: employerFadeUp 0.4s ease both;
+}
+
+/* Header icon */
+
+.page-header-icon {
+    width: 56px;
+    height: 56px;
+
+    flex: 0 0 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.18);
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    border-radius: 16px;
+
+    color: #ffffff;
+
+    font-size: 1.5rem;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Header text */
+
+.page-header-text {
+    min-width: 0;
+    flex: 1;
+}
+
+.page-header-text h1 {
+    margin: 0;
+
+    color: #ffffff;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 1.5rem;
+    font-weight: 700;
+
+    line-height: 1.3;
+}
+
+.page-header-text p {
+    margin: 3px 0 0;
+
+    color: rgba(255, 255, 255, 0.7);
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 0.85rem;
+
+    line-height: 1.5;
+}
+
+/* ==========================================================
+   BACK BUTTON
+   ========================================================== */
+
+.back-btn {
+    margin-left: auto;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 9px 18px;
+
+    background: rgba(255, 255, 255, 0.12);
+
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    border-radius: 10px;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 0.83rem;
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    transition:
+        background 0.22s ease,
+        border-color 0.22s ease,
+        transform 0.22s ease;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+
+    border-color: rgba(255, 255, 255, 0.3);
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+/* ==========================================================
+   PROFILE HERO
+   SAME GLASS CARD AS JOB SEEKER
+   ========================================================== */
+
+.profile-hero {
+    position: relative;
+
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 28px;
+
+    padding: 32px 36px;
+
+    margin-bottom: 20px;
+
+    box-sizing: border-box;
+
+    background: rgba(255, 255, 255, 0.13);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    border-radius: 22px;
+
+    overflow: hidden;
+
+    animation: employerFadeUp 0.45s ease both;
+}
+
+/* Purple / blue top accent */
+
+.profile-hero::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 3px;
+
+    background: linear-gradient(
+        90deg,
+        rgba(167, 139, 250, 0.9),
+        rgba(96, 165, 250, 0.9)
+    );
+
+    border-radius: 22px 22px 0 0;
+}
+
+/* ==========================================================
+   COMPANY AVATAR
+   ========================================================== */
+
+.hero-avatar {
+    position: relative;
+
+    width: 86px;
+    height: 86px;
+
+    min-width: 86px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: linear-gradient(
+        135deg,
+        rgba(167, 139, 250, 0.6),
+        rgba(96, 165, 250, 0.6)
+    );
+
+    border: 3px solid rgba(255, 255, 255, 0.3);
+
+    color: #ffffff;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 2rem;
+    font-weight: 700;
+
+    letter-spacing: -1px;
+
+    overflow: hidden;
+
+    flex-shrink: 0;
+
+    cursor: pointer;
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+
+    transition:
+        transform 0.22s ease,
+        border-color 0.22s ease;
+}
+
+.hero-avatar:hover {
+    transform: scale(1.03);
+
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Company image */
+
+.hero-avatar img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+}
+
+/* ==========================================================
+   HERO INFORMATION
+   ========================================================== */
+
+.hero-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.hero-name {
+    margin-bottom: 4px;
+
+    color: #ffffff;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 1.4rem;
+    font-weight: 700;
+
+    line-height: 1.35;
+
+    word-break: break-word;
+}
+
+/* ==========================================================
+   HERO META
+   ========================================================== */
+
+.hero-meta {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin-top: 8px;
+}
+
+.hero-pill {
+    display: inline-flex;
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 5px 13px;
+
+    background: rgba(255, 255, 255, 0.12);
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    border-radius: 50px;
+
+    color: rgba(255, 255, 255, 0.8);
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 0.78rem;
+
+    max-width: 100%;
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+.hero-pill i {
+    font-size: 0.72rem;
+
+    opacity: 0.7;
+
+    flex-shrink: 0;
+}
+
+/* ==========================================================
+   EDIT PROFILE BUTTON
+   ========================================================== */
+
+.btn-edit-profile {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 10px 22px;
+
+    background: rgba(99, 102, 241, 0.4);
+
+    border: 1px solid rgba(99, 102, 241, 0.55);
+
+    border-radius: 11px;
+
+    color: #ffffff;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 0.84rem;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition:
+        background 0.22s ease,
+        transform 0.22s ease,
+        box-shadow 0.22s ease;
+}
+
+.btn-edit-profile:hover {
+    background: rgba(99, 102, 241, 0.6);
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+}
+
+/* ==========================================================
+   INFORMATION GRID
+   ========================================================== */
+
+.info-grid {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+
+    gap: 16px;
+
+    margin-bottom: 20px;
+
+    animation: employerFadeUp 0.5s ease both;
+
+    animation-delay: 0.08s;
+}
+
+/* ==========================================================
+   INFORMATION CARD
+   IMPORTANT:
+   NO WHITE BACKGROUND
+   ========================================================== */
+
+.info-card {
+    min-width: 0;
+
+    padding: 22px 24px;
+
+    background: rgba(255, 255, 255, 0.11);
+
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    border-radius: 16px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+
+    box-sizing: border-box;
+
+    transition:
+        background 0.22s ease,
+        border-color 0.22s ease,
+        transform 0.22s ease;
+}
+
+.info-card:hover {
+    background: rgba(255, 255, 255, 0.14);
+
+    border-color: rgba(255, 255, 255, 0.24);
+
+    transform: translateY(-2px);
+}
+
+/* ==========================================================
+   CARD TITLE
+   ========================================================== */
+
+.info-card-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-bottom: 16px;
+
+    padding-bottom: 10px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    color: rgba(255, 255, 255, 0.5);
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 0.72rem;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.6px;
+}
+
+.info-card-title i {
+    font-size: 0.78rem;
+
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ==========================================================
+   INFORMATION ROW
+   ========================================================== */
+
+.info-row {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 8px 0;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+    min-width: 0;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+
+    padding-bottom: 0;
+}
+
+/* ==========================================================
+   INFORMATION LABEL
+   ========================================================== */
+
+.info-label {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    flex-shrink: 0;
+
+    color: rgba(255, 255, 255, 0.5);
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 0.8rem;
+
+    font-weight: 400;
+}
+
+.info-label i {
+    width: 14px;
+
+    flex: 0 0 14px;
+
+    text-align: center;
+
+    font-size: 0.75rem;
+
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* ==========================================================
+   INFORMATION VALUE
+   ========================================================== */
+
+.info-value {
+    min-width: 0;
+
+    max-width: 60%;
+
+    color: #ffffff;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 0.88rem;
+
+    font-weight: 600;
+
+    text-align: right;
+
+    word-break: break-word;
+
+    overflow-wrap: anywhere;
+}
+
+/* ==========================================================
+   AREA OF WORK BADGE
+   Same visual language as Job Seeker qualification badge
+   ========================================================== */
+
+.qual-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 3px 11px;
+
+    background: rgba(96, 165, 250, 0.18);
+
+    border: 1px solid rgba(96, 165, 250, 0.28);
+
+    border-radius: 50px;
+
+    color: #93c5fd;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 0.78rem;
+
+    font-weight: 600;
+
+    max-width: 100%;
+
+    box-sizing: border-box;
+}
+
+/* ==========================================================
+   ACCOUNT STATUS
+   Same style as Job Seeker gender/status badge
+   ========================================================== */
+
+.gender-badge {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    padding: 3px 11px;
+
+    background: rgba(167, 139, 250, 0.2);
+
+    border: 1px solid rgba(167, 139, 250, 0.3);
+
+    border-radius: 50px;
+
+    color: #c4b5fd;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 0.78rem;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+.gender-badge i {
+    font-size: 0.5rem;
+}
+
+/* ==========================================================
+   OLD PROFILE CLASSES
+   Keep compatibility with previous employer markup
+   ========================================================== */
+
+.profile-card {
+    width: 100%;
+
+    background: rgba(255, 255, 255, 0.11);
+
+    backdrop-filter: blur(16px);
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    border-radius: 16px;
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+
+    overflow: hidden;
+}
+
+.profile-banner {
+    background: rgba(255, 255, 255, 0.08);
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+
+    color: #ffffff;
+}
+
+.avatar-circle {
+    background: linear-gradient(
+        135deg,
+        rgba(167, 139, 250, 0.6),
+        rgba(96, 165, 250, 0.6)
+    );
+
+    border: 3px solid rgba(255, 255, 255, 0.3);
+
+    color: #ffffff;
+}
+
+.banner-info h2 {
+    color: #ffffff;
+}
+
+.banner-info p {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.status-pill {
+    background: rgba(34, 197, 94, 0.15);
+
+    border: 1px solid rgba(134, 239, 172, 0.2);
+
+    color: #86efac;
+}
+
+/* ==========================================================
+   OLD PROFILE BODY
+   ========================================================== */
+
+.profile-body {
+    padding: 26px 28px;
+
+    background: transparent;
+}
+
+.section-label {
+    color: rgba(255, 255, 255, 0.7);
+
+    font-size: 1rem;
+
+    font-weight: 600;
+
+    margin-bottom: 18px;
+}
+
+.fields-grid {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 16px;
+}
+
+.field-item {
+    min-width: 0;
+
+    padding: 15px;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    border-radius: 12px;
+}
+
+.field-item.full {
+    grid-column: 1 / -1;
+}
+
+.field-label {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 7px;
+
+    color: rgba(255, 255, 255, 0.5);
+
+    font-size: 0.76rem;
+
+    font-weight: 500;
+}
+
+.field-label i {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.field-value {
+    color: #ffffff;
+
+    font-size: 0.88rem;
+
+    font-weight: 600;
+
+    word-break: break-word;
+}
+
+.field-value.empty {
+    color: rgba(255, 255, 255, 0.4);
+
+    font-style: italic;
+
+    font-weight: 400;
+}
+
+/* ==========================================================
+   PROFILE ACTIONS
+   ========================================================== */
+
+.profile-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 20px;
+}
+
+/* ==========================================================
+   GENERIC PRIMARY BUTTON
+   ========================================================== */
+
+.btn-primary {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 10px 20px;
+
+    background: rgba(99, 102, 241, 0.4);
+
+    border: 1px solid rgba(99, 102, 241, 0.55);
+
+    border-radius: 11px;
+
+    color: #ffffff;
+
+    font-family: "Poppins", sans-serif;
+
+    font-size: 0.84rem;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.22s ease;
+}
+
+.btn-primary:hover {
+    background: rgba(99, 102, 241, 0.6);
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   EMPLOYER PROFILE — EDIT MODAL
+   Fully Isolated UI
+   Purple/Blue Glass Design
+   Zoom + Responsive Safe
+========================================================= */
+
+/* =========================================================
+   MODAL OVERLAY
+========================================================= */
+
+.profile-modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+
+    width: 100vw !important;
+    height: 100vh !important;
+
+    padding: 20px !important;
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    z-index: 99999 !important;
+
+    background: rgba(15, 23, 42, 0.72) !important;
+
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease;
+}
+
+.profile-modal-overlay.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+/* =========================================================
+   MODAL CONTAINER
+========================================================= */
+
+.profile-modal-overlay .profile-modal {
+    position: relative !important;
+
+    width: min(760px, 100%) !important;
+    max-width: 760px !important;
+
+    height: auto !important;
+
+    max-height: calc(100vh - 40px) !important;
+    min-height: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    overflow: hidden !important;
+
+    box-sizing: border-box !important;
+
+    border-radius: 22px !important;
+
+    /*
+       IMPORTANT:
+       This explicitly prevents Bootstrap
+       or other global CSS from making it white.
+    */
+
+    background: linear-gradient(145deg, #764ba2 0%, #667eea 100%) !important;
+
+    background-color: #667eea !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.45),
+        0 10px 30px rgba(102, 126, 234, 0.25) !important;
+
+    color: #ffffff !important;
+
+    transform: translateY(30px) scale(0.96);
+
+    transition: transform 0.3s ease;
+}
+
+.profile-modal-overlay.show .profile-modal {
+    transform: translateY(0) scale(1);
+}
+
+/* =========================================================
+   REMOVE BOOTSTRAP MODAL BEHAVIOR
+========================================================= */
+
+.profile-modal,
+.profile-modal *,
+.profile-modal *::before,
+.profile-modal *::after {
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.profile-modal > form {
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    min-height: 0 !important;
+
+    background: transparent !important;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.profile-modal .profile-modal-header {
+    flex: 0 0 auto !important;
+
+    width: 100% !important;
+
+    min-height: 84px;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    gap: 15px;
+
+    padding: 18px 22px !important;
+
+    margin: 0 !important;
+
+    background: rgba(255, 255, 255, 0.08) !important;
+
+    border: 0 !important;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+
+    color: #ffffff !important;
+}
+
+/* =========================================================
+   HEADER LEFT
+========================================================= */
+
+.profile-modal-header-left {
+    min-width: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+}
+
+/* =========================================================
+   HEADER ICON
+========================================================= */
+
+.profile-modal-header-icon {
+    width: 44px !important;
+    height: 44px !important;
+
+    min-width: 44px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    border-radius: 13px !important;
+
+    background: rgba(255, 255, 255, 0.16) !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+
+    color: #ffffff !important;
+
+    font-size: 1rem;
+}
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.profile-modal .modal-title {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #ffffff !important;
+
+    background: transparent !important;
+
+    font-size: 1.08rem !important;
+
+    font-weight: 700 !important;
+
+    line-height: 1.35;
+}
+
+/* =========================================================
+   SUBTITLE
+========================================================= */
+
+.profile-modal .profile-modal-subtitle {
+    margin-top: 3px !important;
+
+    color: rgba(255, 255, 255, 0.65) !important;
+
+    background: transparent !important;
+
+    font-size: 0.74rem !important;
+
+    line-height: 1.4;
+}
+
+/* =========================================================
+   CLOSE BUTTON
+   Override Bootstrap .btn-close
+========================================================= */
+
+.profile-modal button.btn-close {
+    width: 38px !important;
+    height: 38px !important;
+
+    min-width: 38px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+
+    border-radius: 11px !important;
+
+    background: rgba(255, 255, 255, 0.08) !important;
+
+    background-image: none !important;
+
+    color: rgba(255, 255, 255, 0.8) !important;
+
+    opacity: 1 !important;
+
+    box-shadow: none !important;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.profile-modal button.btn-close i {
+    color: rgba(255, 255, 255, 0.8) !important;
+
+    font-size: 0.9rem;
+}
+
+.profile-modal button.btn-close:hover {
+    background: rgba(239, 68, 68, 0.22) !important;
+
+    color: #ffffff !important;
+
+    transform: rotate(90deg);
+}
+
+/* =========================================================
+   BODY
+========================================================= */
+
+.profile-modal .profile-modal-body {
+    flex: 1 1 auto !important;
+
+    min-height: 0 !important;
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 22px !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    background: transparent !important;
+
+    color: #ffffff !important;
+
+    scrollbar-width: thin;
+
+    scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+}
+
+/* =========================================================
+   WEBKIT SCROLLBAR
+========================================================= */
+
+.profile-modal-body::-webkit-scrollbar {
+    width: 7px;
+}
+
+.profile-modal-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.profile-modal-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+
+    border-radius: 20px;
+}
+
+.profile-modal-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* =========================================================
+   FORM GRID
+========================================================= */
+
+.profile-modal .form-grid {
+    width: 100% !important;
+
+    display: grid !important;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+
+    gap: 17px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* =========================================================
+   FORM GROUP
+========================================================= */
+
+.profile-modal .form-group {
+    width: 100% !important;
+
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    background: transparent !important;
+}
+
+.profile-modal .form-group.full {
+    grid-column: 1 / -1 !important;
+}
+
+/* =========================================================
+   LABEL
+========================================================= */
+
+.profile-modal label.form-label {
+    display: flex !important;
+
+    align-items: center !important;
+
+    gap: 7px;
+
+    margin: 0 0 7px 2px !important;
+    padding: 0 !important;
+
+    color: rgba(255, 255, 255, 0.72) !important;
+
+    background: transparent !important;
+
+    border: none !important;
+
+    font-size: 0.72rem !important;
+
+    font-weight: 600 !important;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.07em;
+
+    line-height: 1.4;
+}
+
+.profile-modal label.form-label i {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* =========================================================
+   INPUTS
+   Strong Bootstrap Override
+========================================================= */
+
+.profile-modal input.form-input,
+.profile-modal textarea.form-textarea {
+    display: block !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+
+    padding: 11px 13px !important;
+
+    background: rgba(255, 255, 255, 0.1) !important;
+
+    background-color: rgba(255, 255, 255, 0.1) !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.17) !important;
+
+    border-radius: 11px !important;
+
+    color: #ffffff !important;
+
+    -webkit-text-fill-color: #ffffff !important;
+
+    font-family: "Poppins", sans-serif !important;
+
+    font-size: 0.86rem !important;
+
+    font-weight: 400 !important;
+
+    outline: none !important;
+
+    box-shadow: none !important;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+/* =========================================================
+   INPUT HEIGHT
+========================================================= */
+
+.profile-modal input.form-input {
+    min-height: 44px !important;
+
+    height: 44px !important;
+}
+
+/* =========================================================
+   TEXTAREA
+========================================================= */
+
+.profile-modal textarea.form-textarea {
+    min-height: 96px !important;
+
+    height: auto !important;
+
+    resize: vertical !important;
+
+    line-height: 1.5 !important;
+}
+
+/* =========================================================
+   PLACEHOLDER
+========================================================= */
+
+.profile-modal input.form-input::placeholder,
+.profile-modal textarea.form-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+
+    opacity: 1 !important;
+}
+
+/* =========================================================
+   INPUT FOCUS
+========================================================= */
+
+.profile-modal input.form-input:focus,
+.profile-modal textarea.form-textarea:focus {
+    background: rgba(255, 255, 255, 0.15) !important;
+
+    background-color: rgba(255, 255, 255, 0.15) !important;
+
+    border-color: rgba(255, 255, 255, 0.42) !important;
+
+    color: #ffffff !important;
+
+    -webkit-text-fill-color: #ffffff !important;
+
+    outline: none !important;
+
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.07) !important;
+}
+
+/* =========================================================
+   AUTOFILL
+   Prevent Chrome from making inputs white
+========================================================= */
+
+.profile-modal input.form-input:-webkit-autofill,
+.profile-modal input.form-input:-webkit-autofill:hover,
+.profile-modal input.form-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #ffffff !important;
+
+    -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.1) inset !important;
+
+    transition: background-color 9999s ease-in-out 0s;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.profile-modal .profile-modal-footer {
+    flex: 0 0 auto !important;
+
+    width: 100% !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: flex-end !important;
+
+    gap: 10px;
+
+    margin: 0 !important;
+
+    padding: 16px 22px !important;
+
+    background: rgba(255, 255, 255, 0.07) !important;
+
+    border: 0 !important;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.13) !important;
+}
+
+/* =========================================================
+   CANCEL
+========================================================= */
+
+.profile-modal button.btn-cancel {
+    min-height: 40px !important;
+
+    padding: 0 17px !important;
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 7px;
+
+    margin: 0 !important;
+
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+
+    border-radius: 10px !important;
+
+    background: rgba(255, 255, 255, 0.07) !important;
+
+    color: rgba(255, 255, 255, 0.82) !important;
+
+    font-size: 0.82rem !important;
+
+    font-weight: 500 !important;
+
+    box-shadow: none !important;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.profile-modal button.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.13) !important;
+
+    border-color: rgba(255, 255, 255, 0.3) !important;
+
+    color: #ffffff !important;
+}
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+.profile-modal button.btn-submit {
+    min-height: 40px !important;
+
+    padding: 0 19px !important;
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 7px;
+
+    margin: 0 !important;
+
+    border: none !important;
+
+    border-radius: 10px !important;
+
+    background: #ffffff !important;
+
+    color: #5b5fc7 !important;
+
+    font-size: 0.82rem !important;
+
+    font-weight: 600 !important;
+
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18) !important;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.profile-modal button.btn-submit:hover {
+    background: #ffffff !important;
+
+    color: #4f46b5 !important;
+
+    transform: translateY(-1px);
+
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* =========================================================
+   VALIDATION
+========================================================= */
+
+.profile-modal .field-error {
+    display: none;
+
+    margin-top: 5px;
+
+    color: #fecaca !important;
+
+    font-size: 0.72rem;
+}
+
+.profile-modal .field-error.show {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 768px) {
+    .profile-modal-overlay {
+        padding: 14px !important;
+    }
+
+    .profile-modal-overlay .profile-modal {
+        width: 100% !important;
+
+        max-width: 100% !important;
+
+        max-height: calc(100vh - 28px) !important;
+
+        border-radius: 18px !important;
+    }
+
+    .profile-modal .form-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+
+        gap: 15px !important;
+    }
+
+    .profile-modal .form-group.full {
+        grid-column: auto !important;
+    }
+
+    .profile-modal .profile-modal-header {
+        padding: 16px 18px !important;
+    }
+
+    .profile-modal .profile-modal-body {
+        padding: 19px 18px !important;
+    }
+
+    .profile-modal .profile-modal-footer {
+        padding: 14px 18px !important;
+    }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+    .profile-modal-overlay {
+        padding: 8px !important;
+    }
+
+    .profile-modal-overlay .profile-modal {
+        max-height: calc(100vh - 16px) !important;
+
+        border-radius: 15px !important;
+    }
+
+    .profile-modal .profile-modal-header {
+        min-height: 70px;
+
+        padding: 13px !important;
+    }
+
+    .profile-modal-header-left {
+        gap: 9px;
+    }
+
+    .profile-modal-header-icon {
+        width: 37px !important;
+        height: 37px !important;
+
+        min-width: 37px !important;
+
+        border-radius: 10px !important;
+    }
+
+    .profile-modal .modal-title {
+        font-size: 0.95rem !important;
+    }
+
+    .profile-modal .profile-modal-subtitle {
+        font-size: 0.67rem !important;
+    }
+
+    .profile-modal button.btn-close {
+        width: 34px !important;
+        height: 34px !important;
+
+        min-width: 34px !important;
+    }
+
+    .profile-modal .profile-modal-body {
+        padding: 16px 13px !important;
+    }
+
+    .profile-modal .profile-modal-footer {
+        padding: 13px !important;
+
+        flex-direction: column-reverse !important;
+
+        align-items: stretch !important;
+    }
+
+    .profile-modal button.btn-cancel,
+    .profile-modal button.btn-submit {
+        width: 100% !important;
+    }
+}
+
+/* =========================================================
+   SHORT SCREEN / HIGH ZOOM
+========================================================= */
+
+@media (max-height: 650px) {
+    .profile-modal-overlay {
+        align-items: flex-start !important;
+
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+    .profile-modal-overlay .profile-modal {
+        max-height: calc(100vh - 20px) !important;
+    }
+
+    .profile-modal .profile-modal-header {
+        min-height: 64px;
+
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+    .profile-modal .profile-modal-body {
+        padding-top: 14px !important;
+        padding-bottom: 14px !important;
+    }
+
+    .profile-modal .profile-modal-footer {
+        padding-top: 9px !important;
+        padding-bottom: 9px !important;
+    }
+}
+
+/* =========================================================
+   COMPANY LOGO UPLOAD
+========================================================= */
+
+.profile-logo-upload {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 16px;
+
+    margin-bottom: 20px;
+    padding: 15px;
+
+    box-sizing: border-box;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    border-radius: 14px;
+}
+
+/* =========================================================
+   LOGO PREVIEW
+========================================================= */
+
+.profile-logo-preview {
+    width: 72px;
+    height: 72px;
+
+    min-width: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+
+    border-radius: 14px;
+
+    background: rgba(255, 255, 255, 0.12);
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+
+    color: rgba(255, 255, 255, 0.75);
+
+    font-size: 1.7rem;
+}
+
+.profile-logo-preview img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+}
+
+/* =========================================================
+   LOGO CONTENT
+========================================================= */
+
+.profile-logo-content {
+    min-width: 0;
+
+    flex: 1;
+}
+
+.profile-logo-title {
+    margin-bottom: 4px;
+
+    color: #ffffff;
+
+    font-size: 0.9rem;
+
+    font-weight: 600;
+}
+
+.profile-logo-description {
+    margin-bottom: 9px;
+
+    color: rgba(255, 255, 255, 0.55);
+
+    font-size: 0.69rem;
+
+    line-height: 1.45;
+}
+
+/* =========================================================
+   CHOOSE LOGO BUTTON
+========================================================= */
+
+.profile-logo-button {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    min-height: 34px;
+
+    padding: 0 12px;
+
+    margin: 0;
+
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.1);
+
+    color: rgba(255, 255, 255, 0.9);
+
+    font-size: 0.74rem;
+
+    font-weight: 500;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.profile-logo-button:hover {
+    background: rgba(255, 255, 255, 0.17);
+
+    border-color: rgba(255, 255, 255, 0.32);
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   FILE NAME
+========================================================= */
+
+.profile-logo-file-name {
+    display: inline-block;
+
+    margin-left: 8px;
+
+    color: rgba(255, 255, 255, 0.45);
+
+    font-size: 0.68rem;
+
+    vertical-align: middle;
+
+    max-width: 180px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 480px) {
+    .profile-logo-upload {
+        align-items: flex-start;
+
+        gap: 12px;
+
+        padding: 12px;
+    }
+
+    .profile-logo-preview {
+        width: 60px;
+        height: 60px;
+
+        min-width: 60px;
+
+        border-radius: 12px;
+
+        font-size: 1.4rem;
+    }
+
+    .profile-logo-description {
+        font-size: 0.65rem;
+    }
+
+    .profile-logo-file-name {
+        display: block;
+
+        margin: 6px 0 0;
+    }
+}
+
+/* =========================================================
+   EMPLOYER PROFILE AVATAR
+========================================================= */
+
+.user-avatar {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+    border-radius: 50%;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+}
+
+/* =========================================================
+   DROPDOWN COMPANY AVATAR
+========================================================= */
+
+.dropdown-company-avatar {
+    width: 52px;
+    height: 52px;
+
+    margin: 0 auto 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden;
+
+    border-radius: 50%;
+
+    background: linear-gradient(135deg, #764ba2, #667eea);
+
+    border: 2px solid rgba(255, 255, 255, 0.18);
+
+    color: #ffffff;
+
+    font-size: 1.15rem;
+}
+
+.dropdown-company-avatar img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+}

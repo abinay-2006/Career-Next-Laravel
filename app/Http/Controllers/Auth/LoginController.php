@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Employer;
+use Illuminate\Support\Facades\Auth;
+use App\Models\JobSeeker;
+
 
 class LoginController extends Controller
 {
@@ -40,7 +44,7 @@ class LoginController extends Controller
                         'UserType' => 'Administrator',
                         'Name' => $user->UserName
                     ]);
-                    
+
                     return redirect()->route('admin.index');
                 }
 
@@ -48,48 +52,52 @@ class LoginController extends Controller
 
             case 'Employer':
 
-                $user = DB::table('employer_reg')
-                    ->where('UserName', $username)
-                    ->orWhere('Email', $username)
+                $employer = Employer::where(function ($query) use ($username) {
+                    $query->where('UserName', $username)
+                        ->orWhere('Email', $username);
+                })
                     ->first();
 
                 if (
-                    $user &&
-                    in_array($user->Status, ['Confirm', 'Confirmed', 'Approved']) &&
-                    Hash::check($password, $user->Password)
+                    $employer &&
+                    Hash::check($password, $employer->Password) &&
+                    in_array($employer->Status, ['Confirm', 'Confirmed', 'Approved'])
                 ) {
+                    Auth::guard('employer')->login($employer);
 
                     session([
                         'UserType' => 'Employer',
-                        'ID' => $user->EmployerId,
-                        'Name' => $user->CompanyName
+                        'ID' => $employer->EmployerId,
+                        'Name' => $employer->CompanyName,
                     ]);
 
-                    return redirect('/employer');
+                    return redirect()->route('employer.dashboard');
                 }
 
                 break;
 
             case 'JobSeeker':
 
-                $user = DB::table('jobseeker_reg')
-                    ->where('UserName', $username)
-                    ->orWhere('Email', $username)
-                    ->first();
-
+                $jobSeeker = JobSeeker::where(function ($query) use ($username) {
+                    $query->where('UserName', $username)
+                        ->orWhere('Email', $username);
+                })->first();
+                
                 if (
-                    $user &&
-                    in_array($user->Status, ['Confirm', 'Confirmed', 'Approved']) &&
-                    Hash::check($password, $user->Password)
-                ) {
 
+                    $jobSeeker &&
+                    Hash::check($password, $jobSeeker->Password) &&
+                    in_array($jobSeeker->Status, ['Confirm', 'Confirmed', 'Approved'])
+                ) {
+                    Auth::guard('jobseeker')->login($jobSeeker);
+                    
                     session([
                         'UserType' => 'JobSeeker',
-                        'ID' => $user->JobSeekId,
-                        'Name' => $user->JobSeekerName
+                        'ID' => $jobSeeker->JobSeekId,
+                        'Name' => $jobSeeker->JobSeekerName,
                     ]);
 
-                    return redirect('/jobseeker');
+                    return redirect()->route('jobseeker.index');
                 }
 
                 break;
@@ -99,7 +107,6 @@ class LoginController extends Controller
             ->withInput()
             ->with('error', 'Wrong username or password.');
     }
-
     public function logout()
     {
         session()->flush();

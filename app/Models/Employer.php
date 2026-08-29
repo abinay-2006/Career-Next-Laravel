@@ -24,7 +24,8 @@ class Employer extends Authenticatable
         'UserName',
         'Password',
         'Question',
-        'Answer'
+        'Answer',
+        'Photo',
     ];
 
     protected $hidden = [
