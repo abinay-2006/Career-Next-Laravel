@@ -266,7 +266,7 @@
     </div>
 </div>
 @endsection
-@yield('scripts')
+@section('scripts')
 <script>
     /* ── Form validation ── */
     function validateWalkin() {

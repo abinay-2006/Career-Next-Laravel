@@ -4796,3 +4796,17 @@ body::after {
     height: auto !important;
     overflow: visible !important;
 }
+
+.dropdown-menu form {
+    margin: 0;
+    padding: 0;
+}
+
+.dropdown-menu form .logout-button {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+}

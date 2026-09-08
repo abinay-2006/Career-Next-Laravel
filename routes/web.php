@@ -105,11 +105,6 @@ Route::prefix('employer')
         Route::get('/', [EmployerController::class, 'index'])
             ->name('dashboard');
 
-        //Profile Routes
-
-        Route::get('/profile', [EmployerController::class, 'profile'])
-            ->name('profile');
-
         //Job Routes
         Route::get('/jobs', [EmployerJobController::class, 'index'])
             ->name('jobs.index');
@@ -142,10 +137,10 @@ Route::prefix('employer')
             [EmployerApplicationController::class, 'index']
         )->name('applications.index');
 
-        Route::get('/employer/applications/{application}', [EmployerApplicationController::class, 'show'])
+        Route::get('applications/{application}', [EmployerApplicationController::class, 'show'])
             ->name('applications.show');
 
-        Route::put('/employer/applications/{application}', [EmployerApplicationController::class, 'update'])
+        Route::put('applications/{application}', [EmployerApplicationController::class, 'update'])
             ->name('applications.update');
 
         //Profile Routes

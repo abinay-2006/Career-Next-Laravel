@@ -341,7 +341,7 @@
     </div>
 </div>
 @endsection
-@yield('scripts')
+@section('scripts')
 <script>
     const approveUrl = "{{ url('/admin/manage-documents') }}";
 

@@ -23,7 +23,7 @@
     <!-- No jobs posted yet -->
     <div class="no-jobs-card">
         <i class="fas fa-briefcase"></i>
-        <p>You haven't posted any jobs yet. <a href="ManageJob.php" style="color:rgba(255,255,255,0.8);text-decoration:underline;">Post a job</a> to start receiving applications.</p>
+        <p>You haven't posted any jobs yet. <a href="{{ route('employer.jobs.index') }}" style="color:rgba(255,255,255,0.8);text-decoration:underline;">Post a job</a> to start receiving applications.</p>
     </div>
 
     @else

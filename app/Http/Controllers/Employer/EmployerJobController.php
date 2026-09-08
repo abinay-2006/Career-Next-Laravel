@@ -4,16 +4,23 @@ namespace App\Http\Controllers\Employer;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Job;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Job;
 
 class EmployerJobController extends Controller
 {
+    /**
+     * Display all jobs posted by the logged-in employer.
+     */
     public function index()
     {
-        $companyName = session('Name');
+        $employer = Auth::guard('employer')->user();
 
-        $jobs = Job::where('CompanyName', $companyName)
+        if (!$employer) {
+            abort(403, 'Unauthorized');
+        }
+
+        $jobs = Job::where('CompanyName', $employer->CompanyName)
             ->orderByDesc('JobId')
             ->get();
 
@@ -51,22 +58,31 @@ class EmployerJobController extends Controller
         ));
     }
 
+    /**
+     * Store a new job.
+     */
     public function store(Request $request)
     {
         $request->validate([
             'txtTitle' => 'required',
             'txtTotal' => 'required|integer|min:1',
-            'cmbQual' => 'required',
-            'txtDesc' => 'required',
+            'cmbQual'  => 'required',
+            'txtDesc'  => 'required',
         ]);
 
+        $employer = Auth::guard('employer')->user();
+
+        if (!$employer) {
+            abort(403, 'Unauthorized');
+        }
+
         Job::create([
-            'CompanyName' => session('Name'),
+            'CompanyName' => $employer->CompanyName,
             'JobTitle' => $request->txtTitle,
             'Vacancy' => $request->txtTotal,
             'SalaryFrom' => $request->txtSalaryFrom,
             'SalaryTo' => $request->txtSalaryTo,
-            'MinQualification' => $request->cmbQual == 'Other'
+            'MinQualification' => $request->cmbQual === 'Other'
                 ? $request->txtOther
                 : $request->cmbQual,
             'Description' => $request->txtDesc,
@@ -76,16 +92,34 @@ class EmployerJobController extends Controller
         return back()->with('success', 'Job Posted Successfully.');
     }
 
+    /**
+     * Update an existing job.
+     */
     public function update(Request $request, $id)
     {
-        $job = Job::findOrFail($id);
+        $request->validate([
+            'txtTitle' => 'required',
+            'txtTotal' => 'required|integer|min:1',
+            'cmbQual'  => 'required',
+            'txtDesc'  => 'required',
+        ]);
+
+        $employer = Auth::guard('employer')->user();
+
+        if (!$employer) {
+            abort(403, 'Unauthorized');
+        }
+
+        $job = Job::where('JobId', $id)
+            ->where('CompanyName', $employer->CompanyName)
+            ->firstOrFail();
 
         $job->update([
             'JobTitle' => $request->txtTitle,
             'Vacancy' => $request->txtTotal,
             'SalaryFrom' => $request->txtSalaryFrom,
             'SalaryTo' => $request->txtSalaryTo,
-            'MinQualification' => $request->cmbQual == 'Other'
+            'MinQualification' => $request->cmbQual === 'Other'
                 ? $request->txtOther
                 : $request->cmbQual,
             'Description' => $request->txtDesc,
@@ -94,12 +128,25 @@ class EmployerJobController extends Controller
         return back()->with('success', 'Job Updated Successfully.');
     }
 
+    /**
+     * Delete an existing job.
+     */
     public function destroy($id)
-{
-    Job::findOrFail($id)->delete();
+    {
+        $employer = Auth::guard('employer')->user();
 
-    return redirect()
-        ->route('employer.jobs.index')
-        ->with('success', 'Job deleted successfully.');
-}
+        if (!$employer) {
+            abort(403, 'Unauthorized');
+        }
+
+        $job = Job::where('JobId', $id)
+            ->where('CompanyName', $employer->CompanyName)
+            ->firstOrFail();
+
+        $job->delete();
+
+        return redirect()
+            ->route('employer.jobs.index')
+            ->with('success', 'Job deleted successfully.');
+    }
 }

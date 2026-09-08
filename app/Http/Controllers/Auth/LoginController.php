@@ -6,24 +6,29 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Employer;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Employer;
 use App\Models\JobSeeker;
-
 
 class LoginController extends Controller
 {
+    /**
+     * Display login page.
+     */
     public function showLogin()
     {
         return view('auth.login');
     }
 
+    /**
+     * Handle login.
+     */
     public function login(Request $request)
     {
         $request->validate([
             'txtUser' => 'required',
             'txtPass' => 'required',
-            'cmbUser' => 'required'
+            'cmbUser' => 'required',
         ]);
 
         $username = $request->txtUser;
@@ -32,6 +37,11 @@ class LoginController extends Controller
 
         switch ($type) {
 
+            /*
+            |--------------------------------------------------------------------------
+            | Administrator
+            |--------------------------------------------------------------------------
+            */
             case 'Administrator':
 
                 $user = DB::table('user_master')
@@ -42,7 +52,7 @@ class LoginController extends Controller
 
                     session([
                         'UserType' => 'Administrator',
-                        'Name' => $user->UserName
+                        'Name' => $user->UserName,
                     ]);
 
                     return redirect()->route('admin.index');
@@ -50,19 +60,28 @@ class LoginController extends Controller
 
                 break;
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Employer
+            |--------------------------------------------------------------------------
+            */
             case 'Employer':
 
                 $employer = Employer::where(function ($query) use ($username) {
                     $query->where('UserName', $username)
                         ->orWhere('Email', $username);
-                })
-                    ->first();
+                })->first();
 
                 if (
                     $employer &&
                     Hash::check($password, $employer->Password) &&
-                    in_array($employer->Status, ['Confirm', 'Confirmed', 'Approved'])
+                    in_array(
+                        $employer->Status,
+                        ['Confirm', 'Confirmed', 'Approved']
+                    )
                 ) {
+
                     Auth::guard('employer')->login($employer);
 
                     session([
@@ -76,21 +95,30 @@ class LoginController extends Controller
 
                 break;
 
+
+            /*
+            |--------------------------------------------------------------------------
+            | Job Seeker
+            |--------------------------------------------------------------------------
+            */
             case 'JobSeeker':
 
                 $jobSeeker = JobSeeker::where(function ($query) use ($username) {
                     $query->where('UserName', $username)
                         ->orWhere('Email', $username);
                 })->first();
-                
-                if (
 
+                if (
                     $jobSeeker &&
                     Hash::check($password, $jobSeeker->Password) &&
-                    in_array($jobSeeker->Status, ['Confirm', 'Confirmed', 'Approved'])
+                    in_array(
+                        $jobSeeker->Status,
+                        ['Confirm', 'Confirmed', 'Approved']
+                    )
                 ) {
+
                     Auth::guard('jobseeker')->login($jobSeeker);
-                    
+
                     session([
                         'UserType' => 'JobSeeker',
                         'ID' => $jobSeeker->JobSeekId,
@@ -107,10 +135,55 @@ class LoginController extends Controller
             ->withInput()
             ->with('error', 'Wrong username or password.');
     }
-    public function logout()
-    {
-        session()->flush();
 
-        return redirect()->route('login');
+    /**
+     * Logout the currently authenticated user.
+     */
+    public function logout(Request $request)
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Logout from Laravel guards
+        |--------------------------------------------------------------------------
+        */
+
+        Auth::guard('employer')->logout();
+        Auth::guard('jobseeker')->logout();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Logout Administrator session
+        |--------------------------------------------------------------------------
+        |
+        | Administrator currently uses the session-based authentication
+        | system, so clear the administrator session as well.
+        |
+        */
+
+        $request->session()->forget([
+            'UserType',
+            'ID',
+            'Name',
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Invalidate session
+        |--------------------------------------------------------------------------
+        */
+
+        $request->session()->invalidate();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Regenerate CSRF token
+        |--------------------------------------------------------------------------
+        */
+
+        $request->session()->regenerateToken();
+
+        return redirect()
+            ->route('login')
+            ->with('success', 'You have been logged out successfully.');
     }
 }

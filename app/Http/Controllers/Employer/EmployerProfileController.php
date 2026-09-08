@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Employer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Hash;
 
 class EmployerProfileController extends Controller
 {
@@ -36,20 +36,22 @@ class EmployerProfileController extends Controller
         }
 
         $validated = $request->validate([
-            // Required
+            // Required fields
             'CompanyName' => ['required', 'string', 'max:255'],
-            'Email'       => ['required', 'email', 'max:255'],
-            'UserName'    => ['required', 'string', 'max:100'],
+            'Email' => ['required', 'email', 'max:255'],
+            'UserName' => ['required', 'string', 'max:100'],
 
-            // Optional
+            // Optional fields
             'ContactPerson' => ['nullable', 'string', 'max:255'],
-            'Address'       => ['nullable', 'string', 'max:1000'],
-            'City'          => ['nullable', 'string', 'max:100'],
-            'Mobile'        => ['nullable', 'string', 'max:20'],
-            'Area_Work'     => ['nullable', 'string', 'max:255'],
+            'Address' => ['nullable', 'string', 'max:1000'],
+            'City' => ['nullable', 'string', 'max:100'],
+            'Mobile' => ['nullable', 'string', 'max:20'],
+            'Area_Work' => ['nullable', 'string', 'max:255'],
 
             // Optional password
-            'Password'      => ['nullable', 'string', 'min:6'],
+            'Password' => ['nullable', 'string', 'min:6'],
+
+            // Optional company photo
             'Photo' => [
                 'nullable',
                 'image',
@@ -59,22 +61,18 @@ class EmployerProfileController extends Controller
         ]);
 
         /*
-    |--------------------------------------------------------------------------
-    | Upload Company Logo
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Update Company Logo
+        |--------------------------------------------------------------------------
+        */
 
         if ($request->hasFile('Photo')) {
 
             $file = $request->file('Photo');
 
-            $uploadPath =
-                public_path('upload/photos');
+            $uploadPath = public_path('upload/photos');
 
-            /*
-        | Create folder if it doesn't exist
-        */
-
+            // Create upload directory if it doesn't exist.
             if (!File::exists($uploadPath)) {
                 File::makeDirectory(
                     $uploadPath,
@@ -83,26 +81,17 @@ class EmployerProfileController extends Controller
                 );
             }
 
-            /*
-        | Delete old logo
-        */
-
+            // Delete old company logo.
             if (
                 !empty($employer->Photo) &&
-                File::exists(
-                    $uploadPath . '/' . $employer->Photo
-                )
+                File::exists($uploadPath . '/' . $employer->Photo)
             ) {
-
                 File::delete(
                     $uploadPath . '/' . $employer->Photo
                 );
             }
 
-            /*
-        | Generate unique filename
-        */
-
+            // Generate unique filename.
             $filename =
                 'company_' .
                 $employer->EmployerId .
@@ -111,10 +100,7 @@ class EmployerProfileController extends Controller
                 '.' .
                 $file->getClientOriginalExtension();
 
-            /*
-        | Move new logo
-        */
-
+            // Move new logo.
             $file->move(
                 $uploadPath,
                 $filename
@@ -124,12 +110,34 @@ class EmployerProfileController extends Controller
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | Update Employer
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Update Password
+        |--------------------------------------------------------------------------
+        */
+
+        if (!empty($validated['Password'])) {
+            $validated['Password'] = Hash::make(
+                $validated['Password']
+            );
+        } else {
+            // Do not overwrite the existing password
+            // when the password field is left empty.
+            unset($validated['Password']);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Update Employer
+        |--------------------------------------------------------------------------
+        */
 
         $employer->update($validated);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Redirect
+        |--------------------------------------------------------------------------
+        */
 
         return redirect()
             ->route('employer.profile.index')
@@ -137,44 +145,5 @@ class EmployerProfileController extends Controller
                 'success',
                 'Company profile updated successfully.'
             );
-
-        /*
-    |--------------------------------------------------------------------------
-    | Update profile fields
-    |--------------------------------------------------------------------------
-    */
-
-        $employer->CompanyName   = $validated['CompanyName'];
-        $employer->Email         = $validated['Email'];
-        $employer->UserName      = $validated['UserName'];
-
-        // Optional fields
-        $employer->ContactPerson = $validated['ContactPerson'] ?? null;
-        $employer->Address       = $validated['Address'] ?? null;
-        $employer->City          = $validated['City'] ?? null;
-        $employer->Mobile        = $validated['Mobile'] ?? null;
-        $employer->Area_Work     = $validated['Area_Work'] ?? null;
-
-        /*
-    |--------------------------------------------------------------------------
-    | Update password only if entered
-    |--------------------------------------------------------------------------
-    */
-
-        if (!empty($validated['Password'])) {
-            $employer->Password = Hash::make($validated['Password']);
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | Save
-    |--------------------------------------------------------------------------
-    */
-
-        $employer->save();
-
-        return redirect()
-            ->route('employer.profile.index')
-            ->with('success', 'Profile updated successfully.');
     }
 }

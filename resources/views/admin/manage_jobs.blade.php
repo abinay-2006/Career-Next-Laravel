@@ -256,10 +256,10 @@
     </div>
 </div>
 @endsection
-@yield('scripts')
+@section('scripts')
 <script>
     const jobs = @json($jobs->values());
-    let activeJobId = null;
+let activeJobId = null
 
     // Build lookup map
     const jobMap = {};

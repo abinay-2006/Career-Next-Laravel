@@ -5,9 +5,8 @@
 @section('content')
 
 @if(session('success'))
-<div class="alert success show">
-    <i class="fas fa-circle-check"></i>
-    <span>{{ session('success') }}</span>
+<div id="successMessage" class="alert alert-success">
+    {{ session('success') }}
 </div>
 @endif
 <!-- ── Floating Toast ─────────────────────────────────────────────────────── -->
@@ -127,7 +126,6 @@
             </div>
         </div>
 
-        <!-- ══ REGISTER ══ -->
         <!-- ══ REGISTER ══ -->
         <div class="panel" id="panel-register">
 
@@ -594,5 +592,18 @@
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
         document.getElementById('panel-' + name).classList.add('active');
     }
+
+    setTimeout(function() {
+        const message = document.getElementById('successMessage');
+
+        if (message) {
+            message.style.transition = 'opacity 0.4s ease';
+            message.style.opacity = '0';
+
+            setTimeout(function() {
+                message.remove();
+            }, 400);
+        }
+    }, 3000);
 </script>
 @endsection

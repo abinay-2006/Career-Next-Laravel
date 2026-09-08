@@ -5271,3 +5271,17 @@ body::after {
     height: auto !important;
     overflow: visible !important;
 }
+
+.employer-dropdown-menu form {
+    margin: 0;
+    padding: 0;
+}
+
+.employer-dropdown-menu form button.employer-dropdown-item {
+    width: 100%;
+    border: none;
+    background: none;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}

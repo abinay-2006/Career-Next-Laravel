@@ -10,13 +10,17 @@ use Illuminate\Support\Facades\Auth;
 class WalkinController extends Controller
 {
     /**
-     * Display all walkins of logged employer.
+     * Display all walk-ins of the logged-in employer.
      */
     public function index()
     {
-        $company = auth('employer')->user()->CompanyName;
+        $employer = Auth::guard('employer')->user();
 
-        $walkins = Walkin::where('CompanyName', $company)
+        if (!$employer) {
+            abort(403, 'Unauthorized');
+        }
+
+        $walkins = Walkin::where('CompanyName', $employer->CompanyName)
             ->orderByDesc('WalkInId')
             ->get();
 
@@ -24,21 +28,27 @@ class WalkinController extends Controller
     }
 
     /**
-     * Store new walkin.
+     * Store a new walk-in.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'txtTitle' => 'required|max:255',
+            'txtTitle' => 'required|string|max:50',
             'txtTotal' => 'required|integer|min:1',
-            'txtQual'  => 'required',
-            'txtDesc'  => 'required',
+            'txtQual'  => 'required|string|max:50',
+            'txtDesc'  => 'required|string|max:100',
             'txtDate'  => 'required|date',
             'txtTime'  => 'required',
         ]);
 
+        $employer = Auth::guard('employer')->user();
+
+        if (!$employer) {
+            abort(403, 'Unauthorized');
+        }
+
         Walkin::create([
-            'CompanyName'      => auth('employer')->user()->CompanyName,
+            'CompanyName'      => $employer->CompanyName,
             'JobTitle'         => $request->txtTitle,
             'Vacancy'          => $request->txtTotal,
             'MinQualification' => $request->txtQual,
@@ -53,18 +63,28 @@ class WalkinController extends Controller
     }
 
     /**
-     * Update walkin.
+     * Update a walk-in.
      */
-    public function update(Request $request, Walkin $walkin) // Already correct for model binding
+    public function update(Request $request, Walkin $walkin)
     {
         $request->validate([
-            'txtTitle' => 'required|max:255',
+            'txtTitle' => 'required|string|max:50',
             'txtTotal' => 'required|integer|min:1',
-            'txtQual'  => 'required',
-            'txtDesc'  => 'required',
+            'txtQual'  => 'required|string|max:50',
+            'txtDesc'  => 'required|string|max:100',
             'txtDate'  => 'required|date',
             'txtTime'  => 'required',
         ]);
+
+        $employer = Auth::guard('employer')->user();
+
+        if (!$employer) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($walkin->CompanyName !== $employer->CompanyName) {
+            abort(403, 'Unauthorized');
+        }
 
         $walkin->update([
             'JobTitle'         => $request->txtTitle,
@@ -79,10 +99,20 @@ class WalkinController extends Controller
     }
 
     /**
-     * Delete walkin.
+     * Delete a walk-in.
      */
-    public function destroy(Walkin $walkin) // Already correct for model binding
+    public function destroy(Walkin $walkin)
     {
+        $employer = Auth::guard('employer')->user();
+
+        if (!$employer) {
+            abort(403, 'Unauthorized');
+        }
+
+        if ($walkin->CompanyName !== $employer->CompanyName) {
+            abort(403, 'Unauthorized');
+        }
+
         $walkin->delete();
 
         return back()->with('success', 'Walk-in deleted successfully.');

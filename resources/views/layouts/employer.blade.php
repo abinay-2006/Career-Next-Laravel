@@ -18,11 +18,13 @@
   $headerEmployer = Auth::guard('employer')->user();
   @endphp
   <!-- ══ NAVBAR ══ -->
+
   <nav class="navbar">
     <h1 class="brand-logo">
       <img src="{{ asset('images/CareerNext.png') }}" alt="Career Next">
       <span>Career Next</span>
     </h1>
+
     <div class="navbar-user">
 
       <div class="profile-dropdown" id="profileDropdown">
@@ -85,14 +87,19 @@
           </a>
 
 
-          <a href="{{ route('logout') }}"
-            class="employer-dropdown-item danger">
+          <!-- Logout -->
+          <form action="{{ route('logout') }}" method="POST">
+            @csrf
 
-            <i class="fas fa-right-from-bracket"></i>
+            <button type="submit"
+              class="employer-dropdown-item danger">
 
-            <span>Logout</span>
+              <i class="fas fa-right-from-bracket"></i>
 
-          </a>
+              <span>Logout</span>
+
+            </button>
+          </form>
 
         </div>
 

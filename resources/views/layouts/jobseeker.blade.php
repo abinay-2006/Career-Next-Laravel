@@ -16,15 +16,19 @@
     @php
     $headerJobSeeker = Auth::guard('jobseeker')->user();
     @endphp
+
     <!-- ══ NAVBAR ══ -->
     <nav class="navbar">
+
         <a href="{{ route('jobseeker.index') }}" class="navbar-brand brand-logo">
             <img src="{{ asset('images/CareerNext.png') }}" alt="Career Next">
             <span>Career Next</span>
         </a>
 
         <div class="navbar-user">
+
             <div class="profile-dropdown" id="profileDropdown">
+
                 <div class="profile-trigger" onclick="toggleDropdown()">
 
                     <div class="user-avatar">
@@ -40,26 +44,69 @@
                     </div>
 
                     <div class="user-info">
-                        <div class="user-name">{{ session('UserName') }}</div>
-                        <div class="user-role">{{ session('UserType') }}</div>
+
+                        <div class="user-name">
+                            {{ session('UserName') }}
+                        </div>
+
+                        <div class="user-role">
+                            {{ session('UserType') }}
+                        </div>
+
                     </div>
+
                     <i class="fas fa-chevron-down chevron"></i>
+
                 </div>
+
+
                 <div class="dropdown-menu">
+
                     <div class="dropdown-header">
-                        <div class="dh-name">{{ session('UserName') }}</div>
-                        <div class="dh-role">{{ session('UserType') }} Account</div>
+
+                        <div class="dh-name">
+                            {{ session('UserName') }}
+                        </div>
+
+                        <div class="dh-role">
+                            {{ session('UserType') }} Account
+                        </div>
+
                     </div>
-                    <a href="{{ route('jobseeker.profile.index') }}" class="dropdown-item">
-                        <i class="fas fa-user-pen"></i> Profile
+
+
+                    <a href="{{ route('jobseeker.profile.index') }}"
+                        class="dropdown-item">
+
+                        <i class="fas fa-user-pen"></i>
+                        Profile
+
                     </a>
-                    <a href="{{ route('logout') }}" method="POST" class="dropdown-item danger">
-                        <i class="fas fa-right-from-bracket"></i> Logout
-                    </a>
+
+
+                    <!-- Logout -->
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+
+                        <button type="submit"
+                            class="dropdown-item danger logout-button">
+
+                            <i class="fas fa-right-from-bracket"></i>
+                            Logout
+
+                        </button>
+
+                    </form>
+
                 </div>
+
             </div>
+
         </div>
+
     </nav>
+
+
 
     @yield('content')
     <footer class="footer">

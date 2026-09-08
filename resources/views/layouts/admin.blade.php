@@ -32,9 +32,14 @@
                     <div class="user-role">{{ session('UserType') }}</div>
                 </div>
             </div>
-            <a href="{{ route('logout') }}" class="btn-logout">
-                <i class="fas fa-right-from-bracket"></i> Logout
-            </a>
+            
+            <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                @csrf
+
+                <button type="submit" class="btn-logout">
+                    <i class="fas fa-right-from-bracket"></i> Logout
+                </button>
+            </form>
         </div>
     </nav>
 

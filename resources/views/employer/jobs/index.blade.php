@@ -285,7 +285,7 @@
   </div>
 </div>
 @endsection
-@yield('scripts')
+@section('scripts')
 <script>
   // ── "Other" qualification field toggle ──
   document.getElementById('cmbQual').addEventListener('change', function() {
