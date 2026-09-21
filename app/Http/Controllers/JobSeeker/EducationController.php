@@ -8,11 +8,15 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\JobSeekerEducation;
 use App\Models\JobSeekerSchoolEducation;
 use App\Models\JobSeekerDocument;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class EducationController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | Education Page
+    |--------------------------------------------------------------------------
+    */
     public function index()
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
@@ -20,7 +24,9 @@ class EducationController extends Controller
         $rows_edu = JobSeekerEducation::where(
             'JobSeekId',
             $jobSeeker->JobSeekId
-        )->orderByDesc('EduId')->get();
+        )
+            ->orderByDesc('EduId')
+            ->get();
 
         $rows_school = JobSeekerSchoolEducation::where(
             'JobSeekId',
@@ -30,7 +36,9 @@ class EducationController extends Controller
         $rows_docs = JobSeekerDocument::where(
             'JobSeekId',
             $jobSeeker->JobSeekId
-        )->orderByDesc('DocId')->get();
+        )
+            ->orderByDesc('DocId')
+            ->get();
 
         $degrees = [
             'B.C.A',
@@ -100,34 +108,65 @@ class EducationController extends Controller
             'schoolYears' => range(1990, now()->year),
         ]);
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Store Higher Education
+    |--------------------------------------------------------------------------
+    */
     public function store(Request $request)
     {
+        $request->validate([
+            'cmbQual' => 'required|string|max:255',
+            'txtOther' => 'nullable|string|max:255',
+            'txtBoard' => 'required|string|max:255',
+            'cmbYear' => 'required|integer|min:1998|max:' . now()->year,
+            'txtPer' => 'required|numeric|min:0|max:100',
+        ]);
+
         $jobSeeker = Auth::guard('jobseeker')->user();
 
         $degree = $request->cmbQual;
 
         if ($degree === 'Other') {
-            $degree = $request->txtOther;
+            $degree = trim($request->txtOther);
+
+            if ($degree === '') {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'txtOther' => 'Please specify the degree.'
+                    ]);
+            }
         }
 
         JobSeekerEducation::create([
-            'JobSeekId'    => $jobSeeker->JobSeekId,
-            'Degree'       => $degree,
-            'University'   => $request->txtBoard,
-            'PassingYear'  => $request->cmbYear,
-            'Percentage'   => $request->txtPer,
+            'JobSeekId'   => $jobSeeker->JobSeekId,
+            'Degree'      => $degree,
+            'University'  => $request->txtBoard,
+            'PassingYear' => $request->cmbYear,
+            'Percentage'  => $request->txtPer,
         ]);
 
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'Education added successfully.');
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update Higher Education
+    |--------------------------------------------------------------------------
+    */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'cmbQual' => 'required',
+            'cmbQual' => 'required|string|max:255',
+            'txtOther' => 'nullable|string|max:255',
             'txtBoard' => 'required|string|max:255',
-            'cmbYear' => 'required',
+            'cmbYear' => 'required|integer|min:1998|max:' . now()->year,
             'txtPer' => 'required|numeric|min:0|max:100',
         ]);
 
@@ -140,20 +179,35 @@ class EducationController extends Controller
         $degree = $request->cmbQual;
 
         if ($degree === 'Other') {
-            $degree = $request->txtOther;
+            $degree = trim($request->txtOther);
+
+            if ($degree === '') {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'txtOther' => 'Please specify the degree.'
+                    ]);
+            }
         }
 
         $education->update([
-            'Degree'       => $degree,
-            'University'   => $request->txtBoard,
-            'PassingYear'  => $request->cmbYear,
-            'Percentage'   => $request->txtPer,
+            'Degree'      => $degree,
+            'University'  => $request->txtBoard,
+            'PassingYear' => $request->cmbYear,
+            'Percentage'  => $request->txtPer,
         ]);
 
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'Education updated successfully.');
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Higher Education
+    |--------------------------------------------------------------------------
+    */
     public function destroy($id)
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
@@ -169,32 +223,70 @@ class EducationController extends Controller
             ->with('success', 'Education deleted successfully.');
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Store School Education
+    |--------------------------------------------------------------------------
+    */
     public function storeSchool(Request $request)
     {
+        $request->validate([
+            'txtSchoolName' => 'required|string|max:255',
+            'cmbSchoolQual' => 'required|string|max:255',
+            'txtSchoolOther' => 'nullable|string|max:255',
+            'txtSchoolBoard' => 'required|string|max:255',
+            'cmbSchoolYear' => 'required|integer|min:1990|max:' . now()->year,
+            'txtSchoolPer' => 'required|numeric|min:0|max:100',
+        ]);
 
         $jobSeeker = Auth::guard('jobseeker')->user();
 
         $qualification = $request->cmbSchoolQual;
 
         if ($qualification === 'Other') {
-            $qualification = $request->txtSchoolOther;
+            $qualification = trim($request->txtSchoolOther);
+
+            if ($qualification === '') {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'txtSchoolOther' => 'Please specify the qualification.'
+                    ]);
+            }
         }
 
         JobSeekerSchoolEducation::create([
-            'JobSeekId'      => $jobSeeker->JobSeekId,
-            'SchoolName'     => $request->txtSchoolName,
-            'Qualification'  => $qualification,
-            'Board'          => $request->txtSchoolBoard,
-            'YearOfPassing'  => $request->cmbSchoolYear,
-            'Percentage'     => $request->txtSchoolPer,
+            'JobSeekId'     => $jobSeeker->JobSeekId,
+            'SchoolName'    => trim($request->txtSchoolName),
+            'Qualification' => $qualification,
+            'Board'         => trim($request->txtSchoolBoard),
+            'YearOfPassing' => $request->cmbSchoolYear,
+            'Percentage'    => $request->txtSchoolPer,
         ]);
 
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'School education added successfully.');
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Update School Education
+    |--------------------------------------------------------------------------
+    */
     public function updateSchool(Request $request, $id)
     {
+        $request->validate([
+            'txtSchoolName' => 'required|string|max:255',
+            'cmbSchoolQual' => 'required|string|max:255',
+            'txtSchoolOther' => 'nullable|string|max:255',
+            'txtSchoolBoard' => 'required|string|max:255',
+            'cmbSchoolYear' => 'required|integer|min:1990|max:' . now()->year,
+            'txtSchoolPer' => 'required|numeric|min:0|max:100',
+        ]);
+
         $jobSeeker = Auth::guard('jobseeker')->user();
 
         $school = JobSeekerSchoolEducation::where('id', $id)
@@ -204,21 +296,36 @@ class EducationController extends Controller
         $qualification = $request->cmbSchoolQual;
 
         if ($qualification === 'Other') {
-            $qualification = $request->txtSchoolOther;
+            $qualification = trim($request->txtSchoolOther);
+
+            if ($qualification === '') {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'txtSchoolOther' => 'Please specify the qualification.'
+                    ]);
+            }
         }
 
         $school->update([
-            'SchoolName'     => $request->txtSchoolName,
-            'Qualification'  => $qualification,
-            'Board'          => $request->txtSchoolBoard,
-            'YearOfPassing'  => $request->cmbSchoolYear,
-            'Percentage'     => $request->txtSchoolPer,
+            'SchoolName'    => trim($request->txtSchoolName),
+            'Qualification' => $qualification,
+            'Board'         => trim($request->txtSchoolBoard),
+            'YearOfPassing' => $request->cmbSchoolYear,
+            'Percentage'    => $request->txtSchoolPer,
         ]);
 
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'School education updated successfully.');
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete School Education
+    |--------------------------------------------------------------------------
+    */
     public function destroySchool($id)
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
@@ -234,27 +341,48 @@ class EducationController extends Controller
             ->with('success', 'School education deleted successfully.');
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Upload Document
+    |--------------------------------------------------------------------------
+    */
     public function uploadDocument(Request $request)
     {
         $request->validate([
-            'cmbDocumentType' => 'required',
-            'fileDocument' => 'required|mimes:pdf,jpg,jpeg,png|max:5120',
+            'cmbDocumentType' => 'required|string|max:100',
+            'fileDocument' => [
+                'required',
+                'file',
+                'mimes:pdf,jpg,jpeg,png',
+                'max:5120',
+            ],
         ]);
 
         $jobSeeker = Auth::guard('jobseeker')->user();
 
         $file = $request->file('fileDocument');
 
-        $fileName = time() . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+        $fileName = time()
+            . '_'
+            . Str::random(8)
+            . '.'
+            . $file->getClientOriginalExtension();
 
-        $file->move(public_path('uploads/documents'), $fileName);
+        $uploadDirectory = public_path('uploads/documents');
+
+        if (!is_dir($uploadDirectory)) {
+            mkdir($uploadDirectory, 0755, true);
+        }
+
+        $file->move($uploadDirectory, $fileName);
 
         JobSeekerDocument::create([
-            'JobSeekId' => $jobSeeker->JobSeekId,
-            'DocumentType' => $request->cmbDocumentType,
-            'FileName' => $fileName,
+            'JobSeekId'        => $jobSeeker->JobSeekId,
+            'DocumentType'     => $request->cmbDocumentType,
+            'FileName'         => $fileName,
             'OriginalFileName' => $file->getClientOriginalName(),
-            'UploadDate' => now(),
+            'UploadDate'       => now(),
             'VerificationStatus' => 'Pending',
         ]);
 
@@ -262,6 +390,13 @@ class EducationController extends Controller
             ->route('jobseeker.education')
             ->with('success', 'Document uploaded successfully.');
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Delete Document
+    |--------------------------------------------------------------------------
+    */
     public function deleteDocument($id)
     {
         $jobSeeker = Auth::guard('jobseeker')->user();

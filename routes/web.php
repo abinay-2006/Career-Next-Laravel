@@ -34,12 +34,67 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout');
 
-Route::post('/register', [RegisterController::class, 'register'])
-    ->name('register');
 
 Route::get('/forgot', function () {
     return 'Forgot Password Page - Coming Soon';
 })->name('forgot');
+
+// ═══════════════════════════════════════════════════════════════
+// Registration Routes
+// ═══════════════════════════════════════════════════════════════
+
+Route::prefix('register')
+    ->name('register.')
+    ->group(function () {
+
+        // Step 1
+        Route::get('/', [RegisterController::class, 'showRegistration'])
+            ->name('index');
+
+        Route::post('/account-type', [RegisterController::class, 'storeAccountType'])
+            ->name('account-type');
+
+
+        // Step 2
+        Route::get('/details', [RegisterController::class, 'showDetails'])
+            ->name('details');
+
+        Route::post('/details', [RegisterController::class, 'storeDetails'])
+            ->name('details.store');
+
+
+        // Step 3
+        Route::get('/profile', [RegisterController::class, 'showProfile'])
+            ->name('profile');
+
+        Route::post('/profile', [RegisterController::class, 'storeProfile'])
+            ->name('profile.store');
+
+        // Step 4 - Professional Details
+        Route::get('/professional', [RegisterController::class, 'showProfessional'])
+            ->name('professional');
+
+        Route::post('/professional', [RegisterController::class, 'storeProfessional'])
+            ->name('professional.store');
+
+        // Step 5 - Review
+        Route::get('/review', [RegisterController::class, 'showReview'])
+            ->name('review');
+
+        Route::post('/review', [RegisterController::class, 'storeReview'])
+            ->name('review.store');
+
+        // Step 6 - OTP Verification
+
+        Route::get('/verify', [RegisterController::class, 'showVerify'])
+            ->name('verify');
+
+        Route::post('/verify', [RegisterController::class, 'verifyOtp'])
+            ->name('verify.store');
+
+        Route::post('/resend-otp', [RegisterController::class, 'resendOtp'])
+            ->name('resend-otp');
+    });
 
 // Admin Routes
 

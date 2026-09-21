@@ -8,15 +8,22 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\JobSeeker;
 use Illuminate\Support\Facades\File;
+use App\Models\JobSeekerDocument;
 
 class JobSeekerProfileController extends Controller
 {
     /**
      * Display Job Seeker Profile
      */
-    public function index()
+    public function index(Request $request)
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Profile Initials
+    |--------------------------------------------------------------------------
+    */
 
         $initials = collect(
             preg_split('/\s+/', trim($jobSeeker->JobSeekerName ?? ''))
@@ -26,11 +33,185 @@ class JobSeekerProfileController extends Controller
             ->take(2)
             ->implode('');
 
+
+        /*
+    |--------------------------------------------------------------------------
+    | Resume
+    |--------------------------------------------------------------------------
+    | Resume is now taken from jobseeker_documents.
+    |
+    | We use DocumentType = resume.
+    |--------------------------------------------------------------------------
+    */
+
+        $resume = $jobSeeker->documents()
+            ->whereRaw('LOWER(DocumentType) = ?', ['resume'])
+            ->latest('DocId')
+            ->first();
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | PROFILE COMPLETION
+    |--------------------------------------------------------------------------
+    */
+
+        $completionItems = [
+
+            'name' =>
+            !empty(trim((string) $jobSeeker->JobSeekerName)),
+
+            'email' =>
+            !empty(trim((string) $jobSeeker->Email)),
+
+            'mobile' =>
+            !empty(trim((string) $jobSeeker->Mobile)),
+
+            'city' =>
+            !empty(trim((string) $jobSeeker->City)),
+
+            'address' =>
+            !empty(trim((string) $jobSeeker->Address)),
+
+            'gender' =>
+            !empty(trim((string) $jobSeeker->Gender)),
+
+            'birth_date' =>
+            !empty($jobSeeker->BirthDate),
+
+            /*
+        |--------------------------------------------------------------------------
+        | Education
+        |--------------------------------------------------------------------------
+        */
+
+            'education' =>
+            $jobSeeker->education()->exists()
+                ||
+                $jobSeeker->schoolEducation()->exists(),
+
+            /*
+        |--------------------------------------------------------------------------
+        | Resume
+        |--------------------------------------------------------------------------
+        */
+
+            'resume' =>
+            $resume !== null,
+
+            /*
+        |--------------------------------------------------------------------------
+        | Profile Photo
+        |--------------------------------------------------------------------------
+        */
+
+            'photo' =>
+            !empty(trim((string) $jobSeeker->Photo)),
+        ];
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Calculate Completion
+    |--------------------------------------------------------------------------
+    */
+
+        $completedItems = count(
+            array_filter($completionItems)
+        );
+
+        $totalItems = count($completionItems);
+
+        $profileCompletion = $totalItems > 0
+            ? (int) round(
+                ($completedItems / $totalItems) * 100
+            )
+            : 0;
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Completion Labels
+    |--------------------------------------------------------------------------
+    */
+
+        $profileCompletionLabels = [
+
+            'name' => 'Full Name',
+
+            'email' => 'Email',
+
+            'mobile' => 'Mobile Number',
+
+            'city' => 'City',
+
+            'address' => 'Address',
+
+            'gender' => 'Gender',
+
+            'birth_date' => 'Date of Birth',
+
+            'education' => 'Education',
+
+            'resume' => 'Resume',
+
+            'photo' => 'Profile Photo',
+        ];
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Missing Profile Items
+    |--------------------------------------------------------------------------
+    */
+
+        $missingProfileItems = [];
+
+        foreach ($completionItems as $key => $completed) {
+
+            if (!$completed) {
+
+                $missingProfileItems[] =
+                    $profileCompletionLabels[$key];
+            }
+        }
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Deep Link Section
+    |--------------------------------------------------------------------------
+    |
+    | Allows dashboard buttons to open the appropriate
+    | profile section/modal.
+    |--------------------------------------------------------------------------
+    */
+
+        $section = $request->query('section');
+
+
+        /*
+    |--------------------------------------------------------------------------
+    | Return Profile View
+    |--------------------------------------------------------------------------
+    */
+
         return view(
             'jobseeker.profile.index',
-            compact('jobSeeker', 'initials')
+            compact(
+                'jobSeeker',
+                'initials',
+                'resume',
+                'completionItems',
+                'completedItems',
+                'totalItems',
+                'profileCompletion',
+                'missingProfileItems',
+                'section'
+            )
         );
     }
+
 
     /**
      * Update Job Seeker Profile
@@ -162,33 +343,140 @@ class JobSeekerProfileController extends Controller
 
             $file = $request->file('Resume');
 
-            // Generate unique filename
-            $filename = time() . '_' . $jobSeeker->JobSeekId . '_' . $file->getClientOriginalName();
+            /*
+        |--------------------------------------------------------------------------
+        | Resume directory
+        |--------------------------------------------------------------------------
+        */
 
-            // Store inside public/upload
+            $uploadDirectory = public_path('upload');
+
+            if (!File::exists($uploadDirectory)) {
+                File::makeDirectory($uploadDirectory, 0755, true);
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | Generate unique filename
+        |--------------------------------------------------------------------------
+        */
+
+            $filename =
+                time() .
+                '_' .
+                $jobSeeker->JobSeekId .
+                '_' .
+                preg_replace(
+                    '/[^A-Za-z0-9._-]/',
+                    '_',
+                    $file->getClientOriginalName()
+                );
+
+            /*
+        |--------------------------------------------------------------------------
+        | Store file
+        |--------------------------------------------------------------------------
+        */
+
             $file->move(
-                public_path('upload'),
+                $uploadDirectory,
                 $filename
             );
 
-            // Delete old resume if it exists
+            /*
+        |--------------------------------------------------------------------------
+        | Delete old physical resume
+        |--------------------------------------------------------------------------
+        */
+
             if (
-                !empty($jobSeeker->Resume) &&
-                file_exists(public_path('upload/' . $jobSeeker->Resume))
+                !empty($oldResumeFile) &&
+                File::exists(
+                    public_path('upload/' . $oldResumeFile)
+                )
             ) {
-                unlink(public_path('upload/' . $jobSeeker->Resume));
+                File::delete(
+                    public_path('upload/' . $oldResumeFile)
+                );
             }
 
-            // Save filename to database
-            $jobSeeker->Resume = $filename;
+            /*
+        |--------------------------------------------------------------------------
+        | Update legacy Resume field
+        |--------------------------------------------------------------------------
+        |
+        | Keep this because your existing profile page currently
+        | uses jobseeker_reg.Resume.
+        |
+        */
 
+            $jobSeeker->Resume = $filename;
             $jobSeeker->save();
+
+            /*
+        |--------------------------------------------------------------------------
+        | Update jobseeker_documents
+        |--------------------------------------------------------------------------
+        */
+
+            $document = $jobSeeker->documents()
+                ->whereRaw(
+                    'LOWER(DocumentType) = ?',
+                    ['resume']
+                )
+                ->first();
+
+            if ($document) {
+
+                /*
+            | Replace existing resume document
+            */
+
+                $document->FileName = $filename;
+
+                $document->OriginalFileName =
+                    $file->getClientOriginalName();
+
+                $document->UploadDate = now();
+
+                $document->VerificationStatus = 'pending';
+
+                $document->AdminNotes = null;
+
+                $document->save();
+            } else {
+
+                /*
+            | Create first resume document
+            */
+
+                $jobSeeker->documents()->create([
+
+                    'DocumentType' => 'resume',
+
+                    'FileName' => $filename,
+
+                    'OriginalFileName' =>
+                    $file->getClientOriginalName(),
+
+                    'UploadDate' => now(),
+
+                    'VerificationStatus' => 'pending',
+
+                    'AdminNotes' => null,
+
+                ]);
+            }
         }
 
         return redirect()
             ->route('jobseeker.profile.index')
-            ->with('success', 'Resume uploaded successfully.');
+            ->with(
+                'success',
+                'Resume uploaded successfully.'
+            );
     }
+
     /**
      * Remove uploaded resume
      */
@@ -196,20 +484,87 @@ class JobSeekerProfileController extends Controller
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
 
-        // Delete physical file
-        if (
-            !empty($jobSeeker->Resume) &&
-            file_exists(public_path('upload/' . $jobSeeker->Resume))
-        ) {
-            unlink(public_path('upload/' . $jobSeeker->Resume));
+        /*
+    |--------------------------------------------------------------------------
+    | Find resume document
+    |--------------------------------------------------------------------------
+    */
+
+        $resumeDocument = $jobSeeker->documents()
+            ->whereRaw(
+                'LOWER(DocumentType) = ?',
+                ['resume']
+            )
+            ->first();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Delete physical file
+    |--------------------------------------------------------------------------
+    */
+
+        if ($resumeDocument && !empty($resumeDocument->FileName)) {
+
+            $resumePath = public_path(
+                'upload/' . $resumeDocument->FileName
+            );
+
+            if (File::exists($resumePath)) {
+                File::delete($resumePath);
+            }
         }
 
-        // Remove resume reference from database
+        /*
+    |--------------------------------------------------------------------------
+    | Fallback:
+    | Delete using legacy Resume field if document record
+    | does not exist.
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            !empty($jobSeeker->Resume) &&
+            File::exists(
+                public_path('upload/' . $jobSeeker->Resume)
+            )
+        ) {
+
+            File::delete(
+                public_path('upload/' . $jobSeeker->Resume)
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Remove resume document record
+    |--------------------------------------------------------------------------
+    */
+
+        if ($resumeDocument) {
+            $resumeDocument->delete();
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Clear legacy Resume field
+    |--------------------------------------------------------------------------
+    */
+
         $jobSeeker->Resume = null;
+
         $jobSeeker->save();
+
+        /*
+    |--------------------------------------------------------------------------
+    | Return to profile
+    |--------------------------------------------------------------------------
+    */
 
         return redirect()
             ->route('jobseeker.profile.index')
-            ->with('success', 'Resume removed successfully.');
+            ->with(
+                'success',
+                'Resume removed successfully.'
+            );
     }
 }

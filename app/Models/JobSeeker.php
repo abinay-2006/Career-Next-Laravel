@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\JobSeekerDocument;
 
 class JobSeeker extends Authenticatable
 {
@@ -42,24 +44,42 @@ class JobSeeker extends Authenticatable
     /**
      * Higher Education
      */
-    public function educations()
-    {
-        return $this->hasMany(JobSeekerEducation::class, 'JobSeekId', 'JobSeekId');
-    }
-
     /**
-     * School Education
-     */
-    public function schoolEducations()
-    {
-        return $this->hasMany(JobSeekerSchoolEducation::class, 'JobSeekId', 'JobSeekId');
-    }
+ * Higher / professional education records.
+ */
+public function education(): HasMany
+{
+    return $this->hasMany(
+        JobSeekerEducation::class,
+        'JobSeekId',
+        'JobSeekId'
+    );
+}
+
+/**
+ * School education records.
+ */
+public function schoolEducation(): HasMany
+{
+    return $this->hasMany(
+        JobSeekerSchoolEducation::class,
+        'JobSeekId',
+        'JobSeekId'
+    );
+}
 
     /**
      * Uploaded Documents
      */
-    public function documents()
+    /**
+     * Documents uploaded by this job seeker.
+     */
+    public function documents(): HasMany
     {
-        return $this->hasMany(JobSeekerDocument::class, 'JobSeekId', 'JobSeekId');
+        return $this->hasMany(
+            JobSeekerDocument::class,
+            'JobSeekId',
+            'JobSeekId'
+        );
     }
 }

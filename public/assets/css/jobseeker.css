@@ -4810,3 +4810,1628 @@ body::after {
     cursor: pointer;
     font: inherit;
 }
+
+/* =========================================================
+   PROFILE COMPLETION
+   ========================================================= */
+
+.profile-completion-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+
+    margin: 25px 0;
+
+    padding: 22px 24px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 16px;
+
+    box-shadow: 0 5px 20px rgba(15, 23, 42, 0.05);
+
+    transition: 0.2s ease;
+}
+
+.profile-completion-card:hover {
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+}
+
+/* LEFT */
+
+.profile-completion-left {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 16px;
+
+    flex: 1;
+
+    min-width: 0;
+}
+
+/* ICON */
+
+.completion-icon {
+    width: 48px;
+    height: 48px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #eff6ff;
+
+    color: #2563eb;
+
+    font-size: 20px;
+}
+
+/* CONTENT */
+
+.completion-content {
+    flex: 1;
+
+    min-width: 0;
+}
+
+/* HEADER */
+
+.completion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+}
+
+.completion-header h3 {
+    margin: 0 0 4px;
+
+    color: #1f2937;
+
+    font-size: 17px;
+
+    font-weight: 700;
+}
+
+.completion-header p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+}
+
+/* PERCENTAGE */
+
+.completion-percentage {
+    flex-shrink: 0;
+
+    color: #2563eb;
+
+    font-size: 22px;
+
+    font-weight: 700;
+}
+
+/* PROGRESS */
+
+.completion-progress {
+    width: 100%;
+
+    height: 8px;
+
+    margin-top: 15px;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: #e5e7eb;
+}
+
+.completion-progress-bar {
+    height: 100%;
+
+    border-radius: inherit;
+
+    background: #2563eb;
+
+    transition: width 0.5s ease;
+}
+
+/* META */
+
+.completion-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-top: 8px;
+
+    color: #6b7280;
+
+    font-size: 11px;
+}
+
+.completion-meta i {
+    margin-right: 4px;
+
+    color: #16a34a;
+}
+
+.completion-status {
+    color: #64748b;
+
+    font-weight: 600;
+}
+
+.completion-status.complete {
+    color: #16a34a;
+}
+
+/* ACTION */
+
+.completion-action {
+    flex-shrink: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    min-height: 42px;
+
+    padding: 0 16px;
+
+    border: 1px solid #2563eb;
+
+    border-radius: 9px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    transition: 0.2s ease;
+}
+
+.completion-action:hover {
+    background: #1d4ed8;
+
+    border-color: #1d4ed8;
+
+    color: #ffffff;
+
+    transform: translateY(-1px);
+}
+
+.completion-action.complete {
+    background: #ffffff;
+
+    color: #2563eb;
+}
+
+.completion-action.complete:hover {
+    background: #eff6ff;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+    .profile-completion-card {
+        align-items: stretch;
+
+        flex-direction: column;
+
+        padding: 18px;
+    }
+
+    .completion-action {
+        width: 100%;
+    }
+
+    .completion-header {
+        align-items: flex-start;
+    }
+
+    .completion-percentage {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-completion-left {
+        gap: 12px;
+    }
+
+    .completion-icon {
+        width: 42px;
+        height: 42px;
+
+        font-size: 17px;
+    }
+
+    .completion-header {
+        flex-direction: column;
+
+        gap: 4px;
+    }
+
+    .completion-meta {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+}
+
+/* ============================================================
+   PROFILE COMPLETION CARD
+   ============================================================ */
+
+.profile-completion-card {
+    margin-top: 24px;
+    margin-bottom: 30px;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05);
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.profile-completion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.profile-completion-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.profile-completion-icon {
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+    background: #eff6ff;
+    color: #2563eb;
+
+    font-size: 18px;
+}
+
+.profile-completion-title h2 {
+    margin: 0 0 4px;
+
+    color: #111827;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.profile-completion-title p {
+    margin: 0;
+
+    color: #6b7280;
+    font-size: 13px;
+}
+
+/* ============================================================
+   PERCENTAGE
+   ============================================================ */
+
+.profile-completion-percentage {
+    flex-shrink: 0;
+
+    color: #2563eb;
+    font-size: 25px;
+    font-weight: 700;
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+
+.profile-progress-track {
+    width: 100%;
+    height: 9px;
+
+    margin-top: 20px;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+    background: #e5e7eb;
+}
+
+.profile-progress-fill {
+    height: 100%;
+
+    border-radius: inherit;
+    background: #2563eb;
+
+    transition: width 0.5s ease;
+}
+
+/* ============================================================
+   PROGRESS INFORMATION
+   ============================================================ */
+
+.profile-completion-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    margin-top: 10px;
+
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.profile-completion-info strong {
+    color: #374151;
+}
+
+.profile-completion-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    color: #d97706;
+    font-weight: 600;
+}
+
+.profile-completion-status.completed {
+    color: #16a34a;
+}
+
+/* ============================================================
+   MISSING ITEMS
+   ============================================================ */
+
+.profile-missing-section {
+    margin-top: 20px;
+    padding-top: 18px;
+
+    border-top: 1px solid #f1f5f9;
+}
+
+.profile-missing-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+
+    margin-bottom: 11px;
+
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.profile-missing-title i {
+    color: #2563eb;
+}
+
+.profile-missing-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.profile-missing-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 8px 11px;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+
+    background: #f8fafc;
+
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 500;
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.profile-missing-item:hover {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #2563eb;
+
+    transform: translateY(-1px);
+}
+
+.profile-missing-item > i:first-child {
+    color: #2563eb;
+    font-size: 10px;
+}
+
+.profile-missing-item .missing-item-arrow {
+    margin-left: 2px;
+
+    color: #94a3b8;
+    font-size: 9px;
+
+    transition: transform 0.2s ease;
+}
+
+.profile-missing-item:hover .missing-item-arrow {
+    color: #2563eb;
+    transform: translateX(2px);
+}
+
+.profile-missing-item i {
+    color: #94a3b8;
+    font-size: 10px;
+}
+
+/* ============================================================
+   ACTION
+   ============================================================ */
+
+.profile-completion-action {
+    display: flex;
+    justify-content: flex-end;
+
+    margin-top: 20px;
+}
+
+.profile-completion-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 40px;
+    padding: 0 16px;
+
+    border-radius: 9px;
+
+    background: #2563eb;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.profile-completion-btn:hover {
+    background: #1d4ed8;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 600px) {
+    .profile-completion-card {
+        padding: 19px;
+        border-radius: 14px;
+    }
+
+    .profile-completion-header {
+        align-items: flex-start;
+    }
+
+    .profile-completion-title {
+        gap: 10px;
+    }
+
+    .profile-completion-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .profile-completion-title h2 {
+        font-size: 15px;
+    }
+
+    .profile-completion-title p {
+        font-size: 12px;
+    }
+
+    .profile-completion-percentage {
+        font-size: 21px;
+    }
+
+    .profile-completion-info {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .profile-completion-action {
+        justify-content: stretch;
+    }
+
+    .profile-completion-btn {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   PROFILE COMPLETION
+   ========================================================= */
+
+.profile-completion-card {
+    margin-bottom: 30px;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05);
+}
+
+/* Header */
+
+.profile-completion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+.profile-completion-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.profile-completion-icon {
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 12px;
+
+    background: #eff6ff;
+    color: #2563eb;
+
+    font-size: 18px;
+}
+
+.profile-completion-title h2 {
+    margin: 0 0 4px;
+
+    color: #1f2937;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.profile-completion-title p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 13px;
+}
+
+/* Percentage */
+
+.profile-completion-percentage {
+    flex-shrink: 0;
+
+    color: #2563eb;
+
+    font-size: 26px;
+    font-weight: 700;
+}
+
+/* Progress */
+
+.profile-progress {
+    width: 100%;
+    height: 9px;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: #e5e7eb;
+
+    margin-bottom: 12px;
+}
+
+.profile-progress-fill {
+    height: 100%;
+
+    border-radius: inherit;
+
+    background: #2563eb;
+
+    transition: width 0.4s ease;
+}
+
+/* Status */
+
+.profile-completion-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    color: #6b7280;
+
+    font-size: 13px;
+}
+
+.profile-completion-status strong {
+    color: #374151;
+}
+
+.completion-complete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.completion-incomplete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    color: #d97706;
+    font-weight: 600;
+}
+
+/* Missing information */
+
+.missing-profile-section {
+    margin-top: 20px;
+    padding-top: 18px;
+
+    border-top: 1px solid #f1f5f9;
+}
+
+.missing-profile-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 12px;
+
+    color: #374151;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.missing-profile-title i {
+    color: #2563eb;
+}
+
+/* Missing list */
+
+.missing-profile-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-bottom: 17px;
+}
+
+.missing-profile-item {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 7px 11px;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.missing-profile-item i {
+    margin-right: 7px;
+
+    color: #cbd5e1;
+
+    font-size: 5px;
+}
+
+/* Complete button */
+
+.complete-profile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    min-height: 40px;
+
+    padding: 0 15px;
+
+    border-radius: 9px;
+
+    background: #2563eb;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    transition: 0.2s ease;
+}
+
+.complete-profile-btn:hover {
+    background: #1d4ed8;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.complete-profile-btn i:last-child {
+    margin-left: 3px;
+}
+
+/* Complete message */
+
+.profile-complete-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 20px;
+    padding: 15px;
+
+    border: 1px solid #dcfce7;
+    border-radius: 10px;
+
+    background: #f0fdf4;
+}
+
+.profile-complete-message > i {
+    color: #16a34a;
+    font-size: 21px;
+}
+
+.profile-complete-message strong {
+    display: block;
+
+    margin-bottom: 2px;
+
+    color: #166534;
+
+    font-size: 13px;
+}
+
+.profile-complete-message span {
+    display: block;
+
+    color: #4b5563;
+
+    font-size: 12px;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+    .profile-completion-card {
+        padding: 19px;
+        border-radius: 14px;
+    }
+
+    .profile-completion-header {
+        align-items: flex-start;
+    }
+
+    .profile-completion-title {
+        align-items: flex-start;
+    }
+
+    .profile-completion-title h2 {
+        font-size: 16px;
+    }
+
+    .profile-completion-title p {
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .profile-completion-percentage {
+        font-size: 22px;
+    }
+
+    .profile-completion-status {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .missing-profile-list {
+        gap: 6px;
+    }
+
+    .complete-profile-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* =========================================================
+   PROFILE COMPLETION - MISSING ITEMS
+   ========================================================= */
+
+.missing-profile-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 10px 12px;
+
+    border-radius: 8px;
+
+    color: inherit;
+    text-decoration: none;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.missing-profile-item:hover {
+    background: rgba(37, 99, 235, 0.06);
+    transform: translateX(3px);
+}
+
+.missing-profile-item span {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.missing-profile-item span i {
+    font-size: 6px;
+    color: #2563eb;
+}
+
+.missing-profile-arrow {
+    color: #94a3b8;
+    font-size: 12px;
+    transition: transform 0.2s ease;
+}
+
+.missing-profile-item:hover .missing-profile-arrow {
+    color: #2563eb;
+    transform: translateX(3px);
+}
+
+/* =========================================================
+   PROFILE PAGE - COMPLETION CARD
+   ========================================================= */
+
+.profile-page-completion {
+    width: 100%;
+    margin: 24px 0;
+    padding: 24px;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+
+    background: #ffffff;
+
+    box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05);
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.profile-completion-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.profile-completion-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.profile-completion-page-icon {
+    width: 46px;
+    height: 46px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #eff6ff;
+    color: #2563eb;
+
+    font-size: 18px;
+}
+
+.profile-completion-heading h2 {
+    margin: 0 0 4px;
+
+    color: #1f2937;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.profile-completion-heading p {
+    margin: 0;
+
+    color: #6b7280;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* =========================================================
+   PERCENTAGE
+   ========================================================= */
+
+.profile-page-percentage {
+    flex-shrink: 0;
+
+    color: #2563eb;
+
+    font-size: 26px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   PROGRESS BAR
+   ========================================================= */
+
+.profile-page-progress {
+    width: 100%;
+    height: 8px;
+
+    margin-top: 20px;
+
+    overflow: hidden;
+
+    border-radius: 20px;
+
+    background: #e5e7eb;
+}
+
+.profile-page-progress-fill {
+    height: 100%;
+
+    min-width: 0;
+
+    border-radius: inherit;
+
+    background: #2563eb;
+
+    transition: width 0.4s ease;
+}
+
+/* =========================================================
+   BOTTOM STATUS
+   ========================================================= */
+
+.profile-page-completion-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-top: 13px;
+}
+
+.profile-page-count {
+    color: #6b7280;
+
+    font-size: 13px;
+}
+
+.profile-page-count strong {
+    color: #374151;
+    font-weight: 700;
+}
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.profile-page-complete,
+.profile-page-incomplete {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.profile-page-complete {
+    color: #16a34a;
+}
+
+.profile-page-incomplete {
+    color: #d97706;
+}
+
+/* =========================================================
+   MISSING ITEMS
+   ========================================================= */
+
+.profile-page-missing {
+    margin-top: 18px;
+    padding-top: 17px;
+
+    border-top: 1px solid #f1f5f9;
+}
+
+.profile-page-missing-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-bottom: 11px;
+
+    color: #374151;
+
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.profile-page-missing-title i {
+    color: #2563eb;
+}
+
+.profile-page-missing-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.profile-page-missing-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 7px 10px;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+
+    background: #f8fafc;
+
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.profile-page-missing-item > i {
+    color: #2563eb;
+    font-size: 5px;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+    .profile-page-completion {
+        padding: 18px;
+        border-radius: 14px;
+    }
+
+    .profile-completion-top {
+        align-items: flex-start;
+    }
+
+    .profile-completion-heading {
+        align-items: flex-start;
+    }
+
+    .profile-completion-page-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .profile-completion-heading h2 {
+        font-size: 16px;
+    }
+
+    .profile-completion-heading p {
+        font-size: 12px;
+    }
+
+    .profile-page-percentage {
+        font-size: 22px;
+    }
+
+    .profile-page-completion-bottom {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .profile-page-missing-list {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .profile-page-missing-item {
+        width: 100%;
+    }
+}
+
+/* ==========================================================
+   RESUME CARD
+========================================================== */
+
+.resume-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    width: 100%;
+    margin-top: 22px;
+    padding: 22px 24px;
+
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 18px;
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.resume-card:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.11);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ==========================================================
+   LEFT SIDE
+========================================================== */
+
+.resume-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.resume-icon {
+    width: 54px;
+    height: 54px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background: rgba(239, 68, 68, 0.16);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+
+    color: #fca5a5;
+    font-size: 1.45rem;
+}
+
+.resume-details {
+    min-width: 0;
+}
+
+.resume-label {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.resume-sub {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.82rem;
+}
+
+.resume-file-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: rgba(255, 255, 255, 0.82);
+}
+
+/* ==========================================================
+   STATUS BADGES
+========================================================== */
+
+.resume-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 4px 9px;
+
+    border-radius: 999px;
+
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.resume-status-approved {
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.13);
+}
+
+.resume-status-rejected {
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.13);
+}
+
+.resume-status-pending {
+    color: #fde68a;
+    background: rgba(245, 158, 11, 0.13);
+}
+
+.resume-no-file {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* ==========================================================
+   RESUME ACTIONS
+========================================================== */
+
+.resume-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+
+    flex-shrink: 0;
+}
+
+/* Base button */
+
+.resume-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    min-height: 42px;
+    padding: 0 15px;
+
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+
+    text-decoration: none;
+    cursor: pointer;
+
+    border: 1px solid transparent;
+
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.resume-action-btn:hover {
+    transform: translateY(-1px);
+}
+
+.resume-action-btn:active {
+    transform: translateY(0);
+}
+
+/* ==========================================================
+   VIEW BUTTON
+========================================================== */
+
+.resume-view-btn {
+    color: #ffffff;
+
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.resume-view-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.19);
+}
+
+/* ==========================================================
+   REPLACE / UPLOAD BUTTON
+========================================================== */
+
+.resume-upload-btn,
+.resume-upload-primary {
+    color: #ffffff;
+
+    background: #2563eb;
+    border-color: #3b82f6;
+
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.25);
+}
+
+.resume-upload-btn:hover,
+.resume-upload-primary:hover {
+    color: #ffffff;
+    background: #1d4ed8;
+    border-color: #60a5fa;
+
+    box-shadow: 0 7px 18px rgba(37, 99, 235, 0.35);
+}
+
+/* ==========================================================
+   CONFIRM REMOVE RESUME BUTTON
+   This button submits the delete form.
+========================================================== */
+
+.btn-delete-confirm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+
+    min-height: 44px;
+    padding: 0 20px;
+
+    border: 1px solid rgba(239, 68, 68, 0.45);
+    border-radius: 10px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(220, 38, 38, 0.95),
+        rgba(185, 28, 28, 0.95)
+    );
+
+    color: #fff;
+
+    font-size: 0.88rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.18);
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.btn-delete-confirm i {
+    font-size: 0.9rem;
+}
+
+.btn-delete-confirm:hover {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+
+    color: #fff;
+
+    transform: translateY(-1px);
+
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.28);
+}
+
+.btn-delete-confirm:active {
+    transform: translateY(0);
+}
+
+.btn-delete-confirm:focus-visible {
+    outline: 2px solid rgba(248, 113, 113, 0.8);
+    outline-offset: 3px;
+}
+
+/* ==========================================================
+   UPLOAD BUTTON WHEN NO RESUME EXISTS
+========================================================== */
+
+.resume-upload-primary {
+    min-height: 44px;
+    padding: 0 20px;
+
+    font-size: 0.85rem;
+}
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 768px) {
+    .resume-card {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .resume-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .resume-action-btn {
+        flex: 1 1 auto;
+    }
+
+    .resume-file-name {
+        max-width: 220px;
+    }
+}
+
+@media (max-width: 480px) {
+    .resume-card {
+        padding: 18px;
+    }
+
+    .resume-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+    }
+
+    .resume-action-btn {
+        width: 100%;
+    }
+
+    .resume-upload-primary {
+        grid-column: 1 / -1;
+    }
+}
+
+/* =========================================================
+   CLICKABLE PROFILE COMPLETION ITEMS
+   ========================================================= */
+
+.missing-profile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.missing-profile-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    padding: 11px 13px;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: #374151;
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.missing-profile-item span {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.missing-profile-item span i {
+    color: #2563eb;
+    font-size: 12px;
+}
+
+.missing-profile-item > i {
+    color: #94a3b8;
+    font-size: 12px;
+
+    transition: transform 0.2s ease;
+}
+
+.missing-profile-item:hover {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    transform: translateX(2px);
+}
+
+.missing-profile-item:hover > i {
+    color: #2563eb;
+    transform: translateX(3px);
+}

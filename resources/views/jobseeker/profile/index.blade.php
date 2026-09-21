@@ -124,11 +124,130 @@
         </button>
 
     </div>
+    <!-- ═══════════════════════════════════════
+     PROFILE COMPLETION
+═══════════════════════════════════════ -->
+
+    <div class="profile-page-completion">
+
+        <!-- Header -->
+        <div class="profile-completion-top">
+
+            <div class="profile-completion-heading">
+
+                <div class="profile-completion-page-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+
+                <div>
+                    <h2>Profile Completion</h2>
+
+                    <p>
+                        Keep your profile updated to get the most from Career Next.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- Percentage -->
+            <div class="profile-page-percentage">
+                {{ $profileCompletion }}%
+            </div>
+
+        </div>
+
+
+        <!-- Progress -->
+        <div class="profile-page-progress">
+
+            <div
+                class="profile-page-progress-fill"
+                style="width: {{ $profileCompletion }}%;">
+            </div>
+
+        </div>
+
+
+        <!-- Status -->
+        <div class="profile-page-completion-bottom">
+
+            <div class="profile-page-count">
+
+                <strong>{{ $completedItems }}</strong>
+                of
+                <strong>{{ $totalItems }}</strong>
+
+                profile sections completed
+
+            </div>
+
+
+            @if($profileCompletion >= 100)
+
+            <div class="profile-page-complete">
+
+                <i class="fas fa-circle-check"></i>
+
+                Profile complete
+
+            </div>
+
+            @else
+
+            <div class="profile-page-incomplete">
+
+                <i class="fas fa-circle-exclamation"></i>
+
+                {{ count($missingProfileItems) }} remaining
+
+            </div>
+
+            @endif
+
+        </div>
+
+
+        <!-- Missing Items -->
+        @if(count($missingProfileItems) > 0)
+
+        <div class="profile-page-missing">
+
+            <div class="profile-page-missing-title">
+
+                <i class="fas fa-list-check"></i>
+
+                Complete these sections
+
+            </div>
+
+
+            <div class="profile-page-missing-list">
+
+                @foreach($missingProfileItems as $item)
+
+                <span class="profile-page-missing-item">
+
+                    <i class="fas fa-circle"></i>
+
+                    {{ $item }}
+
+                </span>
+
+                @endforeach
+
+            </div>
+
+        </div>
+
+        @endif
+
+    </div>
 
 
     <!-- ═══════════════════════════════════════
-         INFORMATION CARDS
-    ═══════════════════════════════════════ -->
+     INFORMATION CARDS
+═══════════════════════════════════════ -->
 
     <div class="info-grid">
 
@@ -340,7 +459,7 @@
                 <i class="fas fa-file-pdf"></i>
             </div>
 
-            <div>
+            <div class="resume-details">
 
                 <div class="resume-label">
                     My Resume
@@ -348,13 +467,41 @@
 
                 <div class="resume-sub">
 
-                    @if (!empty($jobSeeker->Resume))
+                    @if ($resume)
 
-                    {{ $jobSeeker->Resume }}
+                    <span class="resume-file-name">
+                        <i class="fas fa-file-lines"></i>
+                        {{ $resume->OriginalFileName }}
+                    </span>
+
+                    @if ($resume->VerificationStatus === 'approved')
+
+                    <span class="resume-status resume-status-approved">
+                        <i class="fas fa-circle-check"></i>
+                        Verified
+                    </span>
+
+                    @elseif ($resume->VerificationStatus === 'rejected')
+
+                    <span class="resume-status resume-status-rejected">
+                        <i class="fas fa-circle-xmark"></i>
+                        Rejected
+                    </span>
 
                     @else
 
-                    No resume uploaded yet
+                    <span class="resume-status resume-status-pending">
+                        <i class="fas fa-clock"></i>
+                        Pending verification
+                    </span>
+
+                    @endif
+
+                    @else
+
+                    <span class="resume-no-file">
+                        No resume uploaded yet
+                    </span>
 
                     @endif
 
@@ -365,52 +512,61 @@
         </div>
 
 
+        <!-- Resume Actions -->
+
         <div class="resume-actions">
 
-            @if (!empty($jobSeeker->Resume))
+            @if ($resume)
 
-            <!-- View Resume -->
+            <!-- View -->
             <a
-                href="{{ asset('upload/' . $jobSeeker->Resume) }}"
+                href="{{ asset('upload/' . $resume->FileName) }}"
                 target="_blank"
-                class="btn-view-resume">
+                class="resume-action-btn resume-view-btn">
 
                 <i class="fas fa-eye"></i>
-                View Resume
+                <span>View Resume</span>
 
             </a>
 
 
-            <!-- Replace / Upload Resume -->
+            <!-- Replace -->
             <button
                 type="button"
-                class="btn-view-resume"
+                class="resume-action-btn resume-upload-btn"
                 onclick="openResumeModal()">
 
-                <i class="fas fa-upload"></i>
-                Replace
+                <i class="fas fa-cloud-arrow-up"></i>
+                <span>Replace</span>
 
             </button>
 
 
-            <!-- Remove Resume -->
+            <!-- Remove
+                 IMPORTANT:
+                 This does NOT remove the resume.
+                 It ONLY opens the confirmation modal.
+            -->
+            <button
+                type="button"
+                class="resume-action-btn resume-remove-btn"
+                onclick="openRemoveResumeModal()">
+
+                <i class="fas fa-trash-can"></i>
+                <span>Remove</span>
+
+            </button>
+
+
+            <!-- Hidden delete form -->
             <form
                 method="POST"
                 action="{{ route('jobseeker.profile.resume.remove') }}"
-                id="removeResumeForm">
+                id="removeResumeForm"
+                style="display:none;">
 
                 @csrf
                 @method('DELETE')
-
-                <button
-                    type="button"
-                    class="btn-remove-resume"
-                    onclick="openRemoveResumeModal()">
-
-                    <i class="fas fa-trash"></i>
-                    Remove
-
-                </button>
 
             </form>
 
@@ -419,11 +575,11 @@
             <!-- Upload Resume -->
             <button
                 type="button"
-                class="btn-view-resume"
+                class="resume-action-btn resume-upload-primary"
                 onclick="openResumeModal()">
 
-                <i class="fas fa-upload"></i>
-                Upload Resume
+                <i class="fas fa-cloud-arrow-up"></i>
+                <span>Upload Resume</span>
 
             </button>
 
@@ -974,9 +1130,9 @@
 
                 <div class="confirmation-text">
 
-                    <h3>Remove your resume?</h3>
+                    <h3 style="color:rgba(255,255,255,.9);">Remove your resume?</h3>
 
-                    <p>
+                    <p style="color:rgba(255,255,255,.7);">
                         Are you sure you want to remove your uploaded resume?
                         You will need to upload it again if you want to use it
                         in the future.
@@ -1216,5 +1372,85 @@
             form.submit();
         }
     }
+
+
+
+    /* ==========================================================
+   PROFILE COMPLETION DEEP LINK
+========================================================== */
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const section = @json($section ?? null);
+
+        if (!section) {
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Personal information
+        |--------------------------------------------------------------------------
+        */
+
+        if (section === 'personal') {
+
+            const modal = document.getElementById('editModal');
+
+            if (modal) {
+                openModal();
+            }
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Resume
+        |--------------------------------------------------------------------------
+        */
+
+        if (section === 'resume') {
+
+            const modal = document.getElementById('resumeModal');
+
+            if (modal) {
+                openResumeModal();
+            }
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Profile Photo
+        |--------------------------------------------------------------------------
+        */
+
+        if (section === 'photo') {
+
+            const modal = document.getElementById('editModal');
+
+            if (modal) {
+                openModal();
+
+                setTimeout(function() {
+
+                    const photoInput =
+                        document.getElementById('Photo');
+
+                    if (photoInput) {
+                        photoInput.focus();
+                    }
+
+                }, 300);
+            }
+
+            return;
+        }
+
+    });
 </script>
 @endsection

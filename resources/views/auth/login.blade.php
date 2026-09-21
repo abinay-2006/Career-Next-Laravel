@@ -56,7 +56,12 @@
 
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
-            <button class="tab-btn" onclick="switchTab('register')">Register</button>
+            <button
+                type="button"
+                class="tab-btn"
+                onclick="window.location.href='{{ route('register.index') }}'">
+                Register
+            </button>
         </div>
 
         <!-- ══ SIGN IN ══ -->
@@ -119,412 +124,15 @@
             </form>
 
             <div class="switch-text">
-                Don't have an account? <a style="color:purple" onclick="switchTab('register')">Create one</a>
+                Don't have an account? <a
+                    href="{{ route('register.index') }}"
+                    style="color:purple">
+                    Create one
+                </a>
             </div>
             <div class="back-home">
                 <a href="{{ url('/') }}"><i class="fas fa-arrow-left"></i> Back to Home</a>
             </div>
-        </div>
-
-        <!-- ══ REGISTER ══ -->
-        <div class="panel" id="panel-register">
-
-            <!-- ══ ACCOUNT TYPE SELECTION ══ -->
-            <div id="register-type-screen">
-
-                <div class="panel-title">Create your account ✨</div>
-
-                <div class="panel-subtitle">
-                    Choose how you want to use Career Next
-                </div>
-
-                <div class="account-type-options">
-
-                    <!-- JOB SEEKER -->
-                    <button
-                        type="button"
-                        class="account-type-card"
-                        id="account-jobseeker"
-                        onclick="selectAccountType('JobSeeker')">
-
-                        <div class="account-type-icon jobseeker-icon">
-                            <i class="fas fa-user-tie"></i>
-                        </div>
-
-                        <div class="account-type-content">
-                            <h3>Job Seeker</h3>
-
-                            <p>
-                                I'm looking for a job and new career opportunities.
-                            </p>
-
-                            <div class="account-type-features">
-                                <span>
-                                    <i class="fas fa-check"></i>
-                                    Find jobs
-                                </span>
-
-                                <span>
-                                    <i class="fas fa-check"></i>
-                                    Apply easily
-                                </span>
-
-                                <span>
-                                    <i class="fas fa-check"></i>
-                                    Build your profile
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="account-type-check">
-                            <i class="fas fa-check"></i>
-                        </div>
-
-                    </button>
-
-
-                    <!-- EMPLOYER -->
-                    <button
-                        type="button"
-                        class="account-type-card"
-                        id="account-employer"
-                        onclick="selectAccountType('Employer')">
-
-                        <div class="account-type-icon employer-icon">
-                            <i class="fas fa-building"></i>
-                        </div>
-
-                        <div class="account-type-content">
-                            <h3>Employer</h3>
-
-                            <p>
-                                I'm hiring and looking for talented candidates.
-                            </p>
-
-                            <div class="account-type-features">
-                                <span>
-                                    <i class="fas fa-check"></i>
-                                    Post jobs
-                                </span>
-
-                                <span>
-                                    <i class="fas fa-check"></i>
-                                    Find candidates
-                                </span>
-
-                                <span>
-                                    <i class="fas fa-check"></i>
-                                    Manage applications
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="account-type-check">
-                            <i class="fas fa-check"></i>
-                        </div>
-
-                    </button>
-
-                </div>
-
-
-                <!-- Selected account -->
-                <div class="selected-account-message" id="selected-account-message">
-                    <i class="fas fa-circle-info"></i>
-                    <span>Please select an account type to continue.</span>
-                </div>
-
-
-                <button
-                    type="button"
-                    class="btn-primary account-continue-btn"
-                    id="account-continue"
-                    onclick="continueRegistration()"
-                    disabled>
-
-                    Continue
-                    <i class="fas fa-arrow-right"></i>
-
-                </button>
-
-
-                <div class="switch-text">
-                    Already have an account?
-                    <a onclick="switchTab('login')">Sign in</a>
-                </div>
-
-                <div class="back-home">
-                    <a href="{{ url('/') }}">
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Home
-                    </a>
-                </div>
-
-            </div>
-
-
-            <!-- ══ EXISTING REGISTRATION FORM ══ -->
-            <div id="registration-form-screen" style="display:none;">
-
-                <div class="panel-title" id="registration-form-title">
-                    Create your account ✨
-                </div>
-
-                <div class="panel-subtitle" id="registration-form-subtitle">
-                    Enter your account details
-                </div>
-
-                <div class="alert error" id="reg-error">
-                    <i class="fas fa-circle-exclamation"></i>
-                    <span></span>
-                </div>
-
-                <div class="alert success" id="reg-success">
-                    <i class="fas fa-circle-check"></i>
-                    <span></span>
-                </div>
-
-
-                <form
-                    method="POST"
-                    action="{{ route('register') }}"
-                    onsubmit="return handleRegisterSubmit(event)">
-
-                    @csrf
-
-                    <!-- Hidden account type -->
-                    <input
-                        type="hidden"
-                        name="cmbUser"
-                        id="reg-type"
-                        value="">
-
-
-                    <div class="form-row">
-
-                        <div class="form-group">
-
-                            <label id="fname-label">
-                                Full Name
-                            </label>
-
-                            <div class="input-wrap">
-
-                                <i class="fas fa-id-card lead-icon"></i>
-
-                                <input
-                                    type="text"
-                                    name="txtName"
-                                    id="reg-name"
-                                    placeholder="Your full name">
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>
-                                Username
-                            </label>
-
-                            <div class="input-wrap">
-
-                                <i class="fas fa-user lead-icon"></i>
-
-                                <input
-                                    type="text"
-                                    name="txtUser"
-                                    id="reg-user"
-                                    placeholder="Choose a username">
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Email Address
-                        </label>
-
-                        <div class="input-wrap">
-
-                            <i class="fas fa-envelope lead-icon"></i>
-
-                            <input
-                                type="email"
-                                name="txtEmail"
-                                id="reg-email"
-                                placeholder="your@email.com">
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Password
-                        </label>
-
-                        <div class="input-wrap">
-
-                            <i class="fas fa-lock lead-icon"></i>
-
-                            <input
-                                type="password"
-                                name="txtPass"
-                                id="reg-pass"
-                                placeholder="Create a password"
-                                oninput="checkStrength(this.value)"
-                                autocomplete="new-password">
-
-                            <button
-                                type="button"
-                                class="toggle-pass"
-                                onclick="togglePass('reg-pass',this)">
-
-                                <i class="fas fa-eye"></i>
-
-                            </button>
-
-                        </div>
-
-
-                        <div
-                            class="pw-strength"
-                            id="pw-strength">
-
-                            <div class="pw-bars">
-
-                                <div class="pw-bar" id="bar1"></div>
-                                <div class="pw-bar" id="bar2"></div>
-                                <div class="pw-bar" id="bar3"></div>
-                                <div class="pw-bar" id="bar4"></div>
-
-                            </div>
-
-                            <span
-                                class="pw-label"
-                                id="pw-label">
-                            </span>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Confirm Password
-                        </label>
-
-                        <div class="input-wrap">
-
-                            <i class="fas fa-lock lead-icon"></i>
-
-                            <input
-                                type="password"
-                                name="txtConfirm"
-                                id="reg-confirm"
-                                placeholder="Re-enter password"
-                                autocomplete="new-password">
-
-                            <button
-                                type="button"
-                                class="toggle-pass"
-                                onclick="togglePass('reg-confirm',this)">
-
-                                <i class="fas fa-eye"></i>
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="checkbox-wrap">
-
-                        <input
-                            type="checkbox"
-                            id="terms"
-                            name="terms">
-
-                        <label for="terms">
-
-                            I agree to the
-                            <a href="#" target="_blank">
-                                Terms of Service
-                            </a>
-
-                            and
-
-                            <a href="#" target="_blank">
-                                Privacy Policy
-                            </a>
-
-                        </label>
-
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="btn-primary">
-
-                        <i class="fas fa-user-plus"></i>
-                        Create Account
-
-                    </button>
-
-                </form>
-
-
-                <div class="change-account-type">
-
-                    <button
-                        type="button"
-                        onclick="backToAccountType()">
-
-                        <i class="fas fa-arrow-left"></i>
-                        Change account type
-
-                    </button>
-
-                </div>
-
-
-                <div class="switch-text">
-
-                    Already have an account?
-                    <a onclick="switchTab('login')">
-                        Sign in
-                    </a>
-
-                </div>
-
-
-                <div class="back-home">
-
-                    <a href="{{ url('/') }}">
-
-                        <i class="fas fa-arrow-left"></i>
-                        Back to Home
-
-                    </a>
-
-                </div>
-
-            </div>
-
         </div>
 
         <!-- ══ FORGOT PASSWORD ══ -->
@@ -585,12 +193,34 @@
 @section('scripts')
 <script>
     function switchTab(name) {
-        const order = ['login', 'register', 'forgot'];
+        if (name === 'register') {
+            window.location.href = "{{ route('register.index') }}";
+            return;
+        }
+
+        const order = ['login', 'forgot'];
+
         document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-            btn.classList.toggle('active', order[i] === name);
+            btn.classList.toggle(
+                'active',
+                order[i] === name
+            );
         });
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.getElementById('panel-' + name).classList.add('active');
+
+        document
+            .querySelectorAll('.panel')
+            .forEach(panel => {
+                panel.classList.remove('active');
+            });
+
+        const target =
+            document.getElementById(
+                'panel-' + name
+            );
+
+        if (target) {
+            target.classList.add('active');
+        }
     }
 
     setTimeout(function() {

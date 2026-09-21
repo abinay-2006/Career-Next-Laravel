@@ -3,17 +3,28 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class JobSeekerDocument extends Model
 {
+    /**
+     * Database table.
+     */
     protected $table = 'jobseeker_documents';
 
+    /**
+     * Primary key.
+     */
     protected $primaryKey = 'DocId';
 
+    /**
+     * Table does not use Laravel's created_at / updated_at columns.
+     */
     public $timestamps = false;
 
-    const CREATED_AT = 'UploadDate';
-
+    /**
+     * Mass assignable fields.
+     */
     protected $fillable = [
         'JobSeekId',
         'DocumentType',
@@ -21,17 +32,25 @@ class JobSeekerDocument extends Model
         'OriginalFileName',
         'UploadDate',
         'VerificationStatus',
+        'AdminNotes',
     ];
 
+    /**
+     * Attribute casting.
+     */
     protected $casts = [
         'UploadDate' => 'datetime',
     ];
 
     /**
-     * Relationship with JobSeeker
+     * The job seeker who owns this document.
      */
-    public function jobSeeker()
+    public function jobSeeker(): BelongsTo
     {
-        return $this->belongsTo(JobSeeker::class, 'JobSeekId', 'JobSeekId');
+        return $this->belongsTo(
+            JobSeeker::class,
+            'JobSeekId',
+            'JobSeekId'
+        );
     }
 }

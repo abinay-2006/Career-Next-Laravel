@@ -17,11 +17,13 @@
 
         <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/css/login.css') }}">
+        <link rel="stylesheet" href="{{ asset('assets/css/register.css') }}">
 
     </head>
 
     <body>
 
+        @stack('styles')
         @yield('content')
 
         @yield('scripts')

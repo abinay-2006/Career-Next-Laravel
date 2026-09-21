@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class JobSeekerEducation extends Model
 {
@@ -23,8 +24,12 @@ class JobSeekerEducation extends Model
     /**
      * Relationship with JobSeeker
      */
-    public function jobSeeker()
+    public function jobSeeker(): BelongsTo
     {
-        return $this->belongsTo(JobSeeker::class, 'JobSeekId', 'JobSeekId');
+        return $this->belongsTo(
+            JobSeeker::class,
+            'JobSeekId',
+            'JobSeekId'
+        );
     }
 }
