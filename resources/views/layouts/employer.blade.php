@@ -11,9 +11,18 @@
   <link rel="stylesheet" href="{{ asset('assets/css/employer.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/employer-profile.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/notifications.css') }}">
 </head>
 
 <body>
+  <div id="alert-container" class="cn-alert-container" aria-label="Notifications">
+    @foreach (['success', 'error', 'warning', 'info'] as $alertType)
+      @if(session()->has($alertType) && !($alertType === 'error' && $errors->any()))
+        <x-alert :type="$alertType" :message="session($alertType)" :duration="$alertType === 'success' ? 4500 : ($alertType === 'info' ? 5000 : null)" />
+      @endif
+    @endforeach
+    @if($errors->any())<x-alert type="error" title="Please review the form" :message="$errors->first()" />@endif
+  </div>
   @php
   $headerEmployer = Auth::guard('employer')->user();
   @endphp
@@ -109,6 +118,7 @@
   </nav>
   @yield('content')
   @yield('scripts')
+  <script src="{{ asset('assets/js/alerts.js') }}"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {

@@ -256,13 +256,6 @@
             Application Decision
         </div>
 
-        @if(session('success'))
-        <div class="alert-success">
-            <i class="fas fa-circle-check"></i>
-            {{ session('success') }}
-        </div>
-        @endif
-
         @if($errors->any())
         <div class="alert-danger">
             <i class="fas fa-circle-xmark"></i>

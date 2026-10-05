@@ -18,13 +18,27 @@
         <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/css/login.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/css/register.css') }}">
+        <link rel="stylesheet" href="{{ asset('assets/css/notifications.css') }}">
 
     </head>
 
     <body>
 
+        <div id="alert-container" class="cn-alert-container" aria-label="Notifications">
+            @foreach (['success', 'error', 'warning', 'info'] as $alertType)
+                @if(session()->has($alertType) && !($alertType === 'error' && $errors->any()))
+                    <x-alert :type="$alertType" :message="session($alertType)" :duration="$alertType === 'success' ? 4500 : ($alertType === 'info' ? 5000 : null)" />
+                @endif
+            @endforeach
+            @if($errors->any())
+                <x-alert type="error" title="Please review the form" :message="$errors->first()" />
+            @endif
+        </div>
+
         @stack('styles')
         @yield('content')
+
+        <script src="{{ asset('assets/js/alerts.js') }}"></script>
 
         @yield('scripts')
 

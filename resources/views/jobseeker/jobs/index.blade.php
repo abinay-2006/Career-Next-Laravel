@@ -53,13 +53,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-briefcase"></i> Area of Work</label>
-                    <select name="cmbArea" id="cmbArea">
-                        <option value="">— Any Area —</option>
+                    <label><i class="fas fa-briefcase"></i> Job Title</label>
+                    <select name="cmbTitle" id="cmbTitle">
+                        <option value="">— Any Job Title —</option>
                         @foreach($titles as $title)
                         <option
                             value="{{ $title }}"
-                            @selected(request('cmbArea')==$title)>
+                            @selected(request('cmbTitle')==$title)>
                             {{ $title }}
                         </option>
                         @endforeach
@@ -130,23 +130,37 @@
             $alreadyApplied = $applications->contains('JobId', $job->JobId);
             @endphp
 
-            @if($alreadyApplied)
+            <div class="job-card-actions">
 
-            <button class="btn-apply" disabled
-                style="background:#6c757d;cursor:not-allowed;">
-                Applied
-            </button>
+                <a href="{{ route('jobseeker.jobs.show', $job->JobId) }}"
+                    class="btn-details">
+                    <i class="fas fa-eye"></i>
+                    View Details
+                </a>
 
-            @else
+                @if($alreadyApplied)
 
-            <form action="{{ route('jobseeker.jobs.apply', $job->JobId) }}" method="POST">
-                @csrf
-                <button type="submit" class="btn-apply">
-                    Apply Now
+                <button class="btn-apply" disabled
+                    style="background:#6c757d;cursor:not-allowed;">
+                    <i class="fas fa-check"></i>
+                    Applied
                 </button>
-            </form>
 
-            @endif
+                @else
+
+                <form action="{{ route('jobseeker.jobs.apply', $job->JobId) }}"
+                    method="POST">
+                    @csrf
+
+                    <button type="submit" class="btn-apply">
+                        <i class="fas fa-paper-plane"></i>
+                        Apply Now
+                    </button>
+                </form>
+
+                @endif
+
+            </div>
 
         </div>
 

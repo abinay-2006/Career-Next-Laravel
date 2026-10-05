@@ -15,9 +15,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="{{ asset('assets/css/admin.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/notifications.css') }}">
 </head>
 
 <body>
+    <div id="alert-container" class="cn-alert-container" aria-label="Notifications">
+        @foreach (['success', 'error', 'warning', 'info'] as $alertType)
+            @if(session()->has($alertType) && !($alertType === 'error' && $errors->any()))
+                <x-alert :type="$alertType" :message="session($alertType)" :duration="$alertType === 'success' ? 4500 : ($alertType === 'info' ? 5000 : null)" />
+            @endif
+        @endforeach
+        @if($errors->any())<x-alert type="error" title="Please review the form" :message="$errors->first()" />@endif
+    </div>
     <!-- ══════════ NAVBAR ══════════ -->
     <nav class="navbar">
         <a href="{{ route('admin.index') }}" class="navbar-brand brand-logo">
@@ -45,6 +54,7 @@
 
 
     @yield('content')
+    <script src="{{ asset('assets/js/alerts.js') }}"></script>
     @yield('scripts')
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>

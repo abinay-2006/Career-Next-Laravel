@@ -10,26 +10,34 @@ class JobSeekerWalkinController extends Controller
 {
     public function index()
     {
-        // Get all walk-ins ordered by latest interview date
-        $walkins = Walkin::orderBy('InterviewDate', 'desc')
-            ->orderBy('InterviewTime', 'desc')
+        $walkins = Walkin::orderBy('InterviewDate', 'asc')
+            ->orderBy('InterviewTime', 'asc')
             ->get();
 
-        // Upcoming interviews
-        $upcoming = $walkins->filter(function ($walkin) {
-            return Carbon::parse($walkin->InterviewDate)->greaterThanOrEqualTo(Carbon::today());
-        });
+        /*
+        |--------------------------------------------------------------------------
+        | Separate upcoming and past interviews
+        |--------------------------------------------------------------------------
+        | Interviews scheduled for today are considered upcoming.
+        */
 
-        // Past interviews
-        $past = $walkins->filter(function ($walkin) {
-            return Carbon::parse($walkin->InterviewDate)->lt(Carbon::today());
-        });
+        $today = Carbon::today();
+
+        $upcoming = $walkins->filter(function ($walkin) use ($today) {
+            return Carbon::parse($walkin->InterviewDate)->gte($today);
+        })->values();
+
+        $past = $walkins->filter(function ($walkin) use ($today) {
+            return Carbon::parse($walkin->InterviewDate)->lt($today);
+        })->sortByDesc(function ($walkin) {
+            return Carbon::parse($walkin->InterviewDate);
+        })->values();
 
         return view('jobseeker.walkins.index', [
-            'walkins'   => $walkins,
-            'upcoming'  => $upcoming,
-            'past'      => $past,
-            'total'     => $walkins->count(),
+            'walkins'  => $walkins,
+            'upcoming' => $upcoming,
+            'past'     => $past,
+            'total'    => $walkins->count(),
         ]);
     }
 }

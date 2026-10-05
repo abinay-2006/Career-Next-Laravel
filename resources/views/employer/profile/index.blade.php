@@ -14,13 +14,6 @@
          ALERTS
     ══════════════════════════════════════════════════════ -->
 
-    @if(session('success'))
-    <div class="alert alert-success">
-        <i class="fas fa-circle-check"></i>
-        {{ session('success') }}
-    </div>
-    @endif
-
     @if($errors->any())
     <div class="alert alert-danger">
 
@@ -992,9 +985,7 @@
 
             if (!allowedTypes.includes(file.type)) {
 
-                alert(
-                    'Please select a JPG, JPEG, PNG or WEBP image.'
-                );
+                window.showAlert ? window.showAlert('warning', 'Please select a JPG, JPEG, PNG or WEBP image.') : alert('Please select a JPG, JPEG, PNG or WEBP image.');
 
                 this.value = '';
 
@@ -1008,9 +999,7 @@
 
             if (file.size > maxSize) {
 
-                alert(
-                    'Company logo must be smaller than 2 MB.'
-                );
+                window.showAlert ? window.showAlert('warning', 'Company logo must be smaller than 2 MB.') : alert('Company logo must be smaller than 2 MB.');
 
                 this.value = '';
 

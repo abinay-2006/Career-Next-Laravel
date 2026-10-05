@@ -23,6 +23,7 @@ class LoginController extends Controller
     /**
      * Handle login.
      */
+
     public function login(Request $request)
     {
         $request->validate([
@@ -38,10 +39,10 @@ class LoginController extends Controller
         switch ($type) {
 
             /*
-            |--------------------------------------------------------------------------
-            | Administrator
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Administrator
+        |--------------------------------------------------------------------------
+        */
             case 'Administrator':
 
                 $user = DB::table('user_master')
@@ -55,17 +56,17 @@ class LoginController extends Controller
                         'Name' => $user->UserName,
                     ]);
 
-                    return redirect()->route('admin.index');
+                    return redirect()->route('admin.index')->with('success', 'You have signed in successfully.');
                 }
 
                 break;
 
 
             /*
-            |--------------------------------------------------------------------------
-            | Employer
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Employer
+        |--------------------------------------------------------------------------
+        */
             case 'Employer':
 
                 $employer = Employer::where(function ($query) use ($username) {
@@ -73,16 +74,31 @@ class LoginController extends Controller
                         ->orWhere('Email', $username);
                 })->first();
 
-                if (
-                    $employer &&
-                    Hash::check($password, $employer->Password) &&
-                    in_array(
-                        $employer->Status,
-                        ['Confirm', 'Confirmed', 'Approved']
-                    )
-                ) {
+                if ($employer && Hash::check($password, $employer->Password)) {
+
+                    $status = strtolower(trim($employer->Status ?? ''));
+
+                    if ($status === 'pending') {
+                        return back()
+                            ->withInput($request->only('txtUser', 'cmbUser'))
+                            ->with('error', 'Your account is awaiting admin approval.');
+                    }
+
+                    if ($status === 'suspended') {
+                        return back()
+                            ->withInput($request->only('txtUser', 'cmbUser'))
+                            ->with('error', 'Your account has been suspended. Please contact the administrator.');
+                    }
+
+                    if (!in_array($status, ['confirm', 'confirmed', 'approved'])) {
+                        return back()
+                            ->withInput($request->only('txtUser', 'cmbUser'))
+                            ->with('error', 'Your account is not active. Please contact the administrator.');
+                    }
 
                     Auth::guard('employer')->login($employer);
+
+                    $request->session()->regenerate();
 
                     session([
                         'UserType' => 'Employer',
@@ -90,17 +106,17 @@ class LoginController extends Controller
                         'Name' => $employer->CompanyName,
                     ]);
 
-                    return redirect()->route('employer.dashboard');
+                    return redirect()->route('employer.dashboard')->with('success', 'You have signed in successfully.');
                 }
 
                 break;
 
 
             /*
-            |--------------------------------------------------------------------------
-            | Job Seeker
-            |--------------------------------------------------------------------------
-            */
+        |--------------------------------------------------------------------------
+        | Job Seeker
+        |--------------------------------------------------------------------------
+        */
             case 'JobSeeker':
 
                 $jobSeeker = JobSeeker::where(function ($query) use ($username) {
@@ -108,16 +124,31 @@ class LoginController extends Controller
                         ->orWhere('Email', $username);
                 })->first();
 
-                if (
-                    $jobSeeker &&
-                    Hash::check($password, $jobSeeker->Password) &&
-                    in_array(
-                        $jobSeeker->Status,
-                        ['Confirm', 'Confirmed', 'Approved']
-                    )
-                ) {
+                if ($jobSeeker && Hash::check($password, $jobSeeker->Password)) {
+
+                    $status = strtolower(trim($jobSeeker->Status ?? ''));
+
+                    if ($status === 'pending') {
+                        return back()
+                            ->withInput($request->only('txtUser', 'cmbUser'))
+                            ->with('error', 'Your account is awaiting admin approval.');
+                    }
+
+                    if ($status === 'suspended') {
+                        return back()
+                            ->withInput($request->only('txtUser', 'cmbUser'))
+                            ->with('error', 'Your account has been suspended. Please contact the administrator.');
+                    }
+
+                    if (!in_array($status, ['confirm', 'confirmed', 'approved'])) {
+                        return back()
+                            ->withInput($request->only('txtUser', 'cmbUser'))
+                            ->with('error', 'Your account is not active. Please contact the administrator.');
+                    }
 
                     Auth::guard('jobseeker')->login($jobSeeker);
+
+                    $request->session()->regenerate();
 
                     session([
                         'UserType' => 'JobSeeker',
@@ -125,14 +156,14 @@ class LoginController extends Controller
                         'Name' => $jobSeeker->JobSeekerName,
                     ]);
 
-                    return redirect()->route('jobseeker.index');
+                    return redirect()->route('jobseeker.index')->with('success', 'You have signed in successfully.');
                 }
 
                 break;
         }
 
         return back()
-            ->withInput()
+            ->withInput($request->only('txtUser', 'cmbUser'))
             ->with('error', 'Wrong username or password.');
     }
 

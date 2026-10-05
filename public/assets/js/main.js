@@ -251,31 +251,3 @@ function validateForm(objFrm,arrObjDesc)
    }//for 
  }//for 
 } 
-/* ===== notifications.js (toast notifications) ===== */
-// Handle Toast Notification Auto-dismiss and Manual close
-document.addEventListener("DOMContentLoaded", function() {
-    const toast = document.getElementById('global-toast');
-    
-    if (toast) {
-        // Auto-dismiss the toast after 5 seconds
-        const hideTimeout = setTimeout(() => {
-            dismissToast(toast);
-        }, 5000);
-
-        // Allow manual dismissal
-        const closeBtn = toast.querySelector('.toast-close');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                clearTimeout(hideTimeout);
-                dismissToast(toast);
-            });
-        }
-    }
-});
-
-function dismissToast(toastElement) {
-    toastElement.classList.remove('show');
-    setTimeout(() => {
-        toastElement.remove();
-    }, 300); // Wait for the CSS fade-out transition to complete
-}

@@ -4,20 +4,7 @@
 
 @section('content')
 
-@if(session('success'))
-<div id="successMessage" class="alert alert-success">
-    {{ session('success') }}
-</div>
-@endif
 <!-- ── Floating Toast ─────────────────────────────────────────────────────── -->
-<div class="toast" id="toast" role="alert">
-    <i class="fas toast-icon" id="toast-icon"></i>
-    <span id="toast-msg"></span>
-    <button class="toast-close" onclick="hideToast()" aria-label="Close">
-        <i class="fas fa-times"></i>
-    </button>
-    <div class="toast-progress"></div>
-</div>
 
 <div class="page-wrapper">
 
@@ -223,17 +210,5 @@
         }
     }
 
-    setTimeout(function() {
-        const message = document.getElementById('successMessage');
-
-        if (message) {
-            message.style.transition = 'opacity 0.4s ease';
-            message.style.opacity = '0';
-
-            setTimeout(function() {
-                message.remove();
-            }, 400);
-        }
-    }, 3000);
 </script>
 @endsection

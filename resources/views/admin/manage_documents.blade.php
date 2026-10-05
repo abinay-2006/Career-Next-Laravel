@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div x-data="documentsManager()" x-init="init()" class="flex flex-col">
+<div x-data="documentsManager()" class="flex flex-col">
     <!-- ══ MAIN ══ -->
     <div class="main-content">
 
@@ -20,12 +20,6 @@
             <a href="{{ route('admin.index') }}" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Home
             </a>
-        </div>
-
-        <!-- Flash Message -->
-        <div x-show="flash.message" x-cloak x-bind:class="'flash-message ' + flash.type"
-            class="flash-message">
-            <p x-text="flash.message"></p>
         </div>
 
         <!-- Stats Cards -->
@@ -348,25 +342,12 @@
     function documentsManager() {
         return {
 
-            flash: {
-                type: @json(session('success') ? 'success' : (session('error') ? 'error' : '')),
-                message: @json(session('success') ?? session('error') ?? '')
-            },
-
             approveModalOpen: false,
             rejectModalOpen: false,
 
             selectedDocId: null,
             selectedFileName: '',
             selectedUserName: '',
-
-            init() {
-                if (this.flash.message) {
-                    setTimeout(() => {
-                        this.flash.message = '';
-                    }, 5000);
-                }
-            },
 
             openApproveModal(id, file, user) {
 

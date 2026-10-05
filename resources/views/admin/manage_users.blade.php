@@ -12,28 +12,6 @@
         <a href="{{ route('admin.index') }}" class="back-btn"><i class="fas fa-arrow-left"></i> Home</a>
     </div>
     
-    <!-- Toast -->
-    @if(session('success'))
-    <div class="toast success">
-        <i class="fas fa-circle-check"></i>
-        {{ session('success') }}
-    </div>
-    @endif
-
-    @if(session('warning'))
-    <div class="toast warning">
-        <i class="fas fa-triangle-exclamation"></i>
-        {{ session('warning') }}
-    </div>
-    @endif
-
-    @if(session('error'))
-    <div class="toast error">
-        <i class="fas fa-circle-xmark"></i>
-        {{ session('error') }}
-    </div>
-    @endif
-
     <!-- Summary cards -->
     <div class="summary-grid">
         <a href="?status=all&type={{ $filterType }}" class="sum-card {{ $filterStatus === 'all' ? 'active-filter' : '' }}">
@@ -90,23 +68,7 @@
         </form>
     </div>
 
-    <!-- Tabs -->
-    @if($filterType == 'all')
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('all')">
-            <i class="fas fa-users"></i> All
-            <span class="tab-count">{{ count($seekers) + count($employers) }}</span>
-        </button>
-        <button class="tab-btn" onclick="showTab('seekers')">
-            <i class="fas fa-user-tie"></i> Job Seekers
-            <span class="tab-count">{{ count($seekers) }}</span>
-        </button>
-        <button class="tab-btn" onclick="showTab('employers')">
-            <i class="fas fa-building"></i> Employers
-            <span class="tab-count">{{ count($employers) }}</span>
-        </button>
-    </div>
-    @endif
+    
 
     @if($filterType != 'employer')
     <!-- ── Job Seekers Table ── -->
@@ -496,15 +458,23 @@
 
                 if (!response.ok) {
 
-                    const text = await response.text();
-
-                    console.error(text);
-
-                    throw new Error('Server returned ' + response.status);
+                    let payload = {};
+                    if ((response.headers.get('content-type') || '').includes('application/json')) {
+                        payload = await response.json();
+                    }
+                    const messages = {
+                        401: 'Please sign in again to continue.',
+                        403: 'You are not authorized to perform this action.',
+                        404: 'The requested user could not be found.',
+                        422: payload.message || 'Please check the submitted information.'
+                    };
+                    throw new Error(messages[response.status] || payload.message || 'The operation could not be completed.');
 
                 }
 
-                const result = await response.json();
+                const result = (response.headers.get('content-type') || '').includes('application/json')
+                    ? await response.json()
+                    : {};
 
                 if (!result.success) {
 
@@ -548,40 +518,9 @@
 
         function showToast(message, type = 'success') {
 
-            document.querySelectorAll('.toast.dynamic').forEach(t => t.remove());
-
-            const toast = document.createElement('div');
-
-            toast.className = `toast ${type} dynamic`;
-
-            toast.innerHTML = `
-            <i class="fas ${type==='success'
-                ? 'fa-circle-check'
-                : 'fa-circle-xmark'}"></i>
-            ${message}
-        `;
-
-            const header = document.querySelector('.page-header');
-
-            header.insertAdjacentElement('afterend', toast);
-
-            requestAnimationFrame(() => {
-
-                toast.classList.add('visible');
-
-            });
-
-            setTimeout(() => {
-
-                toast.classList.remove('visible');
-
-                setTimeout(() => {
-
-                    toast.remove();
-
-                }, 300);
-
-            }, 1000);
+            if (typeof window.showAlert === 'function') {
+                window.showAlert(type === 'success' ? 'success' : 'error', message);
+            }
         }
 
     });

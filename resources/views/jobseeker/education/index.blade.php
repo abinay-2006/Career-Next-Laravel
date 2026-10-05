@@ -627,14 +627,6 @@
         }
     }
 
-    /* ── Navbar dropdown ── */
-    function toggleDropdown() {
-        document.getElementById('profileDropdown').classList.toggle('open');
-    }
-    document.addEventListener('click', function(e) {
-        const dd = document.getElementById('profileDropdown');
-        if (!dd.contains(e.target)) dd.classList.remove('open');
-    });
 
     /* ── Edit modal ── */
     function openEditModal(id, degree, university, year, percentage) {
@@ -816,11 +808,11 @@
         const fileInput = form.fileDocument;
 
         if (!docType) {
-            alert('Please select a document type.');
+            window.showAlert ? window.showAlert('warning', 'Please select a document type.') : alert('Please select a document type.');
             return false;
         }
         if (!fileInput.files.length) {
-            alert('Please select a file to upload.');
+            window.showAlert ? window.showAlert('warning', 'Please select a file to upload.') : alert('Please select a file to upload.');
             return false;
         }
         return true; // Client-side validation passed, server-side will re-validate

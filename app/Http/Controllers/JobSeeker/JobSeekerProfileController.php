@@ -339,134 +339,140 @@ class JobSeekerProfileController extends Controller
             'Resume' => 'required|file|mimes:pdf,doc,docx|max:5120',
         ]);
 
-        if ($request->hasFile('Resume')) {
+        if (!$request->hasFile('Resume')) {
+            return redirect()
+                ->route('jobseeker.profile.index')
+                ->withErrors([
+                    'Resume' => 'Please select a resume file.'
+                ]);
+        }
 
-            $file = $request->file('Resume');
+        $file = $request->file('Resume');
 
-            /*
-        |--------------------------------------------------------------------------
-        | Resume directory
-        |--------------------------------------------------------------------------
-        */
+        /*
+    |--------------------------------------------------------------------------
+    | Find existing resume document BEFORE replacing it
+    |--------------------------------------------------------------------------
+    */
 
-            $uploadDirectory = public_path('upload');
+        $existingDocument = $jobSeeker->documents()
+            ->whereRaw(
+                'LOWER(DocumentType) = ?',
+                ['resume']
+            )
+            ->first();
 
-            if (!File::exists($uploadDirectory)) {
-                File::makeDirectory($uploadDirectory, 0755, true);
-            }
+        $oldResumeFile = $existingDocument?->FileName;
 
-            /*
-        |--------------------------------------------------------------------------
-        | Generate unique filename
-        |--------------------------------------------------------------------------
-        */
+        /*
+    |--------------------------------------------------------------------------
+    | Resume directory
+    |--------------------------------------------------------------------------
+    */
 
-            $filename =
-                time() .
-                '_' .
-                $jobSeeker->JobSeekId .
-                '_' .
-                preg_replace(
-                    '/[^A-Za-z0-9._-]/',
-                    '_',
-                    $file->getClientOriginalName()
-                );
+        $uploadDirectory = public_path('upload');
 
-            /*
-        |--------------------------------------------------------------------------
-        | Store file
-        |--------------------------------------------------------------------------
-        */
+        if (!File::exists($uploadDirectory)) {
+            File::makeDirectory($uploadDirectory, 0755, true);
+        }
 
-            $file->move(
-                $uploadDirectory,
-                $filename
+        /*
+    |--------------------------------------------------------------------------
+    | Generate unique filename
+    |--------------------------------------------------------------------------
+    */
+
+        $filename =
+            time() .
+            '_' .
+            $jobSeeker->JobSeekId .
+            '_' .
+            preg_replace(
+                '/[^A-Za-z0-9._-]/',
+                '_',
+                $file->getClientOriginalName()
             );
 
-            /*
-        |--------------------------------------------------------------------------
-        | Delete old physical resume
-        |--------------------------------------------------------------------------
-        */
+        /*
+    |--------------------------------------------------------------------------
+    | Store new resume
+    |--------------------------------------------------------------------------
+    */
 
-            if (
-                !empty($oldResumeFile) &&
-                File::exists(
-                    public_path('upload/' . $oldResumeFile)
-                )
-            ) {
-                File::delete(
-                    public_path('upload/' . $oldResumeFile)
-                );
-            }
+        $file->move(
+            $uploadDirectory,
+            $filename
+        );
 
-            /*
-        |--------------------------------------------------------------------------
-        | Update legacy Resume field
-        |--------------------------------------------------------------------------
-        |
-        | Keep this because your existing profile page currently
-        | uses jobseeker_reg.Resume.
-        |
-        */
+        /*
+    |--------------------------------------------------------------------------
+    | Delete previous physical resume
+    |--------------------------------------------------------------------------
+    */
 
-            $jobSeeker->Resume = $filename;
-            $jobSeeker->save();
+        if (
+            !empty($oldResumeFile) &&
+            File::exists(
+                public_path('upload/' . $oldResumeFile)
+            )
+        ) {
+            File::delete(
+                public_path('upload/' . $oldResumeFile)
+            );
+        }
 
-            /*
-        |--------------------------------------------------------------------------
-        | Update jobseeker_documents
-        |--------------------------------------------------------------------------
-        */
+        /*
+    |--------------------------------------------------------------------------
+    | Also remove legacy resume if different
+    |--------------------------------------------------------------------------
+    */
 
-            $document = $jobSeeker->documents()
-                ->whereRaw(
-                    'LOWER(DocumentType) = ?',
-                    ['resume']
-                )
-                ->first();
+        if (
+            !empty($jobSeeker->Resume) &&
+            $jobSeeker->Resume !== $oldResumeFile &&
+            File::exists(
+                public_path('upload/' . $jobSeeker->Resume)
+            )
+        ) {
+            File::delete(
+                public_path('upload/' . $jobSeeker->Resume)
+            );
+        }
 
-            if ($document) {
+        /*
+    |--------------------------------------------------------------------------
+    | Update legacy Resume field
+    |--------------------------------------------------------------------------
+    */
 
-                /*
-            | Replace existing resume document
-            */
+        $jobSeeker->Resume = $filename;
+        $jobSeeker->save();
 
-                $document->FileName = $filename;
+        /*
+    |--------------------------------------------------------------------------
+    | Update jobseeker_documents
+    |--------------------------------------------------------------------------
+    */
 
-                $document->OriginalFileName =
-                    $file->getClientOriginalName();
+        if ($existingDocument) {
 
-                $document->UploadDate = now();
+            $existingDocument->update([
+                'FileName' => $filename,
+                'OriginalFileName' => $file->getClientOriginalName(),
+                'UploadDate' => now(),
+                'VerificationStatus' => 'Pending',
+                'AdminNotes' => null,
+            ]);
+        } else {
 
-                $document->VerificationStatus = 'pending';
-
-                $document->AdminNotes = null;
-
-                $document->save();
-            } else {
-
-                /*
-            | Create first resume document
-            */
-
-                $jobSeeker->documents()->create([
-
-                    'DocumentType' => 'resume',
-
-                    'FileName' => $filename,
-
-                    'OriginalFileName' =>
-                    $file->getClientOriginalName(),
-
-                    'UploadDate' => now(),
-
-                    'VerificationStatus' => 'pending',
-
-                    'AdminNotes' => null,
-
-                ]);
-            }
+            $jobSeeker->documents()->create([
+                'DocumentType' => 'resume',
+                'FileName' => $filename,
+                'OriginalFileName' => $file->getClientOriginalName(),
+                'UploadDate' => now(),
+                'VerificationStatus' => 'Pending',
+                'AdminNotes' => null,
+            ]);
         }
 
         return redirect()

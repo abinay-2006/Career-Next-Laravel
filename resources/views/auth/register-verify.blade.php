@@ -129,29 +129,6 @@
 
             <!-- Success Message -->
 
-            @if(session('success'))
-
-            <div class="registration-info-box">
-
-                <i class="fas fa-check-circle"></i>
-
-                <div>
-
-                    <strong>
-                        Verification code sent
-                    </strong>
-
-                    <p>
-                        {{ session('success') }}
-                    </p>
-
-                </div>
-
-            </div>
-
-            @endif
-
-
             <!-- Validation Errors -->
 
             @if($errors->any())

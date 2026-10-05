@@ -73,36 +73,14 @@ function showSuccess(id, msg) {
 }
 
 /* ── Toast helpers ──────────────────────────────────────────────────────── */
-let toastTimer = null;
-
 function showToast(type, msg) {
-    const toast = document.getElementById("toast");
-    const iconEl = document.getElementById("toast-icon");
-    const msgEl = document.getElementById("toast-msg");
-    const progress = toast.querySelector(".toast-progress");
-
-    // Reset animation
-    progress.style.animation = "none";
-    void progress.offsetWidth; // reflow
-
-    toast.className = "toast " + type;
-    iconEl.className =
-        "fas toast-icon " +
-        (type === "success" ? "fa-circle-check" : "fa-circle-exclamation");
-    msgEl.textContent = msg;
-
-    // Show
-    requestAnimationFrame(() => {
-        toast.classList.add("show");
-        progress.style.animation = "shrink 4s linear forwards";
-    });
-
-    if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(hideToast, 4200);
+    if (typeof window.showAlert === "function") {
+        window.showAlert(type === "success" ? "success" : "error", msg);
+    }
 }
 
 function hideToast() {
-    document.getElementById("toast").classList.remove("show");
+    // Retained as a compatibility hook for older registration scripts.
 }
 
 /* ── Form validation ────────────────────────────────────────────────────── */
@@ -245,10 +223,6 @@ function handleRegisterSubmit(event) {
                     data.message || "Account created successfully.",
                 );
 
-                showSuccess(
-                    "reg-success",
-                    data.message || "Account created successfully.",
-                );
             } else {
                 showError("reg-error", data.message || "Registration failed.");
             }
@@ -363,7 +337,6 @@ window.addEventListener("DOMContentLoaded", function () {
             "success",
             "Approval requested! Your account will be activated within 24-48 hours.",
         );
-        showSuccess("reg-success", "Account created! You can now sign in.");
     }
 
     // ── Registration ERRORS (duplicate username / email / other) ──
@@ -386,7 +359,6 @@ window.addEventListener("DOMContentLoaded", function () {
         }
 
         showError("reg-error", friendly);
-        showToast("error", friendly);
     }
 
     // ── Other URL-based states ──

@@ -121,6 +121,7 @@ class RegisterController extends Controller
                 'min:8',
                 'confirmed',
             ],
+
         ]);
 
 
@@ -867,8 +868,7 @@ class RegisterController extends Controller
                     'Resume' =>
                     $professional['resume'] ?? null,
 
-                    'Status' =>
-                    'Confirm',
+                    'Status' => 'Pending',
 
                     'UserName' =>
                     $registration['username'],
@@ -924,8 +924,7 @@ class RegisterController extends Controller
                     'Area_Work' =>
                     $profile['area_work'],
 
-                    'Status' =>
-                    'Confirm',
+                    'Status' => 'Pending',
 
                     'UserName' =>
                     $registration['username'],

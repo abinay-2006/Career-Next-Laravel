@@ -1,10 +1,8 @@
 @extends('layouts.admin')
 
-@section('title', 'Manage Users')
+@section('title', 'Manage Jobs')
 
 @section('content')
-
-
 
 <!-- ══════════ MAIN ══════════ -->
 <div class="main-content">
@@ -191,7 +189,6 @@
 
 <!-- ══════════ ACTION CONFIRM MODAL ══════════ -->
 <div class="modal-overlay" id="actionModalOverlay" onclick="handleActionOverlayClick(event)">
-    @csrf
     <div class="custom-modal custom-confirm-modal" id="actionModal">
         <div class="modal-header">
             <div class="modal-header-left">
@@ -259,7 +256,7 @@
 @section('scripts')
 <script>
     const jobs = @json($jobs->values());
-let activeJobId = null
+    let activeJobId = null
 
     // Build lookup map
     const jobMap = {};
@@ -369,8 +366,15 @@ let activeJobId = null
         confirmBtn.style.cssText = c.confirmStyle || '';
 
         closeModal();
-        document.getElementById('actionModalOverlay').classList.add('open');
-        document.body.style.overflow = 'hidden';
+
+        const actionOverlay = document.getElementById('actionModalOverlay');
+
+        actionOverlay.classList.remove('open');
+
+        requestAnimationFrame(() => {
+            actionOverlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        });
     }
 
     function closeActionModal() {

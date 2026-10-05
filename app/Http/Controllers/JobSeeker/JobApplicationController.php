@@ -13,6 +13,11 @@ class JobApplicationController extends Controller
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
 
+        // Only approved jobs can receive applications.
+        if ($job->Status !== 'Approved') {
+            abort(404);
+        }
+
         // Prevent duplicate applications
         $exists = Application::where('JobId', $job->JobId)
             ->where('JobSeekId', $jobSeeker->JobSeekId)

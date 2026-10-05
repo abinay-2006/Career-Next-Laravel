@@ -5,14 +5,23 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JOB PORTAL – Control Panel</title>
+    <title>@yield('title', 'Career Next') | Career Next</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/jobseeker.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/notifications.css') }}">
 </head>
 
 <body>
+    <div id="alert-container" class="cn-alert-container" aria-label="Notifications">
+        @foreach (['success', 'error', 'warning', 'info'] as $alertType)
+            @if(session()->has($alertType) && !($alertType === 'error' && $errors->any()))
+                <x-alert :type="$alertType" :message="session($alertType)" :duration="$alertType === 'success' ? 4500 : ($alertType === 'info' ? 5000 : null)" />
+            @endif
+        @endforeach
+        @if($errors->any())<x-alert type="error" title="Please review the form" :message="$errors->first()" />@endif
+    </div>
     @php
     $headerJobSeeker = Auth::guard('jobseeker')->user();
     @endphp
@@ -113,6 +122,7 @@
         &copy; <?php echo date('Y'); ?> Job Portal. All rights reserved.
     </footer>
     @yield('scripts')
+    <script src="{{ asset('assets/js/alerts.js') }}"></script>
     <script>
         function toggleDropdown() {
             document.getElementById('profileDropdown').classList.toggle('open');

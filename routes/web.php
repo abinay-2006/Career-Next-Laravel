@@ -242,11 +242,19 @@ Route::prefix('jobseeker')
             ->name('documents.destroy');
 
         //Apply job
+        // Job Search
         Route::get('/jobs', [JobSearchController::class, 'index'])
             ->name('jobs');
 
+        // Job Details
+        Route::get('/jobs/{job}', [JobSearchController::class, 'show'])
+            ->name('jobs.show');
+
+        // Apply for Job
         Route::post('/jobs/{job}/apply', [JobApplicationController::class, 'apply'])
             ->name('jobs.apply');
+        
+        // Walkin Jobs
 
         Route::get('/walkins', [JobSeekerWalkinController::class, 'index'])
             ->name('walkins');
