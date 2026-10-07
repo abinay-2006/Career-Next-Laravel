@@ -1,16 +1,37 @@
 # ============================================================
-# Career Next - Laravel 13 on Vercel
-# PHP 8.3 + Apache
+# Career Next - Laravel 13 + Vercel
+# PHP 8.3 + Apache + Vite
 # ============================================================
 
+# ------------------------------------------------------------
+# Stage 1: Build frontend assets
+# ------------------------------------------------------------
+FROM node:20-alpine AS frontend
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci
+
+COPY resources ./resources
+COPY public ./public
+COPY vite.config.* ./
+
+RUN npm run build
+
+
+# ------------------------------------------------------------
+# Stage 2: Laravel application
+# ------------------------------------------------------------
 FROM php:8.3-apache
 
 WORKDIR /var/www/html
 
-# ------------------------------------------------------------
-# Install required PHP extensions
-# ------------------------------------------------------------
 
+# ------------------------------------------------------------
+# Install PHP extensions
+# ------------------------------------------------------------
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -41,21 +62,18 @@ RUN apt-get update && apt-get install -y \
 # ------------------------------------------------------------
 # Install Composer
 # ------------------------------------------------------------
-
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 
 # ------------------------------------------------------------
 # Copy Laravel application
 # ------------------------------------------------------------
-
 COPY . .
 
 
 # ------------------------------------------------------------
-# Install Laravel dependencies
+# Install Composer dependencies
 # ------------------------------------------------------------
-
 RUN composer install \
     --no-dev \
     --no-interaction \
@@ -65,10 +83,14 @@ RUN composer install \
 
 
 # ------------------------------------------------------------
-# Configure Apache document root
-# Laravel public directory must be the web root
+# Copy Vite production assets
 # ------------------------------------------------------------
+COPY --from=frontend /app/public/build ./public/build
 
+
+# ------------------------------------------------------------
+# Configure Apache for Laravel
+# ------------------------------------------------------------
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
 RUN sed -ri \
@@ -76,11 +98,12 @@ RUN sed -ri \
     /etc/apache2/sites-available/000-default.conf \
     /etc/apache2/apache2.conf
 
+RUN a2enmod rewrite
+
 
 # ------------------------------------------------------------
-# Laravel writable directories
+# Laravel directories
 # ------------------------------------------------------------
-
 RUN mkdir -p \
     storage/framework/cache \
     storage/framework/sessions \
@@ -88,6 +111,10 @@ RUN mkdir -p \
     storage/logs \
     bootstrap/cache
 
+
+# ------------------------------------------------------------
+# Permissions
+# ------------------------------------------------------------
 RUN chown -R www-data:www-data \
     storage \
     bootstrap/cache \
@@ -95,20 +122,15 @@ RUN chown -R www-data:www-data \
 
 
 # ------------------------------------------------------------
-# Vercel container configuration
+# Production environment
 # ------------------------------------------------------------
-
 ENV APP_ENV=production
 ENV APP_DEBUG=false
 
-# Vercel supplies PORT.
-# Apache normally listens on 80, so configure Apache to use PORT.
 
-RUN sed -i \
-    's/^Listen 80$/Listen 80/' \
-    /etc/apache2/ports.conf
-
+# ------------------------------------------------------------
+# Vercel
+# ------------------------------------------------------------
 EXPOSE 80
 
-# Apache starts automatically.
 CMD ["apache2-foreground"]
