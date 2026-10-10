@@ -98,7 +98,7 @@ Route::prefix('register')
 
 // Admin Routes
 
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
 
     Route::get('/', [AdminController::class, 'index'])
         ->name('index');
@@ -155,6 +155,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 //Employer Routes
 Route::prefix('employer')
     ->name('employer.')
+    ->middleware('role:employer')
     ->group(function () {
 
         Route::get('/', [EmployerController::class, 'index'])
@@ -208,6 +209,7 @@ Route::prefix('employer')
 
 Route::prefix('jobseeker')
     ->name('jobseeker.')
+    ->middleware('role:jobseeker')
     ->group(function () {
 
         Route::get('/', [JobSeekerController::class, 'index'])

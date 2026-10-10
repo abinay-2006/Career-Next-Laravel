@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Employer;
 use App\Models\JobSeeker;
+use App\Models\Admin;
 
 class LoginController extends Controller
 {
@@ -45,11 +45,14 @@ class LoginController extends Controller
         */
             case 'Administrator':
 
-                $user = DB::table('user_master')
+                $user = Admin::query()
                     ->where('UserName', $username)
                     ->first();
 
-                if ($user && Hash::check($password, $user->Password)) {
+                if ($user && Hash::check($password, $user->getAuthPassword())) {
+
+                    Auth::guard('admin')->login($user);
+                    $request->session()->regenerate();
 
                     session([
                         'UserType' => 'Administrator',
@@ -178,6 +181,7 @@ class LoginController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        Auth::guard('admin')->logout();
         Auth::guard('employer')->logout();
         Auth::guard('jobseeker')->logout();
 
