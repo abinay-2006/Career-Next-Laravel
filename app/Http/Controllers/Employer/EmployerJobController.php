@@ -63,11 +63,14 @@ class EmployerJobController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'txtTitle' => 'required',
+        $validated = $request->validate([
+            'txtTitle' => 'required|string|max:50',
             'txtTotal' => 'required|integer|min:1',
-            'cmbQual'  => 'required',
-            'txtDesc'  => 'required',
+            'cmbQual'  => 'required|string|max:50',
+            'txtOther' => 'nullable|required_if:cmbQual,Other|string|max:50',
+            'txtDesc'  => 'required|string|max:200',
+            'txtSalaryFrom' => 'nullable|string|max:50',
+            'txtSalaryTo' => 'nullable|string|max:50',
         ]);
 
         $employer = Auth::guard('employer')->user();
@@ -78,14 +81,14 @@ class EmployerJobController extends Controller
 
         Job::create([
             'CompanyName' => $employer->CompanyName,
-            'JobTitle' => $request->txtTitle,
-            'Vacancy' => $request->txtTotal,
-            'SalaryFrom' => $request->txtSalaryFrom,
-            'SalaryTo' => $request->txtSalaryTo,
-            'MinQualification' => $request->cmbQual === 'Other'
-                ? $request->txtOther
-                : $request->cmbQual,
-            'Description' => $request->txtDesc,
+            'JobTitle' => $validated['txtTitle'],
+            'Vacancy' => $validated['txtTotal'],
+            'SalaryFrom' => $validated['txtSalaryFrom'] ?? null,
+            'SalaryTo' => $validated['txtSalaryTo'] ?? null,
+            'MinQualification' => $validated['cmbQual'] === 'Other'
+                ? $validated['txtOther']
+                : $validated['cmbQual'],
+            'Description' => $validated['txtDesc'],
             'Status' => 'Pending',
         ]);
 
@@ -97,11 +100,14 @@ class EmployerJobController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'txtTitle' => 'required',
+        $validated = $request->validate([
+            'txtTitle' => 'required|string|max:50',
             'txtTotal' => 'required|integer|min:1',
-            'cmbQual'  => 'required',
-            'txtDesc'  => 'required',
+            'cmbQual'  => 'required|string|max:50',
+            'txtOther' => 'nullable|required_if:cmbQual,Other|string|max:50',
+            'txtDesc'  => 'required|string|max:200',
+            'txtSalaryFrom' => 'nullable|string|max:50',
+            'txtSalaryTo' => 'nullable|string|max:50',
         ]);
 
         $employer = Auth::guard('employer')->user();
@@ -115,14 +121,14 @@ class EmployerJobController extends Controller
             ->firstOrFail();
 
         $job->update([
-            'JobTitle' => $request->txtTitle,
-            'Vacancy' => $request->txtTotal,
-            'SalaryFrom' => $request->txtSalaryFrom,
-            'SalaryTo' => $request->txtSalaryTo,
-            'MinQualification' => $request->cmbQual === 'Other'
-                ? $request->txtOther
-                : $request->cmbQual,
-            'Description' => $request->txtDesc,
+            'JobTitle' => $validated['txtTitle'],
+            'Vacancy' => $validated['txtTotal'],
+            'SalaryFrom' => $validated['txtSalaryFrom'] ?? null,
+            'SalaryTo' => $validated['txtSalaryTo'] ?? null,
+            'MinQualification' => $validated['cmbQual'] === 'Other'
+                ? $validated['txtOther']
+                : $validated['cmbQual'],
+            'Description' => $validated['txtDesc'],
         ]);
 
         return back()->with('success', 'Job Updated Successfully.');

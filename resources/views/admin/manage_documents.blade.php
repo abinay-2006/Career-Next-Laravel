@@ -145,21 +145,15 @@
 
                                     <!-- APPROVE -->
                                     <button class="btn-action approve" title="Accept Document"
-                                        @click="openApproveModal(
-                                                    {{ $doc->DocId }},
-                                                    '{{ addslashes($doc->OriginalFileName) }}',
-                                                    '{{ addslashes($doc->JobSeekerName) }}'
-                                                        )">
+                                        data-file="{{ $doc->OriginalFileName }}" data-user="{{ $doc->JobSeekerName }}"
+                                        @click="openApproveModal({{ $doc->DocId }}, $el.dataset.file, $el.dataset.user)">
                                         <i class="fas fa-check"></i>
                                     </button>
 
                                     <!-- REJECT -->
                                     <button class="btn-action reject" title="Reject Document"
-                                        @click="openRejectModal(
-                                                    {{ $doc->DocId }},
-                                                    '{{ addslashes($doc->OriginalFileName) }}',
-                                                    '{{ addslashes($doc->JobSeekerName) }}'
-                                                        )">
+                                        data-file="{{ $doc->OriginalFileName }}" data-user="{{ $doc->JobSeekerName }}"
+                                        @click="openRejectModal({{ $doc->DocId }}, $el.dataset.file, $el.dataset.user)">
                                         <i class="fas fa-xmark"></i>
                                     </button>
 
@@ -167,11 +161,8 @@
 
                                     <!-- ONLY REJECT -->
                                     <button class="btn-action reject" title="Reject Document"
-                                        @click="openRejectModal(
-                                                    {{ $doc->DocId }},
-                                                    '{{ addslashes($doc->OriginalFileName) }}',
-                                                    '{{ addslashes($doc->JobSeekerName) }}'
-                                                        )">
+                                        data-file="{{ $doc->OriginalFileName }}" data-user="{{ $doc->JobSeekerName }}"
+                                        @click="openRejectModal({{ $doc->DocId }}, $el.dataset.file, $el.dataset.user)">
                                         <i class="fas fa-xmark"></i>
                                     </button>
 
@@ -179,11 +170,8 @@
 
                                     <!-- ONLY APPROVE -->
                                     <button class="btn-action approve" title="Accept Document"
-                                        @click="openApproveModal(
-                                                    {{ $doc->DocId }},
-                                                    '{{ addslashes($doc->OriginalFileName) }}',
-                                                    '{{ addslashes($doc->JobSeekerName) }}'
-                                                        )">
+                                        data-file="{{ $doc->OriginalFileName }}" data-user="{{ $doc->JobSeekerName }}"
+                                        @click="openApproveModal({{ $doc->DocId }}, $el.dataset.file, $el.dataset.user)">
                                         <i class="fas fa-check"></i>
                                     </button>
 

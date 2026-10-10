@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\JobSeeker;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\JobSeekerDocument;
 
 class JobSeekerProfileController extends Controller
@@ -363,6 +366,7 @@ class JobSeekerProfileController extends Controller
             ->first();
 
         $oldResumeFile = $existingDocument?->FileName;
+        $legacyResumeFile = $jobSeeker->Resume;
 
         /*
     |--------------------------------------------------------------------------
@@ -370,28 +374,13 @@ class JobSeekerProfileController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        $uploadDirectory = public_path('upload');
-
-        if (!File::exists($uploadDirectory)) {
-            File::makeDirectory($uploadDirectory, 0755, true);
-        }
-
         /*
     |--------------------------------------------------------------------------
     | Generate unique filename
     |--------------------------------------------------------------------------
     */
 
-        $filename =
-            time() .
-            '_' .
-            $jobSeeker->JobSeekId .
-            '_' .
-            preg_replace(
-                '/[^A-Za-z0-9._-]/',
-                '_',
-                $file->getClientOriginalName()
-            );
+        $filename = 'resume_' . $jobSeeker->JobSeekId . '_' . \Illuminate\Support\Str::uuid() . '.' . $file->getClientOriginalExtension();
 
         /*
     |--------------------------------------------------------------------------
@@ -399,10 +388,13 @@ class JobSeekerProfileController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        $file->move(
-            $uploadDirectory,
-            $filename
-        );
+        $storedPath = $file->storeAs('documents', $filename, [
+            'disk' => config('filesystems.default'),
+            'visibility' => 'private',
+        ]);
+        if (!$storedPath) {
+            return back()->with('error', 'The resume could not be saved. Please try again.');
+        }
 
         /*
     |--------------------------------------------------------------------------
@@ -410,69 +402,41 @@ class JobSeekerProfileController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        if (
-            !empty($oldResumeFile) &&
-            File::exists(
-                public_path('upload/' . $oldResumeFile)
-            )
-        ) {
-            File::delete(
-                public_path('upload/' . $oldResumeFile)
-            );
+        try {
+            DB::transaction(function () use ($jobSeeker, $existingDocument, $storedPath, $file): void {
+                $jobSeeker->Resume = $storedPath;
+                $jobSeeker->save();
+
+                $values = [
+                    'FileName' => $storedPath,
+                    'OriginalFileName' => $file->getClientOriginalName(),
+                    'UploadDate' => now(),
+                    'VerificationStatus' => 'pending',
+                    'AdminNotes' => null,
+                ];
+
+                if ($existingDocument) {
+                    $existingDocument->update($values);
+                } else {
+                    $jobSeeker->documents()->create($values + ['DocumentType' => 'resume']);
+                }
+            });
+        } catch (\Throwable $e) {
+            Storage::disk(config('filesystems.default'))->delete($storedPath);
+            Log::error('Resume database update failed.', ['exception' => $e::class]);
+            return back()->with('error', 'The resume could not be saved. Please try again.');
         }
 
-        /*
-    |--------------------------------------------------------------------------
-    | Also remove legacy resume if different
-    |--------------------------------------------------------------------------
-    */
-
-        if (
-            !empty($jobSeeker->Resume) &&
-            $jobSeeker->Resume !== $oldResumeFile &&
-            File::exists(
-                public_path('upload/' . $jobSeeker->Resume)
-            )
-        ) {
-            File::delete(
-                public_path('upload/' . $jobSeeker->Resume)
-            );
+        // Remove the previous file only after the database points at the new one.
+        if ($oldResumeFile && $oldResumeFile !== $storedPath) {
+            Storage::disk(config('filesystems.default'))->delete($oldResumeFile);
+            $legacyPath = public_path('upload/' . basename($oldResumeFile));
+            if (File::isFile($legacyPath)) File::delete($legacyPath);
         }
-
-        /*
-    |--------------------------------------------------------------------------
-    | Update legacy Resume field
-    |--------------------------------------------------------------------------
-    */
-
-        $jobSeeker->Resume = $filename;
-        $jobSeeker->save();
-
-        /*
-    |--------------------------------------------------------------------------
-    | Update jobseeker_documents
-    |--------------------------------------------------------------------------
-    */
-
-        if ($existingDocument) {
-
-            $existingDocument->update([
-                'FileName' => $filename,
-                'OriginalFileName' => $file->getClientOriginalName(),
-                'UploadDate' => now(),
-                'VerificationStatus' => 'Pending',
-                'AdminNotes' => null,
-            ]);
-        } else {
-
-            $jobSeeker->documents()->create([
-                'DocumentType' => 'resume',
-                'FileName' => $filename,
-                'OriginalFileName' => $file->getClientOriginalName(),
-                'UploadDate' => now(),
-                'VerificationStatus' => 'Pending',
-                'AdminNotes' => null,
-            ]);
+        if ($legacyResumeFile && $legacyResumeFile !== $oldResumeFile) {
+            Storage::disk(config('filesystems.default'))->delete($legacyResumeFile);
+            $legacyPath = public_path('upload/' . basename($legacyResumeFile));
+            if (File::isFile($legacyPath)) File::delete($legacyPath);
         }
 
         return redirect()
@@ -510,14 +474,9 @@ class JobSeekerProfileController extends Controller
     */
 
         if ($resumeDocument && !empty($resumeDocument->FileName)) {
-
-            $resumePath = public_path(
-                'upload/' . $resumeDocument->FileName
-            );
-
-            if (File::exists($resumePath)) {
-                File::delete($resumePath);
-            }
+            Storage::disk(config('filesystems.default'))->delete($resumeDocument->FileName);
+            $legacyPath = public_path('upload/' . basename($resumeDocument->FileName));
+            if (File::isFile($legacyPath)) File::delete($legacyPath);
         }
 
         /*
@@ -528,16 +487,10 @@ class JobSeekerProfileController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        if (
-            !empty($jobSeeker->Resume) &&
-            File::exists(
-                public_path('upload/' . $jobSeeker->Resume)
-            )
-        ) {
-
-            File::delete(
-                public_path('upload/' . $jobSeeker->Resume)
-            );
+        if (!empty($jobSeeker->Resume)) {
+            Storage::disk(config('filesystems.default'))->delete($jobSeeker->Resume);
+            $legacyPath = public_path('upload/' . basename($jobSeeker->Resume));
+            if (File::isFile($legacyPath)) File::delete($legacyPath);
         }
 
         /*

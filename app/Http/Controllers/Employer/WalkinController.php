@@ -32,7 +32,7 @@ class WalkinController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'txtTitle' => 'required|string|max:50',
             'txtTotal' => 'required|integer|min:1',
             'txtQual'  => 'required|string|max:50',
@@ -49,12 +49,12 @@ class WalkinController extends Controller
 
         Walkin::create([
             'CompanyName'      => $employer->CompanyName,
-            'JobTitle'         => $request->txtTitle,
-            'Vacancy'          => $request->txtTotal,
-            'MinQualification' => $request->txtQual,
-            'Description'      => $request->txtDesc,
-            'InterviewDate'    => $request->txtDate,
-            'InterviewTime'    => $request->txtTime,
+            'JobTitle'         => $validated['txtTitle'],
+            'Vacancy'          => $validated['txtTotal'],
+            'MinQualification' => $validated['txtQual'],
+            'Description'      => $validated['txtDesc'],
+            'InterviewDate'    => $validated['txtDate'],
+            'InterviewTime'    => $validated['txtTime'],
         ]);
 
         return redirect()
@@ -67,7 +67,7 @@ class WalkinController extends Controller
      */
     public function update(Request $request, Walkin $walkin)
     {
-        $request->validate([
+        $validated = $request->validate([
             'txtTitle' => 'required|string|max:50',
             'txtTotal' => 'required|integer|min:1',
             'txtQual'  => 'required|string|max:50',
@@ -87,12 +87,12 @@ class WalkinController extends Controller
         }
 
         $walkin->update([
-            'JobTitle'         => $request->txtTitle,
-            'Vacancy'          => $request->txtTotal,
-            'MinQualification' => $request->txtQual,
-            'Description'      => $request->txtDesc,
-            'InterviewDate'    => $request->txtDate,
-            'InterviewTime'    => $request->txtTime,
+            'JobTitle'         => $validated['txtTitle'],
+            'Vacancy'          => $validated['txtTotal'],
+            'MinQualification' => $validated['txtQual'],
+            'Description'      => $validated['txtDesc'],
+            'InterviewDate'    => $validated['txtDate'],
+            'InterviewTime'    => $validated['txtTime'],
         ]);
 
         return back()->with('success', 'Walk-in updated successfully.');

@@ -520,7 +520,7 @@
 
             <!-- View -->
             <a
-                href="{{ asset('upload/' . $resume->FileName) }}"
+                href="{{ route('jobseeker.documents.view', $resume->DocId) }}"
                 target="_blank"
                 class="resume-action-btn resume-view-btn">
 

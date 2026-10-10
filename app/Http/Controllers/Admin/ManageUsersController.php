@@ -5,14 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class ManageUsersController extends Controller
 {
     public function index(Request $request)
     {
-        $filterStatus = $request->get('status', 'all');
-        $filterType   = $request->get('type', 'all');
-        $search       = trim($request->get('search', ''));
+        $filters = $request->validate([
+            'status' => ['sometimes', 'in:all,Confirm,Confirmed,Approved,Pending,Suspended'],
+            'type' => ['sometimes', 'in:all,jobseeker,employer'],
+            'search' => ['sometimes', 'string', 'max:100'],
+        ]);
+        $filterStatus = $filters['status'] ?? 'all';
+        $filterType = $filters['type'] ?? 'all';
+        $search = trim($filters['search'] ?? '');
 
         /*
     |--------------------------------------------------------------------------
@@ -34,7 +41,9 @@ class ManageUsersController extends Controller
             );
 
         if ($filterStatus != 'all') {
-            $seekersQuery->where('Status', $filterStatus);
+            in_array($filterStatus, ['Confirm', 'Confirmed', 'Approved'], true)
+                ? $seekersQuery->whereIn('Status', ['Confirm', 'Confirmed', 'Approved'])
+                : $seekersQuery->where('Status', $filterStatus);
         }
 
         if ($search != '') {
@@ -71,7 +80,9 @@ class ManageUsersController extends Controller
             );
 
         if ($filterStatus != 'all') {
-            $employersQuery->where('Status', $filterStatus);
+            in_array($filterStatus, ['Confirm', 'Confirmed', 'Approved'], true)
+                ? $employersQuery->whereIn('Status', ['Confirm', 'Confirmed', 'Approved'])
+                : $employersQuery->where('Status', $filterStatus);
         }
 
         if ($search != '') {
@@ -100,8 +111,8 @@ class ManageUsersController extends Controller
                 DB::table('employer_reg')->count(),
 
             'confirmed' =>
-            DB::table('jobseeker_reg')->where('Status', 'Confirm')->count() +
-                DB::table('employer_reg')->where('Status', 'Confirm')->count(),
+            DB::table('jobseeker_reg')->whereIn('Status', ['Confirm', 'Confirmed', 'Approved'])->count() +
+                DB::table('employer_reg')->whereIn('Status', ['Confirm', 'Confirmed', 'Approved'])->count(),
 
             'pending' =>
             DB::table('jobseeker_reg')->where('Status', 'Pending')->count() +
@@ -134,20 +145,7 @@ class ManageUsersController extends Controller
                 ->with('error', 'Invalid user type.');
         }
 
-        // Determine the table based on the type
-        $table = $type === 'jobseeker' ? 'jobseeker_reg' : 'employer_reg';
-        $key   = $type === 'jobseeker' ? 'JobSeekId' : 'EmployerId';
-
-        DB::table($table)
-            ->where($key, $id)
-            ->update([
-                'Status' => 'Confirm'
-            ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Account approved successfully.'
-        ]);
+        return $this->updateStatus($request, $type, $id, 'Confirm', 'Account approved successfully.');
     }
 
 
@@ -163,21 +161,7 @@ class ManageUsersController extends Controller
                 ->with('error', 'Invalid user type.');
         }
 
-        // Determine the table based on the type
-        $table = $type === 'jobseeker' ? 'jobseeker_reg' : 'employer_reg';
-        $key   = $type === 'jobseeker' ? 'JobSeekId' : 'EmployerId';
-
-        // Update the status to "Suspended"
-        DB::table($table)
-            ->where($key, $id)
-            ->update([
-                'Status' => 'Suspended'
-            ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Account suspended.'
-        ]);
+        return $this->updateStatus($request, $type, $id, 'Suspended', 'Account suspended.');
     }
 
     public function destroy(Request $request, $type, $id)
@@ -192,19 +176,60 @@ class ManageUsersController extends Controller
                 ->with('error', 'Invalid user type.');
         }
 
-        // Determine the table based on the type
         $table = $type === 'jobseeker' ? 'jobseeker_reg' : 'employer_reg';
-        $key   = $type === 'jobseeker' ? 'JobSeekId' : 'EmployerId';
+        $key = $type === 'jobseeker' ? 'JobSeekId' : 'EmployerId';
 
+        try {
+            $deleted = DB::transaction(function () use ($table, $key, $id): bool {
+                $record = DB::table($table)->where($key, $id)->lockForUpdate()->first();
+                if (!$record) {
+                    return false;
+                }
 
-        // Delete the user
-        DB::table($table)
-            ->where($key, $id)
-            ->delete();
+                DB::table($table)->where($key, $id)->delete();
+                return true;
+            });
+        } catch (QueryException $e) {
+            Log::warning('Admin account deletion blocked by related data.', [
+                'account_type' => $type,
+                'account_id' => $id,
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Account deleted.'
-        ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'This account has related records that prevent deletion. Suspend it instead or resolve the related records first.',
+            ], 409);
+        }
+
+        if (!$deleted) {
+            return response()->json(['success' => false, 'message' => 'Account not found.'], 404);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Account deleted.']);
+    }
+
+    private function updateStatus(Request $request, string $type, int|string $id, string $status, string $message)
+    {
+        if (!in_array($type, ['jobseeker', 'employer'], true)) {
+            return response()->json(['success' => false, 'message' => 'Invalid user type.'], 422);
+        }
+
+        $table = $type === 'jobseeker' ? 'jobseeker_reg' : 'employer_reg';
+        $key = $type === 'jobseeker' ? 'JobSeekId' : 'EmployerId';
+        $updated = DB::transaction(function () use ($table, $key, $id, $status): bool {
+            $exists = DB::table($table)->where($key, $id)->lockForUpdate()->exists();
+            if (!$exists) {
+                return false;
+            }
+
+            DB::table($table)->where($key, $id)->update(['Status' => $status]);
+            return true;
+        });
+
+        if (!$updated) {
+            return response()->json(['success' => false, 'message' => 'Account not found.'], 404);
+        }
+
+        return response()->json(['success' => true, 'message' => $message]);
     }
 }

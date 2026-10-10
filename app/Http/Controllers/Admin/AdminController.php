@@ -30,11 +30,11 @@ class AdminController extends Controller
             ->count();
 
         $confirmedJobSeekers = DB::table('jobseeker_reg')
-            ->where('Status', 'Confirm')
+            ->whereIn('Status', ['Confirm', 'Confirmed', 'Approved'])
             ->count();
 
         $confirmedEmployers = DB::table('employer_reg')
-            ->where('Status', 'Confirm')
+            ->whereIn('Status', ['Confirm', 'Confirmed', 'Approved'])
             ->count();
 
         $totalUsers = $totalJobSeekers + $totalEmployers;

@@ -114,4 +114,14 @@ class RoleAuthenticationTest extends TestCase
         $this->post(route('logout'))->assertRedirect(route('login'));
         $this->get(route('employer.dashboard'))->assertRedirect(route('login'));
     }
+
+    public function test_suspension_revokes_an_existing_authenticated_session(): void
+    {
+        $this->post('/login', ['txtUser' => 'employer', 'txtPass' => 'secret', 'cmbUser' => 'Employer']);
+        \DB::table('employer_reg')->where('UserName', 'employer')->update(['Status' => 'Suspended']);
+
+        $this->get(route('employer.dashboard'))
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('error', 'Your account has been suspended. Please contact the administrator.');
+    }
 }

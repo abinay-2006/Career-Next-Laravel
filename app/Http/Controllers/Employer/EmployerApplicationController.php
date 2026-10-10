@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Application;
 use App\Models\Job;
+use App\Support\PrivateUpload;
 
 class EmployerApplicationController extends Controller
 {
@@ -73,7 +74,31 @@ class EmployerApplicationController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        return view('employer.applications.show', compact('application'));
+        $resumeDocument = $application->jobSeeker->documents()
+            ->whereRaw('LOWER(DocumentType) = ?', ['resume'])
+            ->first();
+
+        return view('employer.applications.show', compact('application', 'resumeDocument'));
+    }
+
+    public function viewResume(Application $application)
+    {
+        $employer = Auth::guard('employer')->user();
+        $application->load(['job', 'jobSeeker']);
+
+        if (!$employer || !$application->job || $application->job->CompanyName !== $employer->CompanyName || !$application->jobSeeker) {
+            abort(403);
+        }
+
+        $resume = $application->jobSeeker->documents()
+            ->whereRaw('LOWER(DocumentType) = ?', ['resume'])
+            ->first();
+        $path = $resume?->FileName ?: $application->jobSeeker->Resume;
+        if (!$path) {
+            abort(404);
+        }
+
+        return PrivateUpload::response((string) $path, $resume?->OriginalFileName ?: basename((string) $path), ['upload', 'uploads/resumes']);
     }
 
     /**
@@ -83,7 +108,7 @@ class EmployerApplicationController extends Controller
     {
         $request->validate([
             'Status' => 'required|in:Pending,Accepted,Rejected',
-            'Description' => 'nullable|string|max:1000',
+            'Description' => 'nullable|string|max:200',
         ]);
 
         $employer = Auth::guard('employer')->user();

@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\JobSeekerEducation;
 use App\Models\JobSeekerSchoolEducation;
 use App\Models\JobSeekerDocument;
+use App\Support\PrivateUpload;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class EducationController extends Controller
 {
@@ -350,7 +352,7 @@ class EducationController extends Controller
     public function uploadDocument(Request $request)
     {
         $request->validate([
-            'cmbDocumentType' => 'required|string|max:100',
+            'cmbDocumentType' => 'required|string|max:50',
             'fileDocument' => [
                 'required',
                 'file',
@@ -369,21 +371,21 @@ class EducationController extends Controller
             . '.'
             . $file->getClientOriginalExtension();
 
-        $uploadDirectory = public_path('uploads/documents');
-
-        if (!is_dir($uploadDirectory)) {
-            mkdir($uploadDirectory, 0755, true);
+        $storedPath = $file->storeAs('documents', $fileName, [
+            'disk' => config('filesystems.default'),
+            'visibility' => 'private',
+        ]);
+        if (!$storedPath) {
+            return back()->with('error', 'The document could not be saved. Please try again.');
         }
-
-        $file->move($uploadDirectory, $fileName);
 
         JobSeekerDocument::create([
             'JobSeekId'        => $jobSeeker->JobSeekId,
             'DocumentType'     => $request->cmbDocumentType,
-            'FileName'         => $fileName,
+            'FileName'         => $storedPath,
             'OriginalFileName' => $file->getClientOriginalName(),
             'UploadDate'       => now(),
-            'VerificationStatus' => 'Pending',
+            'VerificationStatus' => 'pending',
         ]);
 
         return redirect()
@@ -405,10 +407,10 @@ class EducationController extends Controller
             ->where('JobSeekId', $jobSeeker->JobSeekId)
             ->firstOrFail();
 
-        $path = public_path('uploads/documents/' . $document->FileName);
-
-        if (file_exists($path)) {
-            unlink($path);
+        Storage::disk(config('filesystems.default'))->delete($document->FileName);
+        $legacyPath = public_path('uploads/documents/' . basename($document->FileName));
+        if (is_file($legacyPath)) {
+            @unlink($legacyPath);
         }
 
         $document->delete();
@@ -416,5 +418,19 @@ class EducationController extends Controller
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'Document deleted successfully.');
+    }
+
+    public function viewDocument(int $id)
+    {
+        $jobSeeker = Auth::guard('jobseeker')->user();
+        $document = JobSeekerDocument::where('DocId', $id)
+            ->where('JobSeekId', $jobSeeker->JobSeekId)
+            ->firstOrFail();
+
+        return PrivateUpload::response(
+            (string) $document->FileName,
+            $document->OriginalFileName,
+            ['uploads/documents', 'upload']
+        );
     }
 }

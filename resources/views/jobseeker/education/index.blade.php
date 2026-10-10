@@ -547,16 +547,16 @@
                         <td>{{ $doc_row['VerificationStatus'] }}</td>
                         <td style="text-align:center">
                             <div style="display: flex; justify-content: center; gap: 4px;">
-                                <a href="{{ asset('uploads/documents/' . $doc_row->FileName) }}"
+                                <a href="{{ route('jobseeker.documents.view', $doc_row->DocId) }}"
                                     target="_blank"
                                     class="btn-edit"
                                     style="background:rgba(74,222,128,.2);border-color:rgba(74,222,128,.3);color:#86efac;">
                                     <i class="fas fa-eye"></i> View
                                 </a>
                                 <button class="btn-edit"
-                                    onclick="confirmDelete(
+                                onclick="confirmDelete(
 '{{ route('jobseeker.documents.destroy',$doc_row->DocId) }}',
-'{{ $doc_row->OriginalFileName }}'
+'{{ addslashes($doc_row->OriginalFileName) }}'
 )"
                                     style="background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.3);color:#fca5a5;">
                                     <i class="fas fa-trash-alt"></i> Delete

@@ -10,8 +10,12 @@ class ManageJobsController extends Controller
 {
     public function index(Request $request)
     {
-        $filterStatus = $request->input('status', 'all');
-        $search = trim($request->input('search', ''));
+        $filters = $request->validate([
+            'status' => ['sometimes', 'in:all,pending,approved,rejected'],
+            'search' => ['sometimes', 'string', 'max:100'],
+        ]);
+        $filterStatus = $filters['status'] ?? 'all';
+        $search = trim($filters['search'] ?? '');
 
         $jobs = DB::table('job_master')
             ->when($filterStatus !== 'all', function ($query) use ($filterStatus) {
@@ -61,13 +65,12 @@ class ManageJobsController extends Controller
 
     public function approve(Request $request, $id)
     {
-        $updated = DB::table('job_master')
-            ->where('JobId', $id)
-            ->update([
-                'Status' => 'Approved'
-            ]);
+        $exists = DB::table('job_master')->where('JobId', $id)->exists();
+        if ($exists) {
+            DB::table('job_master')->where('JobId', $id)->update(['Status' => 'Approved']);
+        }
 
-        if (!$updated) {
+        if (!$exists) {
             return response()->json([
                 'success' => false,
                 'message' => 'Job not found.'
@@ -81,13 +84,12 @@ class ManageJobsController extends Controller
 
     public function reject(Request $request, $id)
     {
-        $updated = DB::table('job_master')
-            ->where('JobId', $id)
-            ->update([
-                'Status' => 'Rejected'
-            ]);
+        $exists = DB::table('job_master')->where('JobId', $id)->exists();
+        if ($exists) {
+            DB::table('job_master')->where('JobId', $id)->update(['Status' => 'Rejected']);
+        }
 
-        if (!$updated) {
+        if (!$exists) {
             return response()->json([
                 'success' => false,
                 'message' => 'Job not found.'

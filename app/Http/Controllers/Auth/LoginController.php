@@ -36,6 +36,11 @@ class LoginController extends Controller
         $password = $request->txtPass;
         $type = $request->cmbUser;
 
+        if (!in_array($type, ['Administrator', 'Employer', 'JobSeeker'], true)) {
+            return back()->withInput($request->only('txtUser', 'cmbUser'))
+                ->with('error', 'Please select a valid account type.');
+        }
+
         switch ($type) {
 
             /*
@@ -51,6 +56,7 @@ class LoginController extends Controller
 
                 if ($user && Hash::check($password, $user->getAuthPassword())) {
 
+                    $this->clearRoleIdentities($request);
                     Auth::guard('admin')->login($user);
                     $request->session()->regenerate();
 
@@ -99,6 +105,7 @@ class LoginController extends Controller
                             ->with('error', 'Your account is not active. Please contact the administrator.');
                     }
 
+                    $this->clearRoleIdentities($request);
                     Auth::guard('employer')->login($employer);
 
                     $request->session()->regenerate();
@@ -149,6 +156,7 @@ class LoginController extends Controller
                             ->with('error', 'Your account is not active. Please contact the administrator.');
                     }
 
+                    $this->clearRoleIdentities($request);
                     Auth::guard('jobseeker')->login($jobSeeker);
 
                     $request->session()->regenerate();
@@ -185,16 +193,6 @@ class LoginController extends Controller
         Auth::guard('employer')->logout();
         Auth::guard('jobseeker')->logout();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Logout Administrator session
-        |--------------------------------------------------------------------------
-        |
-        | Administrator currently uses the session-based authentication
-        | system, so clear the administrator session as well.
-        |
-        */
-
         $request->session()->forget([
             'UserType',
             'ID',
@@ -220,5 +218,14 @@ class LoginController extends Controller
         return redirect()
             ->route('login')
             ->with('success', 'You have been logged out successfully.');
+    }
+
+    private function clearRoleIdentities(Request $request): void
+    {
+        foreach (['admin', 'employer', 'jobseeker'] as $guard) {
+            Auth::guard($guard)->logout();
+        }
+
+        $request->session()->forget(['UserType', 'ID', 'Name']);
     }
 }

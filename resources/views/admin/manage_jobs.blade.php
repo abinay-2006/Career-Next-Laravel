@@ -147,6 +147,11 @@
                     <div class="field-value" id="mTitle">—</div>
                 </div>
 
+                <div class="field-item full">
+                    <div class="field-label"><i class="fas fa-align-left"></i> Description</div>
+                    <div class="field-value" id="mDescription">—</div>
+                </div>
+
                 <div class="field-item">
                     <div class="field-label"><i class="fas fa-users"></i> Vacancies</div>
                     <div class="field-value" id="mVacancy">—</div>
@@ -283,6 +288,7 @@
         document.getElementById('mId').textContent = j.JobId;
         document.getElementById('mCompany').textContent = j.CompanyName;
         document.getElementById('mTitle').textContent = j.JobTitle;
+        document.getElementById('mDescription').textContent = j.Description || 'No description provided.';
         document.getElementById('mVacancy').textContent = j.Vacancy;
         document.getElementById('mQualification').textContent = j.MinQualification;
         document.getElementById('mStatus').textContent = status;

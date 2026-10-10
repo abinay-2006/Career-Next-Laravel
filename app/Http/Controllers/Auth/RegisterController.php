@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Mail\RegistrationOtpMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 
 class RegisterController extends Controller
@@ -93,7 +96,7 @@ class RegisterController extends Controller
             'name' => [
                 'required',
                 'string',
-                'max:255',
+                'max:150',
             ],
 
             'username' => [
@@ -106,13 +109,14 @@ class RegisterController extends Controller
             'email' => [
                 'required',
                 'email',
-                'max:255',
+                'max:150',
             ],
 
             'mobile' => [
                 'required',
                 'string',
-                'max:30',
+                'max:20',
+                ...($accountType === 'JobSeeker' ? ['regex:/^[1-9][0-9]{6,18}$/'] : []),
             ],
 
             'password' => [
@@ -271,13 +275,13 @@ class RegisterController extends Controller
                 'address' => [
                     'required',
                     'string',
-                    'max:500',
+                    'max:255',
                 ],
 
                 'city' => [
                     'required',
                     'string',
-                    'max:100',
+                    'max:20',
                 ],
 
                 'gender' => [
@@ -440,7 +444,7 @@ class RegisterController extends Controller
                 'qualification' => [
                     'required',
                     'string',
-                    'max:255',
+                    'max:20',
                 ],
 
                 'resume' => [
@@ -485,8 +489,7 @@ class RegisterController extends Controller
                 $resume = $request->file('resume');
 
                 $resumePath = $resume->store(
-                    'registration/resumes',
-                    'public'
+                    'registration/resumes'
                 );
 
                 $professionalData['resume'] = $resumePath;
@@ -619,22 +622,26 @@ class RegisterController extends Controller
         // Generate 6-digit OTP
         $otp = (string) random_int(100000, 999999);
 
-        // Store OTP temporarily in registration session
+        try {
+            Mail::to($registration['email'])->send(
+                new RegistrationOtpMail($otp, $registration['name'])
+            );
+        } catch (\Throwable $e) {
+            Log::error('Registration OTP delivery failed.', [
+                'exception' => $e::class,
+            ]);
+
+            return back()->with('error', 'We could not send your verification code. Please try again.');
+        }
+
+        // Store the code only after delivery succeeds, so the user never
+        // reaches verification with a code that was not sent.
         session([
             'registration.otp' => $otp,
             'registration.otp_expires_at' => now()->addMinutes(10),
             'registration.otp_attempts' => 0,
             'registration.otp_last_sent_at' => now(),
         ]);
-
-        // Send OTP to user's email
-        Mail::to($registration['email'])
-            ->send(
-                new RegistrationOtpMail(
-                    $otp,
-                    $registration['name']
-                )
-            );
 
         return redirect()
             ->route('register.verify')
@@ -828,9 +835,17 @@ class RegisterController extends Controller
         |--------------------------------------------------------------------------
         */
 
+            DB::transaction(function () use ($registration): void {
             if (
                 $registration['account_type'] === 'JobSeeker'
             ) {
+
+                if (JobSeeker::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
+                    || Employer::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()) {
+                    throw ValidationException::withMessages([
+                        'otp' => 'An account with this username or email already exists. Please sign in or restart registration with different details.',
+                    ]);
+                }
 
                 $profile =
                     $registration['profile'];
@@ -893,9 +908,16 @@ class RegisterController extends Controller
         |--------------------------------------------------------------------------
         | Employer
         |--------------------------------------------------------------------------
-        */ elseif (
+            */ elseif (
                 $registration['account_type'] === 'Employer'
             ) {
+
+                if (JobSeeker::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
+                    || Employer::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()) {
+                    throw ValidationException::withMessages([
+                        'otp' => 'An account with this username or email already exists. Please sign in or restart registration with different details.',
+                    ]);
+                }
 
                 $profile =
                     $registration['profile'];
@@ -947,19 +969,19 @@ class RegisterController extends Controller
         | Invalid Account Type
         |--------------------------------------------------------------------------
         */ else {
-
-                return redirect()
-                    ->route('register.index')
-                    ->withErrors([
-                        'account_type' =>
-                        'Invalid account type.',
-                    ]);
+                throw ValidationException::withMessages([
+                    'account_type' => 'Invalid account type.',
+                ]);
             }
+            });
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors());
         } catch (\Throwable $e) {
-
-            return back()->withErrors([
-                'otp' => $e->getMessage(),
+            Log::error('Registration account creation failed.', [
+                'exception' => $e::class,
             ]);
+
+            return back()->with('error', 'We could not create your account right now. Your details have not been submitted; please try again.');
         }
 
 
@@ -975,7 +997,7 @@ class RegisterController extends Controller
         return redirect()
             ->route('login')
             ->with(
-                'registration_success',
+                'success',
                 'Your account has been created successfully. You can now log in.'
             );
     }
@@ -1018,22 +1040,24 @@ class RegisterController extends Controller
         // Generate new 6-digit OTP
         $otp = (string) random_int(100000, 999999);
 
-        // Store new OTP and cooldown timestamp
+        try {
+            Mail::to($registration['email'])->send(
+                new RegistrationOtpMail($otp, $registration['name'])
+            );
+        } catch (\Throwable $e) {
+            Log::error('Registration OTP resend failed.', [
+                'exception' => $e::class,
+            ]);
+
+            return back()->with('error', 'We could not send your verification code. Please try again.');
+        }
+
         session([
             'registration.otp' => $otp,
             'registration.otp_expires_at' => now()->addMinutes(10),
             'registration.otp_attempts' => 0,
             'registration.otp_last_sent_at' => now(),
         ]);
-
-        // Send new OTP
-        Mail::to($registration['email'])
-            ->send(
-                new RegistrationOtpMail(
-                    $otp,
-                    $registration['name']
-                )
-            );
 
         return back()->with(
             'success',

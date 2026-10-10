@@ -3,18 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\PrivateUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\File;
-use Symfony\Component\HttpFoundation\Response;
 
 class ManageDocumentsController extends Controller
 {
     public function index(Request $request)
     {
-        $filterStatus = $request->status ?? 'all';
-        $search = trim($request->search ?? '');
-        $perPage = $request->input('per_page', 10);
+        $filters = $request->validate([
+            'status' => ['sometimes', 'in:all,pending,approved,rejected'],
+            'search' => ['sometimes', 'string', 'max:100'],
+            'per_page' => ['sometimes', 'in:10,25,50,100'],
+        ]);
+        $filterStatus = $filters['status'] ?? 'all';
+        $search = trim($filters['search'] ?? '');
+        $perPage = (int) ($filters['per_page'] ?? 10);
 
         $documents = DB::table('jobseeker_documents as jd')
             ->join('jobseeker_reg as jr', 'jd.JobSeekId', '=', 'jr.JobSeekId')
@@ -48,7 +52,7 @@ class ManageDocumentsController extends Controller
         ]);
     }
     
-    public function view($id)
+    public function view(int $id)
     {
         $document = DB::table('jobseeker_documents')
             ->where('DocId', $id)
@@ -58,22 +62,17 @@ class ManageDocumentsController extends Controller
             abort(404, 'Document record not found.');
         }
 
-        $path = public_path($document->FileName);
-
-        if (!File::exists($path)) {
-            abort(404, 'Physical file not found.');
-        }
-
-        return response()->file($path);
+        return PrivateUpload::response(
+            (string) $document->FileName,
+            $document->OriginalFileName,
+            ['uploads/documents', 'upload']
+        );
     }
 
-    public function approve($id)
+    public function approve(int $id)
     {
-        $updated = DB::table('jobseeker_documents')
-            ->where('DocId', $id)
-            ->update([
-                'VerificationStatus' => 'approved'
-            ]);
+        $updated = DB::table('jobseeker_documents')->where('DocId', $id)->exists();
+        if ($updated) DB::table('jobseeker_documents')->where('DocId', $id)->update(['VerificationStatus' => 'approved']);
 
         if (!$updated) {
             return redirect()
@@ -86,13 +85,10 @@ class ManageDocumentsController extends Controller
             ->with('success', 'Document approved successfully.');
     }
 
-    public function reject($id)
+    public function reject(int $id)
     {
-        $updated = DB::table('jobseeker_documents')
-            ->where('DocId', $id)
-            ->update([
-                'VerificationStatus' => 'rejected'
-            ]);
+        $updated = DB::table('jobseeker_documents')->where('DocId', $id)->exists();
+        if ($updated) DB::table('jobseeker_documents')->where('DocId', $id)->update(['VerificationStatus' => 'rejected']);
 
         if (!$updated) {
             return redirect()

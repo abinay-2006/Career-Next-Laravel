@@ -59,7 +59,7 @@
             </select>
             <select name="status" class="filter-select">
                 <option value="all" {{ $filterStatus === 'all' ? 'selected' : '' }}>All Statuses</option>
-                <option value="Confirm" {{ $filterStatus === 'Confirm' ? 'selected' : '' }}>Confirmed</option>
+                <option value="Confirm" {{ in_array($filterStatus, ['Confirm', 'Confirmed', 'Approved']) ? 'selected' : '' }}>Confirmed</option>
                 <option value="Pending" {{ $filterStatus === 'Pending' ? 'selected' : '' }}>Pending</option>
                 <option value="Suspended" {{ $filterStatus === 'Suspended' ? 'selected' : '' }}>Suspended</option>
             </select>

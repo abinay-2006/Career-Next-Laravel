@@ -204,13 +204,13 @@
 
                 <h4>Resume Uploaded</h4>
 
-                <p>{{ $application->jobSeeker->Resume }}</p>
+                <p>{{ $resumeDocument?->OriginalFileName ?? basename((string) $application->jobSeeker->Resume) }}</p>
 
             </div>
 
             <div class="resume-actions">
 
-                <a href="{{ asset('uploads/resumes/'.$application->jobSeeker->Resume) }}"
+                <a href="{{ route('employer.applications.resume', $application->ApplicationId) }}"
                     target="_blank"
                     class="btn-resume btn-view-resume">
 
@@ -219,7 +219,7 @@
 
                 </a>
 
-                <a href="{{ asset('uploads/resumes/'.$application->jobSeeker->Resume) }}"
+                <a href="{{ route('employer.applications.resume', $application->ApplicationId) }}"
                     download
                     class="btn-resume btn-download-resume">
 

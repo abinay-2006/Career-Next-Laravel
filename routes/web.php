@@ -196,6 +196,9 @@ Route::prefix('employer')
         Route::get('applications/{application}', [EmployerApplicationController::class, 'show'])
             ->name('applications.show');
 
+        Route::get('applications/{application}/resume', [EmployerApplicationController::class, 'viewResume'])
+            ->name('applications.resume');
+
         Route::put('applications/{application}', [EmployerApplicationController::class, 'update'])
             ->name('applications.update');
 
@@ -239,6 +242,9 @@ Route::prefix('jobseeker')
 
         Route::post('/documents', [EducationController::class, 'uploadDocument'])
             ->name('documents.store');
+
+        Route::get('/documents/{id}/view', [EducationController::class, 'viewDocument'])
+            ->name('documents.view');
 
         Route::delete('/documents/{id}', [EducationController::class, 'deleteDocument'])
             ->name('documents.destroy');
