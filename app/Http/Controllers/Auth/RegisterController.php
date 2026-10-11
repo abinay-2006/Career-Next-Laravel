@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 
 class RegisterController extends Controller
 {
@@ -622,18 +623,68 @@ class RegisterController extends Controller
         // Generate 6-digit OTP
         $otp = (string) random_int(100000, 999999);
 
+
         try {
-            Mail::to($registration['email'])->send(
-                new RegistrationOtpMail($otp, $registration['name'])
+            $otpMail = new RegistrationOtpMail(
+                $otp,
+                $registration['name']
             );
+
+            // Render the existing email template.
+            $htmlContent = $otpMail->render();
+
+            $response = Http::acceptJson()
+                ->withHeaders([
+                    'api-key' => config('services.brevo.key'),
+                ])
+                ->post('https://api.brevo.com/v3/smtp/email', [
+                    'sender' => [
+                        'name' => config('mail.from.name', 'Career Next'),
+                        'email' => config(
+                            'mail.from.address',
+                            'careernextnet@gmail.com'
+                        ),
+                    ],
+                    'to' => [
+                        [
+                            'email' => $registration['email'],
+                            'name' => $registration['name'],
+                        ],
+                    ],
+                    'subject' => 'Verify your Career Next registration',
+                    'htmlContent' => $htmlContent,
+                    'textContent' => trim(
+                        preg_replace('/\s+/', ' ', strip_tags($htmlContent))
+                    ),
+                ]);
+
+            // Treat unsuccessful API responses as delivery errors.
+            $response->throw();
         } catch (\Throwable $e) {
-            Log::error('Registration OTP delivery failed.', [
-                'exception' => $e::class,
+            \Illuminate\Support\Facades\Log::error(
+                'Registration OTP delivery failed.',
+                [
+                    'exception' => get_class($e),
+                    'message' => $e->getMessage(),
+                ]
+            );
+
+            if (app()->environment('local')) {
+                return back()
+                    ->withInput($request->except([
+                        'password',
+                        'password_confirmation',
+                        'otp',
+                    ]))
+                    ->withErrors([
+                        'email' => get_class($e) . ': ' . $e->getMessage(),
+                    ]);
+            }
+
+            return back()->withErrors([
+                'email' => 'We could not send your verification code. Please try again.',
             ]);
-
-            return back()->with('error', 'We could not send your verification code. Please try again.');
         }
-
         // Store the code only after delivery succeeds, so the user never
         // reaches verification with a code that was not sent.
         session([
@@ -836,143 +887,147 @@ class RegisterController extends Controller
         */
 
             DB::transaction(function () use ($registration): void {
-            if (
-                $registration['account_type'] === 'JobSeeker'
-            ) {
+                if (
+                    $registration['account_type'] === 'JobSeeker'
+                ) {
 
-                if (JobSeeker::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
-                    || Employer::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()) {
-                    throw ValidationException::withMessages([
-                        'otp' => 'An account with this username or email already exists. Please sign in or restart registration with different details.',
+                    if (
+                        JobSeeker::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
+                        || Employer::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
+                    ) {
+                        throw ValidationException::withMessages([
+                            'otp' => 'An account with this username or email already exists. Please sign in or restart registration with different details.',
+                        ]);
+                    }
+
+                    $profile =
+                        $registration['profile'];
+
+                    $professional =
+                        $registration['professional'];
+
+
+                    JobSeeker::create([
+
+                        'JobSeekerName' =>
+                        $registration['name'],
+
+                        'Address' =>
+                        $profile['address'],
+
+                        'City' =>
+                        $profile['city'],
+
+                        'Email' =>
+                        $registration['email'],
+
+                        'Mobile' =>
+                        $registration['mobile'],
+
+                        'Qualification' =>
+                        $professional['qualification'],
+
+                        'Gender' =>
+                        $profile['gender'],
+
+                        'BirthDate' =>
+                        $profile['birth_date'],
+
+                        'Resume' =>
+                        $professional['resume'] ?? null,
+
+                        'Status' => 'pending',
+
+                        'UserName' =>
+                        $registration['username'],
+
+                        'Password' =>
+                        $registration['password'],
+
+                        'Question' =>
+                        null,
+
+                        'Answer' =>
+                        null,
+
+                        'Photo' =>
+                        $professional['photo'] ?? null,
+
                     ]);
                 }
 
-                $profile =
-                    $registration['profile'];
 
-                $professional =
-                    $registration['professional'];
-
-
-                JobSeeker::create([
-
-                    'JobSeekerName' =>
-                    $registration['name'],
-
-                    'Address' =>
-                    $profile['address'],
-
-                    'City' =>
-                    $profile['city'],
-
-                    'Email' =>
-                    $registration['email'],
-
-                    'Mobile' =>
-                    $registration['mobile'],
-
-                    'Qualification' =>
-                    $professional['qualification'],
-
-                    'Gender' =>
-                    $profile['gender'],
-
-                    'BirthDate' =>
-                    $profile['birth_date'],
-
-                    'Resume' =>
-                    $professional['resume'] ?? null,
-
-                    'Status' => 'pending',
-
-                    'UserName' =>
-                    $registration['username'],
-
-                    'Password' =>
-                    $registration['password'],
-
-                    'Question' =>
-                    null,
-
-                    'Answer' =>
-                    null,
-
-                    'Photo' =>
-                    $professional['photo'] ?? null,
-
-                ]);
-            }
-
-
-            /*
+                /*
         |--------------------------------------------------------------------------
         | Employer
         |--------------------------------------------------------------------------
             */ elseif (
-                $registration['account_type'] === 'Employer'
-            ) {
+                    $registration['account_type'] === 'Employer'
+                ) {
 
-                if (JobSeeker::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
-                    || Employer::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()) {
-                    throw ValidationException::withMessages([
-                        'otp' => 'An account with this username or email already exists. Please sign in or restart registration with different details.',
+                    if (
+                        JobSeeker::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
+                        || Employer::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
+                    ) {
+                        throw ValidationException::withMessages([
+                            'otp' => 'An account with this username or email already exists. Please sign in or restart registration with different details.',
+                        ]);
+                    }
+
+                    $profile =
+                        $registration['profile'];
+
+
+                    Employer::create([
+
+                        'CompanyName' =>
+                        $registration['name'],
+
+                        'ContactPerson' =>
+                        $profile['contact_person'],
+
+                        'Address' =>
+                        $profile['address'],
+
+                        'City' =>
+                        $profile['city'],
+
+                        'Email' =>
+                        $registration['email'],
+
+                        'Mobile' =>
+                        $registration['mobile'],
+
+                        'Area_Work' =>
+                        $profile['area_work'],
+
+                        'Status' => 'pending',
+
+                        'UserName' =>
+                        $registration['username'],
+
+                        'Password' =>
+                        $registration['password'],
+
+                        'Question' =>
+                        null,
+
+                        'Answer' =>
+                        null,
+
                     ]);
                 }
 
-                $profile =
-                    $registration['profile'];
 
-
-                Employer::create([
-
-                    'CompanyName' =>
-                    $registration['name'],
-
-                    'ContactPerson' =>
-                    $profile['contact_person'],
-
-                    'Address' =>
-                    $profile['address'],
-
-                    'City' =>
-                    $profile['city'],
-
-                    'Email' =>
-                    $registration['email'],
-
-                    'Mobile' =>
-                    $registration['mobile'],
-
-                    'Area_Work' =>
-                    $profile['area_work'],
-
-                    'Status' => 'pending',
-
-                    'UserName' =>
-                    $registration['username'],
-
-                    'Password' =>
-                    $registration['password'],
-
-                    'Question' =>
-                    null,
-
-                    'Answer' =>
-                    null,
-
-                ]);
-            }
-
-
-            /*
+                /*
         |--------------------------------------------------------------------------
         | Invalid Account Type
         |--------------------------------------------------------------------------
         */ else {
-                throw ValidationException::withMessages([
-                    'account_type' => 'Invalid account type.',
-                ]);
-            }
+                    throw ValidationException::withMessages([
+                        'account_type' => 'Invalid account type.',
+                    ]);
+                }
             });
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
