@@ -883,7 +883,7 @@ class RegisterController extends Controller
                     'Resume' =>
                     $professional['resume'] ?? null,
 
-                    'Status' => 'Pending',
+                    'Status' => 'pending',
 
                     'UserName' =>
                     $registration['username'],
@@ -946,7 +946,7 @@ class RegisterController extends Controller
                     'Area_Work' =>
                     $profile['area_work'],
 
-                    'Status' => 'Pending',
+                    'Status' => 'pending',
 
                     'UserName' =>
                     $registration['username'],

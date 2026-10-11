@@ -89,7 +89,7 @@ class EmployerJobController extends Controller
                 ? $validated['txtOther']
                 : $validated['cmbQual'],
             'Description' => $validated['txtDesc'],
-            'Status' => 'Pending',
+            'Status' => 'pending',
         ]);
 
         return back()->with('success', 'Job Posted Successfully.');

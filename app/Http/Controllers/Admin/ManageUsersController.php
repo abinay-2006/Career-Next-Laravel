@@ -13,7 +13,7 @@ class ManageUsersController extends Controller
     public function index(Request $request)
     {
         $filters = $request->validate([
-            'status' => ['sometimes', 'in:all,Confirm,Confirmed,Approved,Pending,Suspended'],
+            'status' => ['sometimes', 'in:all,confirm,confirmed,approved,pending,suspended'],
             'type' => ['sometimes', 'in:all,jobseeker,employer'],
             'search' => ['sometimes', 'string', 'max:100'],
         ]);
@@ -41,8 +41,8 @@ class ManageUsersController extends Controller
             );
 
         if ($filterStatus != 'all') {
-            in_array($filterStatus, ['Confirm', 'Confirmed', 'Approved'], true)
-                ? $seekersQuery->whereIn('Status', ['Confirm', 'Confirmed', 'Approved'])
+            in_array($filterStatus, ['confirm', 'confirmed', 'approved'], true)
+                ? $seekersQuery->whereIn('Status', ['confirm', 'confirmed', 'approved'])
                 : $seekersQuery->where('Status', $filterStatus);
         }
 
@@ -80,8 +80,8 @@ class ManageUsersController extends Controller
             );
 
         if ($filterStatus != 'all') {
-            in_array($filterStatus, ['Confirm', 'Confirmed', 'Approved'], true)
-                ? $employersQuery->whereIn('Status', ['Confirm', 'Confirmed', 'Approved'])
+            in_array($filterStatus, ['confirm', 'confirmed', 'approved'], true)
+                ? $employersQuery->whereIn('Status', ['confirm', 'confirmed', 'approved'])
                 : $employersQuery->where('Status', $filterStatus);
         }
 
@@ -111,16 +111,16 @@ class ManageUsersController extends Controller
                 DB::table('employer_reg')->count(),
 
             'confirmed' =>
-            DB::table('jobseeker_reg')->whereIn('Status', ['Confirm', 'Confirmed', 'Approved'])->count() +
-                DB::table('employer_reg')->whereIn('Status', ['Confirm', 'Confirmed', 'Approved'])->count(),
+            DB::table('jobseeker_reg')->whereIn('Status', ['confirm', 'confirmed', 'approved'])->count() +
+                DB::table('employer_reg')->whereIn('Status', ['confirm', 'confirmed', 'approved'])->count(),
 
             'pending' =>
-            DB::table('jobseeker_reg')->where('Status', 'Pending')->count() +
-                DB::table('employer_reg')->where('Status', 'Pending')->count(),
+            DB::table('jobseeker_reg')->where('Status', 'pending')->count() +
+                DB::table('employer_reg')->where('Status', 'pending')->count(),
 
             'suspended' =>
-            DB::table('jobseeker_reg')->where('Status', 'Suspended')->count() +
-                DB::table('employer_reg')->where('Status', 'Suspended')->count(),
+            DB::table('jobseeker_reg')->where('Status', 'suspended')->count() +
+                DB::table('employer_reg')->where('Status', 'suspended')->count(),
         ];
 
         return view('admin.manage_users', compact(
@@ -145,7 +145,7 @@ class ManageUsersController extends Controller
                 ->with('error', 'Invalid user type.');
         }
 
-        return $this->updateStatus($request, $type, $id, 'Confirm', 'Account approved successfully.');
+        return $this->updateStatus($request, $type, $id, 'confirm', 'Account approved successfully.');
     }
 
 
@@ -161,7 +161,7 @@ class ManageUsersController extends Controller
                 ->with('error', 'Invalid user type.');
         }
 
-        return $this->updateStatus($request, $type, $id, 'Suspended', 'Account suspended.');
+        return $this->updateStatus($request, $type, $id, 'suspended', 'Account suspended.');
     }
 
     public function destroy(Request $request, $type, $id)

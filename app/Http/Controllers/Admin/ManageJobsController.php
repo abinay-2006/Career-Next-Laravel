@@ -19,7 +19,7 @@ class ManageJobsController extends Controller
 
         $jobs = DB::table('job_master')
             ->when($filterStatus !== 'all', function ($query) use ($filterStatus) {
-                $query->where('Status', ucfirst(strtolower($filterStatus)));
+                $query->where('Status', $filterStatus);
             })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
@@ -35,15 +35,15 @@ class ManageJobsController extends Controller
             'total' => DB::table('job_master')->count(),
 
             'pending' => DB::table('job_master')
-                ->where('Status', 'Pending')
+                ->where('Status', 'pending')
                 ->count(),
 
             'approved' => DB::table('job_master')
-                ->where('Status', 'Approved')
+                ->where('Status', 'approved')
                 ->count(),
 
             'rejected' => DB::table('job_master')
-                ->where('Status', 'Rejected')
+                ->where('Status', 'rejected')
                 ->count(),
         ];
 
@@ -67,7 +67,7 @@ class ManageJobsController extends Controller
     {
         $exists = DB::table('job_master')->where('JobId', $id)->exists();
         if ($exists) {
-            DB::table('job_master')->where('JobId', $id)->update(['Status' => 'Approved']);
+            DB::table('job_master')->where('JobId', $id)->update(['Status' => 'approved']);
         }
 
         if (!$exists) {
@@ -86,7 +86,7 @@ class ManageJobsController extends Controller
     {
         $exists = DB::table('job_master')->where('JobId', $id)->exists();
         if ($exists) {
-            DB::table('job_master')->where('JobId', $id)->update(['Status' => 'Rejected']);
+            DB::table('job_master')->where('JobId', $id)->update(['Status' => 'rejected']);
         }
 
         if (!$exists) {

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('Description', 200);
             $table->string('SalaryFrom', 50)->nullable();
             $table->string('SalaryTo', 50)->nullable();
-            $table->string('Status', 50)->nullable()->default('Pending');
+            $table->string('Status', 50)->nullable()->default('pending');
         });
     }
 
