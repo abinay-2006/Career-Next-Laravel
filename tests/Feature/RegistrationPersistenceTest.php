@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Mail\RegistrationOtpMail;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -49,6 +51,65 @@ class RegistrationPersistenceTest extends TestCase
             'profile' => ['contact_person' => 'HR Contact', 'address' => '1 Test Road', 'city' => 'Pune', 'area_work' => 'Technology'],
             'professional' => ['completed' => true],
         ];
+    }
+
+    public function test_job_seeker_review_sends_otp_and_redirects_to_verify_with_registration_session(): void
+    {
+        Mail::fake();
+        $registration = $this->jobSeekerRegistration();
+
+        $this->withSession(['registration' => $registration])
+            ->post(route('register.review.store'), ['confirm_details' => '1'])
+            ->assertRedirect(route('register.verify'))
+            ->assertSessionHas('registration.account_type', 'JobSeeker')
+            ->assertSessionHas('registration.email', 'seeker@example.test')
+            ->assertSessionHas('registration.otp');
+
+        Mail::assertSent(RegistrationOtpMail::class, fn ($mail) => $mail->hasTo('seeker@example.test'));
+        $this->get(route('register.verify'))->assertOk()->assertSee('Verify your email');
+    }
+
+    public function test_employer_review_sends_otp_and_redirects_to_verify_with_registration_session(): void
+    {
+        Mail::fake();
+        $registration = $this->employerRegistration();
+
+        $this->withSession(['registration' => $registration])
+            ->post(route('register.review.store'), ['confirm_details' => '1'])
+            ->assertRedirect(route('register.verify'))
+            ->assertSessionHas('registration.account_type', 'Employer')
+            ->assertSessionHas('registration.email', 'hr@example.test')
+            ->assertSessionHas('registration.otp');
+
+        Mail::assertSent(RegistrationOtpMail::class, fn ($mail) => $mail->hasTo('hr@example.test'));
+        $this->get(route('register.verify'))->assertOk()->assertSee('Verify your email');
+    }
+
+    public function test_review_confirmation_validation_failure_does_not_send_otp(): void
+    {
+        Mail::fake();
+
+        $this->withSession(['registration' => $this->jobSeekerRegistration()])
+            ->from(route('register.review'))
+            ->post(route('register.review.store'))
+            ->assertRedirect(route('register.review'))
+            ->assertSessionHasErrors('confirm_details')
+            ->assertSessionMissing('registration.otp');
+
+        Mail::assertNothingSent();
+    }
+
+    public function test_mail_failure_returns_to_review_without_storing_an_unsent_otp(): void
+    {
+        Mail::shouldReceive('to')->once()->with('seeker@example.test')->andReturnSelf();
+        Mail::shouldReceive('send')->once()->andThrow(new \RuntimeException('SMTP unavailable'));
+
+        $this->withSession(['registration' => $this->jobSeekerRegistration()])
+            ->from(route('register.review'))
+            ->post(route('register.review.store'), ['confirm_details' => '1'])
+            ->assertRedirect(route('register.review'))
+            ->assertSessionHas('error', 'We could not send your verification code. Please try again.')
+            ->assertSessionMissing('registration.otp');
     }
 
     public function test_correct_otp_creates_pending_jobseeker_with_hashed_password_once(): void
