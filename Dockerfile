@@ -1,26 +1,46 @@
 
-# Build the frontend assets
+# Stage 1: Build frontend assets
 FROM node:24-alpine AS frontend
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+COPY package.json package-lock.json ./
+RUN npm ci
 
 COPY . .
 RUN npm run build
 
 
-# Build the Laravel application runtime
+# Stage 2: Laravel + PHP + Apache
 FROM php:8.3-apache
 
-RUN apt-get update && apt-get install -y \
-    git unzip libzip-dev libicu-dev libxml2-dev \
-    libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install \
-       pdo_mysql mbstring bcmath exif pcntl gd intl zip opcache \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        git \
+        unzip \
+        libzip-dev \
+        libicu-dev \
+        libxml2-dev \
+        libonig-dev \
+        libpng-dev \
+        libjpeg62-turbo-dev \
+        libfreetype6-dev \
+        $PHPIZE_DEPS \
+    && docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" \
+        pdo_mysql \
+        mbstring \
+        bcmath \
+        exif \
+        pcntl \
+        gd \
+        intl \
+        zip \
+        opcache \
     && a2enmod rewrite headers \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -29,21 +49,24 @@ WORKDIR /var/www/html
 
 COPY . .
 
-# Install production PHP dependencies
-RUN composer install --no-dev --prefer-dist \
-    --no-interaction --optimize-autoloader
+# Install Laravel production dependencies
+RUN composer install \
+    --no-dev \
+    --prefer-dist \
+    --no-interaction \
+    --optimize-autoloader
 
-# Copy compiled Vite assets into Laravel public directory
+# Copy compiled frontend assets
 COPY --from=frontend /app/public/build ./public/build
 
-# Serve Laravel from its public directory
+# Configure Apache to serve Laravel's public directory
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
 RUN sed -ri \
-    -e 's!/var/www/html!/var/www/html/public!g' \
+    's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
     /etc/apache2/sites-available/000-default.conf \
     && sed -ri \
-    -e 's!/var/www/!/var/www/public!g' \
+    's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
     /etc/apache2/apache2.conf \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R ug+rwX storage bootstrap/cache
