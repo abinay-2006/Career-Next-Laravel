@@ -67,7 +67,7 @@
                     <label>I am a</label>
                     <div class="input-wrap">
                         <i class="fas fa-users lead-icon"></i>
-                        <select name="cmbUser" id="login-type">
+                        <select name="cmbUser" id="login-type" required>
                             <option value="">Select User Type</option>
                             <option value="JobSeeker">Job Seeker</option>
                             <option value="Employer">Employer</option>

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Employer;
 use App\Models\JobSeeker;
 use App\Models\Admin;
-
+use Illuminate\Support\Facades\Log;
 class LoginController extends Controller
 {
     /**
@@ -26,6 +26,10 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+        Log::info('Login field check', [
+            'cmbUser_present' => $request->has('cmbUser'),
+            'cmbUser_value' => $request->input('cmbUser'),
+        ]);
         $request->validate([
             'txtUser' => 'required',
             'txtPass' => 'required',

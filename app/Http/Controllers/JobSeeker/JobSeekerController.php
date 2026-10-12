@@ -11,6 +11,14 @@ class JobSeekerController extends Controller
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
 
+        if (!$jobSeeker) {
+            return redirect()
+                ->route('login')
+                ->withErrors([
+                    'login' => 'Please log in to access your Job Seeker dashboard.',
+                ]);
+        }
+
         /*
         |--------------------------------------------------------------------------
         | PROFILE COMPLETION
