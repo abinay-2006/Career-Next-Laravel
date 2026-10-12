@@ -10,6 +10,7 @@ use App\Models\Employer;
 use App\Models\JobSeeker;
 use App\Models\Admin;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 class LoginController extends Controller
 {
     /**
@@ -26,9 +27,11 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        Log::info('Login field check', [
+        $correlationId = (string) Str::uuid();
+        Log::info('Login attempt started', [
+            'correlation_id' => $correlationId,
             'cmbUser_present' => $request->has('cmbUser'),
-            'cmbUser_value' => $request->input('cmbUser'),
+            'guard' => $request->input('cmbUser'),
         ]);
         $request->validate([
             'txtUser' => 'required',
@@ -41,6 +44,10 @@ class LoginController extends Controller
         $type = $request->cmbUser;
 
         if (!in_array($type, ['Administrator', 'Employer', 'JobSeeker'], true)) {
+            Log::warning('Invalid account type selected', [
+                'correlation_id' => $correlationId,
+                'type' => $type,
+            ]);
             return back()->withInput($request->only('txtUser', 'cmbUser'))
                 ->with('error', 'Please select a valid account type.');
         }
@@ -176,6 +183,11 @@ class LoginController extends Controller
 
                 break;
         }
+
+        Log::warning('Login failed: no matching credentials', [
+            'correlation_id' => $correlationId,
+            'type' => $type,
+        ]);
 
         return back()
             ->withInput($request->only('txtUser', 'cmbUser'))

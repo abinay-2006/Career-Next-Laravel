@@ -4,6 +4,8 @@ namespace App\Http\Controllers\JobSeeker;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class JobSeekerController extends Controller
 {
@@ -44,12 +46,10 @@ class JobSeekerController extends Controller
             |--------------------------------------------------------------------------
             | EDUCATION
             |--------------------------------------------------------------------------
-            | Check the actual education tables.
+            | Check the actual education tables. Wrapped in try-catch to handle
+            | missing tables gracefully in production while logging the error.
             */
-            'education' =>
-            $jobSeeker->education()->exists()
-                ||
-                $jobSeeker->schoolEducation()->exists(),
+            'education' => $this->checkEducationExists($jobSeeker),
 
             /*
             |--------------------------------------------------------------------------
@@ -59,9 +59,7 @@ class JobSeekerController extends Controller
             |
             | We use DocumentType = resume.
             */
-            'resume' => $jobSeeker->documents()
-                ->whereRaw('LOWER(DocumentType) = ?', ['resume'])
-                ->exists(),
+            'resume' => $this->checkResumeExists($jobSeeker),
 
             /*
             |--------------------------------------------------------------------------
@@ -182,5 +180,38 @@ class JobSeekerController extends Controller
     public function walkins()
     {
         return view('jobseeker.walkins.index');
+    }
+
+    /**
+     * Check if education records exist, handling missing tables gracefully.
+     */
+    private function checkEducationExists($jobSeeker): bool
+    {
+        try {
+            return $jobSeeker->education()->exists()
+                || $jobSeeker->schoolEducation()->exists();
+        } catch (Throwable $e) {
+            Log::error('Job Seeker dashboard education query failed', [
+                'exception' => $e::class,
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Check if resume document exists, handling missing tables gracefully.
+     */
+    private function checkResumeExists($jobSeeker): bool
+    {
+        try {
+            return $jobSeeker->documents()
+                ->whereRaw('LOWER(DocumentType) = ?', ['resume'])
+                ->exists();
+        } catch (Throwable $e) {
+            Log::error('Job Seeker dashboard resume query failed', [
+                'exception' => $e::class,
+            ]);
+            throw $e;
+        }
     }
 }
