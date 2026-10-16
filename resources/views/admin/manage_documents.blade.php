@@ -96,7 +96,8 @@
             </div>
             @else
             <div class="table-wrapper">
-                <table>
+                <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table>
                     <thead>
                         <tr>
                             <th>User</th>
@@ -183,6 +184,7 @@
                         @endforeach
                     </tbody>
                 </table>
+</div>
             </div>
 
             <!-- Pagination -->

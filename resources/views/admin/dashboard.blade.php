@@ -95,7 +95,8 @@
 
         <!-- Job Seekers tab -->
         <div class="tab-panel active" id="tab-seekers">
-            <table>
+            <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table>
                 <thead>
                     <tr>
                         <th>#</th>
@@ -125,11 +126,13 @@
                     @endif
                 </tbody>
             </table>
+</div>
         </div>
 
         <!-- Employers tab -->
         <div class="tab-panel" id="tab-employers">
-            <table>
+            <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table>
                 <thead>
                     <tr>
                         <th>#</th>
@@ -159,11 +162,13 @@
                     @endif
                 </tbody>
             </table>
+</div>
         </div>
 
         <!-- Jobs tab -->
         <div class="tab-panel" id="tab-jobs">
-            <table>
+            <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table>
                 <thead>
                     <tr>
                         <th>#</th>
@@ -195,6 +200,7 @@
                     @endif
                 </tbody>
             </table>
+</div>
         </div>
     </div>
 

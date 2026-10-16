@@ -184,7 +184,8 @@
     <div class="glass-card" style="padding:0;overflow:hidden">
         @if ($applications->count() > 0)
         <div class="status-table-wrap">
-            <table class="status-table">
+            <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table class="status-table">
                 <thead>
                     <tr>
                         <th><i class="fas fa-building" style="margin-right:6px;opacity:.7"></i>Company</th>
@@ -247,6 +248,7 @@
                     @endforeach
                 </tbody>
             </table>
+</div>
             <div class="table-footer">
                 <i class="fas fa-info-circle"></i> Total {{ $applications->count() }} application{{ $applications->count() !== 1 ? 's' : '' }} found
             </div>

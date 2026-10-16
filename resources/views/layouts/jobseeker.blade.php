@@ -29,6 +29,7 @@
 
     <!-- ══ NAVBAR ══ -->
     <nav class="navbar">
+        <button class="cn-menu-toggle" type="button" aria-label="Open navigation" aria-controls="roleSidebar" aria-expanded="false"><i class="fas fa-bars" aria-hidden="true"></i></button>
 
         <a href="{{ route('jobseeker.index') }}" class="navbar-brand brand-logo">
             <img src="{{ asset('images/CareerNext.png') }}" alt="Career Next">
@@ -118,11 +119,16 @@
 
 
 
-    @yield('content')
+    <div class="cn-dashboard-layout">
+        <div class="cn-sidebar-backdrop" data-sidebar-close></div>
+        <x-dashboard-sidebar role="jobseeker" />
+        <main class="cn-dashboard-main">@yield('content')</main>
+    </div>
     <footer class="footer">
         &copy; <?php echo date('Y'); ?> Job Portal. All rights reserved.
     </footer>
     @yield('scripts')
+    <script src="{{ asset('assets/js/dashboard-sidebar.js') }}"></script>
     <script src="{{ asset('assets/js/alerts.js') }}"></script>
     <script>
         function toggleDropdown() {

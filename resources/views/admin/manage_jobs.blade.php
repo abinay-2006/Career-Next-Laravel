@@ -36,7 +36,8 @@
 
     <div class="table-wrapper">
         @if ($jobs->count() > 0)
-        <table>
+        <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table>
             <thead>
                 <tr>
                     <th>ID</th>
@@ -95,6 +96,7 @@
                 @endforeach
             </tbody>
         </table>
+</div>
         <div class="table-footer">
             <span>Showing all posted job listings</span>
             <span class="records-count">

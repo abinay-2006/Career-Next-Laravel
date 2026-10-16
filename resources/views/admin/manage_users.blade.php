@@ -83,7 +83,8 @@
                 <p>No job seekers found matching your filters.</p>
             </div>
             @else
-            <table>
+            <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table>
                 <thead>
                     <tr>
                         <th>#</th>
@@ -144,6 +145,7 @@
                     @endforeach
                 </tbody>
             </table>
+</div>
             @endif
         </div>
     </div>
@@ -161,7 +163,8 @@
                 <p>No employers found matching your filters.</p>
             </div>
             @else
-            <table>
+            <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table>
                 <thead>     
                     <tr>
                         <th>#</th>
@@ -234,6 +237,7 @@
                     @endforeach
                 </tbody>
             </table>
+</div>
             @endif
         </div>
     </div>

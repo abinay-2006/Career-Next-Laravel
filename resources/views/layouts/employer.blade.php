@@ -30,6 +30,7 @@
   <!-- ══ NAVBAR ══ -->
 
   <nav class="navbar">
+    <button class="cn-menu-toggle" type="button" aria-label="Open navigation" aria-controls="roleSidebar" aria-expanded="false"><i class="fas fa-bars" aria-hidden="true"></i></button>
     <h1 class="brand-logo">
       <img src="{{ asset('images/CareerNext.png') }}" alt="Career Next">
       <span>Career Next</span>
@@ -117,8 +118,13 @@
 
     </div>
   </nav>
-  @yield('content')
+  <div class="cn-dashboard-layout">
+    <div class="cn-sidebar-backdrop" data-sidebar-close></div>
+    <x-dashboard-sidebar role="employer" />
+    <main class="cn-dashboard-main">@yield('content')</main>
+  </div>
   @yield('scripts')
+  <script src="{{ asset('assets/js/dashboard-sidebar.js') }}"></script>
   <script src="{{ asset('assets/js/alerts.js') }}"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
   <script>

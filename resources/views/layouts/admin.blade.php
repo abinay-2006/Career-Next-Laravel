@@ -30,6 +30,7 @@
     </div>
     <!-- ══════════ NAVBAR ══════════ -->
     <nav class="navbar">
+        <button class="cn-menu-toggle" type="button" aria-label="Open navigation" aria-controls="roleSidebar" aria-expanded="false"><i class="fas fa-bars" aria-hidden="true"></i></button>
         <a href="{{ route('admin.index') }}" class="navbar-brand brand-logo">
             <img src="../images/CareerNext.png" alt="Career Next" onerror="this.style.display='none'">
             <span style="color: white;">Career Next</span>
@@ -54,9 +55,14 @@
     </nav>
 
 
-    @yield('content')
+    <div class="cn-dashboard-layout">
+        <div class="cn-sidebar-backdrop" data-sidebar-close></div>
+        <x-dashboard-sidebar role="admin" />
+        <main class="cn-dashboard-main">@yield('content')</main>
+    </div>
     <script src="{{ asset('assets/js/alerts.js') }}"></script>
     @yield('scripts')
+    <script src="{{ asset('assets/js/dashboard-sidebar.js') }}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 <!-- ══ FOOTER ══ -->

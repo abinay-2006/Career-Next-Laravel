@@ -107,7 +107,8 @@
 
         @if($walkins->isNotEmpty())
         <div class="table-wrap">
-            <table class="data-table">
+            <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table class="data-table">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -159,6 +160,7 @@
                     @endforeach
                 </tbody>
             </table>
+</div>
         </div>
         @else
         <div class="empty-state">

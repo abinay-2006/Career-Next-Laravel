@@ -109,7 +109,8 @@
 
     @if ($totalRecords > 0)
     <div class="table-wrap">
-      <table class="jobs-table">
+      <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table class="jobs-table">
         <thead>
           <tr>
             <th>Job Title</th>
@@ -171,6 +172,7 @@
           @endforeach
         </tbody>
       </table>
+</div>
     </div>
     @else
     <div class="empty-state">

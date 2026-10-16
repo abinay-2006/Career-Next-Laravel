@@ -393,7 +393,8 @@
     <div class="glass-card" style="padding:0;overflow:hidden">
         @if($rows_edu->count())
         <div class="edu-table-wrap">
-            <table class="edu-table">
+            <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table class="edu-table">
                 <thead>
                     <tr>
                         <th><i class="fas fa-user-graduate" style="margin-right:6px;opacity:.7"></i>Degree</th>
@@ -438,6 +439,7 @@
                     @endforeach
                 </tbody>
             </table>
+</div>
             <div class="table-footer">
                 <i class="fas fa-info-circle"></i> Total {{ $records_edu }} record{{ $records_edu !== 1 ? 's' : '' }} found
             </div>
@@ -457,7 +459,8 @@
     <div class="glass-card" style="padding:0;overflow:hidden">
         @if (count($rows_school) > 0)
         <div class="edu-table-wrap">
-            <table class="edu-table">
+            <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table class="edu-table">
                 <thead>
                     <tr>
                         <th><i class="fas fa-school" style="margin-right:6px;opacity:.7"></i>School Name</th>
@@ -511,6 +514,7 @@
                     @endforeach
                 </tbody>
             </table>
+</div>
             <div class="table-footer">
                 <i class="fas fa-info-circle"></i>
                 Total {{ $records_school }} record{{ $records_school !== 1 ? 's' : '' }}found
@@ -528,7 +532,8 @@
     <div class="glass-card" style="padding:0;overflow:hidden">
         @if (count($rows_docs) > 0)
         <div class="edu-table-wrap">
-            <table class="edu-table">
+            <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
+<table class="edu-table">
                 <thead>
                     <tr>
                         <th><i class="fas fa-file-alt" style="margin-right:6px;opacity:.7"></i>Document Type</th>
@@ -567,6 +572,7 @@
                     @endforeach
                 </tbody>
             </table>
+</div>
             <div class="table-footer">
                 <i class="fas fa-info-circle"></i>
                 Total {{ $records_docs }} document{{ $records_docs !== 1 ? 's' : '' }} found
