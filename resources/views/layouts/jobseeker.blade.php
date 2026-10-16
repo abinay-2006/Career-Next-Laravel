@@ -46,7 +46,7 @@
 
                         @if($headerJobSeeker && !empty($headerJobSeeker->Photo))
                         <img
-                            src="{{ asset('upload/photos/' . $headerJobSeeker->Photo) }}"
+                            src="{{ Storage::disk(config('filesystems.default'))->url('photos/' . $headerJobSeeker->Photo) }}"
                             alt="Profile Photo">
                         @else
                         <i class="fas fa-user"></i>

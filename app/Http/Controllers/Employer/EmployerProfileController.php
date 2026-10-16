@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class EmployerProfileController extends Controller
 {
@@ -66,47 +68,37 @@ class EmployerProfileController extends Controller
         |--------------------------------------------------------------------------
         */
 
+        // Handle company photo upload using configurable storage (public locally, s3 in production)
         if ($request->hasFile('Photo')) {
+            try {
+                $file = $request->file('Photo');
+                // Use the default filesystem disk (public for local dev, s3 for production)
+                $disk = config('filesystems.default');
+                $storagePath = 'photos'; // folder inside the chosen disk
 
-            $file = $request->file('Photo');
+                // Generate a unique filename
+                $filename =
+                    'company_' .
+                    $employer->EmployerId .
+                    '_' .
+                    time() .
+                    '.' .
+                    $file->getClientOriginalExtension();
 
-            $uploadPath = public_path('upload/photos');
+                // Delete old photo if it exists
+                if (!empty($employer->Photo) && Storage::disk($disk)->exists("$storagePath/" . $employer->Photo)) {
+                    Storage::disk($disk)->delete("$storagePath/" . $employer->Photo);
+                }
 
-            // Create upload directory if it doesn't exist.
-            if (!File::exists($uploadPath)) {
-                File::makeDirectory(
-                    $uploadPath,
-                    0755,
-                    true
-                );
+                // Store the new photo
+                $file->storeAs($storagePath, $filename, $disk);
+
+                // Save filename in DB
+                $validated['Photo'] = $filename;
+            } catch (\Exception $e) {
+                Log::error('Employer profile photo upload failed: ' . $e->getMessage());
+                return back()->withErrors(['Photo' => 'Unable to upload company photo. Please try again later.']);
             }
-
-            // Delete old company logo.
-            if (
-                !empty($employer->Photo) &&
-                File::exists($uploadPath . '/' . $employer->Photo)
-            ) {
-                File::delete(
-                    $uploadPath . '/' . $employer->Photo
-                );
-            }
-
-            // Generate unique filename.
-            $filename =
-                'company_' .
-                $employer->EmployerId .
-                '_' .
-                time() .
-                '.' .
-                $file->getClientOriginalExtension();
-
-            // Move new logo.
-            $file->move(
-                $uploadPath,
-                $filename
-            );
-
-            $validated['Photo'] = $filename;
         }
 
         /*

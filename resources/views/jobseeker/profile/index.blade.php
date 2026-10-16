@@ -37,7 +37,7 @@
             @if (!empty($jobSeeker->Photo))
 
             <img
-                src="{{ asset('upload/photos/' . $jobSeeker->Photo) }}"
+                src="{{ Storage::disk(config('filesystems.default'))->url('photos/' . $jobSeeker->Photo) }}"
                 alt="Profile Photo">
 
             @else
@@ -662,7 +662,7 @@
 
                             @if (!empty($jobSeeker->Photo))
                             <img
-                                src="{{ asset('upload/photos/' . $jobSeeker->Photo) }}"
+                                src="{{ Storage::disk(config('filesystems.default'))->url('photos/' . $jobSeeker->Photo) }}"
                                 alt="Profile Photo">
                             @else
                             <i class="fas fa-user"></i>

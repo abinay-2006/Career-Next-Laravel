@@ -71,7 +71,7 @@
 
             @if (!empty($employer->Photo))
             <img
-                src="{{ asset('upload/photos/' . $employer->Photo) }}"
+                src="{{ Storage::disk(config('filesystems.default'))->url('photos/' . $employer->Photo) }}"
                 alt="Company Profile Photo">
             @else
             <i class="fas fa-building"></i>
@@ -525,7 +525,7 @@
 
                             @if (!empty($employer->Photo))
                             <img
-                                src="{{ asset('upload/photos/' . $employer->Photo) }}"
+                                src="{{ Storage::disk(config('filesystems.default'))->url('photos/' . $employer->Photo) }}"
                                 alt="Company Logo">
                             @else
                             <i class="fas fa-building"></i>

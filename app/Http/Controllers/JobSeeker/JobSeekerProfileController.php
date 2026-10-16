@@ -29,8 +29,7 @@ class JobSeekerProfileController extends Controller
     */
 
         $initials = collect(
-            preg_split('/\s+/', trim($jobSeeker->JobSeekerName ?? ''))
-        )
+            preg_split('/\s+/', trim($jobSeeker->JobSeekerName ?? '')))
             ->filter()
             ->map(fn($name) => strtoupper(substr($name, 0, 1)))
             ->take(2)
@@ -282,46 +281,46 @@ class JobSeekerProfileController extends Controller
             $jobSeeker->Password =
                 Hash::make($validated['Password']);
         }
+
         /*
-|--------------------------------------------------------------------------
-| Profile Photo
-|--------------------------------------------------------------------------
-*/
+        |--------------------------------------------------------------------------
+        | Profile Photo
+        |--------------------------------------------------------------------------
+        */
 
+        // Handle profile photo upload using configurable storage (public locally, s3 in production)
         if ($request->hasFile('Photo')) {
+            try {
+                $photo = $request->file('Photo');
+                // Use the default filesystem disk (public for local dev, s3 for production)
+                $disk = config('filesystems.default');
+                $storagePath = 'photos'; // folder inside the chosen disk
 
-            $photo = $request->file('Photo');
+                // Generate a unique filename
+                $fileName = 'profile_' . $jobSeeker->JobSeekId . '_' . time() . '.' . $photo->getClientOriginalExtension();
 
-            $photoDirectory = public_path('upload/photos');
-
-            // Create directory if it doesn't exist
-            if (!File::exists($photoDirectory)) {
-                File::makeDirectory($photoDirectory, 0755, true);
-            }
-
-            // Delete old photo
-            if (!empty($jobSeeker->Photo)) {
-
-                $oldPhoto = $photoDirectory . '/' . $jobSeeker->Photo;
-
-                if (File::exists($oldPhoto)) {
-                    File::delete($oldPhoto);
+                // Delete old photo if it exists
+                if (!empty($jobSeeker->Photo) && Storage::disk($disk)->exists("$storagePath/" . $jobSeeker->Photo)) {
+                    Storage::disk($disk)->delete("$storagePath/" . $jobSeeker->Photo);
                 }
+
+                // Store the new photo
+                $photo->storeAs($storagePath, $fileName, $disk);
+
+                // Save the filename in DB
+                $jobSeeker->Photo = $fileName;
+            } catch (\Exception $e) {
+                Log::error('JobSeeker profile photo upload failed: ' . $e->getMessage());
+                return back()->withErrors(['Photo' => 'Unable to upload profile photo. Please try again later.']);
             }
-
-            // Generate unique filename
-            $fileName = 'profile_' .
-                $jobSeeker->JobSeekId . '_' .
-                time() . '.' .
-                $photo->getClientOriginalExtension();
-
-            // Store photo
-            $photo->move($photoDirectory, $fileName);
-
-            // Save filename
-            $jobSeeker->Photo = $fileName;
         }
-        $jobSeeker->save();
+
+        try {
+            $jobSeeker->save();
+        } catch (\Exception $e) {
+            Log::error('JobSeeker profile save failed: ' . $e->getMessage());
+            return back()->withErrors(['profile' => 'Unable to save profile. Please try again later.']);
+        }
 
         return redirect()
             ->route('jobseeker.profile.index')
@@ -411,119 +410,32 @@ class JobSeekerProfileController extends Controller
                     'FileName' => $storedPath,
                     'OriginalFileName' => $file->getClientOriginalName(),
                     'UploadDate' => now(),
-                    'VerificationStatus' => 'pending',
-                    'AdminNotes' => null,
+                    'DocumentType' => 'resume'
                 ];
 
                 if ($existingDocument) {
                     $existingDocument->update($values);
                 } else {
-                    $jobSeeker->documents()->create($values + ['DocumentType' => 'resume']);
+                    $jobSeeker->documents()->create($values);
                 }
             });
-        } catch (\Throwable $e) {
-            Storage::disk(config('filesystems.default'))->delete($storedPath);
-            Log::error('Resume database update failed.', ['exception' => $e::class]);
-            return back()->with('error', 'The resume could not be saved. Please try again.');
+
+            // If transaction succeeds, delete old file
+            if ($oldResumeFile && Storage::exists($oldResumeFile)) {
+                Storage::delete($oldResumeFile);
+            }
+            if ($legacyResumeFile && Storage::exists($legacyResumeFile) && $legacyResumeFile !== $storedPath) {
+                Storage::delete($legacyResumeFile);
+            }
+
+            return redirect()
+                ->route('jobseeker.profile.index')
+                ->with('success', 'Resume uploaded successfully.');
+        } catch (\Exception $e) {
+            Log::error('Resume upload error: ' . $e->getMessage());
+            // Attempt to clean up the newly uploaded file on failure
+            Storage::delete($storedPath);
+            return back()->with('error', 'Failed to update resume record. Please try again.');
         }
-
-        // Remove the previous file only after the database points at the new one.
-        if ($oldResumeFile && $oldResumeFile !== $storedPath) {
-            Storage::disk(config('filesystems.default'))->delete($oldResumeFile);
-            $legacyPath = public_path('upload/' . basename($oldResumeFile));
-            if (File::isFile($legacyPath)) File::delete($legacyPath);
-        }
-        if ($legacyResumeFile && $legacyResumeFile !== $oldResumeFile) {
-            Storage::disk(config('filesystems.default'))->delete($legacyResumeFile);
-            $legacyPath = public_path('upload/' . basename($legacyResumeFile));
-            if (File::isFile($legacyPath)) File::delete($legacyPath);
-        }
-
-        return redirect()
-            ->route('jobseeker.profile.index')
-            ->with(
-                'success',
-                'Resume uploaded successfully.'
-            );
-    }
-
-    /**
-     * Remove uploaded resume
-     */
-    public function removeResume()
-    {
-        $jobSeeker = Auth::guard('jobseeker')->user();
-
-        /*
-    |--------------------------------------------------------------------------
-    | Find resume document
-    |--------------------------------------------------------------------------
-    */
-
-        $resumeDocument = $jobSeeker->documents()
-            ->whereRaw(
-                'LOWER(DocumentType) = ?',
-                ['resume']
-            )
-            ->first();
-
-        /*
-    |--------------------------------------------------------------------------
-    | Delete physical file
-    |--------------------------------------------------------------------------
-    */
-
-        if ($resumeDocument && !empty($resumeDocument->FileName)) {
-            Storage::disk(config('filesystems.default'))->delete($resumeDocument->FileName);
-            $legacyPath = public_path('upload/' . basename($resumeDocument->FileName));
-            if (File::isFile($legacyPath)) File::delete($legacyPath);
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | Fallback:
-    | Delete using legacy Resume field if document record
-    | does not exist.
-    |--------------------------------------------------------------------------
-    */
-
-        if (!empty($jobSeeker->Resume)) {
-            Storage::disk(config('filesystems.default'))->delete($jobSeeker->Resume);
-            $legacyPath = public_path('upload/' . basename($jobSeeker->Resume));
-            if (File::isFile($legacyPath)) File::delete($legacyPath);
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | Remove resume document record
-    |--------------------------------------------------------------------------
-    */
-
-        if ($resumeDocument) {
-            $resumeDocument->delete();
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | Clear legacy Resume field
-    |--------------------------------------------------------------------------
-    */
-
-        $jobSeeker->Resume = null;
-
-        $jobSeeker->save();
-
-        /*
-    |--------------------------------------------------------------------------
-    | Return to profile
-    |--------------------------------------------------------------------------
-    */
-
-        return redirect()
-            ->route('jobseeker.profile.index')
-            ->with(
-                'success',
-                'Resume removed successfully.'
-            );
     }
 }

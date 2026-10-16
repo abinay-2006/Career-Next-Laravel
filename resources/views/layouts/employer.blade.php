@@ -50,7 +50,7 @@
 
             @if($headerEmployer && !empty($headerEmployer->Photo))
             <img
-              src="{{ asset('upload/photos/' . $headerEmployer->Photo) }}"
+              src="{{ Storage::disk(config('filesystems.default'))->url('photos/' . $headerEmployer->Photo) }}"
               alt="Company Logo">
             @else
             <i class="fas fa-building"></i>
