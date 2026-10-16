@@ -33,7 +33,6 @@
 
     <div class="glass-card">
         <form method="GET" action="{{ route('employer.applications.index') }}">
-            @csrf
             <div class="filter-bar">
                 <div class="filter-group">
                     <label class="filter-label" for="cmbTitle"><i class="fas fa-list-check"></i> Select Job Title</label>
@@ -114,7 +113,8 @@
                     @foreach($applications as $app)
 
                     @php
-                    $initials = strtoupper(substr($app->jobSeeker->JobSeekerName,0,1));
+                    $applicantName = $app->jobSeeker?->JobSeekerName;
+                    $initials = $applicantName ? strtoupper(substr($applicantName, 0, 1)) : '?';
                     @endphp
 
                     <tr>
@@ -123,12 +123,12 @@
                             <div class="applicant-cell">
                                 <div class="applicant-avatar">{{ $initials }}</div>
                                 <div>
-                                    <div class="applicant-name">{{ $app->jobSeeker->JobSeekerName }}</div>
-                                    <div class="applicant-city"><i class="fas fa-location-dot" style="font-size:0.65rem;opacity:0.6;"></i>{{ $app->jobSeeker->City }}</div>
+                                    <div class="applicant-name">{{ $applicantName ?: 'Applicant unavailable' }}</div>
+                                    <div class="applicant-city"><i class="fas fa-location-dot" style="font-size:0.65rem;opacity:0.6;"></i>{{ $app->jobSeeker?->City }}</div>
                                 </div>
                             </div>
                         </td>
-                        <td class="email-cell">{{ $app->jobSeeker->Email }}</td>
+                        <td class="email-cell">{{ $app->jobSeeker?->Email }}</td>
                         <td>{{ $app->Status }}</td>
                         <td>
                             <a href="{{ route('employer.applications.show', $app->ApplicationId) }}"

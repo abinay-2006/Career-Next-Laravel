@@ -27,21 +27,21 @@ class EmployerApplicationController extends Controller
             ->orderByDesc('JobId')
             ->get();
 
-        $selectedJobId = $request->cmbTitle;
+        $selectedJobId = $request->query('cmbTitle');
 
         $selectedJob = null;
         $applications = collect();
 
-        if ($selectedJobId) {
+        if ($selectedJobId !== null && $selectedJobId !== '') {
+            abort_unless(is_scalar($selectedJobId) && ctype_digit((string) $selectedJobId), 404);
 
-            // Find the selected job only from this employer's jobs.
-            $selectedJob = $jobs->firstWhere('JobId', $selectedJobId);
+            // Resolve selections only within this employer's jobs.
+            $selectedJob = $jobs->firstWhere('JobId', (int) $selectedJobId);
+            abort_unless($selectedJob, 404);
 
-            if ($selectedJob) {
-                $applications = Application::with('jobSeeker')
-                    ->where('JobId', $selectedJob->JobId)
-                    ->get();
-            }
+            $applications = Application::with('jobSeeker')
+                ->where('JobId', $selectedJob->JobId)
+                ->get();
         }
 
         return view('employer.applications.index', compact(
@@ -73,6 +73,8 @@ class EmployerApplicationController extends Controller
         ) {
             abort(403, 'Unauthorized');
         }
+
+        abort_unless($application->jobSeeker, 404);
 
         $resumeDocument = $application->jobSeeker->documents()
             ->whereRaw('LOWER(DocumentType) = ?', ['resume'])
