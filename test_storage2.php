@@ -1,0 +1,1 @@
+<?php\nuse Illuminate\Support\Facades\Storage;\necho 'Default disk: ' . config('filesystems.default') . PHP_EOL;\necho 'Storage URL: ' . Storage::disk('public')->url('photos/profile_6_1792163859.jpg') . PHP_EOL;\necho 'File exists: ' . (Storage::disk('public')->exists('photos/profile_6_1792163859.jpg') ? 'Yes' : 'No') . PHP_EOL;
