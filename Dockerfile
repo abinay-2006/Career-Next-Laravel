@@ -56,6 +56,9 @@ RUN composer install \
     --no-interaction \
     --optimize-autoloader
 
+# Make files stored on the public disk reachable through /storage.
+RUN php artisan storage:link
+
 # Copy compiled frontend assets
 COPY --from=frontend /app/public/build ./public/build
 

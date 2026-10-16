@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use App\Support\ProfilePhoto;
 
 class EmployerProfileController extends Controller
 {
@@ -72,9 +73,7 @@ class EmployerProfileController extends Controller
         if ($request->hasFile('Photo')) {
             try {
                 $file = $request->file('Photo');
-                // Use the default filesystem disk (public for local dev, s3 for production)
-                $disk = config('filesystems.default');
-                $storagePath = 'photos'; // folder inside the chosen disk
+                $disk = Storage::disk('public');
 
                 // Generate a unique filename
                 $filename =
@@ -86,15 +85,19 @@ class EmployerProfileController extends Controller
                     $file->getClientOriginalExtension();
 
                 // Delete old photo if it exists
-                if (!empty($employer->Photo) && Storage::disk($disk)->exists("$storagePath/" . $employer->Photo)) {
-                    Storage::disk($disk)->delete("$storagePath/" . $employer->Photo);
+                $oldPath = ProfilePhoto::path($employer->Photo);
+                if ($oldPath && $disk->exists($oldPath)) {
+                    $disk->delete($oldPath);
                 }
 
                 // Store the new photo
-                $file->storeAs($storagePath, $filename, $disk);
+                $storedPath = $file->storeAs('photos', $filename, 'public');
+                if (!$storedPath) {
+                    throw new \RuntimeException('The company photo could not be written to the public disk.');
+                }
 
                 // Save filename in DB
-                $validated['Photo'] = $filename;
+                $validated['Photo'] = $storedPath;
             } catch (\Exception $e) {
                 Log::error('Employer profile photo upload failed: ' . $e->getMessage());
                 return back()->withErrors(['Photo' => 'Unable to upload company photo. Please try again later.']);

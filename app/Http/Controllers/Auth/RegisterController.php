@@ -508,7 +508,7 @@ class RegisterController extends Controller
                 $photo = $request->file('photo');
 
                 $photoPath = $photo->store(
-                    'registration/photos',
+                    'photos',
                     'public'
                 );
 

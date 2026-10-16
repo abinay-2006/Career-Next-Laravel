@@ -3,6 +3,7 @@
 @section('title', 'Employer Profile')
 
 @section('content')
+@php($employerPhotoUrl = \App\Support\ProfilePhoto::url($employer->Photo))
 
 <!-- ═══════════════════════════════════════════════════════
      MAIN
@@ -69,9 +70,9 @@
             title="Edit company profile"
             style="cursor:pointer; position:relative;">
 
-            @if (!empty($employer->Photo))
+            @if ($employerPhotoUrl)
             <img
-                src="{{ Storage::disk(config('filesystems.default'))->url('photos/' . $employer->Photo) }}"
+                src="{{ $employerPhotoUrl }}"
                 alt="Company Profile Photo">
             @else
             <i class="fas fa-building"></i>
@@ -523,9 +524,9 @@
 
                         <div class="profile-logo-preview" id="logoPreview">
 
-                            @if (!empty($employer->Photo))
+                            @if ($employerPhotoUrl)
                             <img
-                                src="{{ Storage::disk(config('filesystems.default'))->url('photos/' . $employer->Photo) }}"
+                                src="{{ $employerPhotoUrl }}"
                                 alt="Company Logo">
                             @else
                             <i class="fas fa-building"></i>

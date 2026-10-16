@@ -44,9 +44,9 @@
 
                     <div class="user-avatar">
 
-                        @if($headerJobSeeker && !empty($headerJobSeeker->Photo))
+                        @if($headerJobSeeker && ($headerPhotoUrl = \App\Support\ProfilePhoto::url($headerJobSeeker->Photo)))
                         <img
-                            src="{{ Storage::disk(config('filesystems.default'))->url('photos/' . $headerJobSeeker->Photo) }}"
+                            src="{{ $headerPhotoUrl }}"
                             alt="Profile Photo">
                         @else
                         <i class="fas fa-user"></i>

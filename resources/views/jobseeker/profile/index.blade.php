@@ -3,6 +3,7 @@
 @section('title', 'Job Seeker Profile')
 
 @section('content')
+@php($jobSeekerPhotoUrl = \App\Support\ProfilePhoto::url($jobSeeker->Photo))
 
 <!-- ══ MAIN ══ -->
 <div class="main-content">
@@ -34,10 +35,10 @@
             title="Change photo"
             style="cursor:pointer; position:relative;">
 
-            @if (!empty($jobSeeker->Photo))
+            @if ($jobSeekerPhotoUrl)
 
             <img
-                src="{{ Storage::disk(config('filesystems.default'))->url('photos/' . $jobSeeker->Photo) }}"
+                src="{{ $jobSeekerPhotoUrl }}"
                 alt="Profile Photo">
 
             @else
@@ -660,9 +661,9 @@
 
                         <div class="profile-photo-preview" id="profilePhotoPreview">
 
-                            @if (!empty($jobSeeker->Photo))
+                            @if ($jobSeekerPhotoUrl)
                             <img
-                                src="{{ Storage::disk(config('filesystems.default'))->url('photos/' . $jobSeeker->Photo) }}"
+                                src="{{ $jobSeekerPhotoUrl }}"
                                 alt="Profile Photo">
                             @else
                             <i class="fas fa-user"></i>

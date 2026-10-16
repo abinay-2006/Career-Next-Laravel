@@ -33,8 +33,8 @@
 
             <div class="profile-image">
 
-                @if(!empty($application->jobSeeker->Photo))
-                <img src="{{ asset('uploads/jobseekers/'.$application->jobSeeker->Photo) }}"
+                @if($applicantPhotoUrl = \App\Support\ProfilePhoto::url($application->jobSeeker->Photo))
+                <img src="{{ $applicantPhotoUrl }}"
                     alt="Applicant">
                 @else
                 <i class="fas fa-user"></i>

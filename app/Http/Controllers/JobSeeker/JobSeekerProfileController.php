@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\JobSeekerDocument;
+use App\Support\ProfilePhoto;
 
 class JobSeekerProfileController extends Controller
 {
@@ -292,23 +293,25 @@ class JobSeekerProfileController extends Controller
         if ($request->hasFile('Photo')) {
             try {
                 $photo = $request->file('Photo');
-                // Use the default filesystem disk (public for local dev, s3 for production)
-                $disk = config('filesystems.default');
-                $storagePath = 'photos'; // folder inside the chosen disk
+                $disk = Storage::disk('public');
 
                 // Generate a unique filename
                 $fileName = 'profile_' . $jobSeeker->JobSeekId . '_' . time() . '.' . $photo->getClientOriginalExtension();
 
                 // Delete old photo if it exists
-                if (!empty($jobSeeker->Photo) && Storage::disk($disk)->exists("$storagePath/" . $jobSeeker->Photo)) {
-                    Storage::disk($disk)->delete("$storagePath/" . $jobSeeker->Photo);
+                $oldPath = ProfilePhoto::path($jobSeeker->Photo);
+                if ($oldPath && $disk->exists($oldPath)) {
+                    $disk->delete($oldPath);
                 }
 
                 // Store the new photo
-                $photo->storeAs($storagePath, $fileName, $disk);
+                $storedPath = $photo->storeAs('photos', $fileName, 'public');
+                if (!$storedPath) {
+                    throw new \RuntimeException('The profile photo could not be written to the public disk.');
+                }
 
                 // Save the filename in DB
-                $jobSeeker->Photo = $fileName;
+                $jobSeeker->Photo = $storedPath;
             } catch (\Exception $e) {
                 Log::error('JobSeeker profile photo upload failed: ' . $e->getMessage());
                 return back()->withErrors(['Photo' => 'Unable to upload profile photo. Please try again later.']);
