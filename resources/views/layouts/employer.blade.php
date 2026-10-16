@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="{{ asset('assets/css/employer-profile.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/notifications.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
 </head>
 
 <body>

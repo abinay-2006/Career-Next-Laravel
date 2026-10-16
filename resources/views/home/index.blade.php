@@ -17,6 +17,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
     <link rel="stylesheet" href="{{ asset('style.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
 </head>
 
 <body>
@@ -40,6 +41,10 @@
 
         <nav class="modern-menu">
             <div class="menu-container">
+                <button class="menu-toggle" type="button" aria-controls="publicNavigation" aria-expanded="false" aria-label="Open navigation menu">
+                    <i class="fas fa-bars" aria-hidden="true"></i><span>Menu</span>
+                </button>
+                <div class="public-navigation" id="publicNavigation">
                 <ul class="nav-links">
                     <li><a class="active"><i class="fas fa-home"></i> Home</a></li>
                     <li><a href="{{ route('login') }}"><i class="fas fa-search"></i> Find Jobs</a></li>
@@ -50,6 +55,7 @@
                 <div class="auth-buttons">
                     <a href="{{ route('login') }}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Login</a>
                     <a href="{{route('login')}}" class="btn-register"><i class="fas fa-user-plus"></i> Register</a>
+                </div>
                 </div>
             </div>
         </nav>
@@ -183,6 +189,25 @@
     </div>
 
     <script>
+        const menuToggle = document.querySelector('.menu-toggle');
+        const publicNavigation = document.getElementById('publicNavigation');
+        if (menuToggle && publicNavigation) {
+            menuToggle.addEventListener('click', () => {
+                const isOpen = menuToggle.getAttribute('aria-expanded') === 'true';
+                menuToggle.setAttribute('aria-expanded', String(!isOpen));
+                menuToggle.setAttribute('aria-label', isOpen ? 'Open navigation menu' : 'Close navigation menu');
+                publicNavigation.classList.toggle('is-open', !isOpen);
+            });
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && menuToggle.getAttribute('aria-expanded') === 'true') {
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                    menuToggle.setAttribute('aria-label', 'Open navigation menu');
+                    publicNavigation.classList.remove('is-open');
+                    menuToggle.focus();
+                }
+            });
+        }
+
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function(e) {
                 e.preventDefault();

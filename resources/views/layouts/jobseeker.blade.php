@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/jobseeker.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/notifications.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
 </head>
 
 <body>
@@ -38,7 +39,7 @@
 
             <div class="profile-dropdown" id="profileDropdown">
 
-                <div class="profile-trigger" onclick="toggleDropdown()">
+                <button type="button" class="profile-trigger" id="profileTrigger" aria-controls="jobseekerProfileMenu" aria-expanded="false" onclick="toggleDropdown()">
 
                     <div class="user-avatar">
 
@@ -66,10 +67,10 @@
 
                     <i class="fas fa-chevron-down chevron"></i>
 
-                </div>
+                </button>
 
 
-                <div class="dropdown-menu">
+                <div class="dropdown-menu" id="jobseekerProfileMenu">
 
                     <div class="dropdown-header">
 
@@ -125,11 +126,25 @@
     <script src="{{ asset('assets/js/alerts.js') }}"></script>
     <script>
         function toggleDropdown() {
-            document.getElementById('profileDropdown').classList.toggle('open');
+            const dropdown = document.getElementById('profileDropdown');
+            const trigger = document.getElementById('profileTrigger');
+            const isOpen = dropdown.classList.toggle('open');
+            trigger.setAttribute('aria-expanded', String(isOpen));
         }
         document.addEventListener('click', function(e) {
             const dd = document.getElementById('profileDropdown');
-            if (!dd.contains(e.target)) dd.classList.remove('open');
+            if (!dd.contains(e.target)) {
+                dd.classList.remove('open');
+                document.getElementById('profileTrigger').setAttribute('aria-expanded', 'false');
+            }
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('profileDropdown').classList.remove('open');
+                const trigger = document.getElementById('profileTrigger');
+                trigger.setAttribute('aria-expanded', 'false');
+                trigger.focus();
+            }
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>

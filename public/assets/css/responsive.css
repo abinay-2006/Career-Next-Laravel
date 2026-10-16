@@ -1,0 +1,381 @@
+/* Shared responsive layer for Career Next's legacy Blade pages. */
+:root {
+    --cn-page-gutter: clamp(1rem, 3vw, 2.5rem);
+    --cn-content-width: 82rem;
+    --cn-control-min-height: 2.75rem;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    min-width: 320px;
+    overflow-x: clip;
+    scroll-padding-top: 1rem;
+}
+
+body {
+    min-width: 320px;
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+img,
+video,
+canvas,
+svg,
+iframe {
+    max-width: 100%;
+}
+
+img,
+video {
+    height: auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+button,
+td,
+th,
+label,
+small,
+span {
+    overflow-wrap: anywhere;
+}
+
+button,
+input,
+select,
+textarea {
+    max-width: 100%;
+}
+
+button,
+[role="button"],
+input[type="submit"],
+input[type="button"] {
+    min-height: var(--cn-control-min-height);
+    touch-action: manipulation;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+    min-width: 0;
+}
+
+:focus-visible {
+    outline: 3px solid #f6c453;
+    outline-offset: 2px;
+}
+
+.main-content,
+#page,
+#page-in,
+#content,
+.register-container,
+.page-wrapper {
+    width: 100%;
+    min-width: 0;
+    max-width: var(--cn-content-width);
+    margin-inline: auto;
+}
+
+.main-content {
+    padding: clamp(1rem, 3vw, 2.5rem) var(--cn-page-gutter);
+}
+
+.page-header,
+.page-header-left,
+.page-header-text,
+.card-header,
+.table-card-header,
+.navbar-brand,
+.brand-logo,
+.navbar-user,
+.profile-trigger {
+    min-width: 0;
+}
+
+.page-header h1,
+.page-header-text h1 {
+    font-size: clamp(1.35rem, 2.5vw, 2rem);
+    line-height: 1.2;
+}
+
+.stats-grid,
+.stats-strip,
+.charts-row,
+.summary-grid,
+.feature-grid,
+.job-grid,
+.cards-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+.chart-card,
+.chart-wrap,
+.glass-card,
+.table-card,
+.stat-card,
+.job-card,
+.info-card,
+.profile-card,
+.application-card {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.chart-wrap canvas {
+    max-width: 100%;
+}
+
+/* Keep data complete; overflow is contained within the table itself. */
+table {
+    max-width: 100%;
+}
+
+table:not(.table-layout-fixed) {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+td,
+th {
+    max-width: 28rem;
+}
+
+.modal-dialog {
+    width: auto;
+    max-width: min(100% - 1rem, 56rem);
+    margin: 0.5rem auto;
+}
+
+.modal-content {
+    max-height: calc(100dvh - 1rem);
+    overflow: auto;
+}
+
+.menu-toggle {
+    display: none;
+}
+
+.public-navigation {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.cn-alert-container {
+    width: min(100% - 1rem, 26rem);
+}
+
+.dropdown-menu,
+.employer-dropdown-menu {
+    max-width: calc(100vw - 1rem);
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 767.98px) {
+    .navbar {
+        height: auto;
+        min-height: 4.25rem;
+        padding: 0.65rem var(--cn-page-gutter);
+        gap: 0.5rem;
+    }
+
+    .navbar-brand,
+    .brand-logo {
+        gap: 0.5rem;
+        font-size: clamp(1rem, 4vw, 1.25rem);
+    }
+
+    .brand-logo img,
+    .navbar-brand img {
+        width: auto;
+        max-width: 2.25rem;
+        max-height: 2.25rem;
+        object-fit: contain;
+    }
+
+    .navbar-user {
+        gap: 0.5rem;
+    }
+
+    .user-info {
+        max-width: min(35vw, 10rem);
+    }
+
+    .user-name,
+    .user-role {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .user-badge,
+    .profile-trigger {
+        max-width: 100%;
+        padding: 0.35rem 0.55rem;
+    }
+
+    .btn-logout {
+        min-height: 2.75rem;
+        padding: 0.5rem 0.65rem;
+        white-space: nowrap;
+    }
+
+    .stats-grid,
+    .stats-strip,
+    .charts-row,
+    .summary-grid,
+    .feature-grid,
+    .job-grid,
+    .cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    }
+
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .page-header-left {
+        max-width: 100%;
+    }
+
+    .page-header a,
+    .page-header .btn,
+    .page-header button {
+        max-width: 100%;
+    }
+
+    .job-card-actions,
+    .modal-footer,
+    .filter-actions,
+    .page-actions {
+        flex-wrap: wrap;
+    }
+
+    .job-card-actions > *,
+    .filter-actions > *,
+    .page-actions > * {
+        min-width: min(100%, 8rem);
+    }
+
+    .modal-dialog {
+        max-width: calc(100% - 1rem);
+    }
+
+    .modern-menu {
+        padding: 0.75rem var(--cn-page-gutter);
+    }
+
+    .menu-container {
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+    .menu-toggle {
+        display: inline-flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: 1px solid #d9dce8;
+        border-radius: 0.6rem;
+        background: #fff;
+        color: #34405f;
+        font-weight: 600;
+    }
+
+    .public-navigation {
+        display: none;
+        align-items: stretch;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .public-navigation.is-open {
+        display: flex;
+    }
+
+    .nav-links,
+    .auth-buttons {
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+
+    .nav-links a,
+    .auth-buttons a {
+        display: inline-flex;
+        min-height: 2.75rem;
+        align-items: center;
+    }
+}
+
+@media (max-width: 430px) {
+    :root {
+        --cn-page-gutter: 1rem;
+    }
+
+    .navbar {
+        flex-wrap: wrap;
+    }
+
+    .navbar-brand {
+        flex: 1 1 auto;
+    }
+
+    .navbar-user {
+        flex: 0 1 auto;
+    }
+
+    .user-info,
+    .chevron {
+        display: none;
+    }
+
+    .main-content {
+        padding-block: 1.25rem;
+    }
+
+    .register-container,
+    .page-wrapper {
+        padding-inline: 0.75rem;
+    }
+
+    .modern-header {
+        padding: 1.25rem var(--cn-page-gutter);
+    }
+
+    #page {
+        padding: 1.25rem var(--cn-page-gutter);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
