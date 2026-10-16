@@ -14,7 +14,7 @@ class JobApplicationController extends Controller
         $jobSeeker = Auth::guard('jobseeker')->user();
 
         // Only approved jobs can receive applications.
-        if ($job->Status !== 'Approved') {
+        if (strtolower(trim((string) $job->Status)) !== 'approved') {
             abort(404);
         }
 

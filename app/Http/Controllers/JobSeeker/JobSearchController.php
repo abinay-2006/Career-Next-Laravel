@@ -16,23 +16,23 @@ class JobSearchController extends Controller
     public function index(Request $request)
     {
         // Dropdown values
-        $qualifications = Job::where('Status', 'Approved')
+        $qualifications = Job::whereRaw('LOWER(Status) = ?', ['approved'])
             ->distinct()
             ->orderBy('MinQualification')
             ->pluck('MinQualification');
 
-        $companies = Job::where('Status', 'Approved')
+        $companies = Job::whereRaw('LOWER(Status) = ?', ['approved'])
             ->distinct()
             ->orderBy('CompanyName')
             ->pluck('CompanyName');
 
-        $titles = Job::where('Status', 'Approved')
+        $titles = Job::whereRaw('LOWER(Status) = ?', ['approved'])
             ->distinct()
             ->orderBy('JobTitle')
             ->pluck('JobTitle');
 
         // Search query
-        $query = Job::where('Status', 'Approved');
+        $query = Job::whereRaw('LOWER(Status) = ?', ['approved']);
 
         if ($request->filled('cmbQual')) {
             $query->where('MinQualification', $request->cmbQual);
@@ -74,7 +74,7 @@ class JobSearchController extends Controller
     public function show(Job $job)
     {
         // Only approved jobs can be viewed by Job Seekers.
-        if ($job->Status !== 'Approved') {
+        if (strtolower(trim((string) $job->Status)) !== 'approved') {
             abort(404);
         }
 
