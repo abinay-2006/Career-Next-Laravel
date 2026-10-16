@@ -78,12 +78,16 @@ class JobSearchController extends Controller
             abort(404);
         }
 
+        // The EnsureUserRole middleware guarantees an authenticated job seeker.
         $jobSeeker = Auth::guard('jobseeker')->user();
 
-        // Check whether the current Job Seeker has already applied.
-        $alreadyApplied = Application::where('JobId', $job->JobId)
-            ->where('JobSeekId', $jobSeeker->JobSeekId)
-            ->exists();
+        // Determine if the current Job Seeker has already applied for this job.
+        $alreadyApplied = false;
+        if ($jobSeeker) {
+            $alreadyApplied = Application::where('JobId', $job->JobId)
+                ->where('JobSeekId', $jobSeeker->JobSeekId)
+                ->exists();
+        }
 
         return view('jobseeker.jobs.show', compact(
             'job',
