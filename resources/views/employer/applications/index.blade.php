@@ -16,7 +16,6 @@
                 <p>Review candidates who applied to your job listings</p>
             </div>
         </div>
-        <a href="{{route('employer.dashboard')}}" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Panel</a>
     </div>
 
     @if($jobs->isEmpty())

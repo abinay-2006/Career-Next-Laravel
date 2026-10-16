@@ -17,9 +17,6 @@
                     <p>Verify or reject documents uploaded by job seekers</p>
                 </div>
             </div>
-            <a href="{{ route('admin.index') }}" class="btn-back">
-                <i class="fas fa-arrow-left"></i> Home
-            </a>
         </div>
 
         <!-- Stats Cards -->

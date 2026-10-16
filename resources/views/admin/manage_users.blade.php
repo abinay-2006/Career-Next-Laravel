@@ -9,7 +9,6 @@
     <div class="page-header">
         <h1>Manage Users 👥</h1>
         <p>Approve, suspend, or remove job seeker and employer accounts.</p>
-        <a href="{{ route('admin.index') }}" class="back-btn"><i class="fas fa-arrow-left"></i> Home</a>
     </div>
     
     <!-- Summary cards -->

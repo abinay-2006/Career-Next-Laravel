@@ -155,7 +155,6 @@
             <h1>Education Qualification</h1>
             <p>Manage your academic credentials and qualifications</p>
         </div>
-        <a href="{{ route('jobseeker.index') }}" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
     </div>
 
     <!-- Add Form -->

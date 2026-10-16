@@ -52,16 +52,6 @@
 
         </div>
 
-        <a
-            href="{{ route('employer.dashboard') }}"
-            class="back-btn">
-
-            <i class="fas fa-arrow-left"></i>
-
-            Back to Panel
-
-        </a>
-
     </div>
 
 

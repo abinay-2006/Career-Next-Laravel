@@ -16,7 +16,6 @@
                 <p>Schedule walk-in interviews and manage your listings</p>
             </div>
         </div>
-        <a href="{{ route('employer.dashboard') }}" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Panel</a>
     </div>
 
     <!-- ── POST WALK-IN FORM ── -->

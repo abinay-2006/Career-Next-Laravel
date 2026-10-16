@@ -22,7 +22,6 @@
             </div>
             @endif
         </div>
-        <a href="{{ route('admin.index') }}" class="back-btn"><i class="fas fa-arrow-left"></i> Home</a>
     </div>
 
     <div class="section-title"><i class="fas fa-briefcase"></i> Posted Jobs</div>

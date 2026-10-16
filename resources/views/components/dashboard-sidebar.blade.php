@@ -28,6 +28,7 @@
         @foreach ($menus[$role] as [$label, $routeName, $icon])
             @php
                 $activePattern = match ($routeName) {
+                    'admin.dashboard' => ['admin.dashboard', 'admin.index'],
                     'employer.jobs.index' => 'employer.jobs.*',
                     'employer.applications.index' => 'employer.applications.*',
                     'employer.profile.index' => 'employer.profile.*',
@@ -38,14 +39,10 @@
                     default => $routeName,
                 };
             @endphp
-            <a class="cn-sidebar-link {{ request()->routeIs($activePattern) ? 'is-active' : '' }}"
-               href="{{ route($routeName) }}" @if(request()->routeIs($activePattern)) aria-current="page" @endif>
+            <a class="cn-sidebar-link {{ request()->routeIs(...(array) $activePattern) ? 'is-active' : '' }}"
+               href="{{ route($routeName) }}" @if(request()->routeIs(...(array) $activePattern)) aria-current="page" @endif>
                 <i class="{{ $icon }}" aria-hidden="true"></i><span>{{ $label }}</span>
             </a>
         @endforeach
-        <form action="{{ route('logout') }}" method="POST" class="cn-sidebar-logout">
-            @csrf
-            <button type="submit" class="cn-sidebar-link"><i class="fas fa-right-from-bracket" aria-hidden="true"></i><span>Logout</span></button>
-        </form>
     </nav>
 </aside>

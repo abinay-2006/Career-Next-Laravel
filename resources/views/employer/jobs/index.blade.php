@@ -16,9 +16,6 @@
         <p>Post new listings and manage your existing vacancies</p>
       </div>
     </div>
-    <a href="{{ route('employer.dashboard') }}" style="display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:10px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.8);font-family:'Poppins',sans-serif;font-size:0.83rem;text-decoration:none;transition:all 0.2s;">
-      <i class="fas fa-arrow-left"></i> Back to Panel
-    </a>
   </div>
 
   <!-- ── POST JOB FORM ── -->

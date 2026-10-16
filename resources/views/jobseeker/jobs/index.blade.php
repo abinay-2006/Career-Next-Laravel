@@ -14,7 +14,6 @@
             <h1>Search Job</h1>
             <p>Find and apply for jobs matching your qualifications</p>
         </div>
-        <a href="{{ route('jobseeker.index') }}" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
     </div>
 
     <!-- ── Search Form ── -->

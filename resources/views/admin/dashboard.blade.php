@@ -13,7 +13,6 @@
     <div class="page-header">
         <h1>Admin Dashboard 🛡️</h1>
         <p>Welcome back, {{ session('Name') }}. Here's a live overview of the platform.</p>
-        <a href="{{ route('admin.index') }}" class="back-btn"><i class="fas fa-arrow-left"></i> Home</a>
     </div>
 
 

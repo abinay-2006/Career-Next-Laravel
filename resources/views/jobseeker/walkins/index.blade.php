@@ -21,11 +21,6 @@
       <p>Discover upcoming interview opportunities from employers.</p>
     </div>
 
-    <a href="{{ route('jobseeker.index') }}" class="back-btn">
-      <i class="fas fa-arrow-left"></i>
-      Back to Dashboard
-    </a>
-
   </div>
 
 
