@@ -80,7 +80,7 @@
             @else
 
             <span class="completion-incomplete">
-                <i class="fas fa-circle-exclamation"></i>
+                <i class="fas fa-circle-exclamation m-4"></i>
                 {{ count($missingProfileItems) }} remaining
             </span>
 
