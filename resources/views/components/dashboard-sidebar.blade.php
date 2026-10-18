@@ -15,6 +15,7 @@
             ['Manage Jobs', 'employer.jobs.index', 'fas fa-briefcase'],
             ['Applications', 'employer.applications.index', 'fas fa-user-check'],
             ['Walk-in Interviews', 'employer.walkins.index', 'fas fa-calendar'],
+            ['Feedback', 'employer.feedback.create', 'fas fa-comment'],
             ['Career News', 'news.index', 'fas fa-newspaper'],
         ],
         'jobseeker' => [
@@ -40,11 +41,13 @@
                     'employer.applications.index' => 'employer.applications.*',
                     'employer.profile.index' => 'employer.profile.*',
                     'employer.walkins.index' => 'employer.walkins.*',
+                    'employer.feedback.create' => 'employer.feedback.*',
                     'jobseeker.jobs' => 'jobseeker.jobs*',
                     'jobseeker.profile.index' => 'jobseeker.profile.*',
                     'jobseeker.education' => 'jobseeker.education*',
                     'jobseeker.applications.index' => 'jobseeker.applications.*',
                     'jobseeker.feedback.create' => 'jobseeker.feedback.*',
+                    'news.index' => 'news.*',
                     default => $routeName,
                 };
             @endphp

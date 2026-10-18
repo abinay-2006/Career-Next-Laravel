@@ -1,6 +1,6 @@
 @extends('layouts.jobseeker')
 
-@section('title','Jobseeker Portal')
+@section('title', 'Find Jobs')
 
 @section('content')
 
