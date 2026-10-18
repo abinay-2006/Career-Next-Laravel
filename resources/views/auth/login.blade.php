@@ -130,37 +130,18 @@
             <div class="alert error" id="forgot-error"> <i class="fas fa-circle-exclamation"></i><span></span></div>
             <div class="alert success" id="forgot-success"><i class="fas fa-circle-check"></i><span></span></div>
 
-            <form method="POST" action="{{ route('forgot') }}" onsubmit="return handleForgotSubmit(event)">
-
-                <div class="form-group">
-                    <label>Account Type</label>
-                    <div class="input-wrap">
-                        <i class="fas fa-users lead-icon"></i>
-                        <select name="cmbUser">
-                            <option value="JobSeeker">Job Seeker</option>
-                            <option value="Employer">Employer</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Username</label>
-                    <div class="input-wrap">
-                        <i class="fas fa-user lead-icon"></i>
-                        <input type="text" name="txtUser" id="forgot-user" placeholder="Your username">
-                    </div>
-                </div>
-
+            <form method="POST" action="{{ route('forgot.send') }}">
+                @csrf
                 <div class="form-group">
                     <label>Email Address</label>
                     <div class="input-wrap">
                         <i class="fas fa-envelope lead-icon"></i>
-                        <input type="email" name="txtEmail" id="forgot-email" placeholder="your@email.com">
+                        <input type="email" name="email" id="forgot-email" placeholder="your@email.com" required>
                     </div>
                 </div>
 
                 <button type="submit" class="btn-primary">
-                    <i class="fas fa-paper-plane"></i> Send Reset Link
+                    <i class="fas fa-paper-plane"></i> Send Verification Code
                 </button>
             </form>
 

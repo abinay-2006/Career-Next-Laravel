@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Employer\EmployerController;
 use App\Http\Controllers\JobSeeker\JobSeekerController;
@@ -35,9 +36,10 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout');
 
 
-Route::get('/forgot', function () {
-    return 'Forgot Password Page - Coming Soon';
-})->name('forgot');
+Route::get('/forgot', [PasswordResetController::class, 'show'])->name('forgot');
+Route::post('/forgot', [PasswordResetController::class, 'sendOtp'])->name('forgot.send');
+Route::post('/forgot/verify', [PasswordResetController::class, 'verifyOtp'])->name('forgot.verify');
+Route::post('/forgot/reset', [PasswordResetController::class, 'resetPassword'])->name('forgot.reset');
 
 // ═══════════════════════════════════════════════════════════════
 // Registration Routes
