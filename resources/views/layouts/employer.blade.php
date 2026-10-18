@@ -13,6 +13,9 @@
   <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/notifications.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/account-ui.css') }}">
+  <link rel="stylesheet" href="{{ asset('assets/css/news.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -31,10 +34,10 @@
 
   <nav class="navbar">
     <button class="cn-menu-toggle" type="button" aria-label="Open navigation" aria-controls="roleSidebar" aria-expanded="false"><i class="fas fa-bars" aria-hidden="true"></i></button>
-    <h1 class="brand-logo">
+    <a href="{{ route('employer.dashboard') }}" class="navbar-brand brand-logo">
       <img src="{{ asset('images/CareerNext.png') }}" alt="Career Next">
       <span>Career Next</span>
-    </h1>
+    </a>
 
     <div class="navbar-user">
 
@@ -126,6 +129,7 @@
   @yield('scripts')
   <script src="{{ asset('assets/js/dashboard-sidebar.js') }}"></script>
   <script src="{{ asset('assets/js/alerts.js') }}"></script>
+  <script src="{{ asset('assets/js/dashboard-analytics.js') }}"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -206,9 +210,9 @@
 
     });
   </script>
+  <footer class="footer">
+    &copy; {{ date('Y') }} Career Next. All rights reserved.
+  </footer>
 </body>
-<footer class="footer">
-  &copy; <?php echo date('Y'); ?> Job Portal. All rights reserved.
-</footer>
 
 </html>

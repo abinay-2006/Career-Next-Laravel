@@ -26,6 +26,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\Admin\ManageNewsController;
 use App\Http\Controllers\Admin\ManageFeedbackController;
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\DashboardAnalyticsController;
 
 // Route
 
@@ -43,7 +44,9 @@ Route::post('/logout', [LoginController::class, 'logout'])
 
 
 Route::get('/forgot', [PasswordResetController::class, 'show'])->name('forgot');
-Route::post('/forgot', [PasswordResetController::class, 'sendLink'])->middleware('throttle:3,1')->name('forgot.send');
+Route::post('/forgot', [PasswordResetController::class, 'sendOtp'])->middleware('throttle:3,1')->name('forgot.send');
+Route::get('/forgot/verify', [PasswordResetController::class, 'showOtp'])->name('forgot.verify');
+Route::post('/forgot/verify', [PasswordResetController::class, 'verifyOtp'])->middleware('throttle:6,1')->name('forgot.verify.submit');
 Route::get('/forgot/{token}', [PasswordResetController::class, 'showReset'])->name('forgot.token');
 Route::post('/forgot/{token}', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:6,1')->name('forgot.reset');
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
@@ -176,6 +179,7 @@ Route::prefix('employer')
 
         Route::get('/', [EmployerController::class, 'index'])
             ->name('dashboard');
+        Route::get('/analytics', [DashboardAnalyticsController::class, 'employer'])->name('analytics');
 
         //Job Routes
         Route::get('/jobs', [EmployerJobController::class, 'index'])
@@ -233,6 +237,7 @@ Route::prefix('jobseeker')
 
         Route::get('/', [JobSeekerController::class, 'index'])
             ->name('index');
+        Route::get('/analytics', [DashboardAnalyticsController::class, 'jobSeeker'])->name('analytics');
         Route::get('/applications', [ApplicationHistoryController::class, 'index'])->name('applications.index');
         Route::get('/applications/{application}', [ApplicationHistoryController::class, 'show'])->name('applications.show');
         Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');

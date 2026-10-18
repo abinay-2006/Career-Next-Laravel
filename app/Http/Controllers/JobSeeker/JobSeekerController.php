@@ -6,10 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Throwable;
+use App\Services\DashboardAnalyticsService;
 
 class JobSeekerController extends Controller
 {
-    public function index()
+    public function index(DashboardAnalyticsService $analytics)
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
 
@@ -157,14 +158,17 @@ class JobSeekerController extends Controller
             }
         }
 
-        return view('jobseeker.index', compact(
+        $dashboardData = compact(
             'jobSeeker',
             'completionItems',
             'completedItems',
             'totalItems',
             'profileCompletion',
             'missingProfileItems'
-        ));
+        );
+        $dashboardData['analytics'] = $analytics->jobSeeker($jobSeeker);
+
+        return view('jobseeker.index', $dashboardData);
     }
 
     public function education()

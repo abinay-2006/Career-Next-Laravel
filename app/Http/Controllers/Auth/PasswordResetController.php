@@ -21,7 +21,16 @@ class PasswordResetController extends Controller
         return view('auth.forgot-password');
     }
 
-    public function sendLink(Request $request)
+    public function showOtp(Request $request)
+    {
+        if (!$request->session()->has('password_recovery_email')) {
+            return redirect()->route('forgot');
+        }
+
+        return view('auth.forgot-password', ['step' => 'otp']);
+    }
+
+    public function sendOtp(Request $request)
     {
         $data = $request->validate(['email' => ['required', 'email', 'max:150']]);
         $email = Str::lower(trim($data['email']));
@@ -34,14 +43,14 @@ class PasswordResetController extends Controller
         if ($matches->count() === 1) {
             $account = $matches->first();
             $type = $account instanceof JobSeeker ? 'jobseeker' : 'employer';
-            $token = Str::random(64);
+            $otp = (string) random_int(100000, 999999);
             DB::table('password_recovery_tokens')->where('email', $email)->delete();
             DB::table('password_recovery_tokens')->insert([
                 'account_type' => $type,
                 'account_id' => $account->getKey(),
                 'email' => $email,
-                'token_hash' => hash('sha256', $token),
-                'expires_at' => now()->addMinutes(30),
+                'token_hash' => hash('sha256', $otp),
+                'expires_at' => now()->addMinutes(10),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -50,15 +59,55 @@ class PasswordResetController extends Controller
                 if (config('mail.default') === 'log') {
                     throw new \RuntimeException('The configured log mailer does not deliver recovery email.');
                 }
-                Mail::to($email)->send(new PasswordRecoveryMail(route('forgot.token', $token)));
+                Mail::to($email)->send(new PasswordRecoveryMail($otp));
+            } catch (\Throwable $exception) {
+                DB::table('password_recovery_tokens')->where('token_hash', hash('sha256', $otp))->delete();
+                Log::warning('Password recovery email could not be sent', ['exception' => $exception::class]);
+                return back()->with('status', 'We could not send a code right now. Please try again shortly.');
+            }
+
+            // A logging failure must not invalidate a link that has already been emailed.
+            try {
                 app(ActivityLogger::class)->record('password_recovery_requested', $type, $account->getKey());
             } catch (\Throwable $exception) {
-                DB::table('password_recovery_tokens')->where('token_hash', hash('sha256', $token))->delete();
-                Log::warning('Password recovery email could not be sent', ['exception' => $exception::class]);
+                Log::warning('Password recovery request could not be logged', ['exception' => $exception::class]);
             }
         }
 
-        return back()->with('status', 'If an eligible account matches that email, a password recovery link will arrive shortly.');
+        if ($matches->count() === 1) {
+            $request->session()->put('password_recovery_email', $email);
+            return redirect()->route('forgot.verify')->with('status', 'A verification code has been sent to your email address.');
+        }
+
+        return back()->with('status', 'If an eligible account matches that email, a verification code will arrive shortly.');
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $validated = $request->validate(['otp' => ['required', 'digits:6']]);
+        $email = $request->session()->get('password_recovery_email');
+        if (!$email) {
+            return redirect()->route('forgot');
+        }
+
+        $recovery = DB::table('password_recovery_tokens')
+            ->where('email', $email)
+            ->where('token_hash', hash('sha256', $validated['otp']))
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (!$recovery) {
+            return back()->withErrors(['otp' => 'That code is invalid or expired. Please request a new code.']);
+        }
+
+        $token = Str::random(64);
+        DB::table('password_recovery_tokens')->where('id', $recovery->id)->update([
+            'token_hash' => hash('sha256', $token),
+            'expires_at' => now()->addMinutes(10),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('forgot.token', $token);
     }
 
     public function showReset(string $token)

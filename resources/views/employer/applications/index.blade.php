@@ -1,6 +1,6 @@
 @extends('layouts.employer')
 
-@section('title','Walkins')
+@section('title', 'Applications')
 
 @section('content')
 

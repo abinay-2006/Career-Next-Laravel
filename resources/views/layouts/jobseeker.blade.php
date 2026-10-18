@@ -12,6 +12,9 @@
     <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/notifications.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/account-ui.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/news.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -125,11 +128,12 @@
         <main class="cn-dashboard-main">@yield('content')</main>
     </div>
     <footer class="footer">
-        &copy; <?php echo date('Y'); ?> Job Portal. All rights reserved.
+        &copy; {{ date('Y') }} Career Next. All rights reserved.
     </footer>
     @yield('scripts')
     <script src="{{ asset('assets/js/dashboard-sidebar.js') }}"></script>
     <script src="{{ asset('assets/js/alerts.js') }}"></script>
+    <script src="{{ asset('assets/js/dashboard-analytics.js') }}"></script>
     <script>
         function toggleDropdown() {
             const dropdown = document.getElementById('profileDropdown');
