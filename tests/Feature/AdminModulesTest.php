@@ -63,7 +63,7 @@ class AdminModulesTest extends TestCase
         $this->assertDatabaseMissing('jobseeker_reg', ['JobSeekId' => $id]);
     }
 
-    public function test_admin_job_approval_and_rejection_persist_legacy_status_values(): void
+    public function test_admin_job_approval_and_rejection_persist_existing_lowercase_status_values(): void
     {
         $id = DB::table('job_master')->insertGetId([
             'CompanyName' => 'Example', 'JobTitle' => 'Engineer', 'Vacancy' => 1,
@@ -71,9 +71,36 @@ class AdminModulesTest extends TestCase
         ], 'JobId');
 
         $this->post(route('admin.jobs.approve', $id))->assertRedirect(route('admin.manage.jobs'));
-        $this->assertSame('Approved', DB::table('job_master')->where('JobId', $id)->value('Status'));
+        $this->assertSame('approved', DB::table('job_master')->where('JobId', $id)->value('Status'));
         $this->post(route('admin.jobs.reject', $id))->assertRedirect(route('admin.manage.jobs'));
-        $this->assertSame('Rejected', DB::table('job_master')->where('JobId', $id)->value('Status'));
+        $this->assertSame('rejected', DB::table('job_master')->where('JobId', $id)->value('Status'));
+    }
+
+    public function test_pending_job_details_include_named_approve_and_reject_actions(): void
+    {
+        $id = DB::table('job_master')->insertGetId([
+            'CompanyName' => 'Example', 'JobTitle' => 'Engineer', 'Vacancy' => 1,
+            'MinQualification' => 'Graduate', 'Description' => 'Role', 'Status' => 'Pending',
+        ], 'JobId');
+
+        $this->get(route('admin.manage.jobs'))
+            ->assertOk()
+            ->assertSee('Approve Job')
+            ->assertSee('Reject Job')
+            ->assertSee(route('admin.jobs.approve', ['id' => '__JOB_ID__']), false)
+            ->assertSee(route('admin.jobs.reject', ['id' => '__JOB_ID__']), false);
+    }
+
+    public function test_admin_job_status_filter_matches_status_case_insensitively(): void
+    {
+        DB::table('job_master')->insert([
+            'CompanyName' => 'Example', 'JobTitle' => 'Engineer', 'Vacancy' => 1,
+            'MinQualification' => 'Graduate', 'Description' => 'Role', 'Status' => 'Pending',
+        ]);
+
+        $this->get(route('admin.manage.jobs', ['status' => 'pending']))
+            ->assertOk()
+            ->assertSee('Engineer');
     }
 
     public function test_admin_document_status_and_protected_view_use_private_storage(): void

@@ -50,7 +50,7 @@ th,
 label,
 small,
 span {
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 button,
@@ -234,7 +234,7 @@ th {
 .dropdown-menu,
 .employer-dropdown-menu {
     max-width: calc(100vw - 1rem);
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 @media (max-width: 767.98px) {
@@ -412,6 +412,226 @@ th {
 
     #page {
         padding: 1.25rem var(--cn-page-gutter);
+    }
+}
+
+/* Home page layout refinements. Keep these after the shared rules so they
+   override the legacy fixed desktop spacing only on smaller screens. */
+#main,
+#main * {
+    min-width: 0;
+}
+
+#main .article h2 {
+    font-size: clamp(1.35rem, 2.6vw, 2rem);
+    line-height: 1.2;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.7rem;
+}
+
+#main .article p {
+    font-size: clamp(0.9rem, 1.1vw, 1rem);
+    line-height: 1.6;
+    margin-bottom: 0.9rem;
+    overflow-wrap: anywhere;
+}
+
+#main .article .welcome-letter {
+    font-size: clamp(0.98rem, 1.4vw, 1.1rem);
+}
+
+#main .feature-card h3,
+#main #col-in h3 {
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    line-height: 1.3;
+}
+
+#main .feature-card p,
+#main #col-in ul li a,
+#main .footer-section,
+#main .footer-bottom {
+    font-size: clamp(0.82rem, 1vw, 0.92rem);
+    line-height: 1.5;
+}
+
+#main .nav-links a,
+#main .auth-buttons a {
+    font-size: clamp(0.82rem, 1vw, 0.95rem);
+}
+
+@media (max-width: 767.98px) {
+    #main {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+    }
+
+    .modern-header {
+        padding: 1.5rem var(--cn-page-gutter);
+    }
+
+    .header-content {
+        gap: 0.75rem;
+    }
+
+    .logo .brand-logo {
+        --brand-size: clamp(1.35rem, 6vw, 1.8rem);
+    }
+
+    .header-stats h2 {
+        margin: 0;
+        font-size: clamp(0.95rem, 4vw, 1.15rem);
+        line-height: 1.45;
+    }
+
+    .header-stats h2 p {
+        margin: 0;
+    }
+
+    .modern-menu {
+        position: relative;
+        padding: 0.75rem var(--cn-page-gutter);
+    }
+
+    .menu-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.65rem;
+    }
+
+    .public-navigation.is-open {
+        padding: 0.5rem 0 0.25rem;
+    }
+
+    .nav-links,
+    .auth-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+        gap: 0.5rem;
+        margin: 0;
+    }
+
+    .nav-links a,
+    .auth-buttons a {
+        justify-content: center;
+        width: 100%;
+        padding: 0.65rem 0.5rem;
+        text-align: center;
+    }
+
+    #page {
+        padding: 1rem var(--cn-page-gutter);
+    }
+
+    #page-in {
+        gap: 1rem;
+    }
+
+    #content,
+    #col {
+        padding: clamp(1rem, 4vw, 1.5rem);
+        border-radius: 0.85rem;
+    }
+
+    .article h2 {
+        font-size: clamp(1.3rem, 5.5vw, 1.65rem);
+        line-height: 1.2;
+    }
+
+    .welcome-letter {
+        font-size: 0.98rem;
+    }
+
+    .article p {
+        font-size: 0.9rem;
+        line-height: 1.55;
+        margin-bottom: 0.8rem;
+    }
+
+    .feature-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin: 1.25rem 0;
+    }
+
+    .feature-card {
+        min-width: 0;
+        padding: 1rem 0.75rem;
+    }
+
+    .feature-card h3 {
+        font-size: 0.95rem;
+        line-height: 1.25;
+    }
+
+    .feature-card p {
+        font-size: 0.8rem;
+        line-height: 1.45;
+    }
+
+    #col-in ul li a {
+        min-height: 2.75rem;
+    }
+
+    .alert-input {
+        align-items: stretch;
+    }
+
+    .alert-input button {
+        flex: 0 0 2.75rem;
+        padding-inline: 0.75rem;
+    }
+
+    .modern-footer {
+        padding: 1.5rem var(--cn-page-gutter);
+    }
+
+    .footer-content {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .feature-grid,
+    .footer-content {
+        grid-template-columns: 1fr;
+    }
+
+    .feature-card {
+        text-align: left;
+        padding: 0.85rem 1rem;
+    }
+
+    #main .article h2 {
+        font-size: 1.3rem;
+    }
+
+    #main .article p {
+        font-size: 0.875rem;
+    }
+
+    #main #col-in ul li a {
+        font-size: 0.875rem;
+        line-height: 1.4;
+    }
+
+    .feature-card i {
+        margin-bottom: 0.5rem;
+    }
+
+    .article > div[style*="text-align: center"] .btn-register {
+        display: flex !important;
+        width: 100%;
+        justify-content: center;
+        padding-inline: 1rem !important;
+        font-size: 1rem !important;
+    }
+
+    .footer-bottom {
+        font-size: 0.8rem;
+        line-height: 1.6;
     }
 }
 

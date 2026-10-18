@@ -19,7 +19,7 @@ class ManageJobsController extends Controller
 
         $jobs = DB::table('job_master')
             ->when($filterStatus !== 'all', function ($query) use ($filterStatus) {
-                $query->where('Status', $filterStatus);
+                $query->whereRaw('LOWER(Status) = ?', [$filterStatus]);
             })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
@@ -35,15 +35,15 @@ class ManageJobsController extends Controller
             'total' => DB::table('job_master')->count(),
 
             'pending' => DB::table('job_master')
-                ->where('Status', 'pending')
+                ->whereRaw('LOWER(Status) = ?', ['pending'])
                 ->count(),
 
             'approved' => DB::table('job_master')
-                ->where('Status', 'approved')
+                ->whereRaw('LOWER(Status) = ?', ['approved'])
                 ->count(),
 
             'rejected' => DB::table('job_master')
-                ->where('Status', 'rejected')
+                ->whereRaw('LOWER(Status) = ?', ['rejected'])
                 ->count(),
         ];
 
