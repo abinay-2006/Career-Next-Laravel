@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Application;
 use App\Models\Job;
+use App\Services\ActivityLogger;
 
 class JobApplicationController extends Controller
 {
@@ -27,12 +28,14 @@ class JobApplicationController extends Controller
             return back()->with('error', 'You have already applied for this job.');
         }
 
-        Application::create([
+        $application = Application::create([
             'JobSeekId'   => $jobSeeker->JobSeekId,
             'JobId'       => $job->JobId,
             'Status'      => 'Pending',
             'Description' => 'Application Submitted',
+            'ApplicationDate' => now(),
         ]);
+        app(ActivityLogger::class)->record('application_submitted', 'application', $application->ApplicationId, $job->JobId);
 
         return back()->with('success', 'Application submitted successfully.');
     }

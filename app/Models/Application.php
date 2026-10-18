@@ -17,6 +17,7 @@ class Application extends Model
         'JobId',
         'Status',
         'Description',
+        'ApplicationDate',
     ];
 
     public function job()

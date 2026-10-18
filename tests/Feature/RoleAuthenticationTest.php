@@ -65,7 +65,7 @@ class RoleAuthenticationTest extends TestCase
             ->assertRedirect(route('admin.index'));
 
         $this->get(route('admin.index'))->assertOk();
-        $this->get(route('employer.dashboard'))->assertRedirect(route('login'));
+        $this->get(route('employer.dashboard'))->assertForbidden();
     }
 
     public function test_employer_can_login_by_email_and_access_only_employer_routes(): void
@@ -74,8 +74,8 @@ class RoleAuthenticationTest extends TestCase
             ->assertRedirect(route('employer.dashboard'));
 
         $this->get(route('employer.dashboard'))->assertOk();
-        $this->get(route('admin.index'))->assertRedirect(route('login'));
-        $this->get(route('jobseeker.index'))->assertRedirect(route('login'));
+        $this->get(route('admin.index'))->assertForbidden();
+        $this->get(route('jobseeker.index'))->assertForbidden();
     }
 
     public function test_jobseeker_can_login_by_username_and_cross_role_access_is_rejected(): void
@@ -84,8 +84,8 @@ class RoleAuthenticationTest extends TestCase
             ->assertRedirect(route('jobseeker.index'));
 
         $this->get(route('jobseeker.index'))->assertOk();
-        $this->get(route('employer.dashboard'))->assertRedirect(route('login'));
-        $this->get(route('admin.index'))->assertRedirect(route('login'));
+        $this->get(route('employer.dashboard'))->assertForbidden();
+        $this->get(route('admin.index'))->assertForbidden();
     }
 
     public function test_wrong_password_and_inactive_status_do_not_authenticate(): void

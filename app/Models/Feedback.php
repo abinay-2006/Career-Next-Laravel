@@ -14,6 +14,7 @@ class Feedback extends Model
 
     protected $fillable = [
         'JobSeekId',
+        'EmployerId',
         'Feedback',
         'FeedbakDate',
     ];
