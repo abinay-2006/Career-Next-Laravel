@@ -40,7 +40,8 @@ class LoginController extends Controller
             'cmbUser' => 'required',
         ]);
 
-        $username = $request->txtUser;
+        $username = trim($request->txtUser);
+        $normalizedUsername = mb_strtolower($username);
         $password = $request->txtPass;
         $type = $request->cmbUser;
 
@@ -91,12 +92,9 @@ class LoginController extends Controller
         */
             case 'Employer':
 
-                $employer = Employer::where(function ($query) use ($username) {
-                    $query->where('UserName', $username)
-                        ->orWhere('Email', $username);
-                })->first();
+                $employer = $this->findAccountByLogin(Employer::query(), $normalizedUsername);
 
-                if ($employer && Hash::check($password, $employer->Password)) {
+                if ($employer && Hash::check($password, $employer->getAuthPassword())) {
 
                     $status = strtolower(trim($employer->Status ?? ''));
 
@@ -143,12 +141,9 @@ class LoginController extends Controller
         */
             case 'JobSeeker':
 
-                $jobSeeker = JobSeeker::where(function ($query) use ($username) {
-                    $query->where('UserName', $username)
-                        ->orWhere('Email', $username);
-                })->first();
+                $jobSeeker = $this->findAccountByLogin(JobSeeker::query(), $normalizedUsername);
 
-                if ($jobSeeker && Hash::check($password, $jobSeeker->Password)) {
+                if ($jobSeeker && Hash::check($password, $jobSeeker->getAuthPassword())) {
 
                     $status = strtolower(trim($jobSeeker->Status ?? ''));
 
@@ -249,5 +244,21 @@ class LoginController extends Controller
         }
 
         $request->session()->forget(['UserType', 'ID', 'Name']);
+    }
+
+    /**
+     * Find an account by username or email without depending on database
+     * collation (MySQL and PostgreSQL handle case sensitivity differently).
+     */
+    private function findAccountByLogin($query, string $login)
+    {
+        $grammar = $query->getQuery()->getGrammar();
+        $usernameColumn = $grammar->wrap('UserName');
+        $emailColumn = $grammar->wrap('Email');
+
+        return $query->where(function ($query) use ($usernameColumn, $emailColumn, $login) {
+            $query->whereRaw("LOWER({$usernameColumn}) = ?", [$login])
+                ->orWhereRaw("LOWER({$emailColumn}) = ?", [$login]);
+        })->first();
     }
 }
