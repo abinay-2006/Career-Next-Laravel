@@ -341,8 +341,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         const jobs = @json($jobs -> values());
 
-        const approveJobUrlTemplate = @json(route('admin.jobs.approve', ['id' => '__JOB_ID__']));
-        const rejectJobUrlTemplate = @json(route('admin.jobs.reject', ['id' => '__JOB_ID__']));
+        const approveJobUrlTemplate = @json(route('admin.jobs.approve', ['id' => 'JOBIDPLACEHOLDER']));
+        const rejectJobUrlTemplate = @json(route('admin.jobs.reject', ['id' => 'JOBIDPLACEHOLDER']));
 
         let activeJobId = null;
         let activeAction = null;
@@ -460,7 +460,7 @@
                 approveJobUrlTemplate :
                 rejectJobUrlTemplate;
 
-            actionForm.action = urlTemplate.replace('__JOB_ID__', encodedId);
+            actionForm.action = urlTemplate.replace('JOBIDPLACEHOLDER', encodedId);
 
             confirmButton.disabled = false;
             confirmButton.className = config.buttonClass;

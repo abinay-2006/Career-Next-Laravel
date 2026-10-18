@@ -665,7 +665,6 @@ class RegisterController extends Controller
                 'Registration OTP delivery failed.',
                 [
                     'exception' => get_class($e),
-                    'message' => $e->getMessage(),
                 ]
             );
 
@@ -676,14 +675,10 @@ class RegisterController extends Controller
                         'password_confirmation',
                         'otp',
                     ]))
-                    ->withErrors([
-                        'email' => get_class($e) . ': ' . $e->getMessage(),
-                    ]);
+                    ->with('error', 'We could not send your verification code. Please try again.');
             }
 
-            return back()->withErrors([
-                'email' => 'We could not send your verification code. Please try again.',
-            ]);
+            return back()->with('error', 'We could not send your verification code. Please try again.');
         }
         // Store the code only after delivery succeeds, so the user never
         // reaches verification with a code that was not sent.
@@ -886,7 +881,8 @@ class RegisterController extends Controller
         |--------------------------------------------------------------------------
         */
 
-            DB::transaction(function () use ($registration): void {
+            $createdAccountId = null;
+            DB::transaction(function () use ($registration, &$createdAccountId): void {
                 if (
                     $registration['account_type'] === 'JobSeeker'
                 ) {
@@ -907,7 +903,7 @@ class RegisterController extends Controller
                         $registration['professional'];
 
 
-                    JobSeeker::create([
+                    $createdAccount = JobSeeker::create([
 
                         'JobSeekerName' =>
                         $registration['name'],
@@ -936,7 +932,7 @@ class RegisterController extends Controller
                         'Resume' =>
                         $professional['resume'] ?? null,
 
-                        'Status' => 'pending',
+                        'Status' => 'Pending',
 
                         'UserName' =>
                         $registration['username'],
@@ -954,6 +950,7 @@ class RegisterController extends Controller
                         $professional['photo'] ?? null,
 
                     ]);
+                    $createdAccountId = $createdAccount->getKey();
                 }
 
 
@@ -978,7 +975,7 @@ class RegisterController extends Controller
                         $registration['profile'];
 
 
-                    Employer::create([
+                    $createdAccount = Employer::create([
 
                         'CompanyName' =>
                         $registration['name'],
@@ -1001,7 +998,7 @@ class RegisterController extends Controller
                         'Area_Work' =>
                         $profile['area_work'],
 
-                        'Status' => 'pending',
+                        'Status' => 'Pending',
 
                         'UserName' =>
                         $registration['username'],
@@ -1016,6 +1013,7 @@ class RegisterController extends Controller
                         null,
 
                     ]);
+                    $createdAccountId = $createdAccount->getKey();
                 }
 
 
@@ -1038,6 +1036,12 @@ class RegisterController extends Controller
 
             return back()->with('error', 'We could not create your account right now. Your details have not been submitted; please try again.');
         }
+
+        app(\App\Services\ActivityLogger::class)->record(
+            'account_registered',
+            strtolower($registration['account_type']),
+            (int) $createdAccountId
+        );
 
 
         /*

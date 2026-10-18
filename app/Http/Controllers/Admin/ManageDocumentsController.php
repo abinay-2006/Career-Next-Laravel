@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Support\PrivateUpload;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\ActivityLogger;
 
 class ManageDocumentsController extends Controller
 {
@@ -72,7 +73,10 @@ class ManageDocumentsController extends Controller
     public function approve(int $id)
     {
         $updated = DB::table('jobseeker_documents')->where('DocId', $id)->exists();
-        if ($updated) DB::table('jobseeker_documents')->where('DocId', $id)->update(['VerificationStatus' => 'approved']);
+        if ($updated) {
+            DB::table('jobseeker_documents')->where('DocId', $id)->update(['VerificationStatus' => 'approved']);
+            app(ActivityLogger::class)->record('document_approved', 'document', (int) $id);
+        }
 
         if (!$updated) {
             return redirect()
@@ -88,7 +92,10 @@ class ManageDocumentsController extends Controller
     public function reject(int $id)
     {
         $updated = DB::table('jobseeker_documents')->where('DocId', $id)->exists();
-        if ($updated) DB::table('jobseeker_documents')->where('DocId', $id)->update(['VerificationStatus' => 'rejected']);
+        if ($updated) {
+            DB::table('jobseeker_documents')->where('DocId', $id)->update(['VerificationStatus' => 'rejected']);
+            app(ActivityLogger::class)->record('document_rejected', 'document', (int) $id);
+        }
 
         if (!$updated) {
             return redirect()

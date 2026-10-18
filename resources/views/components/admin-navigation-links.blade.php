@@ -4,6 +4,9 @@
         ['Manage Users', 'admin.manageUsers', ['admin.manageUsers'], 'fas fa-users'],
         ['Manage Jobs', 'admin.manage.jobs', ['admin.manage.jobs'], 'fas fa-briefcase'],
         ['Manage Documents', 'admin.manage.documents', ['admin.manage.documents'], 'fas fa-file-lines'],
+        ['News', 'admin.news.index', ['admin.news.*'], 'fas fa-newspaper'],
+        ['Feedback', 'admin.feedback.index', ['admin.feedback.*'], 'fas fa-comment'],
+        ['Activity Logs', 'admin.logs.index', ['admin.logs.*'], 'fas fa-clipboard-list'],
     ];
 @endphp
 

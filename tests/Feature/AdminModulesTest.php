@@ -42,7 +42,7 @@ class AdminModulesTest extends TestCase
         $admin = new Admin(['UserName' => 'test-admin']);
         $admin->UserId = 1;
         $this->actingAs($admin, 'admin');
-        Storage::fake('local');
+        Storage::fake(config('filesystems.default'));
     }
 
     public function test_admin_user_actions_update_only_the_requested_record(): void
@@ -87,8 +87,8 @@ class AdminModulesTest extends TestCase
             ->assertOk()
             ->assertSee('Approve Job')
             ->assertSee('Reject Job')
-            ->assertSee(route('admin.jobs.approve', ['id' => '__JOB_ID__']), false)
-            ->assertSee(route('admin.jobs.reject', ['id' => '__JOB_ID__']), false);
+            ->assertSee(json_encode(route('admin.jobs.approve', ['id' => 'JOBIDPLACEHOLDER'])), false)
+            ->assertSee(json_encode(route('admin.jobs.reject', ['id' => 'JOBIDPLACEHOLDER'])), false);
     }
 
     public function test_admin_job_status_filter_matches_status_case_insensitively(): void
@@ -105,13 +105,13 @@ class AdminModulesTest extends TestCase
 
     public function test_admin_document_status_and_protected_view_use_private_storage(): void
     {
-        Storage::disk('local')->put('documents/test.pdf', '%PDF-1.4 test');
+        Storage::disk(config('filesystems.default'))->put('documents/test.pdf', '%PDF-1.4 test');
         $id = DB::table('jobseeker_documents')->insertGetId([
             'JobSeekId' => 1, 'DocumentType' => 'resume', 'FileName' => 'documents/test.pdf',
             'OriginalFileName' => 'resume.pdf', 'UploadDate' => now(), 'VerificationStatus' => 'pending',
         ], 'DocId');
 
-        $this->get(route('admin.documents.view', $id))->assertOk()->assertHeader('cache-control', 'private, no-store');
+        $this->get(route('admin.documents.view', $id))->assertOk()->assertHeader('cache-control', 'no-store, private');
         $this->post(route('admin.documents.approve', $id))->assertRedirect(route('admin.manage.documents'));
         $this->assertSame('approved', DB::table('jobseeker_documents')->where('DocId', $id)->value('VerificationStatus'));
     }

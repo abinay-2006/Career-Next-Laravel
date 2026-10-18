@@ -2,11 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Mail\RegistrationOtpMail;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -55,7 +54,7 @@ class RegistrationPersistenceTest extends TestCase
 
     public function test_job_seeker_review_sends_otp_and_redirects_to_verify_with_registration_session(): void
     {
-        Mail::fake();
+        Http::fake(['api.brevo.com/*' => Http::response(['messageId' => 'test'], 201)]);
         $registration = $this->jobSeekerRegistration();
 
         $this->withSession(['registration' => $registration])
@@ -65,13 +64,13 @@ class RegistrationPersistenceTest extends TestCase
             ->assertSessionHas('registration.email', 'seeker@example.test')
             ->assertSessionHas('registration.otp');
 
-        Mail::assertSent(RegistrationOtpMail::class, fn ($mail) => $mail->hasTo('seeker@example.test'));
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'api.brevo.com/v3/smtp/email') && $request['to'][0]['email'] === 'seeker@example.test');
         $this->get(route('register.verify'))->assertOk()->assertSee('Verify your email');
     }
 
     public function test_employer_review_sends_otp_and_redirects_to_verify_with_registration_session(): void
     {
-        Mail::fake();
+        Http::fake(['api.brevo.com/*' => Http::response(['messageId' => 'test'], 201)]);
         $registration = $this->employerRegistration();
 
         $this->withSession(['registration' => $registration])
@@ -81,13 +80,13 @@ class RegistrationPersistenceTest extends TestCase
             ->assertSessionHas('registration.email', 'hr@example.test')
             ->assertSessionHas('registration.otp');
 
-        Mail::assertSent(RegistrationOtpMail::class, fn ($mail) => $mail->hasTo('hr@example.test'));
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'api.brevo.com/v3/smtp/email') && $request['to'][0]['email'] === 'hr@example.test');
         $this->get(route('register.verify'))->assertOk()->assertSee('Verify your email');
     }
 
     public function test_review_confirmation_validation_failure_does_not_send_otp(): void
     {
-        Mail::fake();
+        Http::fake(['api.brevo.com/*' => Http::response(['messageId' => 'test'], 201)]);
 
         $this->withSession(['registration' => $this->jobSeekerRegistration()])
             ->from(route('register.review'))
@@ -96,13 +95,12 @@ class RegistrationPersistenceTest extends TestCase
             ->assertSessionHasErrors('confirm_details')
             ->assertSessionMissing('registration.otp');
 
-        Mail::assertNothingSent();
+        Http::assertNothingSent();
     }
 
     public function test_mail_failure_returns_to_review_without_storing_an_unsent_otp(): void
     {
-        Mail::shouldReceive('to')->once()->with('seeker@example.test')->andReturnSelf();
-        Mail::shouldReceive('send')->once()->andThrow(new \RuntimeException('SMTP unavailable'));
+        Http::fake(['api.brevo.com/*' => Http::response(['message' => 'delivery failed'], 500)]);
 
         $this->withSession(['registration' => $this->jobSeekerRegistration()])
             ->from(route('register.review'))

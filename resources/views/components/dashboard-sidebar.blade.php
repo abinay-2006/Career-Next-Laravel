@@ -5,6 +5,9 @@
             ['Manage Users', 'admin.manageUsers', 'fas fa-users'],
             ['Manage Jobs', 'admin.manage.jobs', 'fas fa-briefcase'],
             ['Manage Documents', 'admin.manage.documents', 'fas fa-file-lines'],
+            ['News', 'admin.news.index', 'fas fa-newspaper'],
+            ['Feedback', 'admin.feedback.index', 'fas fa-comment'],
+            ['Activity Logs', 'admin.logs.index', 'fas fa-clipboard-list'],
         ],
         'employer' => [
             ['Dashboard', 'employer.dashboard', 'fas fa-house'],
@@ -12,6 +15,7 @@
             ['Manage Jobs', 'employer.jobs.index', 'fas fa-briefcase'],
             ['Applications', 'employer.applications.index', 'fas fa-user-check'],
             ['Walk-in Interviews', 'employer.walkins.index', 'fas fa-calendar'],
+            ['Career News', 'news.index', 'fas fa-newspaper'],
         ],
         'jobseeker' => [
             ['Dashboard', 'jobseeker.index', 'fas fa-house'],
@@ -19,6 +23,9 @@
             ['Walk-in Interviews', 'jobseeker.walkins', 'fas fa-calendar'],
             ['Profile', 'jobseeker.profile.index', 'fas fa-user'],
             ['Education & Documents', 'jobseeker.education', 'fas fa-graduation-cap'],
+            ['My Applications', 'jobseeker.applications.index', 'fas fa-clock-rotate-left'],
+            ['Feedback', 'jobseeker.feedback.create', 'fas fa-comment'],
+            ['Career News', 'news.index', 'fas fa-newspaper'],
         ],
     ];
 @endphp
@@ -36,6 +43,8 @@
                     'jobseeker.jobs' => 'jobseeker.jobs*',
                     'jobseeker.profile.index' => 'jobseeker.profile.*',
                     'jobseeker.education' => 'jobseeker.education*',
+                    'jobseeker.applications.index' => 'jobseeker.applications.*',
+                    'jobseeker.feedback.create' => 'jobseeker.feedback.*',
                     default => $routeName,
                 };
             @endphp

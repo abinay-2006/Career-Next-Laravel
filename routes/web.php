@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Employer\EmployerController;
 use App\Http\Controllers\JobSeeker\JobSeekerController;
@@ -19,6 +20,12 @@ use App\Http\Controllers\JobSeeker\JobSeekerWalkinController;
 use App\Http\Controllers\JobSeeker\JobApplicationController;
 use App\Http\Controllers\Employer\EmployerProfileController;
 use App\Http\Controllers\JobSeeker\JobSeekerProfileController;
+use App\Http\Controllers\JobSeeker\ApplicationHistoryController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\NewsController;
+use App\Http\Controllers\Admin\ManageNewsController;
+use App\Http\Controllers\Admin\ManageFeedbackController;
+use App\Http\Controllers\Admin\ActivityLogController;
 
 // Route
 
@@ -35,9 +42,12 @@ Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout');
 
 
-Route::get('/forgot', function () {
-    return 'Forgot Password Page - Coming Soon';
-})->name('forgot');
+Route::get('/forgot', [PasswordResetController::class, 'show'])->name('forgot');
+Route::post('/forgot', [PasswordResetController::class, 'sendLink'])->middleware('throttle:3,1')->name('forgot.send');
+Route::get('/forgot/{token}', [PasswordResetController::class, 'showReset'])->name('forgot.token');
+Route::post('/forgot/{token}', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:6,1')->name('forgot.reset');
+Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+Route::get('/news/{news}', [NewsController::class, 'show'])->name('news.show');
 
 // ═══════════════════════════════════════════════════════════════
 // Registration Routes
@@ -151,12 +161,18 @@ Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function
 
     Route::post('/manage-documents/{id}/reject', [ManageDocumentsController::class, 'reject'])
         ->name('documents.reject');
+    Route::resource('news', ManageNewsController::class)->except(['create', 'edit'])->names('news');
+    Route::get('/feedback', [ManageFeedbackController::class, 'index'])->name('feedback.index');
+    Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('logs.index');
 });
 //Employer Routes
 Route::prefix('employer')
     ->name('employer.')
     ->middleware('role:employer')
     ->group(function () {
+
+        Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
+        Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:5,10')->name('feedback.store');
 
         Route::get('/', [EmployerController::class, 'index'])
             ->name('dashboard');
@@ -217,6 +233,10 @@ Route::prefix('jobseeker')
 
         Route::get('/', [JobSeekerController::class, 'index'])
             ->name('index');
+        Route::get('/applications', [ApplicationHistoryController::class, 'index'])->name('applications.index');
+        Route::get('/applications/{application}', [ApplicationHistoryController::class, 'show'])->name('applications.show');
+        Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
+        Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:5,10')->name('feedback.store');
 
         //Education Routes
         Route::get('/education', [EducationController::class, 'index'])

@@ -11,6 +11,7 @@ use App\Models\JobSeeker;
 use App\Models\Admin;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Services\ActivityLogger;
 class LoginController extends Controller
 {
     /**
@@ -75,6 +76,7 @@ class LoginController extends Controller
                         'UserType' => 'Administrator',
                         'Name' => $user->UserName,
                     ]);
+                    app(ActivityLogger::class)->record('login_succeeded', 'admin', $user->getKey());
 
                     return redirect()->route('admin.index')->with('success', 'You have signed in successfully.');
                 }
@@ -126,6 +128,7 @@ class LoginController extends Controller
                         'ID' => $employer->EmployerId,
                         'Name' => $employer->CompanyName,
                     ]);
+                    app(ActivityLogger::class)->record('login_succeeded', 'employer', $employer->getKey());
 
                     return redirect()->route('employer.dashboard')->with('success', 'You have signed in successfully.');
                 }
@@ -177,6 +180,7 @@ class LoginController extends Controller
                         'ID' => $jobSeeker->JobSeekId,
                         'Name' => $jobSeeker->JobSeekerName,
                     ]);
+                    app(ActivityLogger::class)->record('login_succeeded', 'jobseeker', $jobSeeker->getKey());
 
                     return redirect()->route('jobseeker.index')->with('success', 'You have signed in successfully.');
                 }
@@ -188,6 +192,7 @@ class LoginController extends Controller
             'correlation_id' => $correlationId,
             'type' => $type,
         ]);
+        app(ActivityLogger::class)->record('login_failed', 'account', null, null, ['account_type' => $type]);
 
         return back()
             ->withInput($request->only('txtUser', 'cmbUser'))
@@ -199,6 +204,7 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
+        app(ActivityLogger::class)->record('logout', 'account');
         /*
         |--------------------------------------------------------------------------
         | Logout from Laravel guards

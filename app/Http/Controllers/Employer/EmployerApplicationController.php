@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Application;
 use App\Models\Job;
 use App\Support\PrivateUpload;
+use App\Services\ActivityLogger;
 
 class EmployerApplicationController extends Controller
 {
@@ -129,10 +130,12 @@ class EmployerApplicationController extends Controller
             abort(403, 'Unauthorized');
         }
 
+        $previousStatus = $application->Status;
         $application->update([
             'Status' => $request->Status,
             'Description' => $request->Description,
         ]);
+        app(ActivityLogger::class)->record('application_status_changed', 'application', $application->ApplicationId, $application->JobId, ['from' => $previousStatus, 'to' => $application->Status]);
 
         return redirect()
             ->route(

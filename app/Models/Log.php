@@ -16,5 +16,10 @@ class Log extends Model
         'JobId',
         'action',
         'cdate',
+        'actor_type',
+        'actor_id',
+        'target_type',
+        'target_id',
+        'metadata',
     ];
 }

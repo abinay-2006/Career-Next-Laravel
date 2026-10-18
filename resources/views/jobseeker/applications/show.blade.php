@@ -1,0 +1,5 @@
+@extends('layouts.jobseeker')
+@section('title', 'Application Details')
+@section('content')
+<div class="main-content"><div class="page-header"><div class="page-header-icon"><i class="fas fa-briefcase"></i></div><div class="page-header-text"><h1>Application Details</h1><p>Application #{{ $application->ApplicationId }}</p></div></div><div class="glass-card"><dl class="row mb-0"><dt class="col-sm-3">Job</dt><dd class="col-sm-9">{{ $application->job?->JobTitle ?? 'Job no longer available' }}</dd><dt class="col-sm-3">Company</dt><dd class="col-sm-9">{{ $application->job?->CompanyName ?? '—' }}</dd><dt class="col-sm-3">Application date</dt><dd class="col-sm-9">{{ $application->ApplicationDate ? \Illuminate\Support\Carbon::parse($application->ApplicationDate)->format('M j, Y') : 'Date unavailable' }}</dd><dt class="col-sm-3">Current status</dt><dd class="col-sm-9">{{ $application->Status }}</dd><dt class="col-sm-3">Employer note</dt><dd class="col-sm-9">{{ $application->Description ?: 'No note provided.' }}</dd></dl></div><a class="btn btn-outline-primary mt-3" href="{{ route('jobseeker.applications.index') }}">Back to applications</a></div>
+@endsection

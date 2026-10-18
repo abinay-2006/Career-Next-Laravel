@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\ActivityLogger;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
@@ -145,7 +146,7 @@ class ManageUsersController extends Controller
                 ->with('error', 'Invalid user type.');
         }
 
-        return $this->updateStatus($request, $type, $id, 'confirm', 'Account approved successfully.');
+        return $this->updateStatus($request, $type, $id, 'Confirm', 'Account approved successfully.');
     }
 
 
@@ -161,7 +162,7 @@ class ManageUsersController extends Controller
                 ->with('error', 'Invalid user type.');
         }
 
-        return $this->updateStatus($request, $type, $id, 'suspended', 'Account suspended.');
+        return $this->updateStatus($request, $type, $id, 'Suspended', 'Account suspended.');
     }
 
     public function destroy(Request $request, $type, $id)
@@ -229,6 +230,8 @@ class ManageUsersController extends Controller
         if (!$updated) {
             return response()->json(['success' => false, 'message' => 'Account not found.'], 404);
         }
+
+        app(ActivityLogger::class)->record($status === 'confirm' ? 'account_approved' : 'account_suspended', $type, (int) $id);
 
         return response()->json(['success' => true, 'message' => $message]);
     }

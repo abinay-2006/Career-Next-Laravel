@@ -29,7 +29,7 @@ class EnsureUserRole
         }
 
         if ($role !== 'admin') {
-            $account = Auth::guard($role)->user();
+            $account = Auth::guard($role)->user()?->fresh();
             $status = strtolower(trim((string) ($account?->Status ?? '')));
 
             if (!in_array($status, ['confirm', 'confirmed', 'approved'], true)) {

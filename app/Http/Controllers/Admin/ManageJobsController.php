@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\ActivityLogger;
 
 class ManageJobsController extends Controller
 {
@@ -68,6 +69,7 @@ class ManageJobsController extends Controller
         $exists = DB::table('job_master')->where('JobId', $id)->exists();
         if ($exists) {
             DB::table('job_master')->where('JobId', $id)->update(['Status' => 'approved']);
+            app(ActivityLogger::class)->record('job_approved', 'job', (int) $id, (int) $id);
         }
 
         if (!$exists) {
@@ -87,6 +89,7 @@ class ManageJobsController extends Controller
         $exists = DB::table('job_master')->where('JobId', $id)->exists();
         if ($exists) {
             DB::table('job_master')->where('JobId', $id)->update(['Status' => 'rejected']);
+            app(ActivityLogger::class)->record('job_rejected', 'job', (int) $id, (int) $id);
         }
 
         if (!$exists) {
