@@ -17,6 +17,7 @@ class PasswordRecoveryTest extends TestCase
         parent::setUp();
         Schema::create('jobseeker_reg', function (Blueprint $table): void {
             $table->increments('JobSeekId'); $table->string('Email'); $table->string('Password');
+            $table->string('UserName')->nullable(); $table->string('Status')->nullable();
         });
         Schema::create('employer_reg', function (Blueprint $table): void {
             $table->increments('EmployerId'); $table->string('Email'); $table->string('Password');
@@ -31,18 +32,30 @@ class PasswordRecoveryTest extends TestCase
     public function test_eligible_email_gets_single_use_recovery_and_can_log_in_with_new_password(): void
     {
         $old = Hash::make('OldPassword123');
-        $id = DB::table('jobseeker_reg')->insertGetId(['Email' => 'seeker@example.test', 'Password' => $old]);
+        $id = DB::table('jobseeker_reg')->insertGetId([
+            'Email' => 'seeker@example.test', 'Password' => $old, 'UserName' => 'seeker', 'Status' => 'confirmed',
+        ]);
         Mail::fake();
 
         $this->post(route('forgot.send'), ['email' => 'seeker@example.test'])->assertRedirect();
         Mail::assertSent(PasswordRecoveryMail::class);
         $mail = Mail::sent(PasswordRecoveryMail::class)->first();
-        $token = basename(parse_url($mail->recoveryUrl, PHP_URL_PATH));
+        $otp = $mail->otp;
+
+        $this->get(route('forgot.verify'))->assertOk();
+        $verified = $this->post(route('forgot.verify.submit'), ['otp' => $otp]);
+        $verified->assertRedirect();
+        $token = basename(parse_url($verified->headers->get('Location'), PHP_URL_PATH));
+        $this->assertNotSame('', $token);
+        $this->post(route('forgot.verify.submit'), ['otp' => $otp])->assertRedirect(route('forgot.verify'));
+        $this->get(route('forgot.token', $token))->assertOk();
 
         $this->post(route('forgot.reset', $token), ['password' => 'NewPassword123', 'password_confirmation' => 'NewPassword123'])
             ->assertRedirect(route('login'));
         $this->assertTrue(Hash::check('NewPassword123', DB::table('jobseeker_reg')->where('JobSeekId', $id)->value('Password')));
         $this->assertFalse(Hash::check('OldPassword123', DB::table('jobseeker_reg')->where('JobSeekId', $id)->value('Password')));
+        $this->post('/login', ['txtUser' => 'seeker', 'txtPass' => 'NewPassword123', 'cmbUser' => 'JobSeeker'])
+            ->assertRedirect(route('jobseeker.index'))->assertSessionHas('UserType', 'JobSeeker');
         $this->post(route('forgot.reset', $token), ['password' => 'AnotherPassword123', 'password_confirmation' => 'AnotherPassword123'])
             ->assertRedirect(route('forgot'));
     }
@@ -51,7 +64,12 @@ class PasswordRecoveryTest extends TestCase
     {
         Mail::fake();
         $this->from(route('forgot'))->post(route('forgot.send'), ['email' => 'unknown@example.test'])
-            ->assertRedirect(route('forgot'))->assertSessionHas('status', 'If an eligible account matches that email, a password recovery link will arrive shortly.');
+            ->assertRedirect(route('forgot'))->assertSessionHas('status', 'If an eligible account matches that email, a verification code will arrive shortly.');
         Mail::assertNothingSent();
+
+        DB::table('jobseeker_reg')->insert(['Email' => 'valid@example.test', 'Password' => Hash::make('OldPassword123')]);
+        $this->from(route('forgot'))->post(route('forgot.send'), ['email' => 'valid@example.test'])
+            ->assertRedirect(route('forgot.verify'));
+        Mail::assertSent(PasswordRecoveryMail::class);
     }
 }
