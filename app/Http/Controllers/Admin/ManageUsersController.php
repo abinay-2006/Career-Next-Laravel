@@ -14,11 +14,11 @@ class ManageUsersController extends Controller
     public function index(Request $request)
     {
         $filters = $request->validate([
-            'status' => ['sometimes', 'in:all,confirm,confirmed,approved,pending,suspended'],
+            'status' => ['sometimes', 'in:all,confirm,confirmed,approved,pending,suspended,Confirm,Confirmed,Approved,Pending,Suspended'],
             'type' => ['sometimes', 'in:all,jobseeker,employer'],
             'search' => ['sometimes', 'string', 'max:100'],
         ]);
-        $filterStatus = $filters['status'] ?? 'all';
+        $filterStatus = strtolower($filters['status'] ?? 'all');
         $filterType = $filters['type'] ?? 'all';
         $search = trim($filters['search'] ?? '');
 
@@ -231,7 +231,7 @@ class ManageUsersController extends Controller
             return response()->json(['success' => false, 'message' => 'Account not found.'], 404);
         }
 
-        app(ActivityLogger::class)->record($status === 'confirm' ? 'account_approved' : 'account_suspended', $type, (int) $id);
+        app(ActivityLogger::class)->record(strtolower($status) === 'confirm' ? 'account_approved' : 'account_suspended', $type, (int) $id);
 
         return response()->json(['success' => true, 'message' => $message]);
     }
