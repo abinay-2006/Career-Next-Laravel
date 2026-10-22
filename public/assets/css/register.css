@@ -470,6 +470,14 @@ body {
    ============================================================ */
 
 @media (max-width: 700px) {
+    /* Adjust for renamed wrapper */
+    .register-page, .registration-page {
+        padding: 20px 12px;
+    }
+    .registration-card {
+        padding: 22px 18px;
+        border-radius: 14px;
+    }
     .register-page {
         padding: 20px 12px;
     }
