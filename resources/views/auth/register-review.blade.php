@@ -8,7 +8,8 @@
 
 @section('content')
 
-<div class="registration-page">
+<div class="register-page">
+    <div class="register-container">
 
     <div class="registration-card">
 
