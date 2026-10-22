@@ -210,21 +210,21 @@
                 <div class="review-item">
                     <span>City</span>
                     <strong>
-                        {{ $registration['profile']['city'] }}
+                        {{ $registration['profile']['city'] ?? '' }}
                     </strong>
                 </div>
 
                 <div class="review-item">
                     <span>Gender</span>
                     <strong>
-                        {{ $registration['profile']['gender'] }}
+                        {{ $registration['profile']['gender'] ?? '' }}
                     </strong>
                 </div>
 
                 <div class="review-item">
                     <span>Date of Birth</span>
                     <strong>
-                        {{ \Carbon\Carbon::parse($registration['profile']['birth_date'])->format('d M Y') }}
+                        @if(!empty($registration['profile']['birth_date'])){{ \Carbon\Carbon::parse($registration['profile']['birth_date'])->format('d M Y') }}@else N/A @endif
                     </strong>
                 </div>
 
@@ -251,7 +251,7 @@
                 <div class="review-item">
                     <span>City</span>
                     <strong>
-                        {{ $registration['profile']['city'] }}
+                        {{ $registration['profile']['city'] ?? '' }}
                     </strong>
                 </div>
 
