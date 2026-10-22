@@ -339,22 +339,6 @@
 
             </div>
 
-            @else
-
-            <div class="review-complete">
-
-                <i class="fas fa-check-circle"></i>
-
-                <div>
-                    <strong>Company information completed</strong>
-                    <span>
-                        Your company details are ready for verification.
-                    </span>
-                </div>
-
-            </div>
-
-            @endif
 
         </div>
 
