@@ -71,7 +71,21 @@ class ProfilePhoto
 
         // Older profile rows often contain only the generated filename.
         foreach (['upload/photos/', 'uploads/photos/'] as $legacyDirectory) {
-            $legacyPath = $legacyDirectory.basename($path);
+            // Build a possible legacy location for a bare filename.
+            $legacyPath = $legacyDirectory . basename($path);
+
+            // -----------------------------------------------------------------
+            // Safety checks – allow only image extensions and prevent directory
+            // traversal. `legacyUrl()` already performs a real‑path check, but we
+            // also guard here to avoid unnecessary filesystem calls for obviously
+            // unsafe values.
+            // -----------------------------------------------------------------
+            $extension = strtolower(pathinfo($legacyPath, PATHINFO_EXTENSION));
+            $allowedExtensions = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
+            if (!in_array($extension, $allowedExtensions, true)) {
+                continue;
+            }
+
             if ($url = self::legacyUrl($legacyPath)) {
                 return $url;
             }
