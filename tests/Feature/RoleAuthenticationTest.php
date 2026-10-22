@@ -49,6 +49,7 @@ class RoleAuthenticationTest extends TestCase
         });
         Schema::create('job_master', function (Blueprint $table) {
             $table->increments('JobId');
+            $table->integer('EmployerId')->nullable();
             $table->string('CompanyName');
             $table->string('JobTitle');
             $table->string('Status')->nullable();

@@ -18,7 +18,7 @@ class DashboardAnalyticsController extends Controller
         $employer = Auth::guard('employer')->user();
         abort_unless($employer, 403);
 
-        return response()->json($analytics->employer((string) $employer->CompanyName, $filters['range']));
+        return response()->json($analytics->employer((int) $employer->EmployerId, $filters['range']));
     }
 
     public function jobSeeker(Request $request, DashboardAnalyticsService $analytics): JsonResponse

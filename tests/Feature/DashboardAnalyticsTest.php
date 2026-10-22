@@ -28,6 +28,7 @@ class DashboardAnalyticsTest extends TestCase
         });
         Schema::create('job_master', function (Blueprint $table): void {
             $table->increments('JobId');
+            $table->integer('EmployerId')->nullable();
             $table->string('CompanyName');
             $table->string('JobTitle');
             $table->string('Status')->nullable();
@@ -54,11 +55,12 @@ class DashboardAnalyticsTest extends TestCase
         });
     }
 
-    public function test_employer_analytics_only_include_jobs_and_applications_for_the_employers_company(): void
+    public function test_employer_analytics_only_include_jobs_and_applications_owned_by_the_employer(): void
     {
         $employerId = DB::table('employer_reg')->insertGetId(['CompanyName' => 'Northwind']);
-        $ownJob = DB::table('job_master')->insertGetId(['CompanyName' => 'Northwind', 'JobTitle' => 'Analyst', 'Status' => 'approved']);
-        $otherJob = DB::table('job_master')->insertGetId(['CompanyName' => 'Private Co', 'JobTitle' => 'Private Role', 'Status' => 'pending']);
+        $sameNameOtherId = DB::table('employer_reg')->insertGetId(['CompanyName' => 'Northwind']);
+        $ownJob = DB::table('job_master')->insertGetId(['EmployerId' => $employerId, 'CompanyName' => 'Northwind', 'JobTitle' => 'Analyst', 'Status' => 'approved']);
+        $otherJob = DB::table('job_master')->insertGetId(['EmployerId' => $sameNameOtherId, 'CompanyName' => 'Northwind', 'JobTitle' => 'Private Role', 'Status' => 'pending']);
         DB::table('application_master')->insert([
             ['JobSeekId' => 1, 'JobId' => $ownJob, 'Status' => 'Pending', 'Description' => '', 'ApplicationDate' => now()],
             ['JobSeekId' => 2, 'JobId' => $otherJob, 'Status' => 'Accepted', 'Description' => '', 'ApplicationDate' => now()],

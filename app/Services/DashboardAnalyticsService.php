@@ -9,10 +9,10 @@ use Illuminate\Support\Carbon;
 
 class DashboardAnalyticsService
 {
-    public function employer(string $companyName, string $range = '30'): array
+    public function employer(int $employerId, string $range = '30'): array
     {
         [$start, $end] = $this->rangeBounds($range);
-        $jobs = Job::query()->where('CompanyName', $companyName);
+        $jobs = Job::query()->where('EmployerId', $employerId);
 
         $jobStatuses = $this->normalizeStatuses(
             (clone $jobs)->selectRaw("LOWER(TRIM(COALESCE(Status, ''))) as status_key, COUNT(*) as total")
@@ -33,7 +33,7 @@ class DashboardAnalyticsService
 
         $recentApplications = Application::query()
             ->join('job_master', 'application_master.JobId', '=', 'job_master.JobId')
-            ->where('job_master.CompanyName', $companyName)
+            ->where('job_master.EmployerId', $employerId)
             ->select('application_master.ApplicationId', 'application_master.Status', 'application_master.ApplicationDate', 'job_master.JobTitle')
             ->orderByDesc('application_master.ApplicationDate')->orderByDesc('application_master.ApplicationId')
             ->limit(5)->get()
@@ -46,7 +46,7 @@ class DashboardAnalyticsService
 
         $applicationsByJob = Job::query()
             ->leftJoin('application_master', 'job_master.JobId', '=', 'application_master.JobId')
-            ->where('job_master.CompanyName', $companyName)
+            ->where('job_master.EmployerId', $employerId)
             ->select('job_master.JobId', 'job_master.JobTitle')
             ->selectRaw('COUNT(application_master.ApplicationId) as application_count')
             ->groupBy('job_master.JobId', 'job_master.JobTitle')

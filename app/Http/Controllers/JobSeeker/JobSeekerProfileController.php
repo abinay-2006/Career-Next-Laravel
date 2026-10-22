@@ -7,12 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\JobSeeker;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\JobSeekerDocument;
 use App\Support\ProfilePhoto;
+use App\Support\UploadStorage;
 
 class JobSeekerProfileController extends Controller
 {
@@ -297,30 +296,32 @@ class JobSeekerProfileController extends Controller
         if ($request->hasFile('Photo')) {
             try {
                 $photo = $request->file('Photo');
-                $disk = Storage::disk('public');
+                $diskName = UploadStorage::publicDiskName();
 
-                // Generate a unique filename
-                $fileName = 'profile_' . $jobSeeker->JobSeekId . '_' . time() . '.' . $photo->getClientOriginalExtension();
-
-                // Delete old photo if it exists
+                $fileName = 'profile_' . $jobSeeker->JobSeekId . '_' . \Illuminate\Support\Str::uuid() . '.' . $photo->getClientOriginalExtension();
                 $oldPath = ProfilePhoto::path($jobSeeker->Photo);
-                if ($oldPath && $disk->exists($oldPath)) {
-                    $disk->delete($oldPath);
-                }
-
-
-                // Store the new photo
-                $storedPath = $photo->storeAs('photos', $fileName, 'public');
-                if (!$storedPath) {
-                    throw new \RuntimeException('The profile photo could not be written to the public disk.');
-                }
-
-
-                // Save the filename in DB
+                $storedPath = UploadStorage::storeAs($photo, 'photos', $fileName, $diskName);
                 $jobSeeker->Photo = $storedPath;
+
+                try {
+                    DB::transaction(function () use ($jobSeeker): void {
+                        if (!$jobSeeker->save()) {
+                            throw new \RuntimeException('Profile update was not persisted.');
+                        }
+                    });
+                } catch (\Throwable $e) {
+                    if (!$oldPath || $oldPath !== $storedPath) {
+                        UploadStorage::deleteBestEffort($diskName, $storedPath, 'failed job seeker photo update cleanup');
+                    }
+                    throw $e;
+                }
+
+                if ($oldPath && $oldPath !== $storedPath) {
+                    UploadStorage::deleteBestEffort($diskName, $oldPath, 'replaced job seeker photo cleanup');
+                }
             }
  catch (\Exception $e) {
-                Log::error('JobSeeker profile photo upload failed: ' . $e->getMessage());
+                Log::error('JobSeeker profile photo upload failed.', ['exception' => $e::class]);
                 return back()->withErrors(['Photo' => 'Unable to upload profile photo. Please try again later.']);
             }
 
@@ -328,10 +329,14 @@ class JobSeekerProfileController extends Controller
 
 
         try {
-            $jobSeeker->save();
+            if (!$request->hasFile('Photo')) {
+                if (!$jobSeeker->save()) {
+                    throw new \RuntimeException('Resume record was not persisted.');
+                }
+            }
         }
  catch (\Exception $e) {
-            Log::error('JobSeeker profile save failed: ' . $e->getMessage());
+            Log::error('JobSeeker profile save failed.', ['exception' => $e::class]);
             return back()->withErrors(['profile' => 'Unable to save profile. Please try again later.']);
         }
 
@@ -403,11 +408,11 @@ class JobSeekerProfileController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        $storedPath = $file->storeAs('documents', $filename, [
-            'disk' => config('filesystems.default'),
-            'visibility' => 'private',
-        ]);
-        if (!$storedPath) {
+        $storedPath = null;
+        try {
+            $storedPath = UploadStorage::storeAs($file, 'documents', $filename, UploadStorage::privateDiskName());
+        } catch (\Throwable $e) {
+            Log::error('Resume upload storage failed.', ['exception' => $e::class]);
             return back()->with('error', 'The resume could not be saved. Please try again.');
         }
 
@@ -431,21 +436,24 @@ class JobSeekerProfileController extends Controller
                 ];
 
                 if ($existingDocument) {
-                    $existingDocument->update($values);
+                    if (!$existingDocument->update($values)) {
+                        throw new \RuntimeException('Resume document record was not persisted.');
+                    }
                 }
  else {
-                    $jobSeeker->documents()->create($values);
+                    $created = $jobSeeker->documents()->create($values);
+                    if (!$created->exists) {
+                        throw new \RuntimeException('Resume document record was not persisted.');
+                    }
                 }
 
             });
 
             // If transaction succeeds, delete old file
-            if ($oldResumeFile && Storage::exists($oldResumeFile)) {
-                Storage::delete($oldResumeFile);
-            }
+            UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $oldResumeFile, 'replaced resume cleanup');
 
-            if ($legacyResumeFile && Storage::exists($legacyResumeFile) && $legacyResumeFile !== $storedPath) {
-                Storage::delete($legacyResumeFile);
+            if ($legacyResumeFile && $legacyResumeFile !== $storedPath) {
+                UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $legacyResumeFile, 'legacy resume cleanup');
             }
 
 
@@ -454,9 +462,9 @@ class JobSeekerProfileController extends Controller
                 ->with('success', 'Resume uploaded successfully.');
         }
  catch (\Exception $e) {
-            Log::error('Resume upload error: ' . $e->getMessage());
+            Log::error('Resume upload failed.', ['exception' => $e::class]);
             // Attempt to clean up the newly uploaded file on failure
-            Storage::delete($storedPath);
+            UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $storedPath, 'failed resume update cleanup');
             return back()->with('error', 'Failed to update resume record. Please try again.');
         }
 
@@ -501,14 +509,11 @@ class JobSeekerProfileController extends Controller
         });
 
         // Delete physical file from configured storage
-        $disk = Storage::disk(config('filesystems.default'));
-        if ($storedPath && $disk->exists($storedPath)) {
-            $disk->delete($storedPath);
-        }
+        UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $storedPath, 'removed resume cleanup');
 
         // Delete legacy file if it exists and differs from the stored path
-        if ($legacyPath && $legacyPath !== $storedPath && $disk->exists($legacyPath)) {
-            $disk->delete($legacyPath);
+        if ($legacyPath && $legacyPath !== $storedPath) {
+            UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $legacyPath, 'removed legacy resume cleanup');
         }
 
 

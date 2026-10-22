@@ -20,7 +20,7 @@ class EmployerJobController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $jobs = Job::where('CompanyName', $employer->CompanyName)
+        $jobs = Job::where('EmployerId', $employer->EmployerId)
             ->orderByDesc('JobId')
             ->get();
 
@@ -80,6 +80,7 @@ class EmployerJobController extends Controller
         }
 
         Job::create([
+            'EmployerId' => $employer->EmployerId,
             'CompanyName' => $employer->CompanyName,
             'JobTitle' => $validated['txtTitle'],
             'Vacancy' => $validated['txtTotal'],
@@ -117,7 +118,7 @@ class EmployerJobController extends Controller
         }
 
         $job = Job::where('JobId', $id)
-            ->where('CompanyName', $employer->CompanyName)
+            ->where('EmployerId', $employer->EmployerId)
             ->firstOrFail();
 
         $job->update([
@@ -146,7 +147,7 @@ class EmployerJobController extends Controller
         }
 
         $job = Job::where('JobId', $id)
-            ->where('CompanyName', $employer->CompanyName)
+            ->where('EmployerId', $employer->EmployerId)
             ->firstOrFail();
 
         $job->delete();

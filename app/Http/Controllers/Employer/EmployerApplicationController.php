@@ -24,7 +24,7 @@ class EmployerApplicationController extends Controller
         }
 
         // Get only jobs posted by this employer.
-        $jobs = Job::where('CompanyName', $employer->CompanyName)
+        $jobs = Job::where('EmployerId', $employer->EmployerId)
             ->orderByDesc('JobId')
             ->get();
 
@@ -70,7 +70,7 @@ class EmployerApplicationController extends Controller
         // posted by this employer.
         if (
             !$application->job ||
-            $application->job->CompanyName !== $employer->CompanyName
+            (int) $application->job->EmployerId !== (int) $employer->EmployerId
         ) {
             abort(403, 'Unauthorized');
         }
@@ -89,7 +89,7 @@ class EmployerApplicationController extends Controller
         $employer = Auth::guard('employer')->user();
         $application->load(['job', 'jobSeeker']);
 
-        if (!$employer || !$application->job || $application->job->CompanyName !== $employer->CompanyName || !$application->jobSeeker) {
+        if (!$employer || !$application->job || (int) $application->job->EmployerId !== (int) $employer->EmployerId || !$application->jobSeeker) {
             abort(403);
         }
 
@@ -101,7 +101,7 @@ class EmployerApplicationController extends Controller
             abort(404);
         }
 
-        return PrivateUpload::response((string) $path, $resume?->OriginalFileName ?: basename((string) $path), ['upload', 'uploads/resumes']);
+        return PrivateUpload::response((string) $path, $resume?->OriginalFileName ?: basename((string) $path), ['upload', 'uploads/resumes', 'uploads/documents']);
     }
 
     /**
@@ -125,7 +125,7 @@ class EmployerApplicationController extends Controller
         // Ensure this application belongs to the logged-in employer.
         if (
             !$application->job ||
-            $application->job->CompanyName !== $employer->CompanyName
+            (int) $application->job->EmployerId !== (int) $employer->EmployerId
         ) {
             abort(403, 'Unauthorized');
         }

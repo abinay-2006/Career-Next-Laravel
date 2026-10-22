@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use App\Support\ProfilePhoto;
+use App\Support\UploadStorage;
 
 class EmployerProfileController extends Controller
 {
@@ -73,33 +73,24 @@ class EmployerProfileController extends Controller
         if ($request->hasFile('Photo')) {
             try {
                 $file = $request->file('Photo');
-                $disk = Storage::disk('public');
+                $diskName = UploadStorage::publicDiskName();
 
-                // Generate a unique filename
                 $filename =
                     'company_' .
                     $employer->EmployerId .
                     '_' .
-                    time() .
+                    \Illuminate\Support\Str::uuid() .
                     '.' .
                     $file->getClientOriginalExtension();
 
-                // Delete old photo if it exists
                 $oldPath = ProfilePhoto::path($employer->Photo);
-                if ($oldPath && $disk->exists($oldPath)) {
-                    $disk->delete($oldPath);
-                }
+                $storedPath = UploadStorage::storeAs($file, 'photos', $filename, $diskName);
 
-                // Store the new photo
-                $storedPath = $file->storeAs('photos', $filename, 'public');
-                if (!$storedPath) {
-                    throw new \RuntimeException('The company photo could not be written to the public disk.');
-                }
-
-                // Save filename in DB
                 $validated['Photo'] = $storedPath;
+
+                $uploadPath = $storedPath;
             } catch (\Exception $e) {
-                Log::error('Employer profile photo upload failed: ' . $e->getMessage());
+                Log::error('Employer profile photo upload failed.', ['exception' => $e::class]);
                 return back()->withErrors(['Photo' => 'Unable to upload company photo. Please try again later.']);
             }
         }
@@ -126,7 +117,23 @@ class EmployerProfileController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $employer->update($validated);
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($employer, $validated): void {
+                if (!$employer->update($validated)) {
+                    throw new \RuntimeException('Employer profile update was not persisted.');
+                }
+            });
+        } catch (\Throwable $e) {
+            if (isset($uploadPath) && (!$oldPath || $oldPath !== $uploadPath)) {
+                UploadStorage::deleteBestEffort(UploadStorage::publicDiskName(), $uploadPath, 'failed employer photo update cleanup');
+            }
+            Log::error('Employer profile save failed.', ['exception' => $e::class]);
+            return back()->withErrors(['profile' => 'Unable to save profile. Please try again later.']);
+        }
+
+        if (isset($uploadPath) && $oldPath && $oldPath !== $uploadPath) {
+            UploadStorage::deleteBestEffort(UploadStorage::publicDiskName(), $oldPath, 'replaced employer photo cleanup');
+        }
 
         /*
         |--------------------------------------------------------------------------

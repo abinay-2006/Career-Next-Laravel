@@ -37,7 +37,7 @@ Route::get('/', [HomeController::class, 'index']);
 Route::get('/login', [LoginController::class, 'showLogin'])
     ->name('login');
 
-Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
 
 Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout');
@@ -103,10 +103,10 @@ Route::prefix('register')
             ->name('verify');
 
         Route::post('/verify', [RegisterController::class, 'verifyOtp'])
-            ->name('verify.store');
+            ->middleware('throttle:6,1')->name('verify.store');
 
         Route::post('/resend-otp', [RegisterController::class, 'resendOtp'])
-            ->name('resend-otp');
+            ->middleware('throttle:3,1')->name('resend-otp');
     });
 
 // Admin Routes

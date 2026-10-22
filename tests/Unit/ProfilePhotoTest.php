@@ -28,4 +28,21 @@ class ProfilePhotoTest extends TestCase
 
         $this->assertSame(url('/storage/photos/avatar.png'), ProfilePhoto::url('photos/avatar.png'));
     }
+
+    public function test_it_resolves_legacy_public_photo_paths_without_moving_the_file(): void
+    {
+        $filename = 'legacy-' . bin2hex(random_bytes(8)) . '.jpg';
+        $relativePath = 'upload/photos/' . $filename;
+        $absolutePath = public_path($relativePath);
+
+        $this->assertSame(strlen('image'), file_put_contents($absolutePath, 'image'));
+
+        try {
+            $this->assertSame($relativePath, ProfilePhoto::path('public/' . $relativePath));
+            $this->assertSame(url('/' . $relativePath), ProfilePhoto::url('public/' . $relativePath));
+            $this->assertSame(url('/' . $relativePath), ProfilePhoto::url($filename));
+        } finally {
+            unlink($absolutePath);
+        }
+    }
 }

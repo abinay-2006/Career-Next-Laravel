@@ -1,0 +1,3 @@
+<FilesMatch "(?i)\.(pdf|doc|docx|odt|rtf)$">
+    Require all denied
+</FilesMatch>

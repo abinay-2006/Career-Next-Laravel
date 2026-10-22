@@ -8,8 +8,8 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
-            fonts: [
-                bunny('Instrument Sans', {
+            fonts: process.env.VITE_BUNNY_FONTS_DISABLED ? [] : [
+                process.env.VITE_BUNNY_FONTS_DISABLED ? undefined : bunny('Instrument Sans', {
                     weights: [400, 500, 600],
                 }),
             ],

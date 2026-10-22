@@ -15,7 +15,7 @@ class EmployerController extends Controller
         abort_unless($employer, 403);
 
         return view('employer.index', [
-            'analytics' => $analytics->employer((string) $employer->CompanyName),
+            'analytics' => $analytics->employer((int) $employer->EmployerId),
         ]);
     }
 }
