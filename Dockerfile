@@ -27,8 +27,30 @@ COPY docker/apache-private-uploads.conf /etc/apache2/conf-available/private-uplo
 RUN a2enconf private-uploads
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+<<<<<<< HEAD
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public \
     PORT=10000
+=======
+WORKDIR /var/www/html
+
+COPY . .
+
+# Install Laravel production dependencies
+RUN composer install \
+    --no-dev \
+    --prefer-dist \
+    --no-interaction \
+    --optimize-autoloader
+
+# Make files stored on the public disk reachable through /storage.
+RUN mkdir -p storage/app/public && php artisan storage:link
+
+# Copy compiled frontend assets
+COPY --from=frontend /app/public/build ./public/build
+
+# Configure Apache to serve Laravel's public directory
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+>>>>>>> main
 
 RUN sed -ri \
     's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
