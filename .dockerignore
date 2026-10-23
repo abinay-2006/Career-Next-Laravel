@@ -15,6 +15,9 @@ storage/framework/sessions/*
 storage/framework/testing/*
 storage/framework/views/*
 storage/app/*
+!storage/app/public/
+!storage/app/public/photos/
+!storage/app/public/photos/**
 
 # Keep legacy upload trees out of the build context except the individually
 # confirmed PDFs that the Docker assembly stage moves into private storage.
