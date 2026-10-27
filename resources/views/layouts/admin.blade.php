@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/notifications.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin-navigation.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/login.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 
@@ -28,7 +29,7 @@
 
     <div class="cn-admin-shell">
         <aside class="cn-admin-sidebar" aria-label="Admin navigation">
-            <a href="{{ route('admin.index') }}" class="brand-logo cn-admin-brand">
+            <a href="{{ route('admin.dashboard') }}" class="brand-logo cn-admin-brand">
                 <img src="{{ asset('images/CareerNext.png') }}" alt="">
                 <span>Career Next</span>
             </a>
@@ -41,7 +42,7 @@
                 <button class="cn-admin-menu-toggle" type="button" aria-label="Open Admin navigation" aria-controls="adminMobileDrawer" aria-expanded="false">
                     <i class="fas fa-bars" aria-hidden="true"></i>
                 </button>
-                <a href="{{ route('admin.index') }}" class="brand-logo cn-admin-mobile-brand">
+                <a href="{{ route('admin.dashboard') }}" class="brand-logo cn-admin-mobile-brand">
                     <img src="{{ asset('images/CareerNext.png') }}" alt="">
                     <span>Career Next</span>
                 </a>
@@ -73,7 +74,7 @@
     <button class="cn-admin-backdrop" type="button" aria-label="Close Admin navigation" tabindex="-1" data-admin-drawer-close></button>
     <aside class="cn-admin-drawer" id="adminMobileDrawer" role="dialog" aria-modal="true" aria-labelledby="adminMobileDrawerTitle" aria-hidden="true" inert>
         <div class="cn-admin-drawer-header">
-            <a href="{{ route('admin.index') }}" class="brand-logo cn-admin-brand cn-admin-drawer-brand">
+            <a href="{{ route('admin.dashboard') }}" class="brand-logo cn-admin-brand cn-admin-drawer-brand">
                 <img src="{{ asset('images/CareerNext.png') }}" alt="">
                 <span id="adminMobileDrawerTitle">Career Next</span>
             </a>

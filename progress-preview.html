@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Next - Progress Indicator Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #f5f7fb 0%, #e8ecf4 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        h1 {
+            color: #1e293b;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .preview-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
+        }
+
+        .preview-card h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .preview-card .subtitle {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 24px;
+        }
+
+        /* ============================================================
+           NEW PURPLE-THEMED PROGRESS (register.css)
+           ============================================================ */
+
+        .registration-progress {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            gap: 0;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: "Poppins", sans-serif;
+            min-width: 72px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-step .step-number {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 2.5px solid #e2e8f0;
+            background: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            color: #94a3b8;
+            transition:
+                border-color 0.25s ease,
+                background 0.25s ease,
+                color 0.25s ease,
+                box-shadow 0.25s ease,
+                transform 0.25s ease;
+            position: relative;
+        }
+
+        .progress-step .step-number i {
+            font-size: 14px;
+        }
+
+        /* Upcoming step */
+        .progress-step:not(.completed):not(.active) .step-number {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #94a3b8;
+        }
+
+        /* Active step */
+        .progress-step.active .step-number {
+            border-color: transparent;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            box-shadow:
+                0 4px 16px rgba(102, 126, 234, 0.35),
+                0 2px 6px rgba(102, 126, 234, 0.2);
+            transform: scale(1.08);
+        }
+
+        @keyframes progressPulse {
+            0%, 100% { opacity: 0; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.12); }
+        }
+
+        .progress-step.active .step-number::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid rgba(102, 126, 234, 0.25);
+            animation: progressPulse 2.2s ease-in-out infinite;
+        }
+
+        /* Completed step */
+        .progress-step.completed .step-number {
+            border-color: transparent;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            box-shadow: 0 3px 12px rgba(102, 126, 234, 0.28);
+        }
+
+        .progress-step.completed {
+            color: #667eea;
+        }
+
+        /* Step labels */
+        .progress-step span:not(.step-number span) {
+            font-size: 11.5px;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            transition: color 0.22s ease;
+        }
+
+        .progress-step.completed span:not(.step-number span) {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .progress-step.active span:not(.step-number span) {
+            color: #4f46e5;
+            font-weight: 700;
+        }
+
+        /* Connector lines */
+        .progress-line {
+            flex: 1;
+            height: 3px;
+            margin-top: -18px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            transition: background 0.25s ease;
+            min-width: 40px;
+            max-width: 90px;
+        }
+
+        .progress-line.active {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 1px 6px rgba(102, 126, 234, 0.2);
+        }
+
+        /* Hover states */
+        .progress-step:not(.completed):not(.active):hover .step-number {
+            border-color: #667eea;
+            color: #667eea;
+            background: #f5f3ff;
+        }
+
+        .progress-step:hover .step-number {
+            transform: scale(1.05);
+        }
+
+        .progress-step.active:hover .step-number {
+            transform: scale(1.1);
+        }
+
+        /* ============================================================
+           COLOR PALETTE REFERENCE
+           ============================================================ */
+        .color-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .color-swatch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .color-label {
+            font-size: 10px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .color-hex {
+            font-size: 10px;
+            color: #94a3b8;
+            font-family: monospace;
+        }
+
+        /* ============================================================
+           FEATURES LIST
+           ============================================================ */
+        .features-list {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .features-list h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .feature-item i {
+            color: #667eea;
+            margin-top: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Career Next — Registration Progress Indicator</h1>
+
+    <div class="comparison-container">
+        <!-- STEP 2: Account Details -->
+        <div class="preview-card">
+            <h2>Step 2: Account Details</h2>
+            <p class="subtitle">First step is completed, Details is active</p>
+
+            <div class="registration-progress">
+                <div class="progress-step completed">
+                    <div class="step-number">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span>Account</span>
+                </div>
+
+                <div class="progress-line active"></div>
+
+                <div class="progress-step active">
+                    <div class="step-number">
+                        2
+                    </div>
+                    <span>Details</span>
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step">
+                    <div class="step-number">
+                        3
+                    </div>
+                    <span>Profile</span>
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step">
+                    <div class="step-number">
+                        4
+                    </div>
+                    <span>Review</span>
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step">
+                    <div class="step-number">
+                        5
+                    </div>
+                    <span>Verify</span>
+                </div>
+            </div>
+
+            <div class="color-palette">
+                <div class="color-swatch">
+                    <div class="swatch" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                    <span class="color-label">Active Gradient</span>
+                    <span class="color-hex">#667eea → #764ba2</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="swatch" style="background: #667eea;"></div>
+                    <span class="color-label">Purple Accent</span>
+                    <span class="color-hex">#667eea</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="swatch" style="background: #4f46e5;"></div>
+                    <span class="color-label">Deep Purple</span>
+                    <span class="color-hex">#4f46e5</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="swatch" style="background: #e2e8f0;"></div>
+                    <span class="color-label">Border</span>
+                    <span class="color-hex">#e2e8f0</span>
+                </div>
+            </div>
+
+            <div class="features-list">
+                <h3>Design Features</h3>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Purple gradient on completed steps with checkmark</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Soft glow effect on active step</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Subtle pulsing ring animation</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Purple gradient connector lines for completed progress</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: Profile Details -->
+        <div class="preview-card">
+            <h2>Step 3: Profile Details</h2>
+            <p class="subtitle">Account & Details completed, Profile active</p>
+
+            <div class="registration-progress">
+                <div class="progress-step completed">
+                    <div class="step-number">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span>Account</span>
+                </div>
+
+                <div class="progress-line active"></div>
+
+                <div class="progress-step completed">
+                    <div class="step-number">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span>Details</span>
+                </div>
+
+                <div class="progress-line active"></div>
+
+                <div class="progress-step active">
+                    <div class="step-number">
+                        3
+                    </div>
+                    <span>Profile</span>
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step">
+                    <div class="step-number">
+                        4
+                    </div>
+                    <span>Review</span>
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step">
+                    <div class="step-number">
+                        5
+                    </div>
+                    <span>Verify</span>
+                </div>
+            </div>
+
+            <div class="color-palette">
+                <div class="color-swatch">
+                    <div class="swatch" style="background: #f8fafc;"></div>
+                    <span class="color-label">Upcoming BG</span>
+                    <span class="color-hex">#f8fafc</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="swatch" style="background: #f5f3ff;"></div>
+                    <span class="color-label">Hover BG</span>
+                    <span class="color-hex">#f5f3ff</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="swatch" style="background: linear-gradient(90deg, #667eea, #764ba2);"></div>
+                    <span class="color-label">Line Gradient</span>
+                    <span class="color-hex">#667eea → #764ba2</span>
+                </div>
+            </div>
+
+            <div class="features-list">
+                <h3>Responsive Design</h3>
+                <div class="feature-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Scrollable on mobile devices</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-compress-arrows-alt"></i>
+                    <span>Compact circles and labels on small screens</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-eye-slash"></i>
+                    <span>Reduced motion support for accessibility</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 5: Review -->
+        <div class="preview-card">
+            <h2>Step 5: Review</h2>
+            <p class="subtitle">All steps completed, Review is active</p>
+
+            <div class="registration-progress">
+                <div class="progress-step completed">
+                    <div class="step-number">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span>Account</span>
+                </div>
+
+                <div class="progress-line active"></div>
+
+                <div class="progress-step completed">
+                    <div class="step-number">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span>Details</span>
+                </div>
+
+                <div class="progress-line active"></div>
+
+                <div class="progress-step completed">
+                    <div class="step-number">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span>Profile</span>
+                </div>
+
+                <div class="progress-line active"></div>
+
+                <div class="progress-step completed">
+                    <div class="step-number">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span>Review</span>
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-step">
+                    <div class="step-number">
+                        5
+                    </div>
+                    <span>Verify</span>
+                </div>
+            </div>
+
+            <div class="features-list">
+                <h3>Visual Consistency</h3>
+                <div class="feature-item">
+                    <i class="fas fa-palette"></i>
+                    <span>Matches login page purple gradient theme</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-balance-scale"></i>
+                    <span>Consistent with existing UI components</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-star"></i>
+                    <span>Professional and modern appearance</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESIGN TOKENS -->
+        <div class="preview-card">
+            <h2>Design Tokens</h2>
+            <p class="subtitle">Colors extracted from login.css</p>
+
+            <div class="color-palette">
+                <div class="color-swatch">
+                    <div class="swatch" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                    <span class="color-label">Primary Gradient</span>
+                    <span class="color-hex">#667eea → #764ba2</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="swatch" style="background: #667eea;"></div>
+                    <span class="color-label">Light Purple</span>
+                    <span class="color-hex">#667eea</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="swatch" style="background: #764ba2;"></div>
+                    <span class="color-label">Dark Purple</span>
+                    <span class="color-hex">#764ba2</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="swatch" style="background: #4f46e5;"></div>
+                    <span class="color-label">Indigo</span>
+                    <span class="color-hex">#4f46e5</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="swatch" style="background: #a78bfa;"></div>
+                    <span class="color-label">Soft Purple</span>
+                    <span class="color-hex">#a78bfa</span>
+                </div>
+                <div class="color-swatch">
+                    <div class="swatch" style="background: #f5f3ff;"></div>
+                    <span class="color-label">Lavender</span>
+                    <span class="color-hex">#f5f3ff</span>
+                </div>
+            </div>
+
+            <div class="features-list">
+                <h3>CSS Implementation</h3>
+                <div class="feature-item">
+                    <i class="fas fa-file-code"></i>
+                    <span>File: <code>public/assets/css/register.css</code></span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-edit"></i>
+                    <span>Lines: 139-289 (Progress section)</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Mobile: 641-682 (Responsive section)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

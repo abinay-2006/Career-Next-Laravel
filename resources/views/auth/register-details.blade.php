@@ -15,7 +15,7 @@
             <a href="{{ route('register.index') }}" class="register-logo">
 
                 <span class="logo-icon">
-                    <i class="fas fa-briefcase"></i>
+                    <img src="{{ asset('assets/images/CareerNext.png') }}" alt="Career Next">
                 </span>
 
                 <span>Career Next</span>

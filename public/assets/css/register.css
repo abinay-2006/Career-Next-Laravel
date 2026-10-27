@@ -38,6 +38,58 @@ body {
 }
 
 /* ============================================================
+   REGISTRATION HEADER
+   ============================================================ */
+
+.register-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border: none;
+    margin-bottom: 30px;
+    padding: 25px 0;
+}
+
+.register-header .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.register-header .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.register-header .col-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+
+.register-logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.logo-icon {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #fff;
+    color: #667eea;
+}
+
+/* ============================================================
    CAREER NEXT - REGISTRATION
    STEP 2
    ============================================================ */
@@ -90,55 +142,150 @@ body {
 
 .registration-progress {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     margin-bottom: 35px;
+    gap: 0;
 }
 
 .progress-step {
-    min-width: 70px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 7px;
-    color: #9ca3af;
+    gap: 8px;
+    color: #94a3b8;
     font-size: 12px;
     font-weight: 600;
+    font-family: "Poppins", sans-serif;
+    min-width: 72px;
+    position: relative;
+    z-index: 1;
 }
 
 .progress-step .step-number {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 2px solid #d1d5db;
+    border: 2.5px solid #e2e8f0;
     background: #fff;
     font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+    transition:
+        border-color 0.25s ease,
+        background 0.25s ease,
+        color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
+    position: relative;
 }
 
-.progress-step.active,
-.progress-step.completed {
-    color: #2563eb;
+.progress-step .step-number i {
+    font-size: 14px;
 }
 
-.progress-step.active .step-number,
-.progress-step.completed .step-number {
-    border-color: #2563eb;
-    background: #2563eb;
+/* ── Upcoming step (default) ─────────────────────────────────────────────── */
+
+.progress-step:not(.completed):not(.active) .step-number {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+}
+
+/* ── Active step — prominent purple gradient with soft glow ──────────────── */
+
+.progress-step.active .step-number {
+    border-color: transparent;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #fff;
+    box-shadow:
+        0 4px 16px rgba(102, 126, 234, 0.35),
+        0 2px 6px rgba(102, 126, 234, 0.2);
+    transform: scale(1.08);
 }
+
+/* Subtle pulsing ring on active step */
+.progress-step.active .step-number::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba(102, 126, 234, 0.25);
+    animation: progressPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes progressPulse {
+    0%, 100% { opacity: 0; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.12); }
+}
+
+/* ── Completed step — filled purple gradient with checkmark ──────────────── */
+
+.progress-step.completed .step-number {
+    border-color: transparent;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(102, 126, 234, 0.28);
+}
+
+.progress-step.completed {
+    color: #667eea;
+}
+
+/* ── Step label ───────────────────────────────────────────────────────────── */
+
+.progress-step span:not(.step-number span) {
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: color 0.22s ease;
+}
+
+.progress-step.completed span:not(.step-number span) {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.progress-step.active span:not(.step-number span) {
+    color: #4f46e5;
+    font-weight: 700;
+}
+
+/* ── Connector lines ───────────────────────────────────────────────────────── */
 
 .progress-line {
-    width: 70px;
-    height: 2px;
-    margin-top: 18px;
-    background: #e5e7eb;
+    flex: 1;
+    height: 3px;
+    margin-top: -18px;
+    border-radius: 3px;
+    background: #e2e8f0;
+    transition: background 0.25s ease;
+    min-width: 40px;
+    max-width: 90px;
 }
 
 .progress-line.active {
-    background: #2563eb;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 1px 6px rgba(102, 126, 234, 0.2);
+}
+
+/* ── Hover states ──────────────────────────────────────────────────────────── */
+
+.progress-step:not(.completed):not(.active):hover .step-number {
+    border-color: #667eea;
+    color: #667eea;
+    background: #f5f3ff;
+}
+
+.progress-step:hover .step-number {
+    transform: scale(1.05);
+}
+
+.progress-step.active:hover .step-number {
+    transform: scale(1.1);
 }
 
 /* ============================================================
@@ -495,18 +642,43 @@ body {
         overflow-x: auto;
         justify-content: flex-start;
         padding-bottom: 5px;
+        gap: 0;
     }
 
     .progress-line {
-        width: 35px;
+        min-width: 28px;
+        height: 2px;
+        margin-top: -14px;
     }
 
     .progress-step {
-        min-width: 55px;
+        min-width: 58px;
     }
 
-    .progress-step span {
-        font-size: 10px;
+    .progress-step .step-number {
+        width: 32px;
+        height: 32px;
+        font-size: 12px;
+    }
+
+    .progress-step .step-number i {
+        font-size: 12px;
+    }
+
+    .progress-step span:not(.step-number span) {
+        font-size: 9.5px;
+    }
+
+    /* Prevent overlap — align labels below circles */
+    .progress-step {
+        padding: 6px 4px 0;
+    }
+
+    /* Reduce pulse animation on mobile for performance */
+    @media (prefers-reduced-motion: reduce) {
+        .progress-step.active .step-number::after {
+            animation: none;
+        }
     }
 
     .account-type-display {
@@ -958,13 +1130,339 @@ body {
     overflow-y: auto !important;
 }
 
-body {
-    position: static !important;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   REGISTRATION PAGE — ACCOUNT TYPE CARDS
+   (Overrides login.css selectors via cascade — register.css loads after)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.account-type-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 8px;
+    margin-bottom: 22px;
 }
 
-.register-page,
-.register-container,
-.registration-card {
-    overflow: visible !important;
-    max-height: none !important;
+@media (max-width: 540px) {
+    .account-type-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Card base ────────────────────────────────────────────────────────────── */
+
+.account-type-card {
+    position: relative;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    overflow: hidden;
+    min-height: 268px;
+    transition:
+        border-color 0.22s ease,
+        background 0.22s ease,
+        transform 0.22s ease,
+        box-shadow 0.22s ease;
+}
+
+/* Thin gradient accent strip — hidden until hover/selected */
+.account-type-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    opacity: 0;
+    transition: opacity 0.22s ease;
+}
+
+/* ── Icon ─────────────────────────────────────────────────────────────────── */
+
+.account-type-icon {
+    width: 62px;
+    height: 62px;
+    margin: 26px auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    font-size: 1.55rem;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+}
+
+/* Job Seeker — indigo on pale lavender */
+.jobseeker-icon {
+    background: #eef2ff;
+    color: #6366f1;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.13);
+}
+
+/* Employer — purple on pale violet */
+.employer-icon {
+    background: #faf5ff;
+    color: #a855f7;
+    box-shadow: 0 4px 14px rgba(168, 85, 247, 0.13);
+}
+
+/* ── Content ──────────────────────────────────────────────────────────────── */
+
+.account-type-content {
+    flex: 1;
+    padding: 0 22px 24px;
+    display: flex;
+    flex-direction: column;
+}
+
+.account-type-content h3 {
+    margin: 0 0 6px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1.25;
+    transition: color 0.22s ease;
+}
+
+.account-type-content p {
+    margin: 0 0 16px;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: #64748b;
+}
+
+/* ── Feature list ─────────────────────────────────────────────────────────── */
+
+.account-type-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px 11px;
+    margin-top: auto;
+}
+
+.account-type-features span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    color: #475569;
+    font-weight: 500;
+    padding: 4px 9px;
+    border-radius: 20px;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.account-type-features i {
+    font-size: 0.62rem;
+}
+
+/* ── Selection check ──────────────────────────────────────────────────────── */
+
+.account-type-check {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.account-type-check i {
+    font-size: 0.62rem;
+    color: #fff;
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+/* ── Hover state ──────────────────────────────────────────────────────────── */
+
+.account-type-card:hover {
+    border-color: #c7d2fe;
+    background: #fafafe;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(99, 102, 241, 0.09);
+}
+
+.account-type-card:hover::before {
+    opacity: 1;
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+}
+
+.account-type-card:hover .jobseeker-icon {
+    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.22);
+}
+
+.account-type-card:hover .employer-icon {
+    box-shadow: 0 6px 18px rgba(168, 85, 247, 0.22);
+}
+
+.account-type-card:hover .account-type-features span {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+}
+
+/* ── Selected (active) state ─────────────────────────────────────────────── */
+
+.account-type-card.selected {
+    border-color: #6366f1;
+    background: #f5f3ff;
+    box-shadow:
+        0 0 0 3px rgba(99, 102, 241, 0.12),
+        0 10px 30px rgba(99, 102, 241, 0.15);
+    transform: translateY(-3px);
+}
+
+.account-type-card.selected::before {
+    opacity: 1;
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+    height: 4px;
+}
+
+.account-type-card.selected .jobseeker-icon {
+    background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(99, 102, 241, 0.35);
+    transform: scale(1.06);
+}
+
+.account-type-card.selected .employer-icon {
+    background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(168, 85, 247, 0.35);
+    transform: scale(1.06);
+}
+
+.account-type-card.selected h3 {
+    color: #4f46e5;
+}
+
+.account-type-card.selected .account-type-features span {
+    background: #ede9fe;
+    border-color: #ddd6fe;
+    color: #4338ca;
+}
+
+.account-type-card.selected .account-type-check {
+    border-color: #6366f1;
+    background: #6366f1;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+    transform: scale(1.05);
+}
+
+.account-type-card.selected .account-type-check i {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* ── Focus-visible ────────────────────────────────────────────────────────── */
+
+.account-type-card:focus-visible {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+    background: #f5f3ff;
+}
+
+/* ── Selected message ─────────────────────────────────────────────────────── */
+
+.selected-account-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #94a3b8;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.selected-account-message.has-selection {
+    background: #ede9fe;
+    color: #4f46e5;
+    border-color: #c4b5fd;
+}
+
+.selected-account-message i {
+    font-size: 0.9rem;
+}
+
+/* ── Continue button ──────────────────────────────────────────────────────── */
+
+.account-continue-btn {
+    margin-top: 2px;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.account-continue-btn:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* ── Mobile ───────────────────────────────────────────────────────────────── */
+
+@media (max-width: 540px) {
+    .account-type-card {
+        min-height: 240px;
+    }
+
+    .account-type-icon {
+        width: 52px;
+        height: 52px;
+        font-size: 1.3rem;
+        margin-top: 22px;
+        border-radius: 14px;
+    }
+
+    .account-type-content {
+        padding: 0 18px 20px;
+    }
+
+    .account-type-content h3 {
+        font-size: 0.98rem;
+    }
+
+    .account-type-content p {
+        font-size: 0.77rem;
+        margin-bottom: 12px;
+    }
+
+    .account-type-features span {
+        font-size: 0.67rem;
+        padding: 3px 7px;
+        gap: 4px;
+    }
+
+    .account-type-check {
+        width: 20px;
+        height: 20px;
+        top: 14px;
+        right: 14px;
+    }
 }

@@ -113,8 +113,8 @@ Route::prefix('register')
 
 Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
 
-    Route::get('/', [AdminController::class, 'index'])
-        ->name('index');
+    Route::get('/', [AdminController::class, 'dashboard'])
+        ->name('dashboard');
 
     Route::get('/dashboard', [AdminController::class, 'dashboard'])
         ->name('dashboard');
