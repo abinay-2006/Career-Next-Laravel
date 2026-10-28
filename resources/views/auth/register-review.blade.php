@@ -9,7 +9,21 @@
 @section('content')
 
 <div class="register-page">
+<<<<<<< HEAD
+
     <div class="register-container">
+
+        <div class="register-header">
+            <a href="{{ route('register.index') }}" class="register-logo">
+                <span class="logo-icon">
+                    <img src="{{ asset('images/CareerNext.png') }}" alt="Career Next Logo" width="42" height="42">
+                </span>
+                <span>Career Next</span>
+            </a>
+        </div>
+=======
+    <div class="register-container">
+>>>>>>> main
 
         <div class="registration-card">
 
@@ -65,11 +79,43 @@
                     <small>Review</small>
                 </div>
 
+<<<<<<< HEAD
+            <div class="progress-step active">
+                <span>4</span>
+                <small>Review</small>
+            </div>
+
+            <div class="progress-line"></div>
+
+            <div class="progress-step">
+                <span>5</span>
+                <small>Verify</small>
+            </div>
+
+        </div>
+
+
+        <!-- Account Type -->
+        <div class="review-section">
+
+            <div class="review-section-header">
+
+                <div>
+                    <h3>
+                        <i class="fas fa-user-tag"></i>
+                        Account Type
+                    </h3>
+
+                    <p>
+                        Your selected registration type
+                    </p>
+=======
                 <div class="progress-line"></div>
 
                 <div class="progress-step">
                     <span>6</span>
                     <small>Verify</small>
+>>>>>>> main
                 </div>
 
             </div>
@@ -404,8 +450,15 @@
     </div>
 
 
+<<<<<<< HEAD
+    </div>
+
+</div>
+
+=======
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+>>>>>>> main
 
             const form = document.getElementById('reviewForm');
             const button = document.getElementById('continueButton');
@@ -431,4 +484,11 @@
         });
     </script>
 
+<<<<<<< HEAD
+    });
+</script>
+
+@endsection
+=======
     @endsection
+>>>>>>> main

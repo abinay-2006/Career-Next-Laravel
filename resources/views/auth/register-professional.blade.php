@@ -22,7 +22,11 @@
             <a href="{{ route('register.index') }}" class="register-logo">
 
                 <span class="logo-icon">
-                    <i class="fas fa-briefcase"></i>
+                    <img
+                        src="{{ asset('images/CareerNext.png') }}"
+                        alt="Career Next Logo"
+                        width="42"
+                        height="42">
                 </span>
 
                 <span>Career Next</span>
@@ -76,7 +80,7 @@
 
             <!-- Step 3 -->
 
-            <div class="progress-step completed">
+            <div class="progress-step active">
 
                 <div class="step-number">
 
@@ -89,18 +93,18 @@
             </div>
 
 
-            <div class="progress-line active"></div>
+            <div class="progress-line"></div>
 
 
             <!-- Step 4 -->
 
-            <div class="progress-step active">
+            <div class="progress-step">
 
                 <div class="step-number">
                     4
                 </div>
 
-                <span>Professional</span>
+                <span>Review</span>
 
             </div>
 
@@ -114,22 +118,6 @@
 
                 <div class="step-number">
                     5
-                </div>
-
-                <span>Review</span>
-
-            </div>
-
-
-            <div class="progress-line"></div>
-
-
-            <!-- Step 6 -->
-
-            <div class="progress-step">
-
-                <div class="step-number">
-                    6
                 </div>
 
                 <span>Verify</span>

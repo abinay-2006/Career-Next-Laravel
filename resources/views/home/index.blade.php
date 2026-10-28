@@ -54,7 +54,7 @@
                 </ul>
                 <div class="auth-buttons">
                     <a href="{{ route('login') }}" class="btn-login"><i class="fas fa-sign-in-alt"></i> Login</a>
-                    <a href="{{route('login')}}" class="btn-register"><i class="fas fa-user-plus"></i> Register</a>
+                    <a href="{{route('register.index')}}" class="btn-register"><i class="fas fa-user-plus"></i> Register</a>
                 </div>
                 </div>
             </div>
