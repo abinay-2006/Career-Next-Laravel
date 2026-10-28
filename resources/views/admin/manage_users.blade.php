@@ -7,8 +7,13 @@
 <div class="main-content">
 
     <div class="page-header">
-        <h1>Manage Users 👥</h1>
-        <p>Approve, suspend, or remove job seeker and employer accounts.</p>
+        <div class="page-header-left">
+            <div class="page-header-icon"><i class="fas fa-users"></i></div>
+            <div class="page-header-text">
+                <h1>Manage Users</h1>
+                <p>Approve, suspend, or remove job seeker and employer accounts.</p>
+            </div>
+        </div>
     </div>
     
     <!-- Summary cards -->
@@ -20,21 +25,21 @@
                 <div class="sum-label">Total Users</div>
             </div>
         </a>
-        <a href="?status=Confirm&type={{ $filterType }}" class="sum-card {{ $filterStatus === 'Confirm' ? 'active-filter' : '' }}">
+        <a href="?status=confirmed&type={{ $filterType }}" class="sum-card {{ in_array($filterStatus, ['confirm', 'confirmed', 'approved'], true) ? 'active-filter' : '' }}">
             <div class="sum-icon confirmed"><i class="fas fa-circle-check"></i></div>
             <div>
                 <div class="sum-val">{{ $counts['confirmed'] }}</div>
                 <div class="sum-label">Confirmed</div>
             </div>
         </a>
-        <a href="?status=Pending&type={{ $filterType }}" class="sum-card {{ $filterStatus === 'Pending' ? 'active-filter' : '' }}">
+        <a href="?status=pending&type={{ $filterType }}" class="sum-card {{ $filterStatus === 'pending' ? 'active-filter' : '' }}">
             <div class="sum-icon pending"><i class="fas fa-clock"></i></div>
             <div>
                 <div class="sum-val">{{ $counts['pending'] }}</div>
                 <div class="sum-label">Pending</div>
             </div>
         </a>
-        <a href="?status=Suspended&type={{ $filterType }}" class="sum-card {{ $filterStatus === 'Suspended' ? 'active-filter' : '' }}">
+        <a href="?status=suspended&type={{ $filterType }}" class="sum-card {{ $filterStatus === 'suspended' ? 'active-filter' : '' }}">
             <div class="sum-icon suspended"><i class="fas fa-ban"></i></div>
             <div>
                 <div class="sum-val">{{ $counts['suspended'] }}</div>
@@ -58,9 +63,9 @@
             </select>
             <select name="status" class="filter-select">
                 <option value="all" {{ $filterStatus === 'all' ? 'selected' : '' }}>All Statuses</option>
-                <option value="Confirm" {{ in_array($filterStatus, ['Confirm', 'Confirmed', 'Approved']) ? 'selected' : '' }}>Confirmed</option>
-                <option value="Pending" {{ $filterStatus === 'Pending' ? 'selected' : '' }}>Pending</option>
-                <option value="Suspended" {{ $filterStatus === 'Suspended' ? 'selected' : '' }}>Suspended</option>
+                <option value="confirmed" {{ in_array($filterStatus, ['confirm', 'confirmed', 'approved'], true) ? 'selected' : '' }}>Confirmed</option>
+                <option value="pending" {{ $filterStatus === 'pending' ? 'selected' : '' }}>Pending</option>
+                <option value="suspended" {{ $filterStatus === 'suspended' ? 'selected' : '' }}>Suspended</option>
             </select>
             <button type="submit" class="btn-filter"><i class="fas fa-filter"></i> Filter</button>
             <a href="{{ url()->current() }}" class="btn-reset"><i class="fas fa-rotate-left"></i> Reset</a>
@@ -119,7 +124,7 @@
                         <td><span class="badge {{ $u->Status }}">{{ ($u->Status) }}</span></td>
                         <td>
                             <div class="action-btns">
-                                @if ($u->Status !== 'Confirm')
+                                @if (!in_array(strtolower(trim((string) $u->Status)), ['confirm', 'confirmed', 'approved'], true))
                                 <button type="button" class="btn-action btn-approve" title="Approve"
                                     data-bs-toggle="modal" data-bs-target="#confirmModal"
                                     data-action="confirm" data-id="{{ $u->id }}" data-table="jobseeker" data-name="{{ $u->name }}">
@@ -199,7 +204,7 @@
                         <td><span class="badge {{ $u->Status }}">{{ $u->Status }}</span></td>
                         <td>
                             <div class="action-btns">
-                                @if ($u->Status !== 'Confirm')
+                                @if (!in_array(strtolower(trim((string) $u->Status)), ['confirm', 'confirmed', 'approved'], true))
                                 <button type="button" class="btn-action btn-approve" title="Approve"
                                     data-bs-toggle="modal"
                                     data-bs-target="#confirmModal"

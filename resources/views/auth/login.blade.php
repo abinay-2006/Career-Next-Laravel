@@ -117,7 +117,7 @@
         <!-- ══ FORGOT PASSWORD ══ -->
         <div class="panel" id="panel-forgot">
             <div class="panel-title">Reset password 🔑</div>
-            <div class="panel-subtitle">We'll send a reset link to your email</div>
+            <div class="panel-subtitle">We'll email you a secure link to reset your password</div>
 
             <div class="alert error" id="forgot-error"> <i class="fas fa-circle-exclamation"></i><span></span></div>
             <div class="alert success" id="forgot-success"><i class="fas fa-circle-check"></i><span></span></div>
@@ -133,7 +133,7 @@
                 </div>
 
                 <button type="submit" class="btn-primary">
-                    <i class="fas fa-paper-plane"></i> Send Verification Code
+                    <i class="fas fa-paper-plane"></i> Send Reset Link
                 </button>
             </form>
 

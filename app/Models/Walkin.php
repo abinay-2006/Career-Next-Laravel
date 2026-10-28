@@ -13,6 +13,7 @@ class Walkin extends Model
     public $timestamps = false;
 
     protected $fillable = [
+        'EmployerId',
         'CompanyName',
         'JobTitle',
         'Vacancy',

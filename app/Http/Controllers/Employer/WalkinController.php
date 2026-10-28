@@ -20,7 +20,7 @@ class WalkinController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $walkins = Walkin::where('CompanyName', $employer->CompanyName)
+        $walkins = Walkin::where('EmployerId', $employer->EmployerId)
             ->orderByDesc('WalkInId')
             ->get();
 
@@ -48,6 +48,7 @@ class WalkinController extends Controller
         }
 
         Walkin::create([
+            'EmployerId'       => $employer->EmployerId,
             'CompanyName'      => $employer->CompanyName,
             'JobTitle'         => $validated['txtTitle'],
             'Vacancy'          => $validated['txtTotal'],
@@ -82,8 +83,8 @@ class WalkinController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        if ($walkin->CompanyName !== $employer->CompanyName) {
-            abort(403, 'Unauthorized');
+        if ((int) $walkin->EmployerId !== (int) $employer->EmployerId) {
+            abort(404);
         }
 
         $walkin->update([
@@ -109,8 +110,8 @@ class WalkinController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        if ($walkin->CompanyName !== $employer->CompanyName) {
-            abort(403, 'Unauthorized');
+        if ((int) $walkin->EmployerId !== (int) $employer->EmployerId) {
+            abort(404);
         }
 
         $walkin->delete();

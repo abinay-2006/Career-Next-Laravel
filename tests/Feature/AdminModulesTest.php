@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Admin;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -42,7 +43,7 @@ class AdminModulesTest extends TestCase
         $admin = new Admin(['UserName' => 'test-admin']);
         $admin->UserId = 1;
         $this->actingAs($admin, 'admin');
-        Storage::fake(config('filesystems.default'));
+        Storage::fake('private');
     }
 
     public function test_admin_user_actions_update_only_the_requested_record(): void
@@ -105,7 +106,7 @@ class AdminModulesTest extends TestCase
 
     public function test_admin_document_status_and_protected_view_use_private_storage(): void
     {
-        Storage::disk(config('filesystems.default'))->put('documents/test.pdf', '%PDF-1.4 test');
+        Storage::disk('private')->put('documents/test.pdf', '%PDF-1.4 test');
         $id = DB::table('jobseeker_documents')->insertGetId([
             'JobSeekId' => 1, 'DocumentType' => 'resume', 'FileName' => 'documents/test.pdf',
             'OriginalFileName' => 'resume.pdf', 'UploadDate' => now(), 'VerificationStatus' => 'pending',
@@ -114,5 +115,26 @@ class AdminModulesTest extends TestCase
         $this->get(route('admin.documents.view', $id))->assertOk()->assertHeader('cache-control', 'no-store, private');
         $this->post(route('admin.documents.approve', $id))->assertRedirect(route('admin.manage.documents'));
         $this->assertSame('approved', DB::table('jobseeker_documents')->where('DocId', $id)->value('VerificationStatus'));
+    }
+
+    public function test_admin_private_document_access_handles_missing_and_unsafe_paths_safely(): void
+    {
+        $id = DB::table('jobseeker_documents')->insertGetId([
+            'JobSeekId' => 1, 'DocumentType' => 'certificate', 'FileName' => '../.env',
+            'OriginalFileName' => 'secret.pdf', 'UploadDate' => now(), 'VerificationStatus' => 'pending',
+        ], 'DocId');
+
+        $this->get(route('admin.documents.view', $id))->assertNotFound()->assertDontSee(base_path());
+
+        DB::table('jobseeker_documents')->where('DocId', $id)->update(['FileName' => 'documents/missing.pdf']);
+        $this->get(route('admin.documents.view', $id))->assertNotFound()->assertDontSee(storage_path());
+    }
+
+    public function test_admin_document_view_route_requires_admin_role(): void
+    {
+        $admin = Auth::guard('admin')->user();
+        Auth::guard('admin')->logout();
+        $this->get(route('admin.documents.view', 1))->assertRedirect(route('login'));
+        Auth::guard('admin')->setUser($admin);
     }
 }

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
+use App\Support\UploadStorage;
 
 class RegisterController extends Controller
 {
@@ -489,9 +490,12 @@ class RegisterController extends Controller
 
                 $resume = $request->file('resume');
 
-                $resumePath = $resume->store(
-                    'registration/resumes'
-                );
+                try {
+                    $resumePath = UploadStorage::store($resume, 'registration/resumes', UploadStorage::privateDiskName());
+                } catch (\Throwable $e) {
+                    Log::error('Registration resume storage failed.', ['exception' => $e::class]);
+                    return back()->withErrors(['resume' => 'Unable to save the resume. Please try again.']);
+                }
 
                 $professionalData['resume'] = $resumePath;
             }
@@ -507,10 +511,12 @@ class RegisterController extends Controller
 
                 $photo = $request->file('photo');
 
-                $photoPath = $photo->store(
-                    'photos',
-                    'public'
-                );
+                try {
+                    $photoPath = UploadStorage::store($photo, 'photos', UploadStorage::publicDiskName());
+                } catch (\Throwable $e) {
+                    Log::error('Registration photo storage failed.', ['exception' => $e::class]);
+                    return back()->withErrors(['photo' => 'Unable to save the photo. Please try again.']);
+                }
 
                 $professionalData['photo'] = $photoPath;
             }

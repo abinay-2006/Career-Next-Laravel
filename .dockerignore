@@ -12,8 +12,25 @@ vendor
 storage/logs/*
 storage/framework/cache/*
 storage/framework/sessions/*
+storage/framework/testing/*
 storage/framework/views/*
 storage/app/*
+
+# Keep legacy upload trees out of the build context except the individually
+# confirmed PDFs that the Docker assembly stage moves into private storage.
+public/upload/**
+public/uploads/**
+!public/upload/photos/
+!public/upload/photos/**
+!public/upload/1789573805_2_No_due_-_IV.pdf
+!public/uploads/photos/
+!public/uploads/photos/**
+!public/uploads/documents/
+!public/uploads/documents/1776426982_69e21fe6680e7.pdf
+!public/uploads/documents/1784988802_VAt6XUfX.pdf
+!public/uploads/documents/Resume.pdf
+!public/uploads/470X310_1.jpg
+!public/uploads/admin.jpg
 
 database/*.sqlite
 database/*.db

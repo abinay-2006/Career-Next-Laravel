@@ -9,8 +9,8 @@ use App\Models\JobSeekerEducation;
 use App\Models\JobSeekerSchoolEducation;
 use App\Models\JobSeekerDocument;
 use App\Support\PrivateUpload;
+use App\Support\UploadStorage;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class EducationController extends Controller
 {
@@ -371,22 +371,27 @@ class EducationController extends Controller
             . '.'
             . $file->getClientOriginalExtension();
 
-        $storedPath = $file->storeAs('documents', $fileName, [
-            'disk' => config('filesystems.default'),
-            'visibility' => 'private',
-        ]);
-        if (!$storedPath) {
+        try {
+            $storedPath = UploadStorage::storeAs($file, 'documents', $fileName, UploadStorage::privateDiskName());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Education document upload storage failed.', ['exception' => $e::class]);
             return back()->with('error', 'The document could not be saved. Please try again.');
         }
 
-        JobSeekerDocument::create([
-            'JobSeekId'        => $jobSeeker->JobSeekId,
-            'DocumentType'     => $request->cmbDocumentType,
-            'FileName'         => $storedPath,
-            'OriginalFileName' => $file->getClientOriginalName(),
-            'UploadDate'       => now(),
-            'VerificationStatus' => 'pending',
-        ]);
+        try {
+            JobSeekerDocument::create([
+                'JobSeekId'        => $jobSeeker->JobSeekId,
+                'DocumentType'     => $request->cmbDocumentType,
+                'FileName'         => $storedPath,
+                'OriginalFileName' => $file->getClientOriginalName(),
+                'UploadDate'       => now(),
+                'VerificationStatus' => 'pending',
+            ]);
+        } catch (\Throwable $e) {
+            UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $storedPath, 'failed education document record cleanup');
+            \Illuminate\Support\Facades\Log::error('Education document record creation failed.', ['exception' => $e::class]);
+            return back()->with('error', 'The document could not be saved. Please try again.');
+        }
 
         return redirect()
             ->route('jobseeker.education')
@@ -407,13 +412,10 @@ class EducationController extends Controller
             ->where('JobSeekId', $jobSeeker->JobSeekId)
             ->firstOrFail();
 
-        Storage::disk(config('filesystems.default'))->delete($document->FileName);
-        $legacyPath = public_path('uploads/documents/' . basename($document->FileName));
-        if (is_file($legacyPath)) {
-            @unlink($legacyPath);
-        }
-
-        $document->delete();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($document): void {
+            $document->delete();
+        });
+        UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $document->FileName, 'deleted education document cleanup');
 
         return redirect()
             ->route('jobseeker.education')

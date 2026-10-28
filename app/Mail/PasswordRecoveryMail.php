@@ -10,10 +10,10 @@ class PasswordRecoveryMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public string $recoveryUrl) {}
+    public function __construct(public string $otp) {}
 
     public function build()
     {
-        return $this->subject('Career Next password recovery')->view('emails.password-recovery');
+        return $this->subject('Career Next password reset code')->view('emails.password-recovery');
     }
 }

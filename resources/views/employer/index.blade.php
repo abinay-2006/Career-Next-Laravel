@@ -9,14 +9,17 @@
     <!-- Welcome hero -->
     <div class="welcome-card">
         <div class="welcome-text">
-            <h1>Welcome to Control Panel 👋</h1>
-            <p>Manage your job portal activity from one place.</p>
+            <h1>Welcome, {{ session('UserName') }}!</h1>
+            <p>Manage your hiring activity, job listings, and candidate applications from one place.</p>
             <div class="role-badge">
-                <i class="fas "></i>
+                <i class="fas fa-building"></i>
                 {{ session('UserType') }} Account
             </div>
         </div>
-        <div class="welcome-illustration">🗂️</div>
+        <div class="welcome-illustration"><i class="fas fa-briefcase" aria-hidden="true"></i></div>
     </div>
+
+
+    @include('components.dashboard-analytics', ['role' => 'employer', 'analytics' => $analytics])
 </div><!-- /main-content -->
 @endsection

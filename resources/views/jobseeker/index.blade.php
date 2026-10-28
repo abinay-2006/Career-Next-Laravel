@@ -10,15 +10,17 @@
     <!-- Welcome hero -->
     <div class="welcome-card">
         <div class="welcome-text">
-            <h1>Welcome to Control Panel 👋</h1>
+            <h1>Welcome, {{ session('UserName') }}!</h1>
             <p>Manage your job search and career activity from one place.</p>
             <div class="role-badge">
-                <i class="fas "></i>
+                <i class="fas fa-user"></i>
                 {{ session('UserType') }} Account
             </div>
         </div>
-        <div class="welcome-illustration">🗂️</div>
+        <div class="welcome-illustration"><i class="fas fa-compass" aria-hidden="true"></i></div>
     </div>
+
+    @include('components.dashboard-analytics', ['role' => 'jobseeker', 'analytics' => $analytics])
 
 
     <!-- PROFILE COMPLETION -->
