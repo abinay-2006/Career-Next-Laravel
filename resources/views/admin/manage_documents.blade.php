@@ -47,7 +47,7 @@
         <div class="section-title"><i class="fas fa-filter"></i> Filter Documents</div>
 
         <div class="glass-card">
-            <form method="GET" action="">
+            <form method="GET" action="" data-ajax-html>
                 <div class="form-body">
                     <div class="form-grid">
                         <div class="form-group">
@@ -202,8 +202,8 @@
             ])->links() }}
                 </div>
 
-                <select class="per-page-select"
-                    onchange="window.location=this.value">
+                <select class="per-page-select" data-ajax-url
+                    onchange="if (!window.CareerNextButtonLoading) window.location=this.value">
 
                     @foreach([10,25,50,100] as $size)
                     <option
@@ -230,7 +230,7 @@
         @click.self="approveModalOpen = false">
 
         <div class="custom-modal">
-            <form method="POST" id="approveForm">
+            <form method="POST" id="approveForm" data-ajax data-ajax-refresh-target=".cn-admin-content">
                 @csrf
 
                 <div class="modal-body">
@@ -278,7 +278,7 @@
         @click.self="rejectModalOpen = false">
 
         <div class="custom-modal">
-            <form method="POST" id="rejectForm">
+            <form method="POST" id="rejectForm" data-ajax data-ajax-refresh-target=".cn-admin-content">
                 @csrf
 
                 <div class="modal-body">

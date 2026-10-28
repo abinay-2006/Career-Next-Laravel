@@ -70,7 +70,7 @@ class ManageDocumentsController extends Controller
         );
     }
 
-    public function approve(int $id)
+    public function approve(Request $request, int $id)
     {
         $updated = DB::table('jobseeker_documents')->where('DocId', $id)->exists();
         if ($updated) {
@@ -79,9 +79,16 @@ class ManageDocumentsController extends Controller
         }
 
         if (!$updated) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Document not found.'], 404);
+            }
             return redirect()
                 ->route('admin.manage.documents')
                 ->with('error', 'Document not found.');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Document approved successfully.', 'refresh' => true]);
         }
 
         return redirect()
@@ -89,7 +96,7 @@ class ManageDocumentsController extends Controller
             ->with('success', 'Document approved successfully.');
     }
 
-    public function reject(int $id)
+    public function reject(Request $request, int $id)
     {
         $updated = DB::table('jobseeker_documents')->where('DocId', $id)->exists();
         if ($updated) {
@@ -98,9 +105,16 @@ class ManageDocumentsController extends Controller
         }
 
         if (!$updated) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Document not found.'], 404);
+            }
             return redirect()
                 ->route('admin.manage.documents')
                 ->with('error', 'Document not found.');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Document rejected successfully.', 'refresh' => true]);
         }
 
         return redirect()

@@ -559,6 +559,7 @@
                 method="POST"
                 action="{{ route('jobseeker.profile.resume.remove') }}"
                 id="removeResumeForm"
+                data-ajax data-ajax-refresh-target=".cn-dashboard-main"
                 style="display:none;">
 
                 @csrf
@@ -641,6 +642,7 @@
             method="POST"
             action="{{ route('jobseeker.profile.update') }}"
             id="editForm"
+            data-ajax data-ajax-refresh-target=".cn-dashboard-main"
             enctype="multipart/form-data">
 
             @csrf
@@ -978,6 +980,7 @@
         <form
             method="POST"
             action="{{ route('jobseeker.profile.resume.update') }}"
+            data-ajax data-ajax-refresh-target=".cn-dashboard-main"
             enctype="multipart/form-data">
 
             @csrf
@@ -1365,7 +1368,7 @@
 
         if (form) {
 
-            form.submit();
+            form.requestSubmit();
         }
     }
 

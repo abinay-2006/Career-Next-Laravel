@@ -22,6 +22,7 @@
         <link rel="stylesheet" href="{{ asset('assets/css/register.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/css/notifications.css') }}">
         <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
+        @vite('resources/js/app.js')
 
     </head>
 

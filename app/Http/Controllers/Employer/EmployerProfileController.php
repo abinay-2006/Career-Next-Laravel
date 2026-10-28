@@ -91,6 +91,9 @@ class EmployerProfileController extends Controller
                 $uploadPath = $storedPath;
             } catch (\Exception $e) {
                 Log::error('Employer profile photo upload failed.', ['exception' => $e::class]);
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Unable to upload company photo. Please try again later.'], 500);
+                }
                 return back()->withErrors(['Photo' => 'Unable to upload company photo. Please try again later.']);
             }
         }
@@ -128,6 +131,9 @@ class EmployerProfileController extends Controller
                 UploadStorage::deleteBestEffort(UploadStorage::publicDiskName(), $uploadPath, 'failed employer photo update cleanup');
             }
             Log::error('Employer profile save failed.', ['exception' => $e::class]);
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Unable to save profile. Please try again later.'], 500);
+            }
             return back()->withErrors(['profile' => 'Unable to save profile. Please try again later.']);
         }
 
@@ -140,6 +146,10 @@ class EmployerProfileController extends Controller
         | Redirect
         |--------------------------------------------------------------------------
         */
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Company profile updated successfully.', 'refresh' => true]);
+        }
 
         return redirect()
             ->route('employer.profile.index')

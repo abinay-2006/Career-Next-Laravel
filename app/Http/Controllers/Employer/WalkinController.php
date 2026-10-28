@@ -58,6 +58,10 @@ class WalkinController extends Controller
             'InterviewTime'    => $validated['txtTime'],
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Walk-in created successfully.', 'refresh' => true]);
+        }
+
         return redirect()
             ->route('employer.walkins.index')
             ->with('success', 'Walk-in created successfully.');
@@ -96,13 +100,17 @@ class WalkinController extends Controller
             'InterviewTime'    => $validated['txtTime'],
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Walk-in updated successfully.', 'refresh' => true]);
+        }
+
         return back()->with('success', 'Walk-in updated successfully.');
     }
 
     /**
      * Delete a walk-in.
      */
-    public function destroy(Walkin $walkin)
+    public function destroy(Request $request, Walkin $walkin)
     {
         $employer = Auth::guard('employer')->user();
 
@@ -115,6 +123,10 @@ class WalkinController extends Controller
         }
 
         $walkin->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Walk-in deleted successfully.', 'refresh' => true]);
+        }
 
         return back()->with('success', 'Walk-in deleted successfully.');
     }

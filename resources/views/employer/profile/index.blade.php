@@ -503,6 +503,7 @@
             method="POST"
             action="{{ route('employer.profile.update') }}"
             id="editForm"
+            data-ajax data-ajax-refresh-target=".cn-dashboard-main"
             enctype="multipart/form-data">
 
             @csrf
