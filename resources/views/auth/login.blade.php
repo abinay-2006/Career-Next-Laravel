@@ -41,15 +41,7 @@
     <!-- ════════════ RIGHT PANEL ════════════ -->
     <div class="right-panel">
 
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
-            <button
-                type="button"
-                class="tab-btn"
-                onclick="window.location.href='{{ route('register.index') }}'">
-                Register
-            </button>
-        </div>
+        
 
         <!-- ══ SIGN IN ══ -->
         <div class="panel active" id="panel-login">

@@ -79,9 +79,15 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 12px;
-    background: #2563eb;
-    color: #fff;
+    flex-shrink: 0;
+}
+
+.logo-icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
 }
 
 /* ============================================================
@@ -95,50 +101,247 @@ body {
     margin-bottom: 35px;
 }
 
-.progress-step {
-    min-width: 70px;
+.registration-progress .progress-step {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 7px;
-    color: #9ca3af;
+    gap: 9px;
+    color: #94a3b8;
     font-size: 12px;
     font-weight: 600;
+    font-family: "Poppins", sans-serif;
+    min-width: 70px;
+    position: relative;
+    z-index: 1;
+    text-align: center;
 }
 
-.progress-step .step-number {
-    width: 36px;
-    height: 36px;
+.registration-progress .step-number {
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: 2px solid #d1d5db;
+    border: 2px solid #e2e8f0;
     background: #fff;
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #94a3b8;
+    position: relative;
+    transition:
+        border-color 0.25s ease,
+        background 0.25s ease,
+        color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
 }
 
-.progress-step.active,
-.progress-step.completed {
-    color: #2563eb;
+.registration-progress .step-number i {
+    font-size: 15px;
 }
 
-.progress-step.active .step-number,
-.progress-step.completed .step-number {
-    border-color: #2563eb;
-    background: #2563eb;
+/* ── Upcoming step (default) ─────────────────────────────────────────────── */
+
+.registration-progress
+    .progress-step:not(.completed):not(.active)
+    .step-number {
+    background: #fafbfc;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+}
+
+/* ── Completed step — filled Career Next purple with checkmark ───────────── */
+
+.registration-progress .progress-step.completed .step-number {
+    border-color: transparent;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #fff;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-.progress-line {
-    width: 70px;
-    height: 2px;
-    margin-top: 18px;
-    background: #e5e7eb;
+.registration-progress .progress-step.completed .step-number i {
+    animation: stepCheckIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-.progress-line.active {
-    background: #2563eb;
+@keyframes stepCheckIn {
+    from {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.registration-progress .progress-step.completed {
+    color: #667eea;
+}
+
+/* ── Active step — purple ring with soft glow ────────────────────────────── */
+
+.registration-progress .progress-step.active .step-number {
+    border: 2.5px solid #667eea;
+    background: #f8f7ff;
+    color: #4f46e5;
+    box-shadow:
+        0 0 0 5px rgba(102, 126, 234, 0.12),
+        0 6px 16px rgba(102, 126, 234, 0.22);
+    transform: scale(1.06);
+}
+
+/* Subtle pulsing halo on active step */
+.registration-progress .progress-step.active .step-number::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    animation: progressPulse 2.4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes progressPulse {
+    0%,
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.14);
+    }
+}
+
+/* ── Step label ───────────────────────────────────────────────────────────── */
+
+.registration-progress .progress-step span:not(.step-number span) {
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: color 0.22s ease;
+}
+
+.registration-progress .progress-step.completed span:not(.step-number span) {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.registration-progress .progress-step.active span:not(.step-number span) {
+    color: #4f46e5;
+    font-weight: 700;
+}
+
+/* ── Connector lines ──────────────────────────────────────────────────────── */
+
+.registration-progress .progress-line {
+    flex: 1;
+    height: 3px;
+    margin-top: 20.5px;
+    border-radius: 3px;
+    background: #e2e8f0;
+    transition:
+        background 0.3s ease,
+        box-shadow 0.3s ease;
+    min-width: 36px;
+    max-width: 90px;
+}
+
+.registration-progress .progress-line.active {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 1px 6px rgba(102, 126, 234, 0.25);
+}
+
+/* ── Hover states ─────────────────────────────────────────────────────────── */
+
+.registration-progress
+    .progress-step:not(.completed):not(.active):hover
+    .step-number {
+    border-color: #a5b4fc;
+    color: #667eea;
+    background: #f8f7ff;
+}
+
+.registration-progress
+    .progress-step:not(.completed):not(.active):hover
+    span:not(.step-number span) {
+    color: #667eea;
+}
+
+.registration-progress .progress-step:hover .step-number {
+    transform: translateY(-1px);
+}
+
+.registration-progress .progress-step.active:hover .step-number {
+    transform: scale(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .registration-progress .progress-step.active .step-number::after,
+    .registration-progress .progress-step.completed .step-number i {
+        animation: none;
+    }
+}
+
+/* ── Review step variant (number spans instead of .step-number) ──────────── */
+
+.registration-progress .progress-step > span:first-child {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e2e8f0;
+    border-radius: 50%;
+    background: #fafbfc;
+    line-height: 1;
+    transition:
+        border-color 0.25s ease,
+        background 0.25s ease,
+        color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
+}
+
+.registration-progress .progress-step.completed > span:first-child {
+    border-color: transparent;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.registration-progress .progress-step.active > span:first-child {
+    border: 2.5px solid #667eea;
+    background: #f8f7ff;
+    color: #4f46e5;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow:
+        0 0 0 5px rgba(102, 126, 234, 0.12),
+        0 6px 16px rgba(102, 126, 234, 0.22);
+    transform: scale(1.06);
+}
+
+.registration-progress
+    .progress-step:not(.completed):not(.active)
+    > span:first-child {
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.registration-progress .progress-line.completed {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 1px 6px rgba(102, 126, 234, 0.25);
+}
+
+.registration-progress .progress-step small {
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
 }
 
 /* ============================================================
@@ -286,30 +489,126 @@ body {
     top: 50%;
     left: 15px;
     transform: translateY(-50%);
-    color: #9ca3af;
+    color: #a78bfa;
     pointer-events: none;
 }
 
-.input-wrapper input {
+/* ============================================================
+   REGISTRATION INPUTS — CAREER NEXT PURPLE THEME
+   ============================================================ */
+
+.register-page .input-wrapper {
+    position: relative;
+}
+
+.register-page .input-wrapper > i {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: #a78bfa;
+    pointer-events: none;
+}
+
+.register-page .input-wrapper input,
+.register-page .input-wrapper select,
+.register-page .input-wrapper textarea {
+    display: block;
     width: 100%;
-    height: 48px;
+    box-sizing: border-box;
     padding: 0 45px;
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 11px;
     outline: none;
-    background: #fff;
-    color: #111827;
-    font-size: 14px;
-    transition: 0.2s ease;
+    background: linear-gradient(
+        145deg,
+        rgba(118, 75, 162, 0.98),
+        rgba(102, 126, 234, 0.98)
+    );
+    color: #fff;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.86rem;
+    font-weight: 400;
+    line-height: 1.4;
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
-.input-wrapper input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+.register-page .input-wrapper input,
+.register-page .input-wrapper select {
+    height: 44px;
 }
 
-.input-wrapper input::placeholder {
-    color: #9ca3af;
+.register-page .input-wrapper textarea {
+    min-height: 100px;
+    padding: 11px 45px;
+    resize: vertical;
+}
+
+/* Focus */
+.register-page .input-wrapper input:focus,
+.register-page .input-wrapper select:focus,
+.register-page .input-wrapper textarea:focus {
+    background: linear-gradient(
+        145deg,
+        rgba(118, 75, 162, 0.98),
+        rgba(102, 126, 234, 0.98)
+    );
+    border-color: rgba(167, 139, 250, 0.7);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+}
+
+/* Placeholder */
+.register-page .input-wrapper input::placeholder,
+.register-page .input-wrapper textarea::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+    opacity: 1;
+}
+
+.register-page .input-wrapper select option {
+    background: #4c3b8e;
+    color: #fff;
+}
+
+/* Disabled fields */
+.register-page .input-wrapper input:disabled,
+.register-page .input-wrapper select:disabled,
+.register-page .input-wrapper textarea:disabled {
+    border-color: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.5);
+    cursor: not-allowed;
+}
+
+/* Read-only fields */
+.register-page .input-wrapper input[readonly],
+.register-page .input-wrapper textarea[readonly] {
+    border-color: rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.75);
+}
+
+/* Purple labels */
+.register-page .form-group label {
+    color: #374151;
+}
+
+/* Purple icons */
+.register-page .input-wrapper > i {
+    color: #a78bfa;
+}
+/* Validation errors keep their message, border turns red */
+
+.register-page .form-group:has(.field-error) .input-wrapper input,
+.register-page .form-group:has(.field-error) .input-wrapper select,
+.register-page .form-group:has(.field-error) .input-wrapper textarea {
+    border-color: #f87171;
+}
+
+.register-page .form-group:has(.field-error) .input-wrapper input:focus,
+.register-page .form-group:has(.field-error) .input-wrapper select:focus,
+.register-page .form-group:has(.field-error) .input-wrapper textarea:focus {
+    box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
 }
 
 /* ============================================================
@@ -328,7 +627,7 @@ body {
 }
 
 .password-toggle:hover {
-    color: #2563eb;
+    color: #667eea;
 }
 
 .password-strength {
@@ -350,7 +649,7 @@ body {
     display: block;
     width: 0;
     height: 100%;
-    background: #2563eb;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     transition: width 0.25s ease;
 }
 
@@ -486,18 +785,56 @@ body {
     .registration-progress {
         overflow-x: auto;
         justify-content: flex-start;
-        padding-bottom: 5px;
+        gap: 0;
+        padding: 2px 0 8px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
     }
 
-    .progress-line {
-        width: 35px;
+    .registration-progress::-webkit-scrollbar {
+        display: none;
     }
 
-    .progress-step {
-        min-width: 55px;
+    .registration-progress .progress-line {
+        min-width: 14px;
+        height: 2px;
+        margin-top: 16px;
     }
 
-    .progress-step span {
+    .registration-progress .progress-step {
+        min-width: 46px;
+        padding: 0 2px;
+        gap: 7px;
+    }
+
+    .registration-progress .step-number {
+        width: 34px;
+        height: 34px;
+        font-size: 12px;
+    }
+
+    .registration-progress .step-number i {
+        font-size: 12px;
+    }
+
+    .registration-progress .progress-step span:not(.step-number span) {
+        font-size: 10px;
+    }
+
+    .registration-progress .progress-step > span:first-child {
+        width: 34px;
+        height: 34px;
+    }
+
+    .registration-progress .progress-step.completed > span:first-child,
+    .registration-progress .progress-step.active > span:first-child,
+    .registration-progress
+        .progress-step:not(.completed):not(.active)
+        > span:first-child {
+        font-size: 12px;
+    }
+
+    .registration-progress .progress-step small {
         font-size: 10px;
     }
 
@@ -516,22 +853,8 @@ body {
 }
 
 .input-wrapper select {
-    width: 100%;
-    height: 48px;
-    padding: 0 45px;
-    border: 1px solid #d1d5db;
-    border-radius: 10px;
-    outline: none;
-    background: #fff;
-    color: #111827;
-    font-size: 14px;
-    transition: 0.2s ease;
     appearance: auto;
-}
-
-.input-wrapper select:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    cursor: pointer;
 }
 
 /* ============================================================
@@ -567,16 +890,16 @@ body {
     align-items: center;
     gap: 14px;
     padding: 15px 17px;
-    border: 1.5px dashed #cbd5e1;
+    border: 1.5px dashed rgba(167, 139, 250, 0.45);
     border-radius: 12px;
-    background: #f8fafc;
+    background: #f8f7ff;
     cursor: pointer;
     transition: 0.2s ease;
 }
 
 .file-upload-label:hover {
-    border-color: #2563eb;
-    background: #eff6ff;
+    border-color: #a78bfa;
+    background: #eef2ff;
 }
 
 .file-upload-icon {
@@ -587,8 +910,8 @@ body {
     align-items: center;
     justify-content: center;
     border-radius: 11px;
-    background: #eff6ff;
-    color: #2563eb;
+    background: #eef2ff;
+    color: #667eea;
     font-size: 19px;
 }
 
@@ -889,6 +1212,7 @@ body {
     margin-top: 2px;
     flex-shrink: 0;
     cursor: pointer;
+    accent-color: #667eea;
 }
 
 .review-error {
@@ -959,4 +1283,367 @@ body {
 .registration-card {
     overflow: visible !important;
     max-height: none !important;
+}
+
+/* ============================================================
+   PROFILE EDITING MODAL LOOK — REGISTRATION DETAILS ONLY
+   ============================================================ */
+
+.register-page {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(8, 5, 25, 0.78);
+}
+
+.register-page .register-container {
+    background: linear-gradient(
+        145deg,
+        rgba(118, 75, 162, 0.98),
+        rgba(102, 126, 234, 0.98)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 20px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+.register-page .register-header {
+    margin: 0;
+    padding: 22px 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+    text-align: left;
+}
+
+.register-page .register-logo {
+    color: #fff;
+    font-size: 22px;
+}
+
+.register-page .registration-progress {
+    margin: 24px 28px 28px;
+}
+
+.register-page .registration-progress .progress-step,
+.register-page .registration-progress .progress-step.completed,
+.register-page .registration-progress .progress-step.active,
+.register-page .registration-progress .progress-step.completed span:not(.step-number span),
+.register-page .registration-progress .progress-step.active span:not(.step-number span) {
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.register-page .registration-progress .step-number,
+.register-page .registration-progress .progress-step > span:first-child {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.register-page .registration-progress .progress-step.completed .step-number,
+.register-page .registration-progress .progress-step.completed > span:first-child {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    box-shadow: none;
+}
+
+.register-page .registration-progress .progress-step.active .step-number,
+.register-page .registration-progress .progress-step.active > span:first-child {
+    border-color: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.register-page .registration-progress .progress-step.active .step-number::after {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.register-page .registration-progress
+    .progress-step:not(.completed):not(.active):hover
+    .step-number,
+.register-page .registration-progress
+    .progress-step:not(.completed):not(.active):hover
+    > span:first-child {
+    border-color: rgba(255, 255, 255, 0.55);
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+}
+
+.register-page .registration-progress
+    .progress-step:not(.completed):not(.active):hover
+    span:not(.step-number span) {
+    color: #fff;
+}
+
+.register-page .registration-progress .progress-line,
+.register-page .registration-progress .progress-line.active,
+.register-page .registration-progress .progress-line.completed {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: none;
+}
+
+.register-page .registration-card {
+    padding: 0 28px 28px;
+    border: 0;
+    border-radius: 0 0 20px 20px;
+    background: transparent;
+    box-shadow: none;
+}
+
+.register-page .registration-card > .registration-header {
+    padding-top: 24px;
+    text-align: center;
+}
+
+.register-page .registration-card > .registration-progress {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.register-page .card-header h1,
+.register-page .registration-header h1,
+.register-page .review-section-header h3 {
+    color: #fff;
+}
+
+.register-page .card-header p,
+.register-page .registration-header p,
+.register-page .registration-header,
+.register-page .review-section-header p {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.register-page .step-badge,
+.register-page .registration-icon {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.1);
+    color: #e9d5ff;
+}
+
+.register-page .account-type-display,
+.register-page .registration-info-box {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.register-page .account-type-display > i {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+}
+
+.register-page .account-type-display strong,
+.register-page .account-type-display span,
+.register-page .account-type-display a,
+.register-page .registration-info-box strong,
+.register-page .registration-info-box p {
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.register-page .registration-info-box > i,
+.register-page .registration-info-box strong {
+    color: #e9d5ff;
+}
+
+.register-page .form-group label {
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.register-page .input-wrapper input,
+.register-page .input-wrapper select,
+.register-page .input-wrapper textarea {
+    border-color: rgba(255, 255, 255, 0.18);
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-family: "Poppins", sans-serif;
+    font-size: 0.86rem;
+    font-weight: 400;
+}
+
+.register-page .input-wrapper input:focus,
+.register-page .input-wrapper select:focus,
+.register-page .input-wrapper textarea:focus {
+    border-color: rgba(255, 255, 255, 0.42);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.07);
+}
+
+.register-page .input-wrapper input::placeholder,
+.register-page .input-wrapper textarea::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.register-page .input-wrapper select option {
+    background: #241b45;
+    color: #fff;
+}
+
+.register-page .input-wrapper input:disabled,
+.register-page .input-wrapper select:disabled,
+.register-page .input-wrapper textarea:disabled,
+.register-page .input-wrapper input[readonly],
+.register-page .input-wrapper textarea[readonly] {
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.68);
+}
+
+.register-page .input-wrapper input:focus::placeholder,
+.register-page .input-wrapper textarea:focus::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.register-page .password-toggle {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.register-page .password-toggle:hover,
+.register-page .review-edit,
+.register-page .login-link a {
+    color: #e9d5ff;
+}
+
+.register-page .strength-bar {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.register-page #strength-text,
+.register-page .field-help,
+.register-page .registration-footer {
+    color: rgba(255, 255, 255, 0.68);
+}
+
+.register-page .field-error,
+.register-page .password-match.invalid {
+    color: #fecaca;
+}
+
+.register-page .password-match.valid {
+    color: #bbf7d0;
+}
+
+.register-page .btn-primary,
+.register-page .btn-secondary {
+    min-height: 44px;
+    border-radius: 11px;
+}
+
+.register-page .btn-primary {
+    background: #8b5cf6;
+    color: #fff;
+}
+
+.register-page .btn-primary:hover {
+    background: #7c3aed;
+}
+
+.register-page .btn-secondary {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.register-page .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+.register-page .login-link {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.register-page .registration-alert {
+    border-color: rgba(254, 202, 202, 0.35);
+    background: rgba(127, 29, 29, 0.28);
+    color: #fee2e2;
+}
+
+.register-page .file-upload-label,
+.register-page .registration-info-box,
+.register-page .professional-summary,
+.register-page .review-section,
+.register-page .review-confirmation {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.register-page .file-upload-label:hover {
+    border-color: rgba(255, 255, 255, 0.42);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.register-page .file-upload-icon,
+.register-page .review-item,
+.register-page .review-account-type,
+.register-page .review-complete,
+.register-page .summary-title,
+.register-page .summary-item:nth-child(odd) {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.register-page .file-upload-icon,
+.register-page .upload-arrow,
+.register-page .file-upload-label strong,
+.register-page .file-upload-label span,
+.register-page .review-section-header h3 i,
+.register-page .review-account-type > i,
+.register-page .review-complete > i,
+.register-page .summary-title i,
+.register-page .review-item span,
+.register-page .review-item strong,
+.register-page .review-account-type strong,
+.register-page .review-account-type span,
+.register-page .review-complete strong,
+.register-page .review-complete span,
+.register-page .confirmation-label,
+.register-page .summary-title,
+.register-page .summary-item span,
+.register-page .summary-item strong,
+.register-page .summary-address span,
+.register-page .summary-address strong {
+    color: rgba(255, 255, 255, 0.86);
+}
+
+.register-page .professional-summary,
+.register-page .review-section,
+.register-page .review-confirmation {
+    border-radius: 14px;
+}
+
+.register-page .summary-title,
+.register-page .summary-item,
+.register-page .summary-item:nth-child(odd),
+.register-page .review-section,
+.register-page .review-confirmation {
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.register-page .review-confirmation {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.register-page .confirmation-label input {
+    accent-color: #a78bfa;
+}
+
+.register-page .review-error {
+    color: #fecaca;
+}
+
+@media (max-width: 700px) {
+    .register-page {
+        padding: 12px;
+    }
+
+    .register-page .register-header {
+        padding: 18px 18px;
+    }
+
+    .register-page .registration-progress {
+        margin: 18px 18px 22px;
+    }
+
+    .register-page .registration-card {
+        padding: 0 18px 22px;
+    }
 }

@@ -8,7 +8,18 @@
 
 @section('content')
 
-<div class="registration-page">
+<div class="register-page">
+
+    <div class="register-container">
+
+        <div class="register-header">
+            <a href="{{ route('register.index') }}" class="register-logo">
+                <span class="logo-icon">
+                    <img src="{{ asset('images/CareerNext.png') }}" alt="Career Next Logo" width="42" height="42">
+                </span>
+                <span>Career Next</span>
+            </a>
+        </div>
 
     <div class="registration-card">
 
@@ -52,22 +63,15 @@
 
             <div class="progress-line completed"></div>
 
-            <div class="progress-step completed">
-                <span>4</span>
-                <small>Professional</small>
-            </div>
-
-            <div class="progress-line completed"></div>
-
             <div class="progress-step active">
-                <span>5</span>
+                <span>4</span>
                 <small>Review</small>
             </div>
 
             <div class="progress-line"></div>
 
             <div class="progress-step">
-                <span>6</span>
+                <span>5</span>
                 <small>Verify</small>
             </div>
 
@@ -413,6 +417,10 @@
             </form>
 
         </div>
+
+    </div>
+
+</div>
 
     </div>
 
