@@ -20,7 +20,7 @@
     <div class="section-title"><i class="fas fa-sliders"></i> Filter Jobs</div>
     <div class="glass-card">
         <form method="GET"
-            action="{{ route('jobseeker.jobs') }}">
+            action="{{ route('jobseeker.jobs') }}" data-ajax-html>
             <div class="search-grid">
 
                 <div class="form-group">
@@ -148,7 +148,7 @@
                 @else
 
                 <form action="{{ route('jobseeker.jobs.apply', $job->JobId) }}"
-                    method="POST">
+                    method="POST" data-ajax data-ajax-mark-applied="Applied">
                     @csrf
 
                     <button type="submit" class="btn-apply">

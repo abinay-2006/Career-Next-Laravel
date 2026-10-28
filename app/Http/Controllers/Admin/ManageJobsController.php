@@ -79,6 +79,10 @@ class ManageJobsController extends Controller
             ], 404);
         }
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Job approved successfully.', 'status' => 'approved', 'id' => (int) $id]);
+        }
+
         return redirect()
             ->route('admin.manage.jobs')
             ->with('success', 'Job approved successfully.');
@@ -97,6 +101,10 @@ class ManageJobsController extends Controller
                 'success' => false,
                 'message' => 'Job not found.'
             ], 404);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Job rejected successfully.', 'status' => 'rejected', 'id' => (int) $id]);
         }
 
         return redirect()

@@ -16,7 +16,7 @@
             </div>
         </div>
 
-        <form method="POST" id="editEducationForm" action="">
+        <form method="POST" id="editEducationForm" action="" data-ajax data-ajax-refresh-target=".cn-dashboard-main">
             @csrf
             @method('PUT')
             <input type="hidden" name="eduId" id="modal_eduId">
@@ -88,7 +88,7 @@
             </div>
         </div>
 
-        <form method="POST" id="editSchoolForm" action="">
+        <form method="POST" id="editSchoolForm" action="" data-ajax data-ajax-refresh-target=".cn-dashboard-main">
             @csrf
             @method('PUT')
             <input type="hidden" name="action" value="update_school">
@@ -163,7 +163,7 @@
     </div>
 
     <div class="glass-card">
-        <form method="POST" action="{{ route('jobseeker.education.store') }}">
+        <form method="POST" action="{{ route('jobseeker.education.store') }}" data-ajax data-ajax-refresh-target=".cn-dashboard-main">
             @csrf
 
             <div class="form-grid">
@@ -250,7 +250,7 @@
 
     <div class="glass-card">
 
-        <form method="POST" action="{{ route('jobseeker.school.store') }}">
+        <form method="POST" action="{{ route('jobseeker.school.store') }}" data-ajax data-ajax-refresh-target=".cn-dashboard-main">
             @csrf
 
             <div class="form-grid">
@@ -343,7 +343,7 @@
     <div class="section-title" style="margin-top: 40px;"><i class="fas fa-upload"></i> Upload Documents</div>
 
     <div class="glass-card">
-        <form method="post" action="{{ route('jobseeker.documents.store') }}" enctype="multipart/form-data" onsubmit="return validateDocumentUpload(this)">
+        <form method="post" action="{{ route('jobseeker.documents.store') }}" data-ajax data-ajax-refresh-target=".cn-dashboard-main" enctype="multipart/form-data" onsubmit="return validateDocumentUpload(this)">
             @csrf
 
             <div class="form-grid">
@@ -603,7 +603,7 @@
 
         <div class="delete-actions">
             <button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-            <form id="deleteForm" method="POST">
+            <form id="deleteForm" method="POST" data-ajax data-ajax-refresh-target=".cn-dashboard-main">
                 @csrf
                 @method('DELETE')
 
@@ -698,8 +698,9 @@
     }
 
     // Close modal on overlay click
-    document.getElementById('editModal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('editModal');
+        if (modal && e.target === modal) closeModal();
     });
 
     /* ── Edit school modal ── */
@@ -751,8 +752,9 @@
     }
 
     // Close school modal on overlay click
-    document.getElementById('editSchoolModal').addEventListener('click', function(e) {
-        if (e.target === this) closeSchoolModal();
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('editSchoolModal');
+        if (modal && e.target === modal) closeSchoolModal();
     });
 
     // Close modal on Escape key

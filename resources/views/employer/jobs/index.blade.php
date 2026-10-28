@@ -30,7 +30,7 @@
       </div>
     </div>
 
-    <form method="POST"
+    <form method="POST" data-ajax data-ajax-refresh-target=".cn-dashboard-main"
       action="{{ route('employer.jobs.store') }}"
       id="postJobForm"
       onsubmit="return validateJob()">
@@ -194,7 +194,7 @@
       <button class="btn-confirm-cancel" onclick="closeDeleteModal()">
         <i class="fas fa-xmark"></i> Cancel
       </button>
-      <form id="deleteForm" method="POST">
+      <form id="deleteForm" method="POST" data-ajax data-ajax-refresh-target=".cn-dashboard-main">
         @csrf
         @method('DELETE')
 
@@ -220,7 +220,7 @@
       <button class="btn-close" onclick="closeEditModal()"><i class="fas fa-xmark"></i></button>
     </div>
 
-    <form method="POST" id="editJobForm">
+    <form method="POST" id="editJobForm" data-ajax data-ajax-refresh-target=".cn-dashboard-main">
       @csrf
       @method('PUT')
 
@@ -287,18 +287,27 @@
 @section('scripts')
 <script>
   // ── "Other" qualification field toggle ──
-  document.getElementById('cmbQual').addEventListener('change', function() {
-    document.getElementById('otherGroup').style.opacity = this.value === 'Other' ? '1' : '0.5';
-    document.getElementById('txtOther').disabled = (this.value !== 'Other');
-  });
-  // init
-  document.getElementById('txtOther').disabled = true;
-  document.getElementById('otherGroup').style.opacity = '0.5';
+  function initializeJobQualificationInputs() {
+    const qualification = document.getElementById('cmbQual');
+    const otherInput = document.getElementById('txtOther');
+    const otherGroup = document.getElementById('otherGroup');
+    if (qualification && otherInput && otherGroup) {
+      otherInput.disabled = qualification.value !== 'Other';
+      otherGroup.style.opacity = qualification.value === 'Other' ? '1' : '0.5';
+    }
+  }
+  initializeJobQualificationInputs();
+  document.addEventListener('cn:region-updated', initializeJobQualificationInputs);
 
-  document.getElementById('edit_cmbQual').addEventListener('change', function() {
-    const otherGroup = document.getElementById('edit_otherGroup');
-    otherGroup.style.opacity = this.value === 'Other' ? '1' : '0.5';
-    document.getElementById('edit_txtOther').disabled = (this.value !== 'Other');
+  document.addEventListener('change', function(event) {
+    if (event.target.id === 'cmbQual') {
+      document.getElementById('otherGroup').style.opacity = event.target.value === 'Other' ? '1' : '0.5';
+      document.getElementById('txtOther').disabled = event.target.value !== 'Other';
+    }
+    if (event.target.id === 'edit_cmbQual') {
+      document.getElementById('edit_otherGroup').style.opacity = event.target.value === 'Other' ? '1' : '0.5';
+      document.getElementById('edit_txtOther').disabled = event.target.value !== 'Other';
+    }
   });
 
   // ── Form validation ──
@@ -337,12 +346,12 @@
     });
     return valid;
   }
-  document.querySelectorAll('.form-input,.form-textarea').forEach(function(el) {
-    el.addEventListener('input', function() {
+  document.addEventListener('input', function(event) {
+      const el = event.target;
+      if (!el.matches('.form-input,.form-textarea')) return;
       const err = document.getElementById('err-' + el.id);
       if (err) err.classList.remove('visible');
       el.style.borderColor = '';
-    });
   });
 
   // ── Delete confirm modal ──

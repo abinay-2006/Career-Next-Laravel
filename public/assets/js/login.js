@@ -167,12 +167,14 @@ function handleRegisterSubmit(event) {
     const form = event.target;
     const formData = new FormData(form);
     const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn.innerHTML;
+    const originalBtnDisabled = submitBtn.disabled;
 
-    const originalBtnText = submitBtn.innerHTML;
-
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
-
-    submitBtn.disabled = true;
+    const restoreButton = window.CareerNextButtonLoading?.start(submitBtn, 'Creating...');
+    if (!window.CareerNextButtonLoading) {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+        submitBtn.disabled = true;
+    }
 
     fetch(form.action, {
         method: "POST",
@@ -227,8 +229,6 @@ function handleRegisterSubmit(event) {
                 showError("reg-error", data.message || "Registration failed.");
             }
 
-            submitBtn.innerHTML = originalBtnText;
-            submitBtn.disabled = false;
         })
         .catch((error) => {
             console.error("Registration error:", error);
@@ -251,8 +251,13 @@ function handleRegisterSubmit(event) {
 
             showError("reg-error", message);
 
-            submitBtn.innerHTML = originalBtnText;
-            submitBtn.disabled = false;
+        })
+        .finally(() => {
+            if (restoreButton) restoreButton();
+            else {
+                submitBtn.innerHTML = originalBtnHtml;
+                submitBtn.disabled = originalBtnDisabled;
+            }
         });
 
     return false;
@@ -265,10 +270,13 @@ function handleForgotSubmit(event) {
     const form = event.target;
     const formData = new FormData(form);
     const submitBtn = form.querySelector('button[type="submit"]');
-    const originalBtnText = submitBtn.innerHTML;
-
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-    submitBtn.disabled = true;
+    const originalBtnHtml = submitBtn.innerHTML;
+    const originalBtnDisabled = submitBtn.disabled;
+    const restoreButton = window.CareerNextButtonLoading?.start(submitBtn, 'Sending...');
+    if (!window.CareerNextButtonLoading) {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        submitBtn.disabled = true;
+    }
 
     fetch(form.action, {
         method: "POST",
@@ -293,14 +301,17 @@ function handleForgotSubmit(event) {
             } else {
                 showError("forgot-error", data.message || "An error occurred.");
             }
-            submitBtn.innerHTML = originalBtnText;
-            submitBtn.disabled = false;
         })
         .catch((error) => {
             console.error("Error:", error);
             showError("forgot-error", "A network error occurred.");
-            submitBtn.innerHTML = originalBtnText;
-            submitBtn.disabled = false;
+        })
+        .finally(() => {
+            if (restoreButton) restoreButton();
+            else {
+                submitBtn.innerHTML = originalBtnHtml;
+                submitBtn.disabled = originalBtnDisabled;
+            }
         });
 }
 

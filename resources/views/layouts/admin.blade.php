@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/notifications.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin-navigation.css') }}">
+    @vite('resources/js/app.js')
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 
@@ -62,7 +63,7 @@
                 </div>
             </header>
 
-            <main class="cn-admin-content">
+            <main class="cn-admin-content" data-ajax-region>
                 @yield('content')
             </main>
 

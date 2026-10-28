@@ -9,13 +9,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/css/brand.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/news.css') }}">
+        @vite('resources/js/app.js')
 </head>
 <body class="cn-news-public">
     <header class="cn-news-public-header">
         <a href="{{ url('/') }}" class="brand-logo"><img src="{{ asset('images/CareerNext.png') }}" alt=""><span>Career Next</span></a>
         <nav aria-label="Main navigation"><a href="{{ route('news.index') }}" aria-current="page">Career News</a><a href="{{ url('/') }}">Home</a><a href="{{ route('login') }}">Sign in</a></nav>
     </header>
-    <main class="cn-news-main">@yield('content')</main>
+    <main class="cn-news-main" data-ajax-region>@yield('content')</main>
     <footer class="cn-news-footer">&copy; {{ date('Y') }} Career Next. All rights reserved.</footer>
 </body>
 </html>

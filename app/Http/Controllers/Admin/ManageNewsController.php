@@ -18,6 +18,7 @@ class ManageNewsController extends Controller
     {
         $data = $request->validate(['News' => ['required', 'string', 'max:200'], 'NewsDate' => ['required', 'date']]);
         News::create($data);
+        if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'News article created.', 'refresh' => true]);
         return back()->with('success', 'News article created.');
     }
 
@@ -29,12 +30,14 @@ class ManageNewsController extends Controller
     public function update(Request $request, News $news)
     {
         $news->update($request->validate(['News' => ['required', 'string', 'max:200'], 'NewsDate' => ['required', 'date']]));
+        if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'News article updated.', 'refresh' => true]);
         return redirect()->route('admin.news.show', $news)->with('success', 'News article updated.');
     }
 
-    public function destroy(News $news)
+    public function destroy(Request $request, News $news)
     {
         $news->delete();
+        if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'News article deleted.', 'refresh' => true]);
         return redirect()->route('admin.news.index')->with('success', 'News article deleted.');
     }
 }

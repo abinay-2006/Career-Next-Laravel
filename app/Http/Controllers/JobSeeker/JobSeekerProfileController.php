@@ -322,6 +322,9 @@ class JobSeekerProfileController extends Controller
             }
  catch (\Exception $e) {
                 Log::error('JobSeeker profile photo upload failed.', ['exception' => $e::class]);
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Unable to upload profile photo. Please try again later.'], 500);
+                }
                 return back()->withErrors(['Photo' => 'Unable to upload profile photo. Please try again later.']);
             }
 
@@ -337,9 +340,16 @@ class JobSeekerProfileController extends Controller
         }
  catch (\Exception $e) {
             Log::error('JobSeeker profile save failed.', ['exception' => $e::class]);
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Unable to save profile. Please try again later.'], 500);
+            }
             return back()->withErrors(['profile' => 'Unable to save profile. Please try again later.']);
         }
 
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Profile updated successfully.', 'refresh' => true]);
+        }
 
         return redirect()
             ->route('jobseeker.profile.index')
@@ -413,6 +423,9 @@ class JobSeekerProfileController extends Controller
             $storedPath = UploadStorage::storeAs($file, 'documents', $filename, UploadStorage::privateDiskName());
         } catch (\Throwable $e) {
             Log::error('Resume upload storage failed.', ['exception' => $e::class]);
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'The resume could not be saved. Please try again.'], 500);
+            }
             return back()->with('error', 'The resume could not be saved. Please try again.');
         }
 
@@ -457,6 +470,10 @@ class JobSeekerProfileController extends Controller
             }
 
 
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => 'Resume uploaded successfully.', 'refresh' => true]);
+            }
+
             return redirect()
                 ->route('jobseeker.profile.index')
                 ->with('success', 'Resume uploaded successfully.');
@@ -465,6 +482,9 @@ class JobSeekerProfileController extends Controller
             Log::error('Resume upload failed.', ['exception' => $e::class]);
             // Attempt to clean up the newly uploaded file on failure
             UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $storedPath, 'failed resume update cleanup');
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to update resume record. Please try again.'], 500);
+            }
             return back()->with('error', 'Failed to update resume record. Please try again.');
         }
 
@@ -489,6 +509,10 @@ class JobSeekerProfileController extends Controller
             if (!empty($jobSeeker->Resume)) {
                 $jobSeeker->Resume = null;
                 $jobSeeker->save();
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => 'No resume to delete.', 'refresh' => true]);
             }
 
             return redirect()
@@ -516,6 +540,10 @@ class JobSeekerProfileController extends Controller
             UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $legacyPath, 'removed legacy resume cleanup');
         }
 
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Resume removed successfully.', 'refresh' => true]);
+        }
 
         return redirect()
             ->route('jobseeker.profile.index')

@@ -121,7 +121,7 @@ class EducationController extends Controller
     {
         $request->validate([
             'cmbQual' => 'required|string|max:255',
-            'txtOther' => 'nullable|string|max:255',
+            'txtOther' => 'nullable|required_if:cmbQual,Other|string|max:255',
             'txtBoard' => 'required|string|max:255',
             'cmbYear' => 'required|integer|min:1998|max:' . now()->year,
             'txtPer' => 'required|numeric|min:0|max:100',
@@ -151,6 +151,7 @@ class EducationController extends Controller
             'Percentage'  => $request->txtPer,
         ]);
 
+        if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'Education added successfully.', 'refresh' => true]);
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'Education added successfully.');
@@ -166,7 +167,7 @@ class EducationController extends Controller
     {
         $request->validate([
             'cmbQual' => 'required|string|max:255',
-            'txtOther' => 'nullable|string|max:255',
+            'txtOther' => 'nullable|required_if:cmbQual,Other|string|max:255',
             'txtBoard' => 'required|string|max:255',
             'cmbYear' => 'required|integer|min:1998|max:' . now()->year,
             'txtPer' => 'required|numeric|min:0|max:100',
@@ -199,6 +200,7 @@ class EducationController extends Controller
             'Percentage'  => $request->txtPer,
         ]);
 
+        if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'Education updated successfully.', 'refresh' => true]);
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'Education updated successfully.');
@@ -210,7 +212,7 @@ class EducationController extends Controller
     | Delete Higher Education
     |--------------------------------------------------------------------------
     */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
 
@@ -220,6 +222,7 @@ class EducationController extends Controller
 
         $education->delete();
 
+        if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'Education deleted successfully.', 'refresh' => true]);
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'Education deleted successfully.');
@@ -236,7 +239,7 @@ class EducationController extends Controller
         $request->validate([
             'txtSchoolName' => 'required|string|max:255',
             'cmbSchoolQual' => 'required|string|max:255',
-            'txtSchoolOther' => 'nullable|string|max:255',
+            'txtSchoolOther' => 'nullable|required_if:cmbSchoolQual,Other|string|max:255',
             'txtSchoolBoard' => 'required|string|max:255',
             'cmbSchoolYear' => 'required|integer|min:1990|max:' . now()->year,
             'txtSchoolPer' => 'required|numeric|min:0|max:100',
@@ -267,6 +270,7 @@ class EducationController extends Controller
             'Percentage'    => $request->txtSchoolPer,
         ]);
 
+        if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'School education added successfully.', 'refresh' => true]);
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'School education added successfully.');
@@ -283,7 +287,7 @@ class EducationController extends Controller
         $request->validate([
             'txtSchoolName' => 'required|string|max:255',
             'cmbSchoolQual' => 'required|string|max:255',
-            'txtSchoolOther' => 'nullable|string|max:255',
+            'txtSchoolOther' => 'nullable|required_if:cmbSchoolQual,Other|string|max:255',
             'txtSchoolBoard' => 'required|string|max:255',
             'cmbSchoolYear' => 'required|integer|min:1990|max:' . now()->year,
             'txtSchoolPer' => 'required|numeric|min:0|max:100',
@@ -317,6 +321,7 @@ class EducationController extends Controller
             'Percentage'    => $request->txtSchoolPer,
         ]);
 
+        if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'School education updated successfully.', 'refresh' => true]);
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'School education updated successfully.');
@@ -328,7 +333,7 @@ class EducationController extends Controller
     | Delete School Education
     |--------------------------------------------------------------------------
     */
-    public function destroySchool($id)
+    public function destroySchool(Request $request, $id)
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
 
@@ -338,6 +343,7 @@ class EducationController extends Controller
 
         $school->delete();
 
+        if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'School education deleted successfully.', 'refresh' => true]);
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'School education deleted successfully.');
@@ -375,6 +381,7 @@ class EducationController extends Controller
             $storedPath = UploadStorage::storeAs($file, 'documents', $fileName, UploadStorage::privateDiskName());
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('Education document upload storage failed.', ['exception' => $e::class]);
+            if ($request->expectsJson()) return response()->json(['success' => false, 'message' => 'The document could not be saved. Please try again.'], 500);
             return back()->with('error', 'The document could not be saved. Please try again.');
         }
 
@@ -390,9 +397,11 @@ class EducationController extends Controller
         } catch (\Throwable $e) {
             UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $storedPath, 'failed education document record cleanup');
             \Illuminate\Support\Facades\Log::error('Education document record creation failed.', ['exception' => $e::class]);
+            if ($request->expectsJson()) return response()->json(['success' => false, 'message' => 'The document could not be saved. Please try again.'], 500);
             return back()->with('error', 'The document could not be saved. Please try again.');
         }
 
+        if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'Document uploaded successfully.', 'refresh' => true]);
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'Document uploaded successfully.');
@@ -404,7 +413,7 @@ class EducationController extends Controller
     | Delete Document
     |--------------------------------------------------------------------------
     */
-    public function deleteDocument($id)
+    public function deleteDocument(Request $request, $id)
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
 
@@ -417,6 +426,7 @@ class EducationController extends Controller
         });
         UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $document->FileName, 'deleted education document cleanup');
 
+        if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'Document deleted successfully.', 'refresh' => true]);
         return redirect()
             ->route('jobseeker.education')
             ->with('success', 'Document deleted successfully.');

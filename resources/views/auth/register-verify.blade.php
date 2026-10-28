@@ -398,14 +398,7 @@
             const button =
                 document.getElementById('verify-button');
 
-            const text =
-                document.getElementById('verify-text');
-
-
-            button.disabled = true;
-
-            text.innerHTML =
-                '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            window.CareerNextButtonLoading?.start(button, 'Verifying...');
 
         });
 
@@ -424,10 +417,7 @@
                 document.getElementById('resend-button');
 
 
-            button.disabled = true;
-
-            button.innerHTML =
-                '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            window.CareerNextButtonLoading?.start(button, 'Sending...');
 
         });
 </script>

@@ -708,10 +708,7 @@
             const button =
                 document.getElementById('professional-continue');
 
-            button.disabled = true;
-
-            button.innerHTML =
-                '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            window.CareerNextButtonLoading?.start(button, 'Saving...');
 
         });
 

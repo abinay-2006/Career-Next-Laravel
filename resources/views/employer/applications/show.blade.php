@@ -57,7 +57,7 @@
                         rejected
                     @else
                         pending
-                    @endif">
+                    @endif" data-application-status>
 
                     {{ $application->Status }}
 
@@ -264,7 +264,7 @@
         @endif
 
         <form action="{{ route('employer.applications.update', $application->ApplicationId) }}"
-            method="POST">
+            method="POST" data-ajax data-ajax-status-target="[data-application-status]" data-ajax-status-base="status-badge">
 
             @csrf
             @method('PUT')

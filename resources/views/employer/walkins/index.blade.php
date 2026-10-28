@@ -30,7 +30,7 @@
             </div>
         </div>
 
-        <form method="POST"
+        <form method="POST" data-ajax data-ajax-refresh-target=".cn-dashboard-main"
             action="{{ route('employer.walkins.store') }}"
             id="walkinForm"
             onsubmit="return validateWalkin()">
@@ -181,7 +181,7 @@
         </div>
         <div class="modal-confirm-actions">
             <button class="btn-confirm-cancel" onclick="closeDeleteModal()"><i class="fas fa-xmark"></i> Cancel</button>
-            <form id="deleteForm" method="POST">
+            <form id="deleteForm" method="POST" data-ajax data-ajax-refresh-target=".cn-dashboard-main">
 
                 @csrf
                 @method('DELETE')
@@ -211,7 +211,7 @@
             <button class="btn-close" style="width: 34px; height: 34px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 9px; color: rgba(255, 255, 255, 0.7); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: all 0.18s;" onclick="closeEditModal()"><i class="fas fa-xmark"></i></button>
         </div>
 
-        <form method="POST"
+        <form method="POST" data-ajax data-ajax-refresh-target=".cn-dashboard-main"
             id="editWalkinForm"
             onsubmit="return validateEditWalkin()">
 
@@ -287,18 +287,15 @@
         });
         return valid;
     }
-    document.querySelectorAll('.form-input,.form-textarea,.form-select').forEach(function(el) {
-        el.addEventListener('change', function() {
-            const err = document.getElementById('err-' + el.id);
-            if (err) err.classList.remove('visible');
-            el.style.borderColor = '';
-        });
-        el.addEventListener('input', function() {
-            const err = document.getElementById('err-' + el.id);
-            if (err) err.classList.remove('visible');
-            el.style.borderColor = '';
-        });
-    });
+    function clearWalkinValidation(event) {
+        const el = event.target;
+        if (!el.matches('.form-input,.form-textarea,.form-select')) return;
+        const err = document.getElementById('err-' + el.id);
+        if (err) err.classList.remove('visible');
+        el.style.borderColor = '';
+    }
+    document.addEventListener('change', clearWalkinValidation);
+    document.addEventListener('input', clearWalkinValidation);
 
     function resetForm() {
         document.querySelectorAll('.field-error').forEach(e => e.classList.remove('visible'));

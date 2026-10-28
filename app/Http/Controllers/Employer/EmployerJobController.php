@@ -93,6 +93,10 @@ class EmployerJobController extends Controller
             'Status' => 'pending',
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Job posted successfully.', 'refresh' => true]);
+        }
+
         return back()->with('success', 'Job Posted Successfully.');
     }
 
@@ -132,13 +136,17 @@ class EmployerJobController extends Controller
             'Description' => $validated['txtDesc'],
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Job updated successfully.', 'refresh' => true]);
+        }
+
         return back()->with('success', 'Job Updated Successfully.');
     }
 
     /**
      * Delete an existing job.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $employer = Auth::guard('employer')->user();
 
@@ -151,6 +159,10 @@ class EmployerJobController extends Controller
             ->firstOrFail();
 
         $job->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Job deleted successfully.', 'refresh' => true]);
+        }
 
         return redirect()
             ->route('employer.jobs.index')

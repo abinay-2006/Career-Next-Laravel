@@ -206,7 +206,11 @@ class ManageUsersController extends Controller
             return response()->json(['success' => false, 'message' => 'Account not found.'], 404);
         }
 
-        return response()->json(['success' => true, 'message' => 'Account deleted.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Account deleted.',
+            'counts' => $this->summaryCounts(),
+        ]);
     }
 
     private function updateStatus(Request $request, string $type, int|string $id, string $status, string $message)
@@ -233,6 +237,24 @@ class ManageUsersController extends Controller
 
         app(ActivityLogger::class)->record(strtolower($status) === 'confirm' ? 'account_approved' : 'account_suspended', $type, (int) $id);
 
-        return response()->json(['success' => true, 'message' => $message]);
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'status' => $status,
+            'counts' => $this->summaryCounts(),
+        ]);
+    }
+
+    private function summaryCounts(): array
+    {
+        return [
+            'total' => DB::table('jobseeker_reg')->count() + DB::table('employer_reg')->count(),
+            'confirmed' => DB::table('jobseeker_reg')->whereIn('Status', ['confirm', 'confirmed', 'approved'])->count()
+                + DB::table('employer_reg')->whereIn('Status', ['confirm', 'confirmed', 'approved'])->count(),
+            'pending' => DB::table('jobseeker_reg')->where('Status', 'pending')->count()
+                + DB::table('employer_reg')->where('Status', 'pending')->count(),
+            'suspended' => DB::table('jobseeker_reg')->where('Status', 'suspended')->count()
+                + DB::table('employer_reg')->where('Status', 'suspended')->count(),
+        ];
     }
 }
