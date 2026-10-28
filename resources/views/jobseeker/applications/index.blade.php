@@ -6,7 +6,7 @@
 <div class="main-content">
     <div class="page-header"><div class="page-header-icon"><i class="fas fa-clock-rotate-left"></i></div><div class="page-header-text"><h1>My Applications</h1><p>Track the status of jobs you have applied for.</p></div></div>
     <div class="glass-card">
-        <form method="GET" action="{{ route('jobseeker.applications.index') }}" class="row g-3 align-items-end">
+        <form method="GET" action="{{ route('jobseeker.applications.index') }}" class="row g-3 align-items-end" data-ajax-html>
             <div class="col-12 col-md-6"><label class="form-label" for="search">Job title or company</label><input class="form-control" id="search" name="search" value="{{ request('search') }}" maxlength="100"></div>
             <div class="col-12 col-md-4"><label class="form-label" for="status">Status</label><select class="form-select" id="status" name="status"><option value="">All statuses</option>@foreach(['Pending','Accepted','Rejected'] as $status)<option value="{{ $status }}" @selected(request('status') === $status)>{{ $status }}</option>@endforeach</select></div>
             <div class="col-12 col-md-2"><button class="btn btn-primary w-100" type="submit">Filter</button></div>

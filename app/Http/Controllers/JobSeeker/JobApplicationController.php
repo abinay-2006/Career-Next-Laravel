@@ -7,10 +7,11 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Application;
 use App\Models\Job;
 use App\Services\ActivityLogger;
+use Illuminate\Http\Request;
 
 class JobApplicationController extends Controller
 {
-    public function apply(Job $job)
+    public function apply(Request $request, Job $job)
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
 
@@ -25,6 +26,9 @@ class JobApplicationController extends Controller
             ->exists();
 
         if ($exists) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'You have already applied for this job.'], 409);
+            }
             return back()->with('error', 'You have already applied for this job.');
         }
 
@@ -37,6 +41,12 @@ class JobApplicationController extends Controller
         ]);
         app(ActivityLogger::class)->record('application_submitted', 'application', $application->ApplicationId, $job->JobId);
 
-        return back()->with('success', 'Application submitted successfully.');
+        $message = 'Application submitted successfully.';
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
+        return back()->with('success', $message);
     }
 }

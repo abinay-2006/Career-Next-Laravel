@@ -1,0 +1,36 @@
+.cn-button-spinner {
+    display: inline-block;
+    width: 0.95em;
+    height: 0.95em;
+    flex: 0 0 0.95em;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    vertical-align: -0.12em;
+    animation: cn-button-spin 0.7s linear infinite;
+}
+
+button[aria-busy="true"],
+[role="button"][aria-busy="true"] {
+    cursor: progress;
+    white-space: nowrap;
+}
+
+.cn-field-invalid {
+    border-color: #dc3545 !important;
+}
+
+.cn-field-error {
+    display: block;
+    margin-top: 0.25rem;
+    color: #b42318;
+    font-size: 0.875rem;
+}
+
+@keyframes cn-button-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cn-button-spinner { animation: none; }
+}

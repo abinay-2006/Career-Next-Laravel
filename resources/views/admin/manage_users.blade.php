@@ -4,7 +4,7 @@
 
 @section('content')
 <!-- ═══════════ MAIN ═══════════ -->
-<div class="main-content">
+<div class="main-content" data-user-filter="{{ $filterStatus }}">
 
     <div class="page-header">
         <div class="page-header-left">
@@ -21,28 +21,28 @@
         <a href="?status=all&type={{ $filterType }}" class="sum-card {{ $filterStatus === 'all' ? 'active-filter' : '' }}">
             <div class="sum-icon all"><i class="fas fa-users"></i></div>
             <div>
-                <div class="sum-val">{{ $counts['total'] }}</div>
+                <div class="sum-val" data-user-count="total">{{ $counts['total'] }}</div>
                 <div class="sum-label">Total Users</div>
             </div>
         </a>
         <a href="?status=confirmed&type={{ $filterType }}" class="sum-card {{ in_array($filterStatus, ['confirm', 'confirmed', 'approved'], true) ? 'active-filter' : '' }}">
             <div class="sum-icon confirmed"><i class="fas fa-circle-check"></i></div>
             <div>
-                <div class="sum-val">{{ $counts['confirmed'] }}</div>
+                <div class="sum-val" data-user-count="confirmed">{{ $counts['confirmed'] }}</div>
                 <div class="sum-label">Confirmed</div>
             </div>
         </a>
         <a href="?status=pending&type={{ $filterType }}" class="sum-card {{ $filterStatus === 'pending' ? 'active-filter' : '' }}">
             <div class="sum-icon pending"><i class="fas fa-clock"></i></div>
             <div>
-                <div class="sum-val">{{ $counts['pending'] }}</div>
+                <div class="sum-val" data-user-count="pending">{{ $counts['pending'] }}</div>
                 <div class="sum-label">Pending</div>
             </div>
         </a>
         <a href="?status=suspended&type={{ $filterType }}" class="sum-card {{ $filterStatus === 'suspended' ? 'active-filter' : '' }}">
             <div class="sum-icon suspended"><i class="fas fa-ban"></i></div>
             <div>
-                <div class="sum-val">{{ $counts['suspended'] }}</div>
+                <div class="sum-val" data-user-count="suspended">{{ $counts['suspended'] }}</div>
                 <div class="sum-label">Suspended</div>
             </div>
         </a>
@@ -50,7 +50,7 @@
 
     <!-- Filter bar -->
     <div class="filter-bar">
-        <form method="GET" action="{{ route('admin.manageUsers') }}">
+        <form method="GET" action="{{ route('admin.manageUsers') }}" data-ajax-html>
             <div class="search-wrap">
                 <i class="fas fa-magnifying-glass"></i>
                 <input type="text" name="search" placeholder="Search by name, username or email…"
@@ -121,7 +121,7 @@
                         <td>{{ ($u->City) }}</td>
                         <td>{{ ($u->Qualification) }}</td>
                         <td>{{ ($u->Gender) }}</td>
-                        <td><span class="badge {{ $u->Status }}">{{ ($u->Status) }}</span></td>
+                        <td><span class="badge {{ $u->Status }}" data-user-status>{{ ($u->Status) }}</span></td>
                         <td>
                             <div class="action-btns">
                                 @if (!in_array(strtolower(trim((string) $u->Status)), ['confirm', 'confirmed', 'approved'], true))
@@ -201,7 +201,7 @@
                         <td>{{ $u->City }}</td>
                         <td>{{ $u->Area_Work }}</td>
                         <td>{{ $u->ContactPerson }}</td>
-                        <td><span class="badge {{ $u->Status }}">{{ $u->Status }}</span></td>
+                        <td><span class="badge {{ $u->Status }}" data-user-status>{{ $u->Status }}</span></td>
                         <td>
                             <div class="action-btns">
                                 @if (!in_array(strtolower(trim((string) $u->Status)), ['confirm', 'confirmed', 'approved'], true))
@@ -255,7 +255,7 @@
     <div class="modal-dialog modal-dialog-centered custom-confirm-modal">
         <div class="modal-content">
 
-            <form method="POST" id="confirmForm">
+            <form method="POST" id="confirmForm" data-loading-managed="true">
                 @csrf
                 <input type="hidden" name="_method" id="formMethod" value="POST">
 
@@ -288,11 +288,6 @@
                         id="modal-confirm-btn">
 
                         <span class="btn-text">Confirm</span>
-
-                        <span class="spinner-border spinner-border-sm d-none"
-                            id="confirm-loader"
-                            role="status">
-                        </span>
 
                     </button>
                 </div>
@@ -352,7 +347,8 @@
 
         if (!modalElement) return;
 
-        modalElement.addEventListener('show.bs.modal', function(event) {
+        document.addEventListener('show.bs.modal', function(event) {
+            if (event.target.id !== 'confirmModal') return;
 
             const button = event.relatedTarget;
 
@@ -425,21 +421,18 @@
         // AJAX SUBMIT
         // =====================================================
 
-        const form = document.getElementById('confirmForm');
-
-        form.addEventListener('submit', async function(e) {
+        document.addEventListener('submit', async function(e) {
+            if (e.target.id !== 'confirmForm') return;
+            const form = e.target;
 
             e.preventDefault();
 
-            const loader = document.getElementById('confirm-loader');
             const btn = document.getElementById('modal-confirm-btn');
-            const btnText = btn.querySelector('.btn-text');
 
             const action = document.getElementById('modal-action').value;
-
-            btn.disabled = true;
-            btnText.style.display = 'none';
-            loader.classList.remove('d-none');
+            const loadingText = action === 'delete' ? 'Deleting...'
+                : (action === 'suspend' ? 'Saving...' : 'Approving...');
+            const restoreButton = window.CareerNextButtonLoading?.start(btn, loadingText);
 
             try {
 
@@ -464,25 +457,28 @@
 
                 });
 
+                const isJson = (response.headers.get('content-type') || '').includes('application/json');
+                const payload = isJson ? await response.json() : {};
+                if (response.redirected) {
+                    throw new Error('Your session may have expired. Please sign in again.');
+                }
+                if (!isJson) {
+                    throw new Error('The server returned an unexpected response. Please try again.');
+                }
                 if (!response.ok) {
-
-                    let payload = {};
-                    if ((response.headers.get('content-type') || '').includes('application/json')) {
-                        payload = await response.json();
-                    }
                     const messages = {
                         401: 'Please sign in again to continue.',
                         403: 'You are not authorized to perform this action.',
                         404: 'The requested user could not be found.',
-                        422: payload.message || 'Please check the submitted information.'
+                        419: 'Your session expired. Refresh the page and try again.',
+                        422: payload.message || 'Please check the submitted information.',
+                        429: 'Too many attempts. Please wait and try again.'
                     };
-                    throw new Error(messages[response.status] || payload.message || 'The operation could not be completed.');
+                    throw new Error(messages[response.status] || payload.message || `The request failed (${response.status}).`);
 
                 }
 
-                const result = (response.headers.get('content-type') || '').includes('application/json')
-                    ? await response.json()
-                    : {};
+                const result = payload;
 
                 if (!result.success) {
 
@@ -490,16 +486,48 @@
 
                 }
 
-                bootstrap.Modal.getInstance(modalElement).hide();
+                bootstrap.Modal.getInstance(document.getElementById('confirmModal'))?.hide();
 
                 showToast(result.message, 'success');
+                Object.entries(result.counts || {}).forEach(([key, value]) => {
+                    const count = document.querySelector(`[data-user-count="${key}"]`);
+                    if (count) count.textContent = value;
+                });
 
-                // reload while preserving current filters/search
-                setTimeout(() => {
+                const row = document.getElementById(`row-${document.getElementById('modal-table').value}-${document.getElementById('modal-id').value}`);
+                if (action === 'delete') {
+                    row?.remove();
+                } else if (row) {
+                    const status = result.status || (action === 'confirm' ? 'Confirm' : 'Suspended');
+                    const badge = row.querySelector('[data-user-status]');
+                    if (badge) {
+                        badge.textContent = status === 'Confirm' ? 'Confirmed' : status;
+                        badge.className = `badge ${status}`;
+                    }
+                    if (action === 'confirm') row.querySelector('.btn-approve')?.remove();
+                    if (action === 'suspend') row.querySelector('.btn-suspend')?.remove();
 
-                    window.location.reload();
+                    const filter = document.querySelector('[data-user-filter]')?.dataset.userFilter;
+                    const normalizedStatus = status.toLowerCase();
+                    const isConfirmed = ['confirm', 'confirmed', 'approved'].includes(normalizedStatus);
+                    if ((filter === 'pending' && normalizedStatus !== 'pending')
+                        || (filter === 'suspended' && normalizedStatus !== 'suspended')
+                        || (filter === 'confirmed' && !isConfirmed)) row.remove();
+                }
 
-                }, 1200);
+                document.querySelectorAll('#tab-seekers, #tab-employers').forEach((table) => {
+                    const count = table.querySelector('.table-card-header > span');
+                    if (count) count.textContent = `${table.querySelectorAll('tbody tr').length} records`;
+                    if (!table.querySelector('tbody tr')) {
+                        const wrap = table.querySelector('.table-wrap');
+                        if (wrap && !wrap.querySelector('.empty-state')) {
+                            const empty = document.createElement('div');
+                            empty.className = 'empty-state';
+                            empty.textContent = 'No users found matching your filters.';
+                            wrap.replaceChildren(empty);
+                        }
+                    }
+                });
 
             } catch (err) {
 
@@ -509,11 +537,7 @@
 
             } finally {
 
-                btn.disabled = false;
-
-                btnText.style.display = '';
-
-                loader.classList.add('d-none');
+                if (restoreButton) restoreButton();
 
             }
 

@@ -31,7 +31,7 @@
     <div class="section-title"><i class="fas fa-filter"></i> Filter by Job</div>
 
     <div class="glass-card">
-        <form method="GET" action="{{ route('employer.applications.index') }}">
+        <form method="GET" action="{{ route('employer.applications.index') }}" data-ajax-html data-ajax-submit-on-change>
             <div class="filter-bar">
                 <div class="filter-group">
                     <label class="filter-label" for="cmbTitle"><i class="fas fa-list-check"></i> Select Job Title</label>
@@ -159,9 +159,6 @@
 @endsection
 @section('scripts')
 <script>
-    // Auto-submit the form when the select changes
-    document.getElementById('cmbTitle')?.addEventListener('change', function() {
-        if (this.value) this.closest('form').submit();
-    });
+    // Filtering is delegated by the shared AJAX form handler.
 </script>
 @endsection

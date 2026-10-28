@@ -65,7 +65,7 @@
 
                 <tbody id="jobsTableBody">
                     @foreach($jobs as $row)
-                    <tr class="job-row"
+                    <tr class="job-row" id="job-row-{{ $row->JobId }}"
                         data-status="{{ strtolower($row->Status ?? 'Pending') }}">
 
                         <td>
@@ -89,7 +89,7 @@
                         </td>
 
                         <td>
-                            <span class="badge {{ strtolower($row->Status ?? 'pending') }}">
+                            <span class="badge {{ strtolower($row->Status ?? 'pending') }}" data-job-status>
                                 {{ ucfirst($row->Status ?? 'Pending') }}
                             </span>
                         </td>
@@ -312,7 +312,7 @@
         </div>
 
         <div class="modal-footer job-confirm-actions">
-            <form method="POST" id="approveRejectForm">
+            <form method="POST" id="approveRejectForm" data-ajax>
                 @csrf
 
                 <input type="hidden" name="jobId" id="actionModalJobId">
@@ -456,6 +456,7 @@
             document.getElementById('actionModalAction').value = action;
 
             const encodedId = encodeURIComponent(job.JobId);
+            actionForm.dataset.jobId = String(job.JobId);
             const urlTemplate = action === 'approve' ?
                 approveJobUrlTemplate :
                 rejectJobUrlTemplate;
@@ -516,10 +517,27 @@
                 return;
             }
 
-            confirmButton.disabled = true;
-            confirmButton.setAttribute('aria-disabled', 'true');
-            confirmButton.innerHTML =
-                '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            window.CareerNextButtonLoading?.start(
+                confirmButton,
+                activeAction === 'approve' ? 'Approving...' : 'Rejecting...'
+            );
+        });
+
+        actionForm.addEventListener('cn:ajax-success', function(event) {
+            const status = event.detail.status;
+            const job = jobMap[String(activeJobId)];
+            if (job) job.Status = status;
+            const row = document.getElementById(`job-row-${event.detail.id}`);
+            if (row) {
+                row.dataset.status = status;
+                const badge = row.querySelector('[data-job-status]');
+                if (badge) {
+                    badge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                    badge.className = `badge ${status}`;
+                }
+            }
+            document.getElementById('mStatus').textContent = status;
+            window.closeActionModal();
         });
 
         window.showTab = function(tab) {

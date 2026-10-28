@@ -137,6 +137,14 @@ class EmployerApplicationController extends Controller
         ]);
         app(ActivityLogger::class)->record('application_status_changed', 'application', $application->ApplicationId, $application->JobId, ['from' => $previousStatus, 'to' => $application->Status]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Application updated successfully.',
+                'status' => $application->Status,
+            ]);
+        }
+
         return redirect()
             ->route(
                 'employer.applications.show',

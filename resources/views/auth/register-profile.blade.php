@@ -693,10 +693,7 @@
             const button =
                 document.getElementById('profile-continue');
 
-            button.disabled = true;
-
-            button.innerHTML =
-                '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            window.CareerNextButtonLoading?.start(button, 'Saving...');
 
         });
 </script>

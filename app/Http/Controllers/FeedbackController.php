@@ -28,6 +28,12 @@ class FeedbackController extends Controller
         ]);
         app(ActivityLogger::class)->record('feedback_submitted', 'feedback');
 
-        return back()->with('success', 'Thank you. Your feedback has been submitted.');
+        $message = 'Thank you. Your feedback has been submitted.';
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
+        return back()->with('success', $message);
     }
 }

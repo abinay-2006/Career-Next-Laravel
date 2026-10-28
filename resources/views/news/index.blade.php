@@ -10,7 +10,7 @@
             <h1>Career news and updates</h1>
             <p>Ideas, announcements, and useful updates for your next career move.</p>
         </div>
-        <form class="cn-news-search" method="GET" action="{{ route('news.index') }}" role="search">
+        <form class="cn-news-search" method="GET" action="{{ route('news.index') }}" role="search" data-ajax-html>
             <label class="visually-hidden" for="newsSearch">Search Career News</label>
             <i class="fas fa-magnifying-glass" aria-hidden="true"></i>
             <input id="newsSearch" type="search" name="q" value="{{ $search }}" maxlength="100" placeholder="Search news">

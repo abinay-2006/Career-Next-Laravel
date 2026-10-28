@@ -76,7 +76,7 @@
 
             <form
                 action="{{ route('jobseeker.jobs.apply', $job->JobId) }}"
-                method="POST">
+                method="POST" data-ajax data-ajax-mark-applied="Application Submitted">
 
                 @csrf
 
@@ -317,7 +317,7 @@
 
                 <form
                     action="{{ route('jobseeker.jobs.apply', $job->JobId) }}"
-                    method="POST">
+                    method="POST" data-ajax data-ajax-mark-applied="Application Submitted">
 
                     @csrf
 

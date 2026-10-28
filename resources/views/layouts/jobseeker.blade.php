@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/account-ui.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/news.css') }}">
+    @vite('resources/js/app.js')
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 
@@ -125,7 +126,7 @@
     <div class="cn-dashboard-layout">
         <div class="cn-sidebar-backdrop" data-sidebar-close></div>
         <x-dashboard-sidebar role="jobseeker" />
-        <main class="cn-dashboard-main">@yield('content')</main>
+        <main class="cn-dashboard-main" data-ajax-region>@yield('content')</main>
     </div>
     <footer class="footer">
         &copy; {{ date('Y') }} Career Next. All rights reserved.
