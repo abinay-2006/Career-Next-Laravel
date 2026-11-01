@@ -39,6 +39,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const jobChart = role === 'employer' ? doughnut('jobStatusChart', initial.jobStatuses || {}) : null;
     const applicationChart = doughnut('applicationStatusChart', initial.applicationStatuses || {});
 
+    // Chart.js draws labels and grid lines to canvas, so CSS alone cannot theme
+    // them. Read the active semantic palette whenever either preference changes.
+    const charts = [trendChart, jobApplicationsChart, jobChart, applicationChart].filter(Boolean);
+    const refreshChartTheme = () => {
+        const styles = getComputedStyle(document.documentElement);
+        const text = styles.getPropertyValue('--theme-text-secondary').trim() || '#67657a';
+        const muted = styles.getPropertyValue('--theme-text-muted').trim() || text;
+        const border = styles.getPropertyValue('--theme-border').trim() || '#e3e0ef';
+        const primary = styles.getPropertyValue('--theme-primary').trim() || '#667eea';
+        const accent = styles.getPropertyValue('--theme-accent').trim() || '#818cf8';
+        const secondary = styles.getPropertyValue('--theme-secondary').trim() || primary;
+        Chart.defaults.color = text;
+        charts.forEach(chart => {
+            if (chart.options.plugins?.legend?.labels) chart.options.plugins.legend.labels.color = text;
+            for (const axis of Object.values(chart.options.scales || {})) {
+                if (axis.ticks) axis.ticks.color = muted;
+                if (axis.grid) axis.grid.color = border;
+            }
+            chart.data.datasets.forEach((dataset, index) => {
+                if (chart.config.type === 'line') {
+                    dataset.borderColor = primary;
+                    dataset.backgroundColor = `${primary}2b`;
+                } else if (chart.config.type === 'bar' && index === 0) {
+                    dataset.backgroundColor = primary;
+                } else if (chart.config.type === 'doughnut') {
+                    dataset.backgroundColor = [primary, accent, secondary, '#f59e0b', '#14b8a6', '#ec4899', '#64748b'];
+                    dataset.borderColor = styles.getPropertyValue('--theme-card-background').trim() || '#fff';
+                }
+            });
+            chart.update('none');
+        });
+    };
+    document.addEventListener('themeChanged', refreshChartTheme);
+    refreshChartTheme();
+
     const setEmpty = (name, empty) => {
         const canvas = root.querySelector(name === 'trend' ? '#activityTrendChart' : name === 'jobs' ? '#jobStatusChart' : '#applicationStatusChart');
         const message = root.querySelector(`[data-empty-for="${name}"]`);

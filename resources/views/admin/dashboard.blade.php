@@ -95,111 +95,111 @@
         <!-- Job Seekers tab -->
         <div class="tab-panel active" id="tab-seekers">
             <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
-<table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>City</th>
-                        <th>Email</th>
-                        <th>Qualification</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if($recentSeekers->isEmpty())
-                    <tr>
-                        <td colspan="6" style="text-align:center;opacity:0.5;padding:28px;">No job seekers found.</td>
-                    </tr>
-                    @else
-                    @foreach($recentSeekers as $s)
-                    <tr>
-                        <td style="opacity:0.5;">{{ $s->JobSeekId }}</td>
-                        <td>{{ $s->JobSeekerName }}</td>
-                        <td style="opacity:0.7;">{{ $s->City }}</td>
-                        <td style="opacity:0.7;">{{ $s->Email }}</td>
-                        <td>{{ $s->Qualification }}</td>
-                        <td><span class="badge {{ $s->Status }}">{{ $s->Status }}</span></td>
-                    </tr>
-                    @endforeach
-                    @endif
-                </tbody>
-            </table>
-</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>City</th>
+                            <th>Email</th>
+                            <th>Qualification</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if($recentSeekers->isEmpty())
+                        <tr>
+                            <td colspan="6" style="text-align:center;opacity:0.5;padding:28px;">No job seekers found.</td>
+                        </tr>
+                        @else
+                        @foreach($recentSeekers as $s)
+                        <tr>
+                            <td style="opacity:0.5;">{{ $s->JobSeekId }}</td>
+                            <td>{{ $s->JobSeekerName }}</td>
+                            <td style="opacity:0.7;">{{ $s->City }}</td>
+                            <td style="opacity:0.7;">{{ $s->Email }}</td>
+                            <td>{{ $s->Qualification }}</td>
+                            <td><span class="badge {{ $s->Status }}">{{ $s->Status }}</span></td>
+                        </tr>
+                        @endforeach
+                        @endif
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Employers tab -->
         <div class="tab-panel" id="tab-employers">
             <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
-<table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Company</th>
-                        <th>City</th>
-                        <th>Email</th>
-                        <th>Industry</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if($recentEmployers->isEmpty())
-                    <tr>
-                        <td colspan="6" style="text-align:center;opacity:0.5;padding:28px;">No employers found.</td>
-                    </tr>
-                    @else
-                    @foreach($recentEmployers as $e)
-                    <tr>
-                        <td style="opacity:0.5;">{{ $e->EmployerId }}</td>
-                        <td>{{ $e->CompanyName }}</td>
-                        <td style="opacity:0.7;">{{ $e->City }}</td>
-                        <td style="opacity:0.7;">{{ $e->Email }}</td>
-                        <td>{{ $e->Area_Work }}</td>
-                        <td><span class="badge {{ $e->Status }}">{{ $e->Status }}</span></td>
-                    </tr>
-                    @endforeach
-                    @endif
-                </tbody>
-            </table>
-</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Company</th>
+                            <th>City</th>
+                            <th>Email</th>
+                            <th>Industry</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if($recentEmployers->isEmpty())
+                        <tr>
+                            <td colspan="6" style="text-align:center;opacity:0.5;padding:28px;">No employers found.</td>
+                        </tr>
+                        @else
+                        @foreach($recentEmployers as $e)
+                        <tr>
+                            <td style="opacity:0.5;">{{ $e->EmployerId }}</td>
+                            <td>{{ $e->CompanyName }}</td>
+                            <td style="opacity:0.7;">{{ $e->City }}</td>
+                            <td style="opacity:0.7;">{{ $e->Email }}</td>
+                            <td>{{ $e->Area_Work }}</td>
+                            <td><span class="badge {{ $e->Status }}">{{ $e->Status }}</span></td>
+                        </tr>
+                        @endforeach
+                        @endif
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Jobs tab -->
         <div class="tab-panel" id="tab-jobs">
             <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
-<table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Company</th>
-                        <th>Job Title</th>
-                        <th>Vacancies</th>
-                        <th>Min. Qualification</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if($recentJobs->isEmpty())
-                    <tr>
-                        <td colspan="5" style="text-align:center;opacity:0.5;padding:28px;">No jobs found.</td>
-                    </tr>
-                    @else
-                    @foreach($recentJobs as $j)
-                    <tr>
-                        <td style="opacity:0.5;">{{ $j->JobId }}</td>
-                        <td>{{ $j->CompanyName }}</td>
-                        <td>{{ $j->JobTitle }}</td>
-                        <td style="text-align:center;">
-                            <span style="background:rgba(96,165,250,0.25);color:#93c5fd;padding:2px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;">
-                                {{ $j->Vacancy }}
-                            </span>
-                        </td>
-                        <td>{{ $j->MinQualification }}</td>
-                    </tr>
-                    @endforeach
-                    @endif
-                </tbody>
-            </table>
-</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Company</th>
+                            <th>Job Title</th>
+                            <th>Vacancies</th>
+                            <th>Min. Qualification</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if($recentJobs->isEmpty())
+                        <tr>
+                            <td colspan="5" style="text-align:center;opacity:0.5;padding:28px;">No jobs found.</td>
+                        </tr>
+                        @else
+                        @foreach($recentJobs as $j)
+                        <tr>
+                            <td style="opacity:0.5;">{{ $j->JobId }}</td>
+                            <td>{{ $j->CompanyName }}</td>
+                            <td>{{ $j->JobTitle }}</td>
+                            <td style="text-align:center;">
+                                <span style="background:rgba(96,165,250,0.25);color:#93c5fd;padding:2px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;">
+                                    {{ $j->Vacancy }}
+                                </span>
+                            </td>
+                            <td>{{ $j->MinQualification }}</td>
+                        </tr>
+                        @endforeach
+                        @endif
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -221,21 +221,26 @@
     }
 
     // Charts
-    Chart.defaults.color = 'rgba(255,255,255,0.75)';
+    const themeStyles = getComputedStyle(document.documentElement);
+    const chartTextColor = themeStyles.getPropertyValue('--theme-text-secondary').trim() || '#67657a';
+    const chartGridColor = themeStyles.getPropertyValue('--theme-border').trim() || '#e3e0ef';
+    const chartPrimary = themeStyles.getPropertyValue('--theme-primary').trim() || '#667eea';
+    const chartAccent = themeStyles.getPropertyValue('--theme-accent').trim() || '#818cf8';
+    Chart.defaults.color = chartTextColor;
     Chart.defaults.font = {
         family: 'Poppins',
         size: 12
     };
 
     // Doughnut – Job Seekers vs Employers
-    new Chart(document.getElementById('userChart'), {
+    const userChart = new Chart(document.getElementById('userChart'), {
         type: 'doughnut',
         data: {
             labels: ['Job Seekers', 'Employers'],
             datasets: [{
                 data: [<?php echo $totalJobSeekers; ?>, <?php echo $totalEmployers; ?>],
-                backgroundColor: ['rgba(102,126,234,0.75)', 'rgba(16,185,129,0.75)'],
-                borderColor: ['rgba(102,126,234,1)', 'rgba(16,185,129,1)'],
+                backgroundColor: [chartPrimary, chartAccent],
+                borderColor: [chartPrimary, chartAccent],
                 borderWidth: 2,
                 hoverOffset: 8
             }]
@@ -258,7 +263,7 @@
     });
 
     // Grouped bar – Confirmed vs Pending for seekers & employers
-    new Chart(document.getElementById('statusChart'), {
+    const statusChart = new Chart(document.getElementById('statusChart'), {
         type: 'bar',
         data: {
             labels: ['Job Seekers', 'Employers'],
@@ -296,24 +301,44 @@
             scales: {
                 x: {
                     grid: {
-                        color: 'rgba(255,255,255,0.08)'
+                        color: chartGridColor
                     },
                     ticks: {
-                        color: 'rgba(255,255,255,0.75)'
+                        color: chartTextColor
                     }
                 },
                 y: {
                     grid: {
-                        color: 'rgba(255,255,255,0.08)'
+                        color: chartGridColor
                     },
                     ticks: {
-                        color: 'rgba(255,255,255,0.75)',
+                        color: chartTextColor,
                         stepSize: 1
                     },
                     beginAtZero: true
                 }
             }
         }
+    });
+
+    document.addEventListener('themeChanged', () => {
+        const styles = getComputedStyle(document.documentElement);
+        const text = styles.getPropertyValue('--theme-text-secondary').trim() || '#67657a';
+        const border = styles.getPropertyValue('--theme-border').trim() || '#e3e0ef';
+        const primary = styles.getPropertyValue('--theme-primary').trim() || '#667eea';
+        const accent = styles.getPropertyValue('--theme-accent').trim() || '#818cf8';
+        Chart.defaults.color = text;
+        [userChart, statusChart].forEach(chart => {
+            if (chart.options.plugins?.legend?.labels) chart.options.plugins.legend.labels.color = text;
+            Object.values(chart.options.scales || {}).forEach(axis => {
+                if (axis.ticks) axis.ticks.color = text;
+                if (axis.grid) axis.grid.color = border;
+            });
+        });
+        userChart.data.datasets[0].backgroundColor = [primary, accent];
+        userChart.data.datasets[0].borderColor = [primary, accent];
+        statusChart.update('none');
+        userChart.update('none');
     });
 </script>
 @endsection

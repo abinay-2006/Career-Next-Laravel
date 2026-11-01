@@ -1,0 +1,414 @@
+/* Shared theme bindings: only recognizable shared components are adjusted. */
+html[data-color] body {
+    background-color: var(--theme-page-background, #f5f4fb);
+    color: var(--theme-text-primary, #29283b);
+}
+html[data-color] .cn-admin-header,
+html[data-color] .cn-news-public-header,
+html[data-color] .navbar,
+html[data-color] .modern-menu {
+    background: var(--theme-nav-background, #fff);
+    color: var(--theme-text-primary, #29283b);
+    border-color: var(--theme-border, #e3e0ef);
+}
+html[data-color] .cn-admin-sidebar,
+html[data-color] .cn-sidebar,
+html[data-color] .cn-admin-drawer {
+    background: var(
+        --theme-sidebar-background,
+        linear-gradient(160deg, #667eea, #764ba2)
+    );
+    color: var(--theme-sidebar-text, #fff);
+}
+html[data-color] .cn-dashboard-main,
+html[data-color] .cn-admin-content,
+html[data-color] .main-content,
+html[data-color] .cn-news-main {
+    background-color: var(--theme-page-background, #f5f4fb);
+    color: var(--theme-text-primary, #29283b);
+}
+html[data-color] .modern-footer,
+html[data-color] .cn-admin-footer,
+html[data-color] .cn-news-footer {
+    background: var(--theme-nav-background, #fff);
+    color: var(--theme-text-secondary, #67657a);
+    border-color: var(--theme-border, #e3e0ef);
+}
+html[data-color] .card,
+html[data-color] .cn-card,
+html[data-color] .cn-analytics-panel,
+html[data-color] .cn-news-card,
+html[data-color] .cn-news-article,
+html[data-color] .profile-card,
+html[data-color] .job-card,
+html[data-color] .application-card {
+    background-color: var(--theme-card-background, #fff);
+    border-color: var(--theme-border, #e3e0ef);
+    color: var(--theme-text-primary, #29283b);
+}
+html[data-color] input,
+html[data-color] select,
+html[data-color] textarea,
+html[data-color] .form-control,
+html[data-color] .form-select {
+    background-color: var(--theme-input-background, #fff);
+    color: var(--theme-input-text, #29283b);
+    border-color: var(--theme-border, #e3e0ef);
+}
+html[data-color] input::placeholder,
+html[data-color] textarea::placeholder {
+    color: var(--theme-text-secondary, #67657a);
+    opacity: 0.85;
+}
+html[data-color] .table > :not(caption) > * > *,
+html[data-color] .table {
+    color: var(--theme-text-primary, #29283b);
+    border-color: var(--theme-border, #e3e0ef);
+}
+html[data-color] .dropdown-menu,
+html[data-color] .modal-content {
+    background: var(--theme-card-background, #fff);
+    color: var(--theme-text-primary, #29283b);
+    border-color: var(--theme-border, #e3e0ef);
+}
+html[data-color] .dropdown-item {
+    color: var(--theme-text-primary, #29283b);
+}
+html[data-color] .dropdown-item:hover,
+html[data-color] .dropdown-item:focus {
+    background: var(--theme-hover, #f1efff);
+    color: var(--theme-primary-dark, #5143a5);
+}
+html[data-color] .btn-primary,
+html[data-color] .btn-register {
+    background: var(--theme-primary, #667eea);
+    border-color: var(--theme-primary, #667eea);
+    color: var(--theme-primary-contrast, #fff);
+}
+html[data-color="yellow"] .btn-primary,
+html[data-color="yellow"] .btn-register {
+    color: #332400;
+}
+html[data-color] .btn-primary:hover,
+html[data-color] .btn-register:hover {
+    background: var(--theme-primary-hover, #5143a5);
+    border-color: var(--theme-primary-hover, #5143a5);
+    color: var(--theme-primary-hover-contrast, #fff);
+}
+html[data-color] .btn-outline-primary {
+    color: var(--theme-primary-dark, #5143a5);
+    border-color: var(--theme-primary, #667eea);
+}
+html[data-color] .btn-outline-primary:hover {
+    background: var(--theme-primary, #667eea);
+    color: var(--theme-primary-contrast, #fff);
+}
+html[data-color] .theme-toggle {
+    color: var(--theme-text-primary, #29283b);
+}
+
+html[data-appearance="dark"] body {
+    background-color: var(--theme-page-background, #171923);
+    color: var(--theme-text-primary, #f3f4f6);
+}
+html[data-appearance="dark"] .modern-header {
+    background: var(--theme-sidebar-background, #202330);
+    color: var(--theme-sidebar-text, #f3f4f6);
+}
+html[data-appearance="dark"] .modern-menu,
+html[data-appearance="dark"] .navbar {
+    background: var(--theme-nav-background, #202330);
+    border-color: var(--theme-border, #3a3e4e);
+}
+html[data-appearance="dark"] .modern-menu .nav-links a:not(.active),
+html[data-appearance="dark"] .navbar a:not(.btn-primary):not(.btn-register) {
+    color: var(--theme-text-primary, #f3f4f6);
+}
+html[data-appearance="dark"] .modern-menu .nav-links a.active {
+    background: var(--theme-primary, #667eea);
+    color: var(--theme-primary-contrast, #fff);
+}
+html[data-appearance="dark"] .modern-header,
+html[data-appearance="dark"] .page-wrapper .left-panel {
+    background: var(--theme-sidebar-background, #202330);
+    color: var(--theme-sidebar-text, #f3f4f6);
+}
+html[data-appearance="dark"] .register-page,
+html[data-appearance="dark"] .email-verification-page {
+    background: var(--theme-page-background, #171923);
+}
+html[data-appearance="dark"] #main,
+html[data-appearance="dark"] #page,
+html[data-appearance="dark"] #page-in,
+html[data-appearance="dark"] .cn-admin-drawer {
+    background-color: var(--theme-page-background, #171923);
+    color: var(--theme-text-primary, #f3f4f6);
+}
+html[data-appearance="dark"] .card,
+html[data-appearance="dark"] .card-header,
+html[data-appearance="dark"] .card-footer,
+html[data-appearance="dark"] .glass-card,
+html[data-appearance="dark"] .feature-card,
+html[data-appearance="dark"] .auth-card,
+html[data-appearance="dark"] .auth-container,
+html[data-appearance="dark"] #content,
+html[data-appearance="dark"] #col,
+html[data-appearance="dark"] .registration-card,
+html[data-appearance="dark"] .registration-info-box,
+html[data-appearance="dark"] .review-section,
+html[data-appearance="dark"] .resume-builder-card,
+html[data-appearance="dark"] .resume-preview,
+html[data-appearance="dark"] .profile-card,
+html[data-appearance="dark"] .job-card,
+html[data-appearance="dark"] .application-card {
+    background-color: var(--theme-card-background, #242735);
+    border-color: var(--theme-border, #3a3e4e);
+    color: var(--theme-text-primary, #f3f4f6);
+}
+html[data-appearance="dark"] .article h2,
+html[data-appearance="dark"] #col h3,
+html[data-appearance="dark"] .feature-card h3,
+html[data-appearance="dark"] .registration-card h1,
+html[data-appearance="dark"] .registration-card h2,
+html[data-appearance="dark"] .registration-card h3,
+html[data-appearance="dark"] .registration-card label,
+html[data-appearance="dark"] .cn-admin-content h1,
+html[data-appearance="dark"] .cn-admin-content h2,
+html[data-appearance="dark"] .cn-admin-content h3 {
+    color: var(--theme-text-primary, #f3f4f6);
+}
+html[data-appearance="dark"] .article p,
+html[data-appearance="dark"] #col p,
+html[data-appearance="dark"] .feature-card p,
+html[data-appearance="dark"] .registration-card p,
+html[data-appearance="dark"] .text-muted,
+html[data-appearance="dark"] .form-text {
+    color: var(--theme-text-secondary, #b5bac8);
+}
+html[data-appearance="dark"] .table > :not(caption) > * > *,
+html[data-appearance="dark"] .table,
+html[data-appearance="dark"] .table-light {
+    --bs-table-bg: var(--theme-card-background, #242735);
+    --bs-table-color: var(--theme-text-primary, #f3f4f6);
+    color: var(--theme-text-primary, #f3f4f6);
+    background-color: var(--theme-card-background, #242735);
+}
+html[data-appearance="dark"] .theme-palette {
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+}
+
+/* These existing layouts use their original typography, sizes, and section backgrounds. */
+html[data-appearance="dark"] .cn-admin-footer,
+html[data-appearance="dark"] .cn-news-footer {
+    color: var(--theme-text-secondary, #b5bac8);
+    border-color: var(--theme-border, #3a3e4e);
+}
+
+/* Admin dashboard: the original dashboard stylesheet was designed for a dark glass
+   background and hard-coded white text. Rebind those selectors in both modes. */
+html[data-appearance="light"] .cn-admin-content .main-content,
+html[data-appearance="light"] .cn-admin-content .main-content * {
+    --cn-dashboard-ink: var(--theme-text-primary, #29283b);
+}
+html[data-appearance="light"] .cn-admin-content .page-header h1,
+html[data-appearance="light"] .cn-admin-content .chart-title,
+html[data-appearance="light"] .cn-admin-content .section-title,
+html[data-appearance="light"] .cn-admin-content .stat-card,
+html[data-appearance="light"] .cn-admin-content .action-card,
+html[data-appearance="light"] .cn-admin-content tbody td {
+    color: var(--theme-text-primary, #29283b) !important;
+}
+html[data-appearance="light"] .cn-admin-content .page-header p,
+html[data-appearance="light"] .cn-admin-content .stat-badge,
+html[data-appearance="light"] .cn-admin-content .tab-btn,
+html[data-appearance="light"] .cn-admin-content thead th {
+    color: var(--theme-text-secondary, #67657a) !important;
+}
+html[data-appearance="light"] .cn-admin-content .stat-card,
+html[data-appearance="light"] .cn-admin-content .chart-card,
+html[data-appearance="light"] .cn-admin-content .tabs-wrap,
+html[data-appearance="light"] .cn-admin-content .action-card {
+    background: var(--theme-card-background, #fff) !important;
+    border: 1px solid var(--theme-border, #e3e0ef) !important;
+    box-shadow: 0 8px 24px rgba(39, 35, 75, 0.055);
+    backdrop-filter: none;
+}
+html[data-appearance="light"] .cn-admin-content .tab-header {
+    border-bottom-color: var(--theme-border, #e3e0ef);
+}
+html[data-appearance="light"] .cn-admin-content .tab-btn:hover,
+html[data-appearance="light"] .cn-admin-content .tab-btn.active {
+    color: var(--theme-primary-dark, #5143a5) !important;
+    background: var(--theme-hover, #f1efff);
+    border-bottom-color: var(--theme-primary, #667eea);
+}
+html[data-appearance="light"] .cn-admin-content thead th {
+    background: #f0eef8;
+}
+html[data-appearance="light"] .cn-admin-content tbody tr {
+    border-top-color: var(--theme-border, #e3e0ef);
+}
+html[data-appearance="light"] .cn-admin-content tbody tr:hover {
+    background: var(--theme-hover, #f1efff);
+}
+html[data-appearance="dark"] .cn-admin-content .page-header h1,
+html[data-appearance="dark"] .cn-admin-content .chart-title,
+html[data-appearance="dark"] .cn-admin-content .section-title,
+html[data-appearance="dark"] .cn-admin-content .stat-card,
+html[data-appearance="dark"] .cn-admin-content .action-card,
+html[data-appearance="dark"] .cn-admin-content tbody td {
+    color: var(--theme-text-primary, #f3f4f6) !important;
+}
+html[data-appearance="dark"] .cn-admin-content .page-header p,
+html[data-appearance="dark"] .cn-admin-content .stat-badge,
+html[data-appearance="dark"] .cn-admin-content .tab-btn,
+html[data-appearance="dark"] .cn-admin-content thead th {
+    color: var(--theme-text-secondary, #b5bac8) !important;
+}
+html[data-appearance="dark"] .cn-admin-content .stat-card,
+html[data-appearance="dark"] .cn-admin-content .chart-card,
+html[data-appearance="dark"] .cn-admin-content .tabs-wrap,
+html[data-appearance="dark"] .cn-admin-content .action-card {
+    background: var(--theme-card-background, #242735) !important;
+    border-color: var(--theme-border, #3a3e4e) !important;
+}
+html[data-appearance="dark"] .cn-admin-content thead th {
+    background: #2b2f40;
+}
+html[data-appearance="dark"] .cn-admin-content .tab-btn:hover,
+html[data-appearance="dark"] .cn-admin-content .tab-btn.active {
+    color: var(--theme-primary-dark, #c4b5fd) !important;
+    background: var(--theme-hover, #383247);
+    border-bottom-color: var(--theme-accent, #818cf8);
+}
+
+/* Shared navigation and page-specific dark glass surfaces. */
+html[data-color] .cn-admin-brand,
+html[data-color] .cn-admin-header-account,
+html[data-color] .cn-admin-header-account a,
+html[data-color] .cn-sidebar-link,
+html[data-color] .profile-trigger,
+html[data-color] .navbar-user { color: var(--theme-text-primary, #29283b); }
+html[data-color] .cn-admin-nav-link,
+html[data-color] .cn-admin-nav-link i { color: var(--theme-sidebar-text, #fff); }
+html[data-color] .cn-admin-nav-link:hover,
+html[data-color] .cn-admin-nav-link.is-active { background: var(--theme-active-nav, #e9e6fb); color: var(--theme-primary-dark, #5143a5); }
+html[data-color] .cn-admin-drawer .cn-admin-nav-link { color: var(--theme-sidebar-text, #fff); }
+html[data-color] .cn-admin-drawer .cn-admin-nav-link:hover,
+html[data-color] .cn-admin-drawer .cn-admin-nav-link.is-active { background: var(--theme-active-nav, #e9e6fb); color: var(--theme-primary-dark, #5143a5); }
+html[data-color] .modern-menu .nav-links a { color: var(--theme-text-primary, #29283b); }
+html[data-color] .modern-menu .nav-links a.active { background: var(--theme-primary, #667eea); color: var(--theme-primary-contrast, #fff); }
+html[data-color] .modern-menu .nav-links a:hover { color: var(--theme-primary-dark, #5143a5); }
+html[data-color] .cn-admin-header .btn-logout,
+html[data-color] .navbar-user .profile-trigger { border-color: var(--theme-border, #e3e0ef); }
+
+html[data-appearance="dark"] .cn-admin-header,
+html[data-appearance="dark"] .cn-news-public-header,
+html[data-appearance="dark"] .navbar,
+html[data-appearance="dark"] .modern-menu,
+html[data-appearance="dark"] .modern-footer,
+html[data-appearance="dark"] .cn-admin-footer,
+html[data-appearance="dark"] .cn-news-footer { background: var(--theme-nav-background, #202330); color: var(--theme-text-primary, #f3f4f6); }
+html[data-appearance="dark"] .cn-admin-drawer .cn-admin-nav-link { color: var(--theme-text-primary, #f3f4f6); }
+html[data-appearance="dark"] .cn-admin-drawer .cn-admin-nav-link:hover,
+html[data-appearance="dark"] .cn-admin-drawer .cn-admin-nav-link.is-active { background: var(--theme-hover, #383247); color: var(--theme-primary-dark, #c4b5fd); }
+
+html[data-color] #main, html[data-color] #page, html[data-color] #page-in {
+    background-color: var(--theme-page-background, #f5f4fb);
+    color: var(--theme-text-primary, #29283b);
+}
+
+/* Shared semantic bindings for former white text over purple glass surfaces. */
+html[data-color] body { background:var(--theme-page-background); color:var(--theme-text-primary); }
+html[data-color] :is(h1,h2,h3,h4,h5,h6,.page-header h1,.section-title,.card-title,.modal-title) { color:var(--theme-heading); }
+html[data-color] :is(p,small,.text-muted,.form-text,.page-header p) { color:var(--theme-text-secondary); }
+html[data-color] a:not(.btn):not(.brand-logo):not(.cn-admin-nav-link):not(.cn-sidebar-link):not(.dropdown-item) { color:var(--theme-link); }
+html[data-color] :is(.cn-dashboard-main,.cn-admin-content,.cn-news-main,.main-content) { background:var(--theme-page-background); color:var(--theme-text-primary); }
+html[data-color] #content,html[data-color] #col { background:var(--theme-card-background); color:var(--theme-text-primary); border-color:var(--theme-border); }
+html[data-color] .cn-dashboard-main :is(h1,h2,h3,h4,h5,h6) { color:var(--theme-heading); }
+html[data-color] .cn-dashboard-main :is(p,small,.text-muted,.form-text) { color:var(--theme-text-secondary); }
+html[data-color] .cn-dashboard-main label { color:var(--theme-form-label); }
+html[data-color] .cn-dashboard-main a:not(.btn):not(.cn-sidebar-link):not(.dropdown-item) { color:var(--theme-link); }
+
+/* Authenticated role navigation, headers and footers. */
+html[data-color] .navbar { color:var(--theme-header-text); }
+html[data-color] .navbar-brand,html[data-color] .navbar-brand:hover,html[data-color] .profile-trigger,
+html[data-color] .profile-trigger :is(.user-name,.user-role,.chevron),html[data-color] .cn-admin-header-account,
+html[data-color] .cn-admin-header-account a,html[data-color] .cn-admin-brand,html[data-color] .cn-admin-mobile-brand { color:var(--theme-header-text); }
+html[data-color] .profile-trigger { background:var(--theme-card-background); border-color:var(--theme-border); }
+html[data-color] :is(.cn-sidebar,.cn-admin-sidebar,.cn-admin-drawer) { color:var(--theme-sidebar-text); }
+html[data-color] :is(.cn-sidebar-link,.cn-sidebar-link i,.cn-admin-nav-link,.cn-admin-nav-link i) { color:var(--theme-sidebar-text); }
+html[data-color] :is(.cn-sidebar-link,.cn-admin-nav-link):is(:hover,.is-active) { background:var(--theme-sidebar-active); color:var(--theme-sidebar-text); border-color:rgba(255,255,255,.28); }
+html[data-color] .cn-admin-nav-link.is-active { box-shadow:inset 3px 0 var(--theme-sidebar-text); }
+html[data-color] .cn-admin-header { background:var(--theme-nav-background); color:var(--theme-header-text); border-color:var(--theme-border); }
+html[data-color] .cn-admin-menu-toggle { border-color:var(--theme-border); background:var(--theme-hover); color:var(--theme-header-text); }
+html[data-color] .cn-admin-header .btn-logout { background:#fff1f2; border-color:#fecdd3; color:#9f1239; }
+html[data-color] .cn-admin-header .btn-logout:hover { background:#ffe4e6; color:#881337; }
+html[data-color] .cn-admin-drawer-brand { color:var(--theme-sidebar-text); }
+html[data-color] .cn-admin-drawer-close { color:var(--theme-sidebar-text); }
+html[data-color] .cn-admin-drawer-logout { background:var(--theme-card-background); color:var(--theme-error); border-color:var(--theme-border); }
+html[data-color] :is(.footer,.cn-admin-footer,.cn-news-footer) { background:var(--theme-nav-background); color:var(--theme-footer-text); border-color:var(--theme-border); }
+html[data-color] .cn-news-public-header nav a { color:var(--theme-text-secondary); }
+html[data-color] .cn-news-public-header nav a:hover,html[data-color] .cn-news-public-header nav a[aria-current] { color:var(--theme-link); }
+
+/* Cards and data surfaces across public, admin and role dashboards. */
+html[data-color] :is(.welcome-card,.glass-card,.feature-card,.auth-card,.registration-card,.registration-info-box,
+ .review-section,.resume-builder-card,.resume-preview,.cn-analytics-stat,.cn-analytics-panel,.dashboard-shortcut,
+ .action-card,.stat-card,.chart-card,.tabs-wrap,.cn-card,.cn-news-card,.cn-news-article,.profile-card,.job-card,
+ .application-card,.table-wrapper) { background:var(--theme-card-background); border-color:var(--theme-border); color:var(--theme-text-primary); -webkit-backdrop-filter:none; backdrop-filter:none; }
+html[data-color] .cn-dashboard-main :is(.card,[class$="-card"],[class*="-card "],.panel,[class$="-panel"],[class*="-panel "],[class$="-widget"],[class*="-widget "],.table-wrapper) { background-color:var(--theme-card-background); border-color:var(--theme-border); color:var(--theme-text-primary); -webkit-backdrop-filter:none; backdrop-filter:none; }
+html[data-color] .cn-dashboard-main :is(.card,[class$="-card"],[class*="-card "],.panel,[class$="-panel"],[class*="-panel "],[class$="-widget"],[class*="-widget "]) :is(h1,h2,h3,h4,h5,h6,strong) { color:var(--theme-heading); }
+html[data-color] .cn-dashboard-main :is(.card,[class$="-card"],[class*="-card "],.panel,[class$="-panel"],[class*="-panel "],[class$="-widget"],[class*="-widget "]) :is(p,small,.text-muted,.form-text) { color:var(--theme-text-secondary); }
+html[data-color] :is(.welcome-card,.glass-card,.feature-card,.auth-card,.registration-card,.registration-info-box,
+ .review-section,.resume-builder-card,.resume-preview,.cn-analytics-stat,.cn-analytics-panel,.dashboard-shortcut,
+ .action-card,.stat-card,.chart-card,.tabs-wrap,.cn-card,.cn-news-card,.cn-news-article,.profile-card,.job-card,
+ .application-card) :is(h1,h2,h3,h4,h5,h6,strong,.card-title,.action-title,.stat-value,.stat-label) { color:var(--theme-heading); }
+html[data-color] :is(.welcome-card,.glass-card,.feature-card,.auth-card,.registration-card,.registration-info-box,
+ .review-section,.resume-builder-card,.resume-preview,.cn-analytics-stat,.cn-analytics-panel,.dashboard-shortcut,
+ .action-card,.stat-card,.chart-card,.tabs-wrap,.cn-card,.cn-news-card,.cn-news-article,.profile-card,.job-card,
+ .application-card) :is(p,small,.card-desc,.form-text,.stat-badge) { color:var(--theme-text-secondary); }
+html[data-color] :is(.auth-container,.registration-card,.auth-card) { background:var(--theme-card-background); color:var(--theme-text-primary); }
+html[data-color] .cn-analytics-stat-icon,html[data-color] .cn-analytics-panel-heading > i { color:var(--theme-primary-dark); }
+html[data-color] .cn-analytics-panel-heading a,html[data-color] .cn-dashboard-main .table a:not(.btn) { color:var(--theme-link); }
+
+/* Forms, tables, menus, dialogs and interactive states. */
+html[data-color] :is(input,select,textarea,.form-control,.form-select) { background-color:var(--theme-input-background); color:var(--theme-input-text); border-color:var(--theme-border); }
+html[data-color] :is(input,textarea,.form-control)::placeholder { color:var(--theme-placeholder); opacity:1; }
+html[data-color] :is(label,.form-label) { color:var(--theme-form-label); }
+html[data-color] select option { background:var(--theme-input-background); color:var(--theme-input-text); }
+html[data-color] .cn-dashboard-main .table { --bs-table-color:var(--theme-table-text); --bs-table-bg:var(--theme-table-bg); --bs-table-hover-color:var(--theme-text-primary); --bs-table-hover-bg:var(--theme-hover); border-color:var(--theme-border); }
+html[data-color] .table thead th { background:var(--theme-table-header-background); color:var(--theme-table-header-text); border-color:var(--theme-border); }
+html[data-color] .table tbody td,html[data-color] .table tbody th { color:var(--theme-table-text); border-color:var(--theme-border); }
+html[data-color] .pagination .page-link { background:var(--theme-card-background); color:var(--theme-link); border-color:var(--theme-border); }
+html[data-color] .pagination .active > .page-link { background:var(--theme-primary); color:var(--theme-primary-contrast); border-color:var(--theme-primary); }
+html[data-color] :is(.dropdown-menu,.employer-dropdown-menu,.modal-content,.popover,.toast) { background:var(--theme-card-background); color:var(--theme-text-primary); border-color:var(--theme-border); }
+html[data-color] :is(.dropdown-item,.employer-dropdown-item) { color:var(--theme-text-primary); }
+html[data-color] :is(.dropdown-item,.employer-dropdown-item):hover { background:var(--theme-hover); color:var(--theme-link); }
+
+/* Registration pages had fixed bright gradients; tie their surface to the palette. */
+html[data-color] :is(.register-page,.registration-page,.verify-page,.email-verification-page) { background:var(--theme-page-background) !important; color:var(--theme-text-primary); }
+html[data-color] .page-wrapper .left-panel { background:var(--theme-page-gradient); color:#fff; }
+html[data-appearance="dark"] .page-wrapper .left-panel { background:var(--theme-sidebar-background); color:var(--theme-sidebar-text); }
+html[data-color] :is(.register-logo,.registration-card h1,.registration-card h2,.registration-card h3) { color:var(--theme-heading); }
+
+/* Preserve the public landing page's branded gradient while making all shared
+   navigation and content surfaces follow the chosen color and appearance. */
+html[data-color][data-appearance="light"] .modern-header { background:var(--theme-page-gradient); color:#fff; }
+html[data-appearance="dark"] .modern-header { background:var(--theme-sidebar-background); color:var(--theme-sidebar-text); }
+html[data-color] .modern-header :is(h1,h2,h3,p,.brand-logo) { color:#fff; }
+html[data-color] .modern-menu .nav-links a { color:var(--theme-text-primary); }
+html[data-color] .modern-menu .nav-links a.active { background:var(--theme-primary); color:var(--theme-primary-contrast); }
+html[data-color] .modern-menu .nav-links a:hover { color:var(--theme-link); }
+html[data-color] .job-alert { background:var(--theme-page-gradient); color:#fff; }
+html[data-color] .job-alert button { color:var(--theme-link); }
+html[data-appearance="dark"] .job-alert { background:var(--theme-sidebar-background); }
+html[data-color] .btn-login { color:var(--theme-link); border-color:var(--theme-primary); }
+html[data-color] .btn-login:hover { background:var(--theme-primary); color:var(--theme-primary-contrast); }
+html[data-color] .article h2::after,html[data-color] #col-in h3::after,html[data-color] .footer-section h4::after { background:var(--theme-primary); }
+html[data-color] .welcome-letter,html[data-color] .feature-card i { background-image:var(--theme-page-gradient); }
+
+/* Former glass dashboard text roles, rebased explicitly for both surfaces. */
+html[data-color] .cn-dashboard-main :is(.page-header-text h1,.glass-card h2,.glass-card h3,.dashboard-shortcut,.cn-analytics-stat-copy strong,.cn-analytics-panel-heading h3) { color:var(--theme-heading); }
+html[data-color] .cn-dashboard-main :is(.page-header-text p,.glass-card p,.glass-card .form-text,.form-label,.cn-analytics-stat-copy > span,.cn-analytics-stat-copy small,.cn-analytics-panel-heading p,.cn-chart-empty) { color:var(--theme-text-secondary) !important; }
+html[data-color] .cn-dashboard-main :is(.form-control,.form-select):focus { background:var(--theme-input-background); color:var(--theme-input-text); border-color:var(--theme-primary); box-shadow:0 0 0 .2rem color-mix(in srgb,var(--theme-primary) 20%,transparent); }
+html[data-color] .cn-dashboard-main .pagination .page-link:hover { background:var(--theme-hover); color:var(--theme-link); }
