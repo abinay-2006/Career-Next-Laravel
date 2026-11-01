@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\ManageNewsController;
 use App\Http\Controllers\Admin\ManageFeedbackController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\DashboardAnalyticsController;
+use App\Http\Controllers\JobSeeker\ResumeBuilderController;
 
 // Route
 
@@ -240,6 +241,15 @@ Route::prefix('jobseeker')
         Route::get('/', [JobSeekerController::class, 'index'])
             ->name('index');
         Route::get('/analytics', [DashboardAnalyticsController::class, 'jobSeeker'])->name('analytics');
+        Route::get('/resume-builder', [ResumeBuilderController::class, 'index'])->name('resumes.index');
+        Route::get('/my-resumes', [ResumeBuilderController::class, 'myResumes'])->name('my-resumes.index');
+        Route::get('/my-resumes/{resume}', [ResumeBuilderController::class, 'show'])->name('my-resumes.show');
+        Route::get('/my-resumes/{resume}/preview', [ResumeBuilderController::class, 'previewSaved'])->name('my-resumes.preview');
+        Route::post('/resume-builder', [ResumeBuilderController::class, 'store'])->name('resumes.store');
+        Route::post('/resume-builder/new', [ResumeBuilderController::class, 'create'])->name('resumes.create');
+        Route::post('/resume-builder/preview', [ResumeBuilderController::class, 'preview'])->name('resumes.preview');
+        Route::get('/resume-builder/{resume}/download', [ResumeBuilderController::class, 'download'])->name('resumes.download');
+        Route::delete('/resume-builder/{resume}', [ResumeBuilderController::class, 'destroy'])->name('resumes.destroy');
         Route::get('/applications', [ApplicationHistoryController::class, 'index'])->name('applications.index');
         Route::get('/applications/{application}', [ApplicationHistoryController::class, 'show'])->name('applications.show');
         Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');

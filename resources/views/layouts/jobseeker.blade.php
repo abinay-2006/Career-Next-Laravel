@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/account-ui.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/news.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/resume-builder.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/my-resume.css') }}">
     @vite('resources/js/app.js')
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>

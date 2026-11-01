@@ -1,0 +1,630 @@
+/* =========================================================
+   CAREER NEXT - RESUME BUILDER
+   Scoped styles for the actual Resume Builder markup
+========================================================= */
+
+.resume-builder {
+    --rb-primary: #7046ad;
+    --rb-primary-dark: #56338d;
+    --rb-primary-light: #f2ebfc;
+    --rb-text: #34264a;
+    --rb-muted: #82788f;
+    --rb-border: #e9e1f1;
+    --rb-surface: #ffffff;
+
+    width: 100%;
+    max-width: 1550px;
+    margin: 0 auto;
+    padding: 20px;
+    color: var(--rb-text);
+}
+
+.resume-builder,
+.resume-builder * {
+    box-sizing: border-box;
+}
+
+/* =========================
+   TOOLBAR
+========================= */
+
+.rb-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 17px 20px;
+    margin-bottom: 20px;
+    background: #fff;
+    border: 1px solid var(--rb-border);
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(58, 35, 88, 0.06);
+}
+
+.rb-brand {
+    display: flex;
+    flex: 1 1 190px;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.rb-brand small {
+    color: var(--rb-muted);
+    font-size: 12px;
+}
+
+.rb-brand small a {
+    color: var(--rb-primary);
+    text-decoration: none;
+}
+
+.rb-brand strong {
+    color: var(--rb-text);
+    font-size: 19px;
+    font-weight: 750;
+}
+
+.rb-title-group {
+    flex: 0 1 245px;
+    min-width: 180px;
+}
+
+.rb-title-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #665a77;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.rb-title-input {
+    width: 100%;
+    height: 42px;
+    padding: 9px 12px;
+    color: var(--rb-text) !important;
+    background: #fff !important;
+    border: 1px solid #ded5e9 !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+}
+
+.rb-title-input:focus {
+    border-color: var(--rb-primary) !important;
+    box-shadow: 0 0 0 3px rgba(112, 70, 173, 0.12) !important;
+}
+
+.rb-toolbar .btn {
+    min-height: 41px;
+    padding: 9px 15px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.rb-toolbar .btn-primary {
+    background: var(--rb-primary);
+    border-color: var(--rb-primary);
+}
+
+.rb-toolbar .btn-primary:hover {
+    background: var(--rb-primary-dark);
+    border-color: var(--rb-primary-dark);
+}
+
+.rb-toolbar .btn-outline-primary {
+    color: var(--rb-primary);
+    border-color: var(--rb-primary);
+}
+
+.rb-toolbar .btn-outline-primary:hover {
+    color: #fff;
+    background: var(--rb-primary);
+}
+
+/* =========================
+   MOBILE EDIT / PREVIEW SWITCH
+========================= */
+
+.rb-mobile-switch {
+    display: none;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.rb-mobile-switch .btn {
+    flex: 1;
+    border-radius: 9px;
+    font-weight: 650;
+}
+
+.rb-mobile-switch .btn.active {
+    color: #fff;
+    background: var(--rb-primary);
+    border-color: var(--rb-primary);
+}
+
+/* =========================
+   WORKSPACE
+========================= */
+
+.rb-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: start;
+    gap: 20px;
+}
+
+.rb-editor,
+.rb-preview-pane {
+    min-width: 0;
+    background: #fff;
+    border: 1px solid var(--rb-border);
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(58, 35, 88, 0.055);
+}
+
+/* =========================
+   EDITOR
+========================= */
+
+.rb-editor {
+    padding: 20px;
+    background: linear-gradient(180deg, #fff 0%, #fdfbff 100%);
+}
+
+.rb-panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0 17px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--rb-border);
+}
+
+.rb-panel-title h1 {
+    color: var(--rb-text) !important;
+    font-size: 19px;
+    font-weight: 750;
+}
+
+.rb-panel-title small {
+    color: var(--rb-muted) !important;
+    font-size: 12px;
+}
+
+/* =========================
+   COLLAPSIBLE SECTIONS
+========================= */
+
+.rb-editor details {
+    margin-bottom: 12px;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--rb-border);
+    border-radius: 12px;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.rb-editor details[open] {
+    border-color: #d9c9ed;
+    box-shadow: 0 3px 12px rgba(112, 70, 173, 0.045);
+}
+
+.rb-editor details > summary {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-height: 55px;
+    padding: 12px 15px;
+    color: var(--rb-text);
+    background: #fff;
+    cursor: pointer;
+    list-style: none;
+    font-size: 13px;
+    font-weight: 700;
+    transition: background 0.2s ease;
+}
+
+.rb-editor details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.rb-editor details > summary:hover {
+    background: #faf7ff;
+}
+
+.rb-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 33px;
+    height: 33px;
+    color: var(--rb-primary);
+    background: var(--rb-primary-light);
+    border-radius: 9px;
+    font-size: 14px;
+}
+
+.rb-chevron {
+    margin-left: auto;
+    color: #9688a8;
+    font-size: 11px;
+    transition: transform 0.2s ease;
+}
+
+.rb-editor details[open] > summary .rb-chevron {
+    transform: rotate(180deg);
+}
+
+.rb-section-body {
+    padding: 17px;
+    border-top: 1px solid #f0eaf6;
+    background: #fdfcff;
+}
+
+/* =========================
+   FORM GRID AND INPUTS
+========================= */
+
+.rb-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.rb-fields > div {
+    min-width: 0;
+}
+
+.rb-fields .wide {
+    grid-column: 1 / -1;
+}
+
+.rb-editor label {
+    display: block;
+    margin-bottom: 6px;
+    color: #5c506e;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.rb-editor .form-control {
+    width: 100%;
+    min-height: 41px;
+    padding: 9px 11px;
+    color: var(--rb-text);
+    background: #fff;
+    border: 1px solid #e2d9ed;
+    border-radius: 8px;
+    box-shadow: none;
+    font-size: 13px;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.rb-editor textarea.form-control {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.rb-editor .form-control:focus {
+    border-color: var(--rb-primary);
+    box-shadow: 0 0 0 3px rgba(112, 70, 173, 0.11);
+}
+
+/* =========================
+   TEMPLATE SELECTION
+========================= */
+
+.rb-template-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 11px;
+}
+
+.rb-template-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+    padding: 12px 8px;
+    color: var(--rb-text);
+    background: #fff;
+    border: 1px solid var(--rb-border);
+    border-radius: 11px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.rb-template-option:hover {
+    border-color: #c8b2e5;
+    background: #faf7ff;
+    transform: translateY(-2px);
+}
+
+.rb-template-option.active {
+    background: #f5effd;
+    border: 1.5px solid var(--rb-primary);
+    box-shadow: 0 0 0 2px rgba(112, 70, 173, 0.08);
+}
+
+.rb-template-option strong {
+    font-size: 11px;
+    text-align: center;
+}
+
+/* Mini template previews */
+
+.rb-mini {
+    display: block;
+    width: 53px;
+    height: 69px;
+    padding: 9px 6px;
+    background: #fff;
+    border: 1px solid #ddd5e7;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.rb-mini span {
+    display: block;
+    width: 70%;
+    height: 5px;
+    margin-bottom: 7px;
+    background: #7652aa;
+    border-radius: 2px;
+}
+
+.rb-mini::before,
+.rb-mini::after {
+    content: "";
+    display: block;
+    height: 3px;
+    margin-bottom: 5px;
+    background: #ddd8e5;
+    border-radius: 2px;
+}
+
+.rb-mini::after {
+    width: 65%;
+    box-shadow:
+        0 7px 0 #e7e2ec,
+        0 14px 0 #e7e2ec;
+}
+
+/* =========================
+   ADD BUTTONS
+========================= */
+
+.rb-add {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 36px;
+    margin-top: 13px;
+    padding: 7px 13px;
+    color: var(--rb-primary);
+    background: #f6f1fc;
+    border: 1px dashed #bba5da;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 650;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.rb-add:hover {
+    color: #fff;
+    background: var(--rb-primary);
+    border-color: var(--rb-primary);
+}
+
+/* =========================
+   REPEATABLE RECORD CARDS
+========================= */
+
+.rb-repeat-card {
+    margin-bottom: 13px;
+    padding: 14px;
+    background: #fff;
+    border: 1px solid #e9e1f1;
+    border-radius: 10px;
+}
+
+.rb-repeat-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 13px;
+    color: var(--rb-text);
+    font-size: 13px;
+}
+
+.rb-repeat-head .btn {
+    width: 32px;
+    height: 32px;
+    padding: 5px;
+    border-radius: 7px;
+}
+
+/* =========================
+   SECTION TOGGLES
+========================= */
+
+.rb-section-toggles {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+}
+
+.rb-section-toggles label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid var(--rb-border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.rb-section-toggles input {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--rb-primary);
+}
+
+/* =========================
+   FEEDBACK
+========================= */
+
+.rb-feedback {
+    min-height: 20px;
+    margin-top: 12px;
+    color: var(--rb-primary);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* =========================
+   PREVIEW PANE
+========================= */
+
+.rb-preview-pane {
+    position: sticky;
+    top: 18px;
+    padding: 17px;
+    overflow: hidden;
+    background: #f4f1f8;
+}
+
+.rb-preview-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 13px;
+    padding: 4px 3px;
+}
+
+.rb-preview-head strong {
+    color: var(--rb-text);
+    font-size: 15px;
+    font-weight: 750;
+}
+
+.rb-preview-head small {
+    color: var(--rb-muted);
+    font-size: 11px;
+}
+
+.rb-preview-frame {
+    display: block;
+    width: 100%;
+    height: 850px;
+    background: #fff;
+    border: 1px solid #e2dbe9;
+    border-radius: 7px;
+    box-shadow: 0 5px 20px rgba(37, 24, 53, 0.09);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1050px) {
+    .rb-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .rb-preview-pane {
+        position: static;
+    }
+
+    .rb-preview-frame {
+        height: 750px;
+    }
+}
+
+@media (max-width: 650px) {
+    .resume-builder {
+        padding: 10px;
+    }
+
+    .rb-toolbar {
+        gap: 11px;
+        padding: 14px;
+    }
+
+    .rb-brand,
+    .rb-title-group {
+        flex: 1 1 100%;
+    }
+
+    .rb-toolbar > button {
+        flex: 1;
+    }
+
+    .rb-mobile-switch {
+        display: flex;
+    }
+
+    .rb-workspace[data-mode="edit"] .rb-preview-pane {
+        display: none;
+    }
+
+    .rb-workspace[data-mode="preview"] .rb-editor {
+        display: none;
+    }
+
+    .rb-editor,
+    .rb-preview-pane {
+        padding: 13px;
+    }
+
+    .rb-fields {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .rb-fields .wide {
+        grid-column: auto;
+    }
+
+    .rb-template-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rb-section-toggles {
+        grid-template-columns: 1fr;
+    }
+
+    .rb-preview-frame {
+        height: 650px;
+    }
+}
+
+@media (max-width: 380px) {
+    .rb-toolbar > button {
+        padding: 8px;
+        font-size: 11px;
+    }
+
+    .rb-editor details > summary {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .rb-preview-frame {
+        height: 550px;
+    }
+}
