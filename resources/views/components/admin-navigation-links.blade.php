@@ -10,7 +10,7 @@
     ];
 @endphp
 
-<nav class="cn-admin-nav" aria-label="Admin pages">
+<nav class="cn-admin-nav" aria-label="Admin pages" data-no-loader>
     @foreach ($adminNavigationItems as [$label, $routeName, $activeRoutes, $icon])
         <a class="cn-admin-nav-link {{ request()->routeIs(...$activeRoutes) ? 'is-active' : '' }}"
            href="{{ route($routeName) }}"

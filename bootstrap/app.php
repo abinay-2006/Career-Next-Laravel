@@ -15,7 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(
-            at: '*',
+            // Laravel's middleware falls back to config('trustedproxy.proxies') at request time.
+            // An empty list avoids hard-coding or globally trusting a proxy here.
+            at: [],
             headers: SymfonyRequest::HEADER_X_FORWARDED_FOR
                 | SymfonyRequest::HEADER_X_FORWARDED_HOST
                 | SymfonyRequest::HEADER_X_FORWARDED_PORT

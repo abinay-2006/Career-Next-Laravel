@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Employer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -42,7 +43,14 @@ class EmployerProfileController extends Controller
             // Required fields
             'CompanyName' => ['required', 'string', 'max:255'],
             'Email' => ['required', 'email', 'max:255'],
-            'UserName' => ['required', 'string', 'max:100'],
+            'UserName' => [
+                'required', 'string', 'max:100',
+                function ($attribute, $value, $fail): void {
+                    if (!\App\Services\AccountIdentifierRegistry::isValidUsername((string) $value)) {
+                        $fail('Use a username or a valid email-style username.');
+                    }
+                },
+            ],
 
             // Optional fields
             'ContactPerson' => ['nullable', 'string', 'max:255'],
@@ -62,6 +70,8 @@ class EmployerProfileController extends Controller
                 'max:2048',
             ],
         ]);
+        $validated['Email'] = mb_strtolower(trim($validated['Email']));
+        $validated['UserName'] = \App\Services\AccountIdentifierRegistry::normalize($validated['UserName']);
 
         /*
         |--------------------------------------------------------------------------
@@ -121,16 +131,27 @@ class EmployerProfileController extends Controller
         */
 
         try {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($employer, $validated): void {
-                if (!$employer->update($validated)) {
-                    throw new \RuntimeException('Employer profile update was not persisted.');
-                }
+            $registry = app(\App\Services\AccountIdentifierRegistry::class);
+            $registry->withOwnershipLock(function () use ($employer, $validated, $registry): void {
+                DB::transaction(function () use ($employer, $validated, $registry): void {
+                    if (!$employer->update($validated)) {
+                        throw new \RuntimeException('Employer profile update was not persisted.');
+                    }
+
+                    $registry->sync('employer', $employer->EmployerId, $validated['UserName'], $validated['Email']);
+                });
             });
         } catch (\Throwable $e) {
             if (isset($uploadPath) && (!$oldPath || $oldPath !== $uploadPath)) {
                 UploadStorage::deleteBestEffort(UploadStorage::publicDiskName(), $uploadPath, 'failed employer photo update cleanup');
             }
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                return back()->withErrors($e->errors());
+            }
             Log::error('Employer profile save failed.', ['exception' => $e::class]);
+            if (\App\Services\AccountIdentifierRegistry::isUniqueViolation($e)) {
+                return back()->withErrors(['Email' => 'That username or email is already in use.']);
+            }
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => 'Unable to save profile. Please try again later.'], 500);
             }

@@ -259,11 +259,12 @@
                 @csrf
                 <input type="hidden" name="_method" id="formMethod" value="POST">
 
-                <div class="modal-header">
+        <div class="modal-header">
                     <h5 class="modal-title">Confirm Action</h5>
                     <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"></button>
+                class="btn-close"
+                aria-label="Close"
+                data-bs-dismiss="modal"><i class="fas fa-xmark" aria-hidden="true"></i></button>
                 </div>
 
                 <div class="modal-body">
@@ -457,28 +458,25 @@
 
                 });
 
-                const isJson = (response.headers.get('content-type') || '').includes('application/json');
-                const payload = isJson ? await response.json() : {};
-                if (response.redirected) {
-                    throw new Error('Your session may have expired. Please sign in again.');
-                }
-                if (!isJson) {
-                    throw new Error('The server returned an unexpected response. Please try again.');
-                }
                 if (!response.ok) {
+
+                    let payload = {};
+                    if ((response.headers.get('content-type') || '').includes('application/json')) {
+                        payload = await response.json();
+                    }
                     const messages = {
                         401: 'Please sign in again to continue.',
                         403: 'You are not authorized to perform this action.',
                         404: 'The requested user could not be found.',
-                        419: 'Your session expired. Refresh the page and try again.',
-                        422: payload.message || 'Please check the submitted information.',
-                        429: 'Too many attempts. Please wait and try again.'
+                        422: payload.message || 'Please check the submitted information.'
                     };
-                    throw new Error(messages[response.status] || payload.message || `The request failed (${response.status}).`);
+                    throw new Error(messages[response.status] || payload.message || 'The operation could not be completed.');
 
                 }
 
-                const result = payload;
+                const result = (response.headers.get('content-type') || '').includes('application/json')
+                    ? await response.json()
+                    : {};
 
                 if (!result.success) {
 

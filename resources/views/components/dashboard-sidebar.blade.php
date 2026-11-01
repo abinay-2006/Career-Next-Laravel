@@ -30,7 +30,7 @@
         ],
     ];
 @endphp
-<aside class="cn-sidebar" id="roleSidebar" aria-label="{{ ucfirst($role) }} navigation">
+<aside class="cn-sidebar" id="roleSidebar" aria-label="{{ ucfirst($role) }} navigation" data-no-loader>
     <div class="cn-sidebar-heading">{{ ucfirst($role) }} workspace</div>
     <nav class="cn-sidebar-nav">
         @foreach ($menus[$role] as [$label, $routeName, $icon])

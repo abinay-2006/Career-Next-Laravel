@@ -114,11 +114,11 @@
                     <div id="col-in">
                         <h3><i class="fas fa-link"></i> Quick Actions</h3>
                         <ul>
-                            <li><a href="login.php?tab=login&type=jobseeker"><i class="fas fa-search"></i> Advanced Job Search</a></li>
-                            <li><a href="login.php?tab=login&type=employer"><i class="fas fa-plus-circle"></i> Post a New Job</a></li>
-                            <li><a href="login.php?tab=login&type=jobseeker"><i class="fas fa-user"></i> Update My Profile</a></li>
-                            <li><a href="login.php?tab=login&type=jobseeker"><i class="fas fa-file-alt"></i> Track Applications</a></li>
-                            <li><a href="login.php?tab=login&type=jobseeker"><i class="fas fa-bookmark"></i> Saved Jobs</a></li>
+                            <li><a href="{{ route('login') }}"><i class="fas fa-search"></i> Advanced Job Search</a></li>
+                            <li><a href="{{ route('login') }}?tab=login&type=employer"><i class="fas fa-plus-circle"></i> Post a New Job</a></li>
+                            <li><a href="{{ route('login') }}?tab=login&type=jobseeker"><i class="fas fa-user"></i> Update My Profile</a></li>
+                            <li><a href="{{ route('login') }}?tab=login&type=jobseeker"><i class="fas fa-file-alt"></i> Track Applications</a></li>
+                            <li><a href="{{ route('login') }}?tab=login&type=jobseeker"><i class="fas fa-bookmark"></i> Saved Jobs</a></li>
                         </ul>
 
 

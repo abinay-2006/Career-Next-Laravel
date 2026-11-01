@@ -33,7 +33,7 @@
 
     <!-- ══ NAVBAR ══ -->
     <nav class="navbar">
-        <button class="cn-menu-toggle" type="button" aria-label="Open navigation" aria-controls="roleSidebar" aria-expanded="false"><i class="fas fa-bars" aria-hidden="true"></i></button>
+        <button class="cn-menu-toggle" type="button" aria-label="Open navigation" aria-controls="roleSidebar" aria-expanded="false" data-no-loader><i class="fas fa-bars" aria-hidden="true"></i></button>
 
         <a href="{{ route('jobseeker.index') }}" class="navbar-brand brand-logo">
             <img src="{{ asset('images/CareerNext.png') }}" alt="Career Next">
@@ -44,7 +44,7 @@
 
             <div class="profile-dropdown" id="profileDropdown">
 
-                <button type="button" class="profile-trigger" id="profileTrigger" aria-controls="jobseekerProfileMenu" aria-expanded="false" onclick="toggleDropdown()">
+                <button type="button" class="profile-trigger" id="profileTrigger" aria-controls="jobseekerProfileMenu" aria-expanded="false" onclick="toggleDropdown()" data-no-loader>
 
                     <div class="user-avatar">
 
@@ -91,7 +91,7 @@
 
 
                     <a href="{{ route('jobseeker.profile.index') }}"
-                        class="dropdown-item">
+                        class="dropdown-item" data-no-loader>
 
                         <i class="fas fa-user-pen"></i>
                         Profile
@@ -104,7 +104,8 @@
                         @csrf
 
                         <button type="submit"
-                            class="dropdown-item danger logout-button">
+                            class="dropdown-item danger logout-button"
+                            data-loading>
 
                             <i class="fas fa-right-from-bracket"></i>
                             Logout

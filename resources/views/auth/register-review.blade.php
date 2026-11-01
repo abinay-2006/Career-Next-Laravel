@@ -3,16 +3,12 @@
 @section('title', 'Review Registration')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/register.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/register.css') }}">
 @endpush
 
 @section('content')
-
 <div class="register-page">
-<<<<<<< HEAD
-
     <div class="register-container">
-
         <div class="register-header">
             <a href="{{ route('register.index') }}" class="register-logo">
                 <span class="logo-icon">
@@ -21,474 +17,280 @@
                 <span>Career Next</span>
             </a>
         </div>
-=======
-    <div class="register-container">
->>>>>>> main
 
         <div class="registration-card">
-
-            <!-- Header -->
             <div class="registration-header">
-
                 <div class="registration-icon">
-                    <i class="fas fa-clipboard-check"></i>
+                    <i class="fas fa-clipboard-check" aria-hidden="true"></i>
                 </div>
-
                 <h1>Review Your Details</h1>
-
-                <p>
-                    Please review your information carefully before continuing.
-                </p>
-
+                <p>Please review your information carefully before continuing.</p>
             </div>
 
-
-            <!-- Progress -->
-            <div class="registration-progress">
-
+            <div class="registration-progress" aria-label="Registration progress">
                 <div class="progress-step completed">
                     <span>1</span>
                     <small>Account</small>
                 </div>
-
                 <div class="progress-line completed"></div>
 
                 <div class="progress-step completed">
                     <span>2</span>
                     <small>Details</small>
                 </div>
-
                 <div class="progress-line completed"></div>
 
                 <div class="progress-step completed">
                     <span>3</span>
                     <small>Profile</small>
                 </div>
-
                 <div class="progress-line completed"></div>
 
                 <div class="progress-step completed">
                     <span>4</span>
                     <small>Professional</small>
                 </div>
-
                 <div class="progress-line completed"></div>
 
-                <div class="progress-step active">
+                <div class="progress-step active" aria-current="step">
                     <span>5</span>
                     <small>Review</small>
                 </div>
-
-<<<<<<< HEAD
-            <div class="progress-step active">
-                <span>4</span>
-                <small>Review</small>
-            </div>
-
-            <div class="progress-line"></div>
-
-            <div class="progress-step">
-                <span>5</span>
-                <small>Verify</small>
-            </div>
-
-        </div>
-
-
-        <!-- Account Type -->
-        <div class="review-section">
-
-            <div class="review-section-header">
-
-                <div>
-                    <h3>
-                        <i class="fas fa-user-tag"></i>
-                        Account Type
-                    </h3>
-
-                    <p>
-                        Your selected registration type
-                    </p>
-=======
                 <div class="progress-line"></div>
 
                 <div class="progress-step">
                     <span>6</span>
                     <small>Verify</small>
->>>>>>> main
                 </div>
-
             </div>
 
-
-            <!-- Account Type -->
-            <div class="review-section">
-
+            {{-- Account Type --}}
+            <section class="review-section">
                 <div class="review-section-header">
-
                     <div>
-                        <h3>
-                            <i class="fas fa-user-tag"></i>
-                            Account Type
-                        </h3>
-
-                        <p>
-                            Your selected registration type
-                        </p>
+                        <h3><i class="fas fa-user-tag" aria-hidden="true"></i> Account Type</h3>
+                        <p>Your selected registration type</p>
                     </div>
-
                 </div>
 
                 <div class="review-account-type">
-
-                    @if($accountType === 'JobSeeker')
-
-                    <i class="fas fa-user"></i>
-
-                    <div>
-                        <strong>Job Seeker</strong>
-                        <span>Looking for jobs and career opportunities</span>
-                    </div>
-
+                    @if (($accountType ?? '') === 'JobSeeker')
+                        <i class="fas fa-user" aria-hidden="true"></i>
+                        <div>
+                            <strong>Job Seeker</strong>
+                            <span>Looking for jobs and career opportunities</span>
+                        </div>
                     @else
-
-                    <i class="fas fa-building"></i>
-
-                    <div>
-                        <strong>Employer</strong>
-                        <span>Looking for candidates and employees</span>
-                    </div>
-
+                        <i class="fas fa-building" aria-hidden="true"></i>
+                        <div>
+                            <strong>Employer</strong>
+                            <span>Looking for candidates and employees</span>
+                        </div>
                     @endif
-
                 </div>
+            </section>
 
-            </div>
-
-
-            <!-- Account Details -->
-            <div class="review-section">
-
+            {{-- Account Details --}}
+            <section class="review-section">
                 <div class="review-section-header">
-
                     <div>
-                        <h3>
-                            <i class="fas fa-lock"></i>
-                            Account Details
-                        </h3>
-
-                        <p>
-                            Your login and contact information
-                        </p>
+                        <h3><i class="fas fa-lock" aria-hidden="true"></i> Account Details</h3>
+                        <p>Your login and contact information</p>
                     </div>
-
                     <a href="{{ route('register.details') }}" class="review-edit">
-                        <i class="fas fa-pen"></i>
-                        Edit
+                        <i class="fas fa-pen" aria-hidden="true"></i> Edit
                     </a>
-
                 </div>
-
 
                 <div class="review-grid">
-
                     <div class="review-item">
                         <span>Name</span>
-                        <strong>
-                            {{ $registration['name'] }}
-                        </strong>
+                        <strong>{{ $registration['name'] ?? 'N/A' }}</strong>
                     </div>
-
                     <div class="review-item">
                         <span>Username</span>
-                        <strong>
-                            {{ $registration['username'] }}
-                        </strong>
+                        <strong>{{ $registration['username'] ?? 'N/A' }}</strong>
                     </div>
-
                     <div class="review-item">
                         <span>Email</span>
-                        <strong>
-                            {{ $registration['email'] }}
-                        </strong>
+                        <strong>{{ $registration['email'] ?? 'N/A' }}</strong>
                     </div>
-
                     <div class="review-item">
                         <span>Mobile</span>
-                        <strong>
-                            {{ $registration['mobile'] }}
-                        </strong>
+                        <strong>{{ $registration['mobile'] ?? 'N/A' }}</strong>
                     </div>
-
                 </div>
+            </section>
 
-            </div>
-
-
-            <!-- Profile Details -->
-            <div class="review-section">
-
+            {{-- Profile Details --}}
+            <section class="review-section">
                 <div class="review-section-header">
-
                     <div>
                         <h3>
-                            <i class="fas fa-address-card"></i>
-                            {{ $accountType === 'JobSeeker' ? 'Personal Details' : 'Company Details' }}
+                            <i class="fas fa-address-card" aria-hidden="true"></i>
+                            {{ ($accountType ?? '') === 'JobSeeker' ? 'Personal Details' : 'Company Details' }}
                         </h3>
-
-                        <p>
-                            Your profile information
-                        </p>
+                        <p>Your profile information</p>
                     </div>
-
                     <a href="{{ route('register.profile') }}" class="review-edit">
-                        <i class="fas fa-pen"></i>
-                        Edit
+                        <i class="fas fa-pen" aria-hidden="true"></i> Edit
                     </a>
-
                 </div>
 
-
-                @if($accountType === 'JobSeeker')
-
-                <div class="review-grid">
-
-                    <div class="review-item">
-                        <span>City</span>
-                        <strong>
-                            {{ $registration['profile']['city'] ?? '' }}
-                        </strong>
+                @if (($accountType ?? '') === 'JobSeeker')
+                    <div class="review-grid">
+                        <div class="review-item">
+                            <span>City</span>
+                            <strong>{{ $registration['profile']['city'] ?? 'N/A' }}</strong>
+                        </div>
+                        <div class="review-item">
+                            <span>Gender</span>
+                            <strong>{{ $registration['profile']['gender'] ?? 'N/A' }}</strong>
+                        </div>
+                        <div class="review-item">
+                            <span>Date of Birth</span>
+                            <strong>
+                                @if (!empty($registration['profile']['birth_date']))
+                                    {{ \Carbon\Carbon::parse($registration['profile']['birth_date'])->format('d M Y') }}
+                                @else
+                                    N/A
+                                @endif
+                            </strong>
+                        </div>
+                        <div class="review-item review-full">
+                            <span>Address</span>
+                            <strong>{{ $registration['profile']['address'] ?? 'N/A' }}</strong>
+                        </div>
                     </div>
-
-                    <div class="review-item">
-                        <span>Gender</span>
-                        <strong>
-                            {{ $registration['profile']['gender'] ?? '' }}
-                        </strong>
-                    </div>
-
-                    <div class="review-item">
-                        <span>Date of Birth</span>
-                        <strong>
-                            @if(!empty($registration['profile']['birth_date'])){{ \Carbon\Carbon::parse($registration['profile']['birth_date'])->format('d M Y') }}@else N/A @endif
-                        </strong>
-                    </div>
-
-                    <div class="review-item review-full">
-                        <span>Address</span>
-                        <strong>
-                            {{ $registration['profile']['address'] }}
-                        </strong>
-                    </div>
-
-                </div>
-
                 @else
-
-                <div class="review-grid">
-
-                    <div class="review-item">
-                        <span>Contact Person</span>
-                        <strong>
-                            {{ $registration['profile']['contact_person'] }}
-                        </strong>
+                    <div class="review-grid">
+                        <div class="review-item">
+                            <span>Contact Person</span>
+                            <strong>{{ $registration['profile']['contact_person'] ?? 'N/A' }}</strong>
+                        </div>
+                        <div class="review-item">
+                            <span>City</span>
+                            <strong>{{ $registration['profile']['city'] ?? 'N/A' }}</strong>
+                        </div>
+                        <div class="review-item">
+                            <span>Area of Work</span>
+                            <strong>{{ $registration['profile']['area_work'] ?? 'N/A' }}</strong>
+                        </div>
+                        <div class="review-item review-full">
+                            <span>Company Address</span>
+                            <strong>{{ $registration['profile']['address'] ?? 'N/A' }}</strong>
+                        </div>
                     </div>
-
-                    <div class="review-item">
-                        <span>City</span>
-                        <strong>
-                            {{ $registration['profile']['city'] ?? '' }}
-                        </strong>
-                    </div>
-
-                    <div class="review-item">
-                        <span>Area of Work</span>
-                        <strong>
-                            {{ $registration['profile']['area_work'] }}
-                        </strong>
-                    </div>
-
-                    <div class="review-item review-full">
-                        <span>Company Address</span>
-                        <strong>
-                            {{ $registration['profile']['address'] }}
-                        </strong>
-                    </div>
-
-                </div>
-
                 @endif
+            </section>
 
-            </div>
-
-
-            <!-- Professional Details -->
-            <div class="review-section">
-
-                <div class="review-section-header">
-
-                    <div>
-                        <h3>
-                            <i class="fas fa-briefcase"></i>
-                            Professional Details
-                        </h3>
-
-                        <p>
-                            Your professional information
-                        </p>
+            {{-- Professional Details --}}
+            @if (($accountType ?? '') === 'JobSeeker')
+                <section class="review-section">
+                    <div class="review-section-header">
+                        <div>
+                            <h3><i class="fas fa-briefcase" aria-hidden="true"></i> Professional Details</h3>
+                            <p>Your professional information</p>
+                        </div>
+                        <a href="{{ route('register.professional') }}" class="review-edit">
+                            <i class="fas fa-pen" aria-hidden="true"></i> Edit
+                        </a>
                     </div>
 
-                    <a href="{{ route('register.professional') }}" class="review-edit">
-                        <i class="fas fa-pen"></i>
-                        Edit
-                    </a>
-
-                </div>
-
-
-                @if($accountType === 'JobSeeker')
-
-                <div class="review-grid">
-
-                    <div class="review-item review-full">
-                        <span>Highest Qualification</span>
-                        <strong>
-                            {{ $registration['professional']['qualification'] }}
-                        </strong>
+                    <div class="review-grid">
+                        <div class="review-item review-full">
+                            <span>Highest Qualification</span>
+                            <strong>{{ $registration['professional']['qualification'] ?? 'N/A' }}</strong>
+                        </div>
+                        <div class="review-item">
+                            <span>Resume</span>
+                            <strong>
+                                @if (!empty($registration['professional']['resume']))
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i> Uploaded
+                                @else
+                                    Not uploaded
+                                @endif
+                            </strong>
+                        </div>
+                        <div class="review-item">
+                            <span>Profile Photo</span>
+                            <strong>
+                                @if (!empty($registration['professional']['photo']))
+                                    <i class="fas fa-check-circle" aria-hidden="true"></i> Uploaded
+                                @else
+                                    Not uploaded
+                                @endif
+                            </strong>
+                        </div>
                     </div>
+                </section>
+            @endif
 
-                    <div class="review-item">
-                        <span>Resume</span>
-
-                        <strong>
-                            @if(!empty($registration['professional']['resume']))
-                            <i class="fas fa-check-circle"></i>
-                            Uploaded
-                            @else
-                            Not uploaded
-                            @endif
-                        </strong>
-                    </div>
-
-                    <div class="review-item">
-                        <span>Profile Photo</span>
-
-                        <strong>
-                            @if(!empty($registration['professional']['photo']))
-                            <i class="fas fa-check-circle"></i>
-                            Uploaded
-                            @else
-                            Not uploaded
-                            @endif
-                        </strong>
-                    </div>
-
-                </div>
-                @endif
-
-            </div>
-
-
-            <!-- Confirmation -->
+            {{-- Confirmation --}}
             <div class="review-confirmation">
-
-                <form
-                    action="{{ route('register.review.store') }}"
-                    method="POST"
-                    id="reviewForm">
-
+                <form action="{{ route('register.review.store') }}" method="POST" id="reviewForm">
                     @csrf
 
-                    <label class="confirmation-label">
-
+                    <label class="confirmation-label" for="confirm_details">
                         <input
                             type="checkbox"
+                            id="confirm_details"
                             name="confirm_details"
                             value="1"
-                            required>
-
+                            required
+                            @checked(old('confirm_details'))>
                         <span>
-                            I confirm that the information provided above is
-                            accurate and belongs to me / my organization.
+                            I confirm that the information provided above is accurate and belongs to me / my organization.
                         </span>
-
                     </label>
 
-
                     @error('confirm_details')
-                    <div class="review-error">
-                        {{ $message }}
-                    </div>
+                        <div class="review-error" role="alert">{{ $message }}</div>
                     @enderror
 
-
                     <div class="review-actions">
-
-                        <a
-                            href="{{ route('register.professional') }}"
-                            class="btn-secondary">
-                            <i class="fas fa-arrow-left"></i>
-                            Back
+                        <a href="{{ route('register.professional') }}" class="btn-secondary">
+                            <i class="fas fa-arrow-left" aria-hidden="true"></i> Back
                         </a>
 
-                        <button
-                            type="submit"
-                            class="btn-primary"
-                            id="continueButton">
+                        <button type="submit" class="btn-primary" id="continueButton">
                             Continue to Verification
-                            <i class="fas fa-arrow-right"></i>
+                            <i class="fas fa-arrow-right" aria-hidden="true"></i>
                         </button>
-
                     </div>
-
                 </form>
-
             </div>
-
         </div>
-
     </div>
-
-
-<<<<<<< HEAD
-    </div>
-
 </div>
-
-=======
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
->>>>>>> main
-
-            const form = document.getElementById('reviewForm');
-            const button = document.getElementById('continueButton');
-
-            if (!form || !button) {
-                return;
-            }
-
-            form.addEventListener('submit', function() {
-
-                if (!form.checkValidity()) {
-                    return;
-                }
-
-                button.disabled = true;
-
-                button.innerHTML = `
-            <span class="spinner-border spinner-border-sm me-2"></span>
-            Preparing verification...
-        `;
-            });
-
-        });
-    </script>
-
-<<<<<<< HEAD
-    });
-</script>
-
 @endsection
-=======
-    @endsection
->>>>>>> main
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('reviewForm');
+    const button = document.getElementById('continueButton');
+
+    if (!form || !button) {
+        return;
+    }
+
+    form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            event.preventDefault();
+            return;
+        }
+
+        if (button.disabled) {
+            event.preventDefault();
+            return;
+        }
+
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Preparing verification...';
+    });
+});
+</script>
+@endsection

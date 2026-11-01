@@ -39,6 +39,10 @@ class RegisterController extends Controller
             ],
         ]);
 
+        if (session('registration.account_type') !== $validated['account_type']) {
+            session()->forget('registration');
+        }
+
         session([
             'registration.account_type' => $validated['account_type'],
         ]);
@@ -105,7 +109,11 @@ class RegisterController extends Controller
                 'required',
                 'string',
                 'max:100',
-                'regex:/^[A-Za-z0-9._-]+$/',
+                function ($attribute, $value, $fail): void {
+                    if (!\App\Services\AccountIdentifierRegistry::isValidUsername((string) $value)) {
+                        $fail('Use a username or a valid email-style username.');
+                    }
+                },
             ],
 
             'email' => [
@@ -130,6 +138,9 @@ class RegisterController extends Controller
 
         ]);
 
+        $validated['username'] = \App\Services\AccountIdentifierRegistry::normalize($validated['username']);
+        $validated['email'] = mb_strtolower(trim($validated['email']));
+
 
         /*
         |--------------------------------------------------------------------------
@@ -137,10 +148,7 @@ class RegisterController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $usernameExists =
-            JobSeeker::where('UserName', $validated['username'])->exists()
-            ||
-            Employer::where('UserName', $validated['username'])->exists();
+        $usernameExists = \App\Services\AccountIdentifierRegistry::existsInAccounts($validated['username']);
 
         if ($usernameExists) {
             return back()
@@ -157,10 +165,7 @@ class RegisterController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $emailExists =
-            JobSeeker::where('Email', $validated['email'])->exists()
-            ||
-            Employer::where('Email', $validated['email'])->exists();
+        $emailExists = \App\Services\AccountIdentifierRegistry::existsInAccounts($validated['email']);
 
         if ($emailExists) {
             return back()
@@ -689,7 +694,8 @@ class RegisterController extends Controller
         // Store the code only after delivery succeeds, so the user never
         // reaches verification with a code that was not sent.
         session([
-            'registration.otp' => $otp,
+            'registration.otp_hash' => Hash::make($otp),
+            'registration.otp' => null,
             'registration.otp_expires_at' => now()->addMinutes(10),
             'registration.otp_attempts' => 0,
             'registration.otp_last_sent_at' => now(),
@@ -733,7 +739,7 @@ class RegisterController extends Controller
         }
 
         // OTP has not been generated yet
-        if (!session()->has('registration.otp')) {
+        if (!session()->has('registration.otp_hash') && !session()->has('registration.otp')) {
             return redirect()->route('register.review');
         }
 
@@ -765,7 +771,7 @@ class RegisterController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        if (!session()->has('registration.otp')) {
+        if (!session()->has('registration.otp_hash') && !session()->has('registration.otp')) {
 
             return redirect()
                 ->route('register.review');
@@ -786,8 +792,8 @@ class RegisterController extends Controller
         ]);
 
 
-        $storedOtp =
-            session('registration.otp');
+        $storedOtpHash = session('registration.otp_hash');
+        $legacyOtp = session('registration.otp');
 
         $expiresAt =
             session('registration.otp_expires_at');
@@ -806,6 +812,7 @@ class RegisterController extends Controller
 
             session()->forget([
                 'registration.otp',
+                'registration.otp_hash',
                 'registration.otp_expires_at',
                 'registration.otp_attempts',
                 'registration.otp_last_sent_at',
@@ -833,6 +840,7 @@ class RegisterController extends Controller
 
             session()->forget([
                 'registration.otp',
+                'registration.otp_hash',
                 'registration.otp_expires_at',
                 'registration.otp_attempts',
             ]);
@@ -851,12 +859,11 @@ class RegisterController extends Controller
     |--------------------------------------------------------------------------
     */
 
-        if (
-            !hash_equals(
-                (string) $storedOtp,
-                (string) $validated['otp']
-            )
-        ) {
+        $otpMatches = $storedOtpHash
+            ? Hash::check((string) $validated['otp'], (string) $storedOtpHash)
+            : is_string($legacyOtp) && hash_equals($legacyOtp, (string) $validated['otp']);
+
+        if (!$otpMatches) {
 
             session([
                 'registration.otp_attempts' =>
@@ -888,15 +895,15 @@ class RegisterController extends Controller
         */
 
             $createdAccountId = null;
-            DB::transaction(function () use ($registration, &$createdAccountId): void {
+            $registry = app(\App\Services\AccountIdentifierRegistry::class);
+            $registry->withOwnershipLock(function () use ($registration, &$createdAccountId, $registry): void {
+                DB::transaction(function () use ($registration, &$createdAccountId, $registry): void {
                 if (
                     $registration['account_type'] === 'JobSeeker'
                 ) {
 
-                    if (
-                        JobSeeker::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
-                        || Employer::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
-                    ) {
+                    if (\App\Services\AccountIdentifierRegistry::existsInAccounts($registration['username'])
+                        || \App\Services\AccountIdentifierRegistry::existsInAccounts($registration['email'])) {
                         throw ValidationException::withMessages([
                             'otp' => 'An account with this username or email already exists. Please sign in or restart registration with different details.',
                         ]);
@@ -957,6 +964,7 @@ class RegisterController extends Controller
 
                     ]);
                     $createdAccountId = $createdAccount->getKey();
+                    $registry->sync('jobseeker', $createdAccountId, $registration['username'], $registration['email']);
                 }
 
 
@@ -968,10 +976,8 @@ class RegisterController extends Controller
                     $registration['account_type'] === 'Employer'
                 ) {
 
-                    if (
-                        JobSeeker::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
-                        || Employer::where('UserName', $registration['username'])->orWhere('Email', $registration['email'])->exists()
-                    ) {
+                    if (\App\Services\AccountIdentifierRegistry::existsInAccounts($registration['username'])
+                        || \App\Services\AccountIdentifierRegistry::existsInAccounts($registration['email'])) {
                         throw ValidationException::withMessages([
                             'otp' => 'An account with this username or email already exists. Please sign in or restart registration with different details.',
                         ]);
@@ -1020,6 +1026,7 @@ class RegisterController extends Controller
 
                     ]);
                     $createdAccountId = $createdAccount->getKey();
+                    $registry->sync('employer', $createdAccountId, $registration['username'], $registration['email']);
                 }
 
 
@@ -1032,10 +1039,14 @@ class RegisterController extends Controller
                         'account_type' => 'Invalid account type.',
                     ]);
                 }
+                });
             });
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors());
         } catch (\Throwable $e) {
+            if (\App\Services\AccountIdentifierRegistry::isUniqueViolation($e)) {
+                return back()->withErrors(['otp' => 'An account with this username or email already exists. Please sign in or restart registration with different details.']);
+            }
             Log::error('Registration account creation failed.', [
                 'exception' => $e::class,
             ]);
@@ -1118,7 +1129,8 @@ class RegisterController extends Controller
         }
 
         session([
-            'registration.otp' => $otp,
+            'registration.otp_hash' => Hash::make($otp),
+            'registration.otp' => null,
             'registration.otp_expires_at' => now()->addMinutes(10),
             'registration.otp_attempts' => 0,
             'registration.otp_last_sent_at' => now(),

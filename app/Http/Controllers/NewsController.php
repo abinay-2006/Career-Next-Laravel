@@ -13,7 +13,7 @@ class NewsController extends Controller
         $filters = $request->validate(['q' => ['nullable', 'string', 'max:100']]);
         $search = trim($filters['q'] ?? '');
         $news = News::query()
-            ->when($search !== '', fn ($query) => $query->where('News', 'like', '%' . $search . '%'))
+            ->when($search !== '', fn($query) => $query->where('News', 'like', '%' . $search . '%'))
             ->orderByDesc('NewsDate')->orderByDesc('NewsId')
             ->paginate(9)->withQueryString();
         $featuredNews = $search === '' && $news->currentPage() === 1 ? $news->getCollection()->first() : null;

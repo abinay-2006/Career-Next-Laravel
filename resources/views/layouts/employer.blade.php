@@ -34,7 +34,7 @@
   <!-- ══ NAVBAR ══ -->
 
   <nav class="navbar">
-    <button class="cn-menu-toggle" type="button" aria-label="Open navigation" aria-controls="roleSidebar" aria-expanded="false"><i class="fas fa-bars" aria-hidden="true"></i></button>
+    <button class="cn-menu-toggle" type="button" aria-label="Open navigation" aria-controls="roleSidebar" aria-expanded="false" data-no-loader><i class="fas fa-bars" aria-hidden="true"></i></button>
     <a href="{{ route('employer.dashboard') }}" class="navbar-brand brand-logo">
       <img src="{{ asset('images/CareerNext.png') }}" alt="Career Next">
       <span>Career Next</span>
@@ -48,7 +48,8 @@
         <button type="button"
           class="profile-trigger"
           id="profileTrigger"
-          aria-expanded="false">
+          aria-expanded="false"
+          data-no-loader>
 
           <div class="user-avatar">
 
@@ -93,7 +94,7 @@
 
 
           <a href="{{ route('employer.profile.index') }}"
-            class="employer-dropdown-item">
+            class="employer-dropdown-item" data-no-loader>
 
             <i class="fas fa-user-pen"></i>
 
@@ -107,7 +108,8 @@
             @csrf
 
             <button type="submit"
-              class="employer-dropdown-item danger">
+              class="employer-dropdown-item danger"
+              data-loading>
 
               <i class="fas fa-right-from-bracket"></i>
 

@@ -1,6 +1,15 @@
+
+# ============================================================
+# ENVIRONMENT FILES AND SECRETS
+# ============================================================
+
 .env
 .env.*
 !.env.example
+
+# ============================================================
+# GIT AND DEVELOPMENT DEPENDENCIES
+# ============================================================
 
 .git
 .github
@@ -9,41 +18,222 @@
 node_modules
 vendor
 
-storage/logs/*
-storage/framework/cache/*
-storage/framework/sessions/*
-storage/framework/testing/*
-storage/framework/views/*
-storage/app/*
-!storage/app/public/
-!storage/app/public/photos/
-!storage/app/public/photos/**
+.vscode
+.idea
+.codex
+.cursor
+.agents
+.zed
+.nova
 
-# Keep legacy upload trees out of the build context except the individually
-# confirmed PDFs that the Docker assembly stage moves into private storage.
+# ============================================================
+# LARAVEL LOCAL DATA AND GENERATED FILES
+# ============================================================
+
+# Never include local logs, sessions, caches or generated views.
+storage/logs/**
+storage/framework/**
+storage/app/**
+
+# Allow only the public profile-photo directory.
+!storage/app/
+!storage/app/public/
+storage/app/public/**
+!storage/app/public/photos/
+storage/app/public/photos/**
+
+# Approved profile photos at the root of the photo directory.
+!storage/app/public/photos/*.jpg
+!storage/app/public/photos/*.jpeg
+!storage/app/public/photos/*.png
+!storage/app/public/photos/*.webp
+
+# Approved profile photos exactly one directory deep.
+!storage/app/public/photos/*/
+!storage/app/public/photos/*/*.jpg
+!storage/app/public/photos/*/*.jpeg
+!storage/app/public/photos/*/*.png
+!storage/app/public/photos/*/*.webp
+
+# Never include the public storage symlink.
+public/storage
+
+# ============================================================
+# LEGACY UPLOAD DIRECTORIES
+# ============================================================
+
+# Exclude all legacy upload content by default.
 public/upload/**
 public/uploads/**
+
+# Allow the photo directories themselves.
+!public/upload/
 !public/upload/photos/
-!public/upload/photos/**
-!public/upload/1789573805_2_No_due_-_IV.pdf
+!public/uploads/
 !public/uploads/photos/
-!public/uploads/photos/**
-!public/uploads/documents/
-!public/uploads/documents/1776426982_69e21fe6680e7.pdf
-!public/uploads/documents/1784988802_VAt6XUfX.pdf
-!public/uploads/documents/Resume.pdf
+
+# Exclude all photo contents before applying the image allowlist.
+public/upload/photos/**
+public/uploads/photos/**
+
+# Approved images at the root of public/upload/photos.
+!public/upload/photos/*.jpg
+!public/upload/photos/*.jpeg
+!public/upload/photos/*.png
+!public/upload/photos/*.webp
+
+# Approved images at the root of public/uploads/photos.
+!public/uploads/photos/*.jpg
+!public/uploads/photos/*.jpeg
+!public/uploads/photos/*.png
+!public/uploads/photos/*.webp
+
+# Allow exactly one nested directory for approved images.
+!public/upload/photos/*/
+!public/upload/photos/*/*.jpg
+!public/upload/photos/*/*.jpeg
+!public/upload/photos/*/*.png
+!public/upload/photos/*/*.webp
+
+!public/uploads/photos/*/
+!public/uploads/photos/*/*.jpg
+!public/uploads/photos/*/*.jpeg
+!public/uploads/photos/*/*.png
+!public/uploads/photos/*/*.webp
+
+# Two explicitly approved legacy public assets.
 !public/uploads/470X310_1.jpg
 !public/uploads/admin.jpg
+
+# ============================================================
+# LOCAL DATABASES AND DATABASE EXPORTS
+# ============================================================
 
 database/*.sqlite
 database/*.db
 
-.vscode
-.idea
+*.sql
+*.sql.*
+*.dump
+*.dump.*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.db
+*.db-*
+*.mdb
+
+# ============================================================
+# PRIVATE DOCUMENTS
+# ============================================================
+
+*.pdf
+*.doc
+*.docx
+
+# ============================================================
+# BACKUPS AND ARCHIVES
+# ============================================================
+
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.*
+*.tgz
+*.gz
+*.bz2
+*.xz
+*.zst
+*.bak
+*.backup
+*.backup.*
+*.old
+*.orig
+
+# ============================================================
+# PRIVATE KEYS, CERTIFICATES AND CREDENTIAL FILES
+# ============================================================
+
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.p12
+*.pfx
+*.p7b
+*.p7c
+*.jks
+*.keystore
+
+id_rsa*
+id_ed25519*
+id_ecdsa*
+id_dsa*
+
+auth.json
+.npmrc
+.netrc
+.pypirc
+.git-credentials
+.aws
+.ssh
+
+# ============================================================
+# LOGS, TEMPORARY FILES AND EDITOR ARTIFACTS
+# ============================================================
+
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.patch
+*.diff
+
+# ============================================================
+# TEST AND COVERAGE ARTIFACTS
+# ============================================================
+
+.phpunit.result.cache
+.phpunit.cache
+/.phpunit*
+/coverage/
+/tests/
+/phpunit.xml
+/phpunit.xml.dist
+/test_*.php
+
+# ============================================================
+# LOCAL DEVELOPMENT SCRIPTS AND SCRATCH FILES
+# ============================================================
+
+scratchpad/
+/trace_path.php
+/test_storage*.php
+/run-tests.bat
+/run-recovery-tests.bat
+
+/career_next
+/staged.patch
+/staged_dockerfile.patch
+/unstaged.patch
+
+# ============================================================
+# LOCAL DOCUMENTATION AND PLANNING FILES
+# ============================================================
+
+/RESPONSIVE_PLAN.md
+/PROFILE_PHOTO_FIX_SUMMARY.md
+/r2-migration.md
+/docs/
+
+# ============================================================
+# OTHER LOCAL SYSTEM FILES
+# ============================================================
 
 .DS_Store
 Thumbs.db
-
-*.zip
-*.bak
-*.backup
+_ide_helper.php

@@ -21,6 +21,8 @@ class RoleAuthenticationTest extends TestCase
         Schema::create('employer_reg', function (Blueprint $table) {
             $table->increments('EmployerId');
             $table->string('CompanyName');
+            $table->string('City')->nullable();
+            $table->string('Area_Work')->nullable();
             $table->string('Email');
             $table->string('Status');
             $table->string('UserName');
@@ -29,7 +31,9 @@ class RoleAuthenticationTest extends TestCase
         Schema::create('jobseeker_reg', function (Blueprint $table) {
             $table->increments('JobSeekId');
             $table->string('JobSeekerName');
+            $table->string('City')->nullable();
             $table->string('Email');
+            $table->string('Qualification')->nullable();
             $table->string('Status');
             $table->string('UserName');
             $table->string('Password');
@@ -52,7 +56,16 @@ class RoleAuthenticationTest extends TestCase
             $table->integer('EmployerId')->nullable();
             $table->string('CompanyName');
             $table->string('JobTitle');
+            $table->integer('Vacancy')->nullable();
+            $table->string('MinQualification')->nullable();
             $table->string('Status')->nullable();
+        });
+        Schema::create('walkin_master', function (Blueprint $table) {
+            $table->increments('WalkInId');
+            $table->string('CompanyName')->nullable();
+            $table->string('JobTitle')->nullable();
+            $table->integer('Vacancy')->nullable();
+            $table->string('MinQualification')->nullable();
         });
         Schema::create('application_master', function (Blueprint $table) {
             $table->increments('ApplicationId');
@@ -61,11 +74,12 @@ class RoleAuthenticationTest extends TestCase
             $table->string('Status')->nullable();
             $table->string('Description')->nullable();
             $table->dateTime('ApplicationDate')->nullable();
+            $table->timestamps();
         });
 
         \DB::table('user_master')->insert(['UserName' => 'admin', 'Password' => Hash::make('secret')]);
         \DB::table('employer_reg')->insert([
-            'CompanyName' => 'Example Co', 'Email' => 'employer@example.test', 'Status' => 'Confirm',
+            'CompanyName' => 'Example Co', 'City' => 'Test City', 'Area_Work' => 'Technology', 'Email' => 'employer@example.test', 'Status' => 'Confirm',
             'UserName' => 'employer', 'Password' => Hash::make('secret'),
         ]);
         \DB::table('jobseeker_reg')->insert([
@@ -91,6 +105,32 @@ class RoleAuthenticationTest extends TestCase
         $this->get(route('employer.dashboard'))->assertOk();
         $this->get(route('admin.index'))->assertForbidden();
         $this->get(route('jobseeker.index'))->assertForbidden();
+    }
+
+    public function test_legacy_account_can_log_in_when_username_equals_email(): void
+    {
+        \DB::table('employer_reg')->where('EmployerId', 1)->update(['UserName' => 'employer@example.test']);
+
+        $this->post('/login', ['txtUser' => 'EMPLOYER@example.test', 'txtPass' => 'secret', 'cmbUser' => 'Employer'])
+            ->assertRedirect(route('employer.dashboard'));
+    }
+
+    public function test_ambiguous_cross_field_login_fails_closed_without_authenticating_either_account(): void
+    {
+        \DB::table('employer_reg')->insert([
+            'CompanyName' => 'Collision owner', 'Email' => 'owner@example.test', 'Status' => 'Confirm',
+            'UserName' => 'collision@example.test', 'Password' => Hash::make('secret'),
+        ]);
+        \DB::table('employer_reg')->insert([
+            'CompanyName' => 'Email owner', 'Email' => 'collision@example.test', 'Status' => 'Confirm',
+            'UserName' => 'other-name', 'Password' => Hash::make('secret'),
+        ]);
+
+        $this->from('/login')->post('/login', [
+            'txtUser' => 'COLLISION@example.test', 'txtPass' => 'secret', 'cmbUser' => 'Employer',
+        ])->assertRedirect('/login')->assertSessionHas('error', 'Wrong username or password.');
+
+        $this->assertGuest('employer');
     }
 
     public function test_jobseeker_can_login_by_username_and_cross_role_access_is_rejected(): void

@@ -138,12 +138,7 @@ class ManageUsersController extends Controller
     {
         // Validate the type
         if (!in_array($type, ['jobseeker', 'employer'])) {
-            if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'message' => 'Invalid user type.'], 422);
-            }
-            return redirect()
-                ->back()
-                ->with('error', 'Invalid user type.');
+            return $this->actionError($request, 'Invalid user type.', 422);
         }
 
         return $this->updateStatus($request, $type, $id, 'Confirm', 'Account approved successfully.');
@@ -154,12 +149,7 @@ class ManageUsersController extends Controller
     {
         // Validate the type
         if (!in_array($type, ['jobseeker', 'employer'])) {
-            if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'message' => 'Invalid user type.'], 422);
-            }
-            return redirect()
-                ->back()
-                ->with('error', 'Invalid user type.');
+            return $this->actionError($request, 'Invalid user type.', 422);
         }
 
         return $this->updateStatus($request, $type, $id, 'Suspended', 'Account suspended.');
@@ -169,12 +159,7 @@ class ManageUsersController extends Controller
     {
         // Validate the type
         if (!in_array($type, ['jobseeker', 'employer'])) {
-            if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'message' => 'Invalid user type.'], 422);
-            }
-            return redirect()
-                ->back()
-                ->with('error', 'Invalid user type.');
+            return $this->actionError($request, 'Invalid user type.', 422);
         }
 
         $table = $type === 'jobseeker' ? 'jobseeker_reg' : 'employer_reg';
@@ -188,6 +173,7 @@ class ManageUsersController extends Controller
                 }
 
                 DB::table($table)->where($key, $id)->delete();
+                app(\App\Services\AccountIdentifierRegistry::class)->release($table === 'employer_reg' ? 'employer' : 'jobseeker', $id);
                 return true;
             });
         } catch (QueryException $e) {
@@ -196,27 +182,28 @@ class ManageUsersController extends Controller
                 'account_id' => $id,
             ]);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'This account has related records that prevent deletion. Suspend it instead or resolve the related records first.',
-            ], 409);
+            return $this->actionError($request, 'This account has related records that prevent deletion. Suspend it instead or resolve the related records first.', 409);
         }
 
         if (!$deleted) {
-            return response()->json(['success' => false, 'message' => 'Account not found.'], 404);
+            return $this->actionError($request, 'Account not found.', 404);
         }
 
-        return response()->json([
+        $result = [
             'success' => true,
             'message' => 'Account deleted.',
             'counts' => $this->summaryCounts(),
-        ]);
+        ];
+
+        return $request->expectsJson()
+            ? response()->json($result)
+            : redirect()->route('admin.manageUsers')->with('success', $result['message']);
     }
 
     private function updateStatus(Request $request, string $type, int|string $id, string $status, string $message)
     {
         if (!in_array($type, ['jobseeker', 'employer'], true)) {
-            return response()->json(['success' => false, 'message' => 'Invalid user type.'], 422);
+            return $this->actionError($request, 'Invalid user type.', 422);
         }
 
         $table = $type === 'jobseeker' ? 'jobseeker_reg' : 'employer_reg';
@@ -232,17 +219,28 @@ class ManageUsersController extends Controller
         });
 
         if (!$updated) {
-            return response()->json(['success' => false, 'message' => 'Account not found.'], 404);
+            return $this->actionError($request, 'Account not found.', 404);
         }
 
         app(ActivityLogger::class)->record(strtolower($status) === 'confirm' ? 'account_approved' : 'account_suspended', $type, (int) $id);
 
-        return response()->json([
+        $result = [
             'success' => true,
             'message' => $message,
             'status' => $status,
             'counts' => $this->summaryCounts(),
-        ]);
+        ];
+
+        return $request->expectsJson()
+            ? response()->json($result)
+            : redirect()->route('admin.manageUsers')->with('success', $message);
+    }
+
+    private function actionError(Request $request, string $message, int $status)
+    {
+        return $request->expectsJson()
+            ? response()->json(['success' => false, 'message' => $message], $status)
+            : redirect()->route('admin.manageUsers')->with('error', $message);
     }
 
     private function summaryCounts(): array

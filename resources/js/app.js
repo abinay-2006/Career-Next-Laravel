@@ -154,9 +154,6 @@ import '../css/button-loading.css';
         current.replaceWith(next);
 
         if (typeof window.Alpine?.initTree === 'function') window.Alpine.initTree(next);
-        if (!document.querySelector('.modal.show, .modal-overlay.open, .modal-overlay.show, .profile-modal-overlay.show')) {
-            document.body.style.overflow = '';
-        }
         document.dispatchEvent(new CustomEvent('cn:region-updated', { detail: { selector: targetSelector } }));
         if (updateHistory) window.history.pushState({}, '', finalUrl.href);
         return response;
@@ -166,7 +163,6 @@ import '../css/button-loading.css';
         if (form.dataset.ajaxMarkApplied) {
             const button = form.querySelector('button[type="submit"]');
             if (button) {
-                activeButtons.get(button)?.();
                 button.disabled = true;
                 button.setAttribute('aria-disabled', 'true');
                 button.textContent = form.dataset.ajaxMarkApplied;
@@ -186,7 +182,6 @@ import '../css/button-loading.css';
             if (modal?.classList.contains('modal')) window.bootstrap?.Modal.getInstance(modal)?.hide();
             if (!document.querySelector('.modal.show, .modal-overlay.open, .modal-overlay.show')) document.body.style.overflow = '';
         }
-        form.dispatchEvent(new CustomEvent('cn:ajax-success', { bubbles: true, detail: payload || {} }));
         if (payload?.refresh && form.dataset.ajaxRefreshTarget) {
             try {
                 await replaceRegion(window.location.href, form.dataset.ajaxRefreshTarget);
@@ -194,14 +189,22 @@ import '../css/button-loading.css';
                 notify('error', `Saved, but the page section could not refresh: ${error.message}`);
             }
         }
+        form.dispatchEvent(new CustomEvent('cn:ajax-success', { bubbles: true, detail: payload || {} }));
     }
 
     function makeFormData(form, button) {
+        const wasDisabled = button?.disabled;
+        if (button && wasDisabled) button.disabled = false;
         if (button) {
-            try { return new FormData(form, button); } catch { /* older browser fallback */ }
+            try {
+                const data = new FormData(form, button);
+                if (wasDisabled) button.disabled = true;
+                return data;
+            } catch { /* older browser fallback */ }
         }
         const data = new FormData(form);
         if (button?.name && !data.has(button.name)) data.append(button.name, button.value);
+        if (wasDisabled) button.disabled = true;
         return data;
     }
 
@@ -283,6 +286,7 @@ import '../css/button-loading.css';
             if (!isJson) throw new Error('The server returned an unexpected response. Please try again.');
             if (payload?.success === false) throw new Error(payload.message || 'The operation could not be completed.');
 
+            if (restoreButton) restoreButton();
             if (payload?.message) notify('success', payload.message);
             await updateAfterAjax(form, payload);
             if (form.hasAttribute('data-ajax-reset')) {
@@ -356,6 +360,8 @@ import '../css/button-loading.css';
         if (!(event.target instanceof Element)) return;
         const element = event.target.closest('a[href], [data-loading]');
         if (!element || element.closest('form') || event.defaultPrevented) return;
+        const loaderExcluded = element.closest('[data-no-loader], nav, [role="navigation"], [role="tablist"], .sidebar, .cn-admin-sidebar, .cn-admin-drawer, .profile-dropdown, .dropdown-menu, .employer-dropdown-menu');
+        const optedIntoLoading = element.matches('[data-loading]:not([data-no-loader])') && !loaderExcluded;
         if (element instanceof HTMLAnchorElement) {
             if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
                 || element.target === '_blank' || element.hasAttribute('download')) return;
@@ -367,14 +373,16 @@ import '../css/button-loading.css';
             if (region && destination.pathname === window.location.pathname
                 && destination.search !== window.location.search) {
                 event.preventDefault();
-                const restore = start(element, element.dataset.loadingText || loadingLabel(element));
+                const restore = optedIntoLoading
+                    ? start(element, element.dataset.loadingText || loadingLabel(element))
+                    : null;
                 void replaceRegion(destination.href, '[data-ajax-region]', { updateHistory: true })
                     .catch((error) => notify('error', error.message))
                     .finally(() => restore?.());
                 return;
             }
         }
-        start(element, element.dataset.loadingText || loadingLabel(element));
+        if (optedIntoLoading) start(element, element.dataset.loadingText || loadingLabel(element));
     });
 
     window.addEventListener('pageshow', () => {

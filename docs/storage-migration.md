@@ -66,13 +66,13 @@ The report distinguishes `copied`, `already_verified`, `skipped`, `missing_sourc
 
 ## Legacy compatibility
 
-The current Docker ignore rules exclude upload trees except for confirmed tracked photos and four confirmed legacy PDFs. The Docker assembly stage copies those PDFs to private `storage/app/private/upload` and `storage/app/private/uploads/documents` keys and removes their public copies. The final image is based on a separate PHP runtime stage and copies the sanitized filesystem snapshot only; it does not inherit the assembly stage's layers. Other live runtime uploads are not included by Docker.
+The Docker ignore rules exclude private legacy upload trees from every image stage; only confirmed public photos and root-level public assets are included. Private legacy documents are never copied into the image. Provision any still-referenced legacy documents separately to the configured private runtime disk through the owner-controlled migration process below. The image does not migrate database keys or preserve those documents automatically. Other live runtime uploads are not included by Docker.
 
-Private legacy resolution checks the configured private disk using the legacy relative directory and basename, then checks approved local legacy roots. Direct public URLs remain denied by Apache. Existing database references are not rewritten. The tracked root-level `public/uploads/Marksheet.pdf` is not included because no code/route mapping was confirmed; include it only after an approved reference review.
+Private legacy resolution checks the configured private disk using the legacy relative directory and basename, then checks approved local legacy roots. Direct public URLs remain denied by Apache. Existing database references are not rewritten. The root-level `public/uploads/Marksheet.pdf` is excluded because no code/route mapping was confirmed; include it only after an approved reference review and only in private runtime storage.
 
 ## Test and local setup
 
-Ordinary local development needs no R2 credentials. Tests should use Laravel fake disks and temporary folders only. For a safe Docker validation, start Docker Desktop in Linux-container mode, build the image, then run `apache2ctl -t` with the default `PORT=10000` and an alternate port. Finally inspect the image filesystem to confirm the legacy PDFs exist only under `storage/app/private`, and request the equivalent `/upload/...pdf` and `/uploads/documents/...pdf` URLs to confirm denial. A Laravel feature test cannot substitute for testing Apache's actual directory rules.
+Ordinary local development needs no R2 credentials. Tests should use Laravel fake disks and temporary folders only. For a safe Docker validation, start Docker Desktop in Linux-container mode, build the image, inspect every final image layer and the merged runtime filesystem to confirm the known private legacy PDFs are absent, then run `apache2ctl -t` with the default `PORT=10000` and an alternate port. Request the equivalent `/upload/...pdf` and `/uploads/documents/...pdf` URLs to confirm denial. Separately verify private-disk writes at runtime. A Laravel feature test cannot substitute for image-layer inspection or testing Apache's actual directory rules.
 
 ## Owner-controlled rollout and rollback
 

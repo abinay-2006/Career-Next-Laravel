@@ -41,7 +41,7 @@ class LoginController extends Controller
         ]);
 
         $username = trim($request->txtUser);
-        $normalizedUsername = mb_strtolower($username);
+        $normalizedUsername = \App\Services\AccountIdentifierRegistry::normalize($username);
         $password = $request->txtPass;
         $type = $request->cmbUser;
 
@@ -256,9 +256,12 @@ class LoginController extends Controller
         $usernameColumn = $grammar->wrap('UserName');
         $emailColumn = $grammar->wrap('Email');
 
-        return $query->where(function ($query) use ($usernameColumn, $emailColumn, $login) {
-            $query->whereRaw("LOWER({$usernameColumn}) = ?", [$login])
-                ->orWhereRaw("LOWER({$emailColumn}) = ?", [$login]);
-        })->first();
+        $matches = $query->where(function ($query) use ($usernameColumn, $emailColumn, $login) {
+            $query->whereRaw("LOWER(TRIM({$usernameColumn})) = ?", [$login])
+                ->orWhereRaw("LOWER(TRIM({$emailColumn})) = ?", [$login]);
+        })->limit(2)->get();
+
+        // Existing cross-field collisions fail closed rather than selecting an arbitrary account.
+        return $matches->count() === 1 ? $matches->first() : null;
     }
 }

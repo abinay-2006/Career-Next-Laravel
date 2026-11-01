@@ -51,6 +51,12 @@ class ProfilePhotoReplacementTest extends TestCase
             $table->string('Status')->default('Approved');
             $table->string('Photo')->nullable();
         });
+        Schema::create('account_identifiers', function (Blueprint $table): void {
+            $table->id(); $table->string('identifier_type', 20); $table->string('normalized_value', 255);
+            $table->string('account_type', 20); $table->unsignedBigInteger('account_id');
+            $table->unique(['identifier_type', 'normalized_value']);
+            $table->unique(['account_type', 'account_id', 'identifier_type']);
+        });
 
         Storage::fake('public');
     }
@@ -81,6 +87,79 @@ class ProfilePhotoReplacementTest extends TestCase
             $this->assertFalse(Storage::disk('public')->exists($oldPath));
             $this->assertTrue($oldFileWasPresentAtUpdate, 'Old photo must remain until the database update succeeds.');
             $this->assertSame('Updated name', $role === 'jobseeker' ? $updated->JobSeekerName : $updated->CompanyName);
+            $this->assertDatabaseHas('account_identifiers', [
+                'account_type' => $role,
+                'account_id' => $updated->getKey(),
+                'normalized_value' => strtolower($fields['UserName']),
+            ]);
+            $this->assertDatabaseHas('account_identifiers', [
+                'account_type' => $role,
+                'account_id' => $updated->getKey(),
+                'normalized_value' => strtolower($fields['Email']),
+            ]);
+        }
+    }
+
+    public function test_identifier_collisions_roll_back_profile_columns_and_registry_for_both_roles(): void
+    {
+        foreach (['jobseeker', 'employer'] as $role) {
+            [$account, $route, , $fields] = $this->makeAccount($role, 'photos/original.png');
+            [$other] = $this->makeAccount($role, 'photos/other.png');
+            $table = $role === 'jobseeker' ? 'jobseeker_reg' : 'employer_reg';
+            $key = $role === 'jobseeker' ? 'JobSeekId' : 'EmployerId';
+            $usernameColumn = 'UserName';
+            $emailColumn = 'Email';
+            $original = $account->newQuery()->findOrFail($account->getKey());
+            $registryBefore = DB::table('account_identifiers')
+                ->where('account_type', $role)->where('account_id', $account->getKey())
+                ->orderBy('identifier_type')->get()->toArray();
+
+            foreach ([
+                ['UserName' => $other->UserName, 'Email' => $fields['Email']],
+                ['UserName' => $fields['UserName'], 'Email' => $other->Email],
+                ['UserName' => $other->Email, 'Email' => $fields['Email']],
+            ] as $collision) {
+                $this->loginAs($account->newQuery()->findOrFail($account->getKey()), $role)
+                    ->from('/profile')
+                    ->put(route($route), array_replace($fields, $collision))
+                    ->assertRedirect('/profile')
+                    ->assertSessionHasErrors('username');
+
+                $after = $account->newQuery()->findOrFail($account->getKey());
+                $this->assertSame($original->$usernameColumn, $after->$usernameColumn);
+                $this->assertSame($original->$emailColumn, $after->$emailColumn);
+                $this->assertSame($original->Photo, $after->Photo);
+                $this->assertEquals($registryBefore, DB::table('account_identifiers')
+                    ->where('account_type', $role)->where('account_id', $account->getKey())
+                    ->orderBy('identifier_type')->get()->toArray());
+                $this->assertSame(2, DB::table($table)->count());
+                $this->assertSame(1, DB::table($table)->where($key, $other->getKey())->count());
+            }
+        }
+    }
+
+    public function test_identifier_collision_with_photo_keeps_old_photo_and_registry_for_both_roles(): void
+    {
+        foreach (['jobseeker', 'employer'] as $role) {
+            [$account, $route, $oldPath, $fields] = $this->makeAccount($role, 'photos/original.png');
+            [$other] = $this->makeAccount($role, 'photos/other.png');
+            Storage::disk('public')->put($oldPath, 'old-image');
+            $registryBefore = DB::table('account_identifiers')
+                ->where('account_type', $role)->where('account_id', $account->getKey())
+                ->orderBy('identifier_type')->get()->toArray();
+
+            $this->loginAs($account, $role)->from('/profile')->put(route($route), array_replace($fields, [
+                'UserName' => $other->Email,
+                'Photo' => $this->image(),
+            ]))->assertRedirect('/profile')->assertSessionHasErrors('username');
+
+            $after = $account->newQuery()->findOrFail($account->getKey());
+            $this->assertSame($oldPath, $after->Photo);
+            $this->assertTrue(Storage::disk('public')->exists($oldPath));
+            $this->assertSame([$oldPath], Storage::disk('public')->allFiles('photos'));
+            $this->assertEquals($registryBefore, DB::table('account_identifiers')
+                ->where('account_type', $role)->where('account_id', $account->getKey())
+                ->orderBy('identifier_type')->get()->toArray());
         }
     }
 
@@ -168,16 +247,18 @@ class ProfilePhotoReplacementTest extends TestCase
 
     private function makeAccount(string $role, string $photo): array
     {
+        $suffix = (string) DB::table($role === 'jobseeker' ? 'jobseeker_reg' : 'employer_reg')->count();
         $fields = $role === 'jobseeker' ? [
-            'JobSeekerName' => 'Updated name', 'Address' => 'Street', 'City' => 'City', 'Email' => 'seeker@example.test',
-            'Mobile' => '123456', 'Qualification' => 'Degree', 'Gender' => 'Other', 'BirthDate' => '2000-01-01', 'UserName' => 'seeker',
+            'JobSeekerName' => 'Updated name', 'Address' => 'Street', 'City' => 'City', 'Email' => 'seeker'.$suffix.'@example.test',
+            'Mobile' => '123456', 'Qualification' => 'Degree', 'Gender' => 'Other', 'BirthDate' => '2000-01-01', 'UserName' => 'seeker'.$suffix,
         ] : [
-            'CompanyName' => 'Updated name', 'Email' => 'employer@example.test', 'UserName' => 'employer',
+            'CompanyName' => 'Updated name', 'Email' => 'employer'.$suffix.'@example.test', 'UserName' => 'employer'.$suffix,
             'ContactPerson' => 'Contact', 'Address' => 'Street', 'City' => 'City', 'Mobile' => '123456', 'Area_Work' => 'Area',
         ];
         $model = $role === 'jobseeker' ? new JobSeeker() : new Employer();
         $model->forceFill($fields + ['Photo' => $photo, 'Password' => 'secret', 'Status' => 'Approved']);
         $model->save();
+        app(\App\Services\AccountIdentifierRegistry::class)->sync($role, $model->getKey(), $fields['UserName'], $fields['Email']);
 
         return [$model, $role.'.profile.update', $photo, $fields];
     }

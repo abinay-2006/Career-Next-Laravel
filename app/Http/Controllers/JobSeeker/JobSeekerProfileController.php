@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\JobSeeker;
+use App\Services\JobSeekerResumeService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\JobSeekerDocument;
 use App\Support\ProfilePhoto;
 use App\Support\UploadStorage;
 
@@ -242,12 +242,21 @@ class JobSeekerProfileController extends Controller
 
             'BirthDate' => 'nullable|date',
 
-            'UserName' => 'required|string|max:100',
+            'UserName' => [
+                'required', 'string', 'max:100',
+                function ($attribute, $value, $fail): void {
+                    if (!\App\Services\AccountIdentifierRegistry::isValidUsername((string) $value)) {
+                        $fail('Use a username or a valid email-style username.');
+                    }
+                },
+            ],
 
             'Password' => 'nullable|string|min:6',
 
             'Photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+        $validated['Email'] = mb_strtolower(trim($validated['Email']));
+        $validated['UserName'] = \App\Services\AccountIdentifierRegistry::normalize($validated['UserName']);
 
         $jobSeeker->JobSeekerName =
             $validated['JobSeekerName'];
@@ -304,10 +313,14 @@ class JobSeekerProfileController extends Controller
                 $jobSeeker->Photo = $storedPath;
 
                 try {
-                    DB::transaction(function () use ($jobSeeker): void {
-                        if (!$jobSeeker->save()) {
-                            throw new \RuntimeException('Profile update was not persisted.');
-                        }
+                    $registry = app(\App\Services\AccountIdentifierRegistry::class);
+                    $registry->withOwnershipLock(function () use ($jobSeeker, $registry): void {
+                        DB::transaction(function () use ($jobSeeker, $registry): void {
+                            if (!$jobSeeker->save()) {
+                                throw new \RuntimeException('Profile update was not persisted.');
+                            }
+                            $registry->sync('jobseeker', $jobSeeker->JobSeekId, $jobSeeker->UserName, $jobSeeker->Email);
+                        });
                     });
                 } catch (\Throwable $e) {
                     if (!$oldPath || $oldPath !== $storedPath) {
@@ -321,6 +334,9 @@ class JobSeekerProfileController extends Controller
                 }
             }
  catch (\Exception $e) {
+                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                    return back()->withErrors($e->errors());
+                }
                 Log::error('JobSeeker profile photo upload failed.', ['exception' => $e::class]);
                 if ($request->expectsJson()) {
                     return response()->json(['success' => false, 'message' => 'Unable to upload profile photo. Please try again later.'], 500);
@@ -333,12 +349,22 @@ class JobSeekerProfileController extends Controller
 
         try {
             if (!$request->hasFile('Photo')) {
-                if (!$jobSeeker->save()) {
-                    throw new \RuntimeException('Resume record was not persisted.');
-                }
+                $registry = app(\App\Services\AccountIdentifierRegistry::class);
+                $registry->withOwnershipLock(function () use ($jobSeeker, $validated, $registry): void {
+                    DB::transaction(function () use ($jobSeeker, $validated, $registry): void {
+                        if (!$jobSeeker->save()) {
+                            throw new \RuntimeException('Profile update was not persisted.');
+                        }
+
+                        $registry->sync('jobseeker', $jobSeeker->JobSeekId, $validated['UserName'], $validated['Email']);
+                    });
+                });
             }
         }
  catch (\Exception $e) {
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                return back()->withErrors($e->errors());
+            }
             Log::error('JobSeeker profile save failed.', ['exception' => $e::class]);
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => 'Unable to save profile. Please try again later.'], 500);
@@ -384,22 +410,6 @@ class JobSeekerProfileController extends Controller
 
         /*
     |--------------------------------------------------------------------------
-    | Find existing resume document BEFORE replacing it
-    |--------------------------------------------------------------------------
-    */
-
-        $existingDocument = $jobSeeker->documents()
-            ->whereRaw(
-                'LOWER(DocumentType) = ?',
-                ['resume']
-            )
-            ->first();
-
-        $oldResumeFile = $existingDocument?->FileName;
-        $legacyResumeFile = $jobSeeker->Resume;
-
-        /*
-    |--------------------------------------------------------------------------
     | Resume directory
     |--------------------------------------------------------------------------
     */
@@ -437,37 +447,16 @@ class JobSeekerProfileController extends Controller
     */
 
         try {
-            DB::transaction(function () use ($jobSeeker, $existingDocument, $storedPath, $file): void {
-                $jobSeeker->Resume = $storedPath;
-                $jobSeeker->save();
+            $resumeService = app(JobSeekerResumeService::class);
+            $oldFiles = $resumeService->replace(
+                $jobSeeker->JobSeekId,
+                $storedPath,
+                $file->getClientOriginalName()
+            );
 
-                $values = [
-                    'FileName' => $storedPath,
-                    'OriginalFileName' => $file->getClientOriginalName(),
-                    'UploadDate' => now(),
-                    'DocumentType' => 'resume'
-                ];
-
-                if ($existingDocument) {
-                    if (!$existingDocument->update($values)) {
-                        throw new \RuntimeException('Resume document record was not persisted.');
-                    }
-                }
- else {
-                    $created = $jobSeeker->documents()->create($values);
-                    if (!$created->exists) {
-                        throw new \RuntimeException('Resume document record was not persisted.');
-                    }
-                }
-
-            });
-
-            // If transaction succeeds, delete old file
-            UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $oldResumeFile, 'replaced resume cleanup');
-
-            if ($legacyResumeFile && $legacyResumeFile !== $storedPath) {
-                UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $legacyResumeFile, 'legacy resume cleanup');
-            }
+            // Storage is not transactional. After commit, delete only paths
+            // that no account or document row still references.
+            $resumeService->cleanupUnreferenced($oldFiles, $storedPath, 'replaced resume cleanup');
 
 
             if ($request->expectsJson()) {
@@ -478,10 +467,10 @@ class JobSeekerProfileController extends Controller
                 ->route('jobseeker.profile.index')
                 ->with('success', 'Resume uploaded successfully.');
         }
- catch (\Exception $e) {
+        catch (\Throwable $e) {
             Log::error('Resume upload failed.', ['exception' => $e::class]);
             // Attempt to clean up the newly uploaded file on failure
-            UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $storedPath, 'failed resume update cleanup');
+            app(JobSeekerResumeService::class)->cleanupUnreferenced([$storedPath], null, 'failed resume update cleanup');
             if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => 'Failed to update resume record. Please try again.'], 500);
             }
@@ -497,57 +486,28 @@ class JobSeekerProfileController extends Controller
     public function removeResume(Request $request)
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
-
-        // Find the resume document (DocumentType = resume)
-        $resumeDoc = $jobSeeker->documents()
-            ->whereRaw('LOWER(DocumentType) = ?', ['resume'])
-            ->first();
-
-        // If no resume exists, just redirect with a message
-        if (!$resumeDoc) {
-            // Ensure legacy column cleared
-            if (!empty($jobSeeker->Resume)) {
-                $jobSeeker->Resume = null;
-                $jobSeeker->save();
-            }
-
+        try {
+            $result = app(JobSeekerResumeService::class)->remove($jobSeeker->JobSeekId);
+        } catch (\Throwable $e) {
+            Log::error('Resume removal failed.', ['exception' => $e::class]);
             if ($request->expectsJson()) {
-                return response()->json(['success' => true, 'message' => 'No resume to delete.', 'refresh' => true]);
+                return response()->json(['success' => false, 'message' => 'Failed to remove resume. Please try again.'], 500);
             }
-
-            return redirect()
-                ->route('jobseeker.profile.index')
-                ->with('success', 'No resume to delete.');
+            return back()->with('error', 'Failed to remove resume. Please try again.');
         }
 
-
-        // Store filenames before deletion
-        $storedPath = $resumeDoc->FileName;
-        $legacyPath = $jobSeeker->Resume;
-
-        // Delete the document record and clear legacy column within a transaction
-        DB::transaction(function () use ($jobSeeker, $resumeDoc) {
-            $resumeDoc->delete();
-            $jobSeeker->Resume = null;
-            $jobSeeker->save();
-        });
-
-        // Delete physical file from configured storage
-        UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $storedPath, 'removed resume cleanup');
-
-        // Delete legacy file if it exists and differs from the stored path
-        if ($legacyPath && $legacyPath !== $storedPath) {
-            UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $legacyPath, 'removed legacy resume cleanup');
-        }
+        $paths = $result['paths'];
+        $hadResume = $result['had_resume'];
+        app(JobSeekerResumeService::class)->cleanupUnreferenced($paths, null, 'removed resume cleanup');
 
 
         if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'message' => 'Resume removed successfully.', 'refresh' => true]);
+            return response()->json(['success' => true, 'message' => $hadResume ? 'Resume removed successfully.' : 'No resume to delete.', 'refresh' => true]);
         }
 
         return redirect()
             ->route('jobseeker.profile.index')
-            ->with('success', 'Resume removed successfully.');
+            ->with('success', $hadResume ? 'Resume removed successfully.' : 'No resume to delete.');
     }
 
 }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\JobSeekerEducation;
 use App\Models\JobSeekerSchoolEducation;
 use App\Models\JobSeekerDocument;
+use App\Services\JobSeekerResumeService;
 use App\Support\PrivateUpload;
 use App\Support\UploadStorage;
 use Illuminate\Support\Str;
@@ -121,7 +122,7 @@ class EducationController extends Controller
     {
         $request->validate([
             'cmbQual' => 'required|string|max:255',
-            'txtOther' => 'nullable|required_if:cmbQual,Other|string|max:255',
+            'txtOther' => 'nullable|string|max:255',
             'txtBoard' => 'required|string|max:255',
             'cmbYear' => 'required|integer|min:1998|max:' . now()->year,
             'txtPer' => 'required|numeric|min:0|max:100',
@@ -135,6 +136,9 @@ class EducationController extends Controller
             $degree = trim($request->txtOther);
 
             if ($degree === '') {
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Please specify the degree.', 'errors' => ['txtOther' => ['Please specify the degree.']]], 422);
+                }
                 return back()
                     ->withInput()
                     ->withErrors([
@@ -167,7 +171,7 @@ class EducationController extends Controller
     {
         $request->validate([
             'cmbQual' => 'required|string|max:255',
-            'txtOther' => 'nullable|required_if:cmbQual,Other|string|max:255',
+            'txtOther' => 'nullable|string|max:255',
             'txtBoard' => 'required|string|max:255',
             'cmbYear' => 'required|integer|min:1998|max:' . now()->year,
             'txtPer' => 'required|numeric|min:0|max:100',
@@ -185,6 +189,9 @@ class EducationController extends Controller
             $degree = trim($request->txtOther);
 
             if ($degree === '') {
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Please specify the degree.', 'errors' => ['txtOther' => ['Please specify the degree.']]], 422);
+                }
                 return back()
                     ->withInput()
                     ->withErrors([
@@ -239,7 +246,7 @@ class EducationController extends Controller
         $request->validate([
             'txtSchoolName' => 'required|string|max:255',
             'cmbSchoolQual' => 'required|string|max:255',
-            'txtSchoolOther' => 'nullable|required_if:cmbSchoolQual,Other|string|max:255',
+            'txtSchoolOther' => 'nullable|string|max:255',
             'txtSchoolBoard' => 'required|string|max:255',
             'cmbSchoolYear' => 'required|integer|min:1990|max:' . now()->year,
             'txtSchoolPer' => 'required|numeric|min:0|max:100',
@@ -253,6 +260,9 @@ class EducationController extends Controller
             $qualification = trim($request->txtSchoolOther);
 
             if ($qualification === '') {
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Please specify the qualification.', 'errors' => ['txtSchoolOther' => ['Please specify the qualification.']]], 422);
+                }
                 return back()
                     ->withInput()
                     ->withErrors([
@@ -287,7 +297,7 @@ class EducationController extends Controller
         $request->validate([
             'txtSchoolName' => 'required|string|max:255',
             'cmbSchoolQual' => 'required|string|max:255',
-            'txtSchoolOther' => 'nullable|required_if:cmbSchoolQual,Other|string|max:255',
+            'txtSchoolOther' => 'nullable|string|max:255',
             'txtSchoolBoard' => 'required|string|max:255',
             'cmbSchoolYear' => 'required|integer|min:1990|max:' . now()->year,
             'txtSchoolPer' => 'required|numeric|min:0|max:100',
@@ -305,6 +315,9 @@ class EducationController extends Controller
             $qualification = trim($request->txtSchoolOther);
 
             if ($qualification === '') {
+                if ($request->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Please specify the qualification.', 'errors' => ['txtSchoolOther' => ['Please specify the qualification.']]], 422);
+                }
                 return back()
                     ->withInput()
                     ->withErrors([
@@ -386,16 +399,31 @@ class EducationController extends Controller
         }
 
         try {
-            JobSeekerDocument::create([
-                'JobSeekId'        => $jobSeeker->JobSeekId,
-                'DocumentType'     => $request->cmbDocumentType,
-                'FileName'         => $storedPath,
-                'OriginalFileName' => $file->getClientOriginalName(),
-                'UploadDate'       => now(),
-                'VerificationStatus' => 'pending',
-            ]);
+            if (strtolower(trim((string) $request->cmbDocumentType)) === 'resume') {
+                $resumeService = app(JobSeekerResumeService::class);
+                $oldPaths = $resumeService->replace(
+                    $jobSeeker->JobSeekId,
+                    $storedPath,
+                    $file->getClientOriginalName(),
+                    'pending'
+                );
+                $resumeService->cleanupUnreferenced($oldPaths, $storedPath, 'replaced resume cleanup');
+            } else {
+                JobSeekerDocument::create([
+                    'JobSeekId'        => $jobSeeker->JobSeekId,
+                    'DocumentType'     => $request->cmbDocumentType,
+                    'FileName'         => $storedPath,
+                    'OriginalFileName' => $file->getClientOriginalName(),
+                    'UploadDate'       => now(),
+                    'VerificationStatus' => 'pending',
+                ]);
+            }
         } catch (\Throwable $e) {
-            UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $storedPath, 'failed education document record cleanup');
+            if (strtolower(trim((string) $request->cmbDocumentType)) === 'resume') {
+                app(JobSeekerResumeService::class)->cleanupUnreferenced([$storedPath], null, 'failed education resume update cleanup');
+            } else {
+                UploadStorage::deleteBestEffort(UploadStorage::privateDiskName(), $storedPath, 'failed education document record cleanup');
+            }
             \Illuminate\Support\Facades\Log::error('Education document record creation failed.', ['exception' => $e::class]);
             if ($request->expectsJson()) return response()->json(['success' => false, 'message' => 'The document could not be saved. Please try again.'], 500);
             return back()->with('error', 'The document could not be saved. Please try again.');
@@ -420,6 +448,22 @@ class EducationController extends Controller
         $document = JobSeekerDocument::where('DocId', $id)
             ->where('JobSeekId', $jobSeeker->JobSeekId)
             ->firstOrFail();
+
+        if (strtolower(trim((string) $document->DocumentType)) === 'resume') {
+            try {
+                $result = app(JobSeekerResumeService::class)->remove($jobSeeker->JobSeekId);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Education resume removal failed.', ['exception' => $e::class]);
+                if ($request->expectsJson()) return response()->json(['success' => false, 'message' => 'The resume could not be deleted. Please try again.'], 500);
+                return back()->with('error', 'The resume could not be deleted. Please try again.');
+            }
+
+            app(JobSeekerResumeService::class)->cleanupUnreferenced($result['paths'], null, 'removed resume cleanup');
+            if ($request->expectsJson()) return response()->json(['success' => true, 'message' => 'Document deleted successfully.', 'refresh' => true]);
+            return redirect()
+                ->route('jobseeker.education')
+                ->with('success', 'Document deleted successfully.');
+        }
 
         \Illuminate\Support\Facades\DB::transaction(function () use ($document): void {
             $document->delete();

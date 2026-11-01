@@ -132,8 +132,19 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label for="forgot-account-type">Account Type</label>
+                    <div class="input-wrap">
+                        <select name="account_type" id="forgot-account-type">
+                            
+                            <option value="employer">Employer</option>
+                            <option value="jobseeker">Job Seeker</option>
+                        </select>
+                    </div>
+                </div>
+
                 <button type="submit" class="btn-primary">
-                    <i class="fas fa-paper-plane"></i> Send Reset Link
+                    <i class="fas fa-paper-plane"></i> Send Verification Code
                 </button>
             </form>
 

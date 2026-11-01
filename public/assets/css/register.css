@@ -1,7 +1,6 @@
 /* ============================================================
    GLOBAL REGISTRATION SCROLL FIX
    ============================================================ */
-
 html,
 body {
     width: 100%;
@@ -9,18 +8,23 @@ body {
     margin: 0;
     padding: 0;
 }
-
 html {
     overflow-y: auto !important;
     overflow-x: hidden !important;
 }
-
 body {
     min-height: 100vh;
     overflow-y: auto !important;
     overflow-x: hidden !important;
 }
-
+/* Consistent bright purple background for all registration pages */
+.register-page,
+.registration-page,
+.verify-page,
+.email-verification-page {
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #c4b5fd 100%) !important;
+    min-height: 100vh;
+}
 /* Registration page must be allowed to grow naturally */
 .register-page {
     width: 100%;
@@ -28,7 +32,6 @@ body {
     height: auto !important;
     overflow: visible !important;
 }
-
 /* Never clip the registration container/card */
 .register-container,
 .registration-card {
@@ -36,33 +39,26 @@ body {
     max-height: none !important;
     overflow: visible !important;
 }
-
 /* ============================================================
    CAREER NEXT - REGISTRATION
    STEP 2
    ============================================================ */
-
 .register-page {
     min-height: 100vh;
     padding: 30px 20px;
-    background: #f5f7fb;
 }
-
 .register-container {
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
 }
-
 /* ============================================================
    HEADER
    ============================================================ */
-
 .register-header {
     text-align: center;
     margin-bottom: 30px;
 }
-
 .register-logo {
     display: inline-flex;
     align-items: center;
@@ -72,7 +68,6 @@ body {
     font-size: 24px;
     font-weight: 700;
 }
-
 .logo-icon {
     width: 42px;
     height: 42px;
@@ -81,7 +76,6 @@ body {
     justify-content: center;
     flex-shrink: 0;
 }
-
 .logo-icon img {
     display: block;
     width: 100%;
@@ -89,18 +83,15 @@ body {
     object-fit: contain;
     border-radius: 10px;
 }
-
 /* ============================================================
    PROGRESS
    ============================================================ */
-
 .registration-progress {
     display: flex;
     align-items: flex-start;
     justify-content: center;
     margin-bottom: 35px;
 }
-
 .registration-progress .progress-step {
     display: flex;
     flex-direction: column;
@@ -115,7 +106,6 @@ body {
     z-index: 1;
     text-align: center;
 }
-
 .registration-progress .step-number {
     width: 44px;
     height: 44px;
@@ -136,13 +126,10 @@ body {
         box-shadow 0.25s ease,
         transform 0.25s ease;
 }
-
 .registration-progress .step-number i {
     font-size: 15px;
 }
-
 /* ── Upcoming step (default) ─────────────────────────────────────────────── */
-
 .registration-progress
     .progress-step:not(.completed):not(.active)
     .step-number {
@@ -150,20 +137,16 @@ body {
     border-color: #e2e8f0;
     color: #94a3b8;
 }
-
 /* ── Completed step — filled Career Next purple with checkmark ───────────── */
-
 .registration-progress .progress-step.completed .step-number {
     border-color: transparent;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #fff;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
-
 .registration-progress .progress-step.completed .step-number i {
     animation: stepCheckIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
-
 @keyframes stepCheckIn {
     from {
         opacity: 0;
@@ -174,13 +157,10 @@ body {
         transform: scale(1);
     }
 }
-
 .registration-progress .progress-step.completed {
     color: #667eea;
 }
-
 /* ── Active step — purple ring with soft glow ────────────────────────────── */
-
 .registration-progress .progress-step.active .step-number {
     border: 2.5px solid #667eea;
     background: #f8f7ff;
@@ -190,7 +170,6 @@ body {
         0 6px 16px rgba(102, 126, 234, 0.22);
     transform: scale(1.06);
 }
-
 /* Subtle pulsing halo on active step */
 .registration-progress .progress-step.active .step-number::after {
     content: "";
@@ -201,7 +180,6 @@ body {
     animation: progressPulse 2.4s ease-in-out infinite;
     pointer-events: none;
 }
-
 @keyframes progressPulse {
     0%,
     100% {
@@ -213,28 +191,22 @@ body {
         transform: scale(1.14);
     }
 }
-
 /* ── Step label ───────────────────────────────────────────────────────────── */
-
 .registration-progress .progress-step span:not(.step-number span) {
     font-size: 11.5px;
     font-weight: 500;
     letter-spacing: 0.01em;
     transition: color 0.22s ease;
 }
-
 .registration-progress .progress-step.completed span:not(.step-number span) {
     color: #667eea;
     font-weight: 600;
 }
-
 .registration-progress .progress-step.active span:not(.step-number span) {
     color: #4f46e5;
     font-weight: 700;
 }
-
 /* ── Connector lines ──────────────────────────────────────────────────────── */
-
 .registration-progress .progress-line {
     flex: 1;
     height: 3px;
@@ -247,14 +219,11 @@ body {
     min-width: 36px;
     max-width: 90px;
 }
-
 .registration-progress .progress-line.active {
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     box-shadow: 0 1px 6px rgba(102, 126, 234, 0.25);
 }
-
 /* ── Hover states ─────────────────────────────────────────────────────────── */
-
 .registration-progress
     .progress-step:not(.completed):not(.active):hover
     .step-number {
@@ -262,30 +231,24 @@ body {
     color: #667eea;
     background: #f8f7ff;
 }
-
 .registration-progress
     .progress-step:not(.completed):not(.active):hover
     span:not(.step-number span) {
     color: #667eea;
 }
-
 .registration-progress .progress-step:hover .step-number {
     transform: translateY(-1px);
 }
-
 .registration-progress .progress-step.active:hover .step-number {
     transform: scale(1.08);
 }
-
 @media (prefers-reduced-motion: reduce) {
     .registration-progress .progress-step.active .step-number::after,
     .registration-progress .progress-step.completed .step-number i {
         animation: none;
     }
 }
-
 /* ── Review step variant (number spans instead of .step-number) ──────────── */
-
 .registration-progress .progress-step > span:first-child {
     width: 44px;
     height: 44px;
@@ -303,7 +266,6 @@ body {
         box-shadow 0.25s ease,
         transform 0.25s ease;
 }
-
 .registration-progress .progress-step.completed > span:first-child {
     border-color: transparent;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -312,7 +274,6 @@ body {
     font-weight: 600;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
-
 .registration-progress .progress-step.active > span:first-child {
     border: 2.5px solid #667eea;
     background: #f8f7ff;
@@ -324,7 +285,6 @@ body {
         0 6px 16px rgba(102, 126, 234, 0.22);
     transform: scale(1.06);
 }
-
 .registration-progress
     .progress-step:not(.completed):not(.active)
     > span:first-child {
@@ -332,22 +292,18 @@ body {
     font-size: 14px;
     font-weight: 600;
 }
-
 .registration-progress .progress-line.completed {
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     box-shadow: 0 1px 6px rgba(102, 126, 234, 0.25);
 }
-
 .registration-progress .progress-step small {
     font-size: 11.5px;
     font-weight: 500;
     letter-spacing: 0.01em;
 }
-
 /* ============================================================
    CARD
    ============================================================ */
-
 .registration-card {
     background: #fff;
     border: 1px solid #e5e7eb;
@@ -355,18 +311,15 @@ body {
     padding: 35px;
     box-shadow: 0 10px 35px rgba(15, 23, 42, 0.07);
 }
-
 /* ============================================================
    TITLE
    ============================================================ */
-
 .card-header {
     display: flex;
     align-items: center;
     gap: 15px;
     margin-bottom: 25px;
 }
-
 .step-badge {
     width: 52px;
     height: 52px;
@@ -379,23 +332,19 @@ body {
     color: #2563eb;
     font-size: 20px;
 }
-
 .card-header h1 {
     margin: 0 0 5px;
     font-size: 26px;
     font-weight: 700;
     color: #111827;
 }
-
 .card-header p {
     margin: 0;
     color: #6b7280;
 }
-
 /* ============================================================
    ACCOUNT TYPE
    ============================================================ */
-
 .account-type-display {
     display: flex;
     align-items: center;
@@ -406,7 +355,6 @@ body {
     border-radius: 12px;
     background: #eff6ff;
 }
-
 .account-type-display > i {
     width: 40px;
     height: 40px;
@@ -417,33 +365,27 @@ body {
     background: #2563eb;
     color: #fff;
 }
-
 .account-type-display div {
     flex: 1;
 }
-
 .account-type-display strong {
     display: block;
     color: #1e3a8a;
     margin-bottom: 2px;
 }
-
 .account-type-display span {
     color: #64748b;
     font-size: 13px;
 }
-
 .account-type-display a {
     color: #2563eb;
     font-size: 13px;
     font-weight: 600;
     text-decoration: none;
 }
-
 /* ============================================================
    ALERT
    ============================================================ */
-
 .registration-alert {
     display: flex;
     gap: 12px;
@@ -454,20 +396,16 @@ body {
     background: #fef2f2;
     color: #991b1b;
 }
-
 .registration-alert ul {
     margin: 5px 0 0;
     padding-left: 18px;
 }
-
 /* ============================================================
    FORM
    ============================================================ */
-
 .form-group {
     margin-bottom: 21px;
 }
-
 .form-group label {
     display: block;
     margin-bottom: 8px;
@@ -475,15 +413,12 @@ body {
     font-size: 14px;
     font-weight: 600;
 }
-
 .form-group label span {
     color: #dc2626;
 }
-
 .input-wrapper {
     position: relative;
 }
-
 .input-wrapper > i {
     position: absolute;
     top: 50%;
@@ -492,24 +427,20 @@ body {
     color: #a78bfa;
     pointer-events: none;
 }
-
 /* ============================================================
    REGISTRATION INPUTS — CAREER NEXT PURPLE THEME
    ============================================================ */
-
 .register-page .input-wrapper {
     position: relative;
 }
-
 .register-page .input-wrapper > i {
     position: absolute;
     top: 50%;
     left: 15px;
     transform: translateY(-50%);
     color: #a78bfa;
-    pointer-events: none;
+    pointer-events: none
 }
-
 .register-page .input-wrapper input,
 .register-page .input-wrapper select,
 .register-page .input-wrapper textarea {
@@ -535,18 +466,15 @@ body {
         background 0.18s ease,
         box-shadow 0.18s ease;
 }
-
 .register-page .input-wrapper input,
 .register-page .input-wrapper select {
     height: 44px;
 }
-
 .register-page .input-wrapper textarea {
     min-height: 100px;
     padding: 11px 45px;
     resize: vertical;
 }
-
 /* Focus */
 .register-page .input-wrapper input:focus,
 .register-page .input-wrapper select:focus,
@@ -559,19 +487,16 @@ body {
     border-color: rgba(167, 139, 250, 0.7);
     box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
 }
-
 /* Placeholder */
 .register-page .input-wrapper input::placeholder,
 .register-page .input-wrapper textarea::placeholder {
     color: rgba(255, 255, 255, 0.35);
     opacity: 1;
 }
-
 .register-page .input-wrapper select option {
     background: #4c3b8e;
     color: #fff;
 }
-
 /* Disabled fields */
 .register-page .input-wrapper input:disabled,
 .register-page .input-wrapper select:disabled,
@@ -580,41 +505,34 @@ body {
     color: rgba(255, 255, 255, 0.5);
     cursor: not-allowed;
 }
-
 /* Read-only fields */
 .register-page .input-wrapper input[readonly],
 .register-page .input-wrapper textarea[readonly] {
     border-color: rgba(255, 255, 255, 0.14);
     color: rgba(255, 255, 255, 0.75);
 }
-
 /* Purple labels */
 .register-page .form-group label {
     color: #374151;
 }
-
 /* Purple icons */
 .register-page .input-wrapper > i {
     color: #a78bfa;
 }
 /* Validation errors keep their message, border turns red */
-
 .register-page .form-group:has(.field-error) .input-wrapper input,
 .register-page .form-group:has(.field-error) .input-wrapper select,
 .register-page .form-group:has(.field-error) .input-wrapper textarea {
     border-color: #f87171;
 }
-
 .register-page .form-group:has(.field-error) .input-wrapper input:focus,
 .register-page .form-group:has(.field-error) .input-wrapper select:focus,
 .register-page .form-group:has(.field-error) .input-wrapper textarea:focus {
     box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.15);
 }
-
 /* ============================================================
    PASSWORD
    ============================================================ */
-
 .password-toggle {
     position: absolute;
     top: 50%;
@@ -625,18 +543,15 @@ body {
     color: #9ca3af;
     cursor: pointer;
 }
-
 .password-toggle:hover {
     color: #667eea;
 }
-
 .password-strength {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-top: 8px;
 }
-
 .strength-bar {
     flex: 1;
     height: 5px;
@@ -644,7 +559,6 @@ body {
     border-radius: 5px;
     background: #e5e7eb;
 }
-
 .strength-bar span {
     display: block;
     width: 0;
@@ -652,53 +566,44 @@ body {
     background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
     transition: width 0.25s ease;
 }
-
 #strength-text {
     min-width: 85px;
     color: #6b7280;
     font-size: 12px;
     font-weight: 600;
 }
-
 .field-help {
     display: block;
     margin-top: 6px;
     color: #6b7280;
     font-size: 12px;
 }
-
 .field-error {
     display: block;
     margin-top: 6px;
     color: #dc2626;
     font-size: 12px;
 }
-
 .password-match {
     display: block;
     margin-top: 6px;
     font-size: 12px;
 }
-
 .password-match.valid {
     color: #16a34a;
 }
-
 .password-match.invalid {
     color: #dc2626;
 }
-
 /* ============================================================
    BUTTONS
    ============================================================ */
-
 .form-actions {
     display: flex;
     justify-content: space-between;
     gap: 15px;
     margin-top: 30px;
 }
-
 .btn-primary,
 .btn-secondary {
     min-height: 48px;
@@ -714,60 +619,49 @@ body {
     cursor: pointer;
     transition: 0.2s ease;
 }
-
 .btn-primary {
     border: 0;
     background: #2563eb;
     color: #fff;
 }
-
 .btn-primary:hover {
     background: #1d4ed8;
 }
-
 .btn-primary:disabled {
     opacity: 0.7;
     cursor: not-allowed;
 }
-
 .btn-secondary {
     border: 1px solid #d1d5db;
     background: #fff;
     color: #374151;
 }
-
 .btn-secondary:hover {
     background: #f9fafb;
 }
-
 /* ============================================================
    LOGIN / FOOTER
    ============================================================ */
-
 .login-link {
     margin-top: 25px;
     text-align: center;
     color: #6b7280;
     font-size: 14px;
 }
-
 .login-link a {
     color: #2563eb;
     font-weight: 600;
     text-decoration: none;
 }
-
 .registration-footer {
     margin-top: 20px;
     text-align: center;
     color: #9ca3af;
     font-size: 12px;
 }
-
 /* ============================================================
    MOBILE
    ============================================================ */
-
 @media (max-width: 700px) {
     /* Adjust for renamed wrapper */
     .register-page, .registration-page {
@@ -780,16 +674,13 @@ body {
     .register-page {
         padding: 20px 12px;
     }
-
     .registration-card {
         padding: 22px 18px;
         border-radius: 14px;
     }
-
     .card-header h1 {
         font-size: 22px;
     }
-
     .registration-progress {
         overflow-x: auto;
         justify-content: flex-start;
@@ -798,42 +689,34 @@ body {
         scrollbar-width: none;
         -webkit-overflow-scrolling: touch;
     }
-
     .registration-progress::-webkit-scrollbar {
         display: none;
     }
-
     .registration-progress .progress-line {
         min-width: 14px;
         height: 2px;
         margin-top: 16px;
     }
-
     .registration-progress .progress-step {
         min-width: 46px;
         padding: 0 2px;
         gap: 7px;
     }
-
     .registration-progress .step-number {
         width: 34px;
         height: 34px;
         font-size: 12px;
     }
-
     .registration-progress .step-number i {
         font-size: 12px;
     }
-
     .registration-progress .progress-step span:not(.step-number span) {
         font-size: 10px;
     }
-
     .registration-progress .progress-step > span:first-child {
         width: 34px;
         height: 34px;
     }
-
     .registration-progress .progress-step.completed > span:first-child,
     .registration-progress .progress-step.active > span:first-child,
     .registration-progress
@@ -841,49 +724,39 @@ body {
         > span:first-child {
         font-size: 12px;
     }
-
     .registration-progress .progress-step small {
         font-size: 10px;
     }
-
     .account-type-display {
         align-items: flex-start;
     }
-
     .form-actions {
         flex-direction: column-reverse;
     }
-
     .btn-primary,
     .btn-secondary {
         width: 100%;
     }
 }
-
 .input-wrapper select {
     appearance: auto;
     cursor: pointer;
 }
-
 /* ============================================================
    STEP 4 - PROFESSIONAL DETAILS
    ============================================================ */
-
 .optional {
     margin-left: 6px;
     color: #9ca3af;
     font-size: 11px;
     font-weight: 500;
 }
-
 /* ============================================================
    FILE UPLOAD
    ============================================================ */
-
 .file-upload-box {
     position: relative;
 }
-
 .file-upload-box input[type="file"] {
     position: absolute;
     width: 1px;
@@ -891,7 +764,6 @@ body {
     opacity: 0;
     overflow: hidden;
 }
-
 .file-upload-label {
     min-height: 82px;
     display: flex;
@@ -904,12 +776,10 @@ body {
     cursor: pointer;
     transition: 0.2s ease;
 }
-
 .file-upload-label:hover {
     border-color: #a78bfa;
     background: #eef2ff;
 }
-
 .file-upload-icon {
     width: 46px;
     height: 46px;
@@ -922,18 +792,15 @@ body {
     color: #667eea;
     font-size: 19px;
 }
-
 .file-upload-label > div:nth-child(2) {
     flex: 1;
 }
-
 .file-upload-label strong {
     display: block;
     margin-bottom: 4px;
     color: #374151;
     font-size: 14px;
 }
-
 .file-upload-label span {
     display: block;
     overflow: hidden;
@@ -942,15 +809,12 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
 .upload-arrow {
     color: #94a3b8;
 }
-
 /* ============================================================
    INFORMATION BOX
    ============================================================ */
-
 .registration-info-box {
     display: flex;
     gap: 13px;
@@ -960,37 +824,31 @@ body {
     border-radius: 12px;
     background: #f8fbff;
 }
-
 .registration-info-box > i {
     margin-top: 2px;
     color: #2563eb;
 }
-
 .registration-info-box strong {
     display: block;
     margin-bottom: 4px;
     color: #1e3a8a;
     font-size: 13px;
 }
-
 .registration-info-box p {
     margin: 0;
     color: #64748b;
     font-size: 12px;
     line-height: 1.6;
 }
-
 /* ============================================================
    EMPLOYER SUMMARY
    ============================================================ */
-
 .professional-summary {
     overflow: hidden;
     margin-bottom: 20px;
     border: 1px solid #e5e7eb;
     border-radius: 13px;
 }
-
 .summary-title {
     display: flex;
     align-items: center;
@@ -1000,25 +858,20 @@ body {
     background: #f8fafc;
     color: #374151;
 }
-
 .summary-title i {
     color: #2563eb;
 }
-
 .summary-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
 }
-
 .summary-item {
     padding: 16px;
     border-bottom: 1px solid #f1f5f9;
 }
-
 .summary-item:nth-child(odd) {
     border-right: 1px solid #f1f5f9;
 }
-
 .summary-item span,
 .summary-address span {
     display: block;
@@ -1029,7 +882,6 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
-
 .summary-item strong,
 .summary-address strong {
     display: block;
@@ -1038,38 +890,30 @@ body {
     font-weight: 600;
     word-break: break-word;
 }
-
 .summary-address {
     padding: 16px;
 }
-
 /* ============================================================
    MOBILE
    ============================================================ */
-
 @media (max-width: 600px) {
     .summary-grid {
         grid-template-columns: 1fr;
     }
-
     .summary-item:nth-child(odd) {
         border-right: 0;
     }
-
     .file-upload-label {
         min-height: 72px;
     }
-
     .file-upload-icon {
         width: 40px;
         height: 40px;
     }
 }
-
 /* =========================================================
    REGISTRATION REVIEW
    ========================================================= */
-
 .review-section {
     margin-top: 24px;
     padding: 22px;
@@ -1077,7 +921,6 @@ body {
     border-radius: 14px;
     background: #ffffff;
 }
-
 .review-section-header {
     display: flex;
     align-items: center;
@@ -1085,24 +928,20 @@ body {
     gap: 15px;
     margin-bottom: 20px;
 }
-
 .review-section-header h3 {
     margin: 0;
     font-size: 17px;
     font-weight: 700;
     color: #1f2937;
 }
-
 .review-section-header h3 i {
     margin-right: 8px;
 }
-
 .review-section-header p {
     margin: 5px 0 0;
     font-size: 13px;
     color: #6b7280;
 }
-
 .review-edit {
     display: inline-flex;
     align-items: center;
@@ -1111,20 +950,17 @@ body {
     font-size: 13px;
     font-weight: 600;
 }
-
 .review-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
 }
-
 .review-item {
     padding: 14px 16px;
     border-radius: 10px;
     background: #f8fafc;
     min-width: 0;
 }
-
 .review-item span {
     display: block;
     margin-bottom: 6px;
@@ -1134,18 +970,15 @@ body {
     text-transform: uppercase;
     letter-spacing: 0.03em;
 }
-
 .review-item strong {
     display: block;
     font-size: 14px;
     color: #1f2937;
     word-break: break-word;
 }
-
 .review-full {
     grid-column: 1 / -1;
 }
-
 .review-account-type {
     display: flex;
     align-items: center;
@@ -1154,24 +987,20 @@ body {
     border-radius: 12px;
     background: #f8fafc;
 }
-
 .review-account-type > i {
     font-size: 24px;
 }
-
 .review-account-type strong {
     display: block;
     font-size: 15px;
     color: #1f2937;
 }
-
 .review-account-type span {
     display: block;
     margin-top: 3px;
     font-size: 13px;
     color: #6b7280;
 }
-
 .review-complete {
     display: flex;
     align-items: center;
@@ -1180,30 +1009,25 @@ body {
     border-radius: 10px;
     background: #f8fafc;
 }
-
 .review-complete > i {
     font-size: 22px;
 }
-
 .review-complete strong {
     display: block;
     font-size: 14px;
 }
-
 .review-complete span {
     display: block;
     margin-top: 3px;
     font-size: 13px;
     color: #6b7280;
 }
-
 .review-confirmation {
     margin-top: 24px;
     padding: 20px;
     border-radius: 14px;
     background: #f8fafc;
 }
-
 .confirmation-label {
     display: flex;
     align-items: flex-start;
@@ -1213,7 +1037,6 @@ body {
     line-height: 1.6;
     color: #374151;
 }
-
 .confirmation-label input {
     width: 18px;
     height: 18px;
@@ -1222,12 +1045,10 @@ body {
     cursor: pointer;
     accent-color: #667eea;
 }
-
 .review-error {
     margin-top: 10px;
     font-size: 13px;
 }
-
 .review-actions {
     display: flex;
     justify-content: space-between;
@@ -1235,68 +1056,54 @@ body {
     gap: 12px;
     margin-top: 22px;
 }
-
 .review-actions button:disabled {
     opacity: 0.7;
     cursor: not-allowed;
 }
-
 /* Mobile */
-
 @media (max-width: 768px) {
     .review-section {
         padding: 17px;
     }
-
     .review-section-header {
         align-items: flex-start;
     }
-
     .review-grid {
         grid-template-columns: 1fr;
     }
-
     .review-full {
         grid-column: auto;
     }
-
     .review-actions {
         flex-direction: column-reverse;
         align-items: stretch;
     }
-
     .review-actions a,
     .review-actions button {
         width: 100%;
         justify-content: center;
     }
 }
-
 /* ============================================================
    FINAL SCROLL OVERRIDE
    ============================================================ */
-
 html,
 body {
     overflow-x: hidden !important;
     overflow-y: auto !important;
 }
-
 body {
     position: static !important;
 }
-
 .register-page,
 .register-container,
 .registration-card {
     overflow: visible !important;
     max-height: none !important;
 }
-
 /* ============================================================
    PROFILE EDITING MODAL LOOK — REGISTRATION DETAILS ONLY
    ============================================================ */
-
 .register-page {
     display: flex;
     align-items: flex-start;
@@ -1304,7 +1111,6 @@ body {
     padding: 24px;
     background: rgba(8, 5, 25, 0.78);
 }
-
 .register-page .register-container {
     background: linear-gradient(
         145deg,
@@ -1315,23 +1121,19 @@ body {
     border-radius: 20px;
     box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
 }
-
 .register-page .register-header {
     margin: 0;
     padding: 22px 28px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.18);
     text-align: left;
 }
-
 .register-page .register-logo {
     color: #fff;
     font-size: 22px;
 }
-
 .register-page .registration-progress {
     margin: 24px 28px 28px;
 }
-
 .register-page .registration-progress .progress-step,
 .register-page .registration-progress .progress-step.completed,
 .register-page .registration-progress .progress-step.active,
@@ -1339,14 +1141,12 @@ body {
 .register-page .registration-progress .progress-step.active span:not(.step-number span) {
     color: rgba(255, 255, 255, 0.82);
 }
-
 .register-page .registration-progress .step-number,
 .register-page .registration-progress .progress-step > span:first-child {
     border-color: rgba(255, 255, 255, 0.25);
     background: rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.82);
 }
-
 .register-page .registration-progress .progress-step.completed .step-number,
 .register-page .registration-progress .progress-step.completed > span:first-child {
     border-color: rgba(255, 255, 255, 0.2);
@@ -1354,7 +1154,6 @@ body {
     color: #fff;
     box-shadow: none;
 }
-
 .register-page .registration-progress .progress-step.active .step-number,
 .register-page .registration-progress .progress-step.active > span:first-child {
     border-color: rgba(255, 255, 255, 0.75);
@@ -1362,11 +1161,9 @@ body {
     color: #fff;
     box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
 }
-
 .register-page .registration-progress .progress-step.active .step-number::after {
     border-color: rgba(255, 255, 255, 0.4);
 }
-
 .register-page .registration-progress
     .progress-step:not(.completed):not(.active):hover
     .step-number,
@@ -1377,20 +1174,17 @@ body {
     background: rgba(255, 255, 255, 0.16);
     color: #fff;
 }
-
 .register-page .registration-progress
     .progress-step:not(.completed):not(.active):hover
     span:not(.step-number span) {
     color: #fff;
 }
-
 .register-page .registration-progress .progress-line,
 .register-page .registration-progress .progress-line.active,
 .register-page .registration-progress .progress-line.completed {
     background: rgba(255, 255, 255, 0.3);
     box-shadow: none;
 }
-
 .register-page .registration-card {
     padding: 0 28px 28px;
     border: 0;
@@ -1398,48 +1192,40 @@ body {
     background: transparent;
     box-shadow: none;
 }
-
 .register-page .registration-card > .registration-header {
     padding-top: 24px;
     text-align: center;
 }
-
 .register-page .registration-card > .registration-progress {
     margin-right: 0;
     margin-left: 0;
 }
-
 .register-page .card-header h1,
 .register-page .registration-header h1,
 .register-page .review-section-header h3 {
     color: #fff;
 }
-
 .register-page .card-header p,
 .register-page .registration-header p,
 .register-page .registration-header,
 .register-page .review-section-header p {
     color: rgba(255, 255, 255, 0.7);
 }
-
 .register-page .step-badge,
 .register-page .registration-icon {
     border: 1px solid rgba(255, 255, 255, 0.12);
     background: rgba(255, 255, 255, 0.1);
     color: #e9d5ff;
 }
-
 .register-page .account-type-display,
 .register-page .registration-info-box {
     border-color: rgba(255, 255, 255, 0.18);
     background: rgba(255, 255, 255, 0.1);
 }
-
 .register-page .account-type-display > i {
     background: rgba(255, 255, 255, 0.16);
     color: #fff;
 }
-
 .register-page .account-type-display strong,
 .register-page .account-type-display span,
 .register-page .account-type-display a,
@@ -1447,16 +1233,13 @@ body {
 .register-page .registration-info-box p {
     color: rgba(255, 255, 255, 0.86);
 }
-
 .register-page .registration-info-box > i,
 .register-page .registration-info-box strong {
     color: #e9d5ff;
 }
-
 .register-page .form-group label {
     color: rgba(255, 255, 255, 0.86);
 }
-
 .register-page .input-wrapper input,
 .register-page .input-wrapper select,
 .register-page .input-wrapper textarea {
@@ -1468,7 +1251,6 @@ body {
     font-size: 0.86rem;
     font-weight: 400;
 }
-
 .register-page .input-wrapper input:focus,
 .register-page .input-wrapper select:focus,
 .register-page .input-wrapper textarea:focus {
@@ -1476,17 +1258,14 @@ body {
     background: rgba(255, 255, 255, 0.15);
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.07);
 }
-
 .register-page .input-wrapper input::placeholder,
 .register-page .input-wrapper textarea::placeholder {
     color: rgba(255, 255, 255, 0.4);
 }
-
 .register-page .input-wrapper select option {
     background: #241b45;
     color: #fff;
 }
-
 .register-page .input-wrapper input:disabled,
 .register-page .input-wrapper select:disabled,
 .register-page .input-wrapper textarea:disabled,
@@ -1496,76 +1275,61 @@ body {
     background: rgba(255, 255, 255, 0.07);
     color: rgba(255, 255, 255, 0.68);
 }
-
 .register-page .input-wrapper input:focus::placeholder,
 .register-page .input-wrapper textarea:focus::placeholder {
     color: rgba(255, 255, 255, 0.5);
 }
-
 .register-page .password-toggle {
     color: rgba(255, 255, 255, 0.72);
 }
-
 .register-page .password-toggle:hover,
 .register-page .review-edit,
 .register-page .login-link a {
     color: #e9d5ff;
 }
-
 .register-page .strength-bar {
     background: rgba(255, 255, 255, 0.18);
 }
-
 .register-page #strength-text,
 .register-page .field-help,
 .register-page .registration-footer {
     color: rgba(255, 255, 255, 0.68);
 }
-
 .register-page .field-error,
 .register-page .password-match.invalid {
     color: #fecaca;
 }
-
 .register-page .password-match.valid {
     color: #bbf7d0;
 }
-
 .register-page .btn-primary,
 .register-page .btn-secondary {
     min-height: 44px;
     border-radius: 11px;
 }
-
 .register-page .btn-primary {
     background: #8b5cf6;
     color: #fff;
 }
-
 .register-page .btn-primary:hover {
     background: #7c3aed;
 }
-
 .register-page .btn-secondary {
     border-color: rgba(255, 255, 255, 0.22);
     background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.9);
 }
-
 .register-page .btn-secondary:hover {
     background: rgba(255, 255, 255, 0.16);
 }
-
 .register-page .login-link {
     color: rgba(255, 255, 255, 0.72);
 }
-
 .register-page .registration-alert {
     border-color: rgba(254, 202, 202, 0.35);
     background: rgba(127, 29, 29, 0.28);
     color: #fee2e2;
 }
-
 .register-page .file-upload-label,
 .register-page .registration-info-box,
 .register-page .professional-summary,
@@ -1574,12 +1338,10 @@ body {
     border-color: rgba(255, 255, 255, 0.18);
     background: rgba(255, 255, 255, 0.1);
 }
-
 .register-page .file-upload-label:hover {
     border-color: rgba(255, 255, 255, 0.42);
     background: rgba(255, 255, 255, 0.15);
 }
-
 .register-page .file-upload-icon,
 .register-page .review-item,
 .register-page .review-account-type,
@@ -1588,7 +1350,6 @@ body {
 .register-page .summary-item:nth-child(odd) {
     background: rgba(255, 255, 255, 0.08);
 }
-
 .register-page .file-upload-icon,
 .register-page .upload-arrow,
 .register-page .file-upload-label strong,
@@ -1611,13 +1372,11 @@ body {
 .register-page .summary-address strong {
     color: rgba(255, 255, 255, 0.86);
 }
-
 .register-page .professional-summary,
 .register-page .review-section,
 .register-page .review-confirmation {
     border-radius: 14px;
 }
-
 .register-page .summary-title,
 .register-page .summary-item,
 .register-page .summary-item:nth-child(odd),
@@ -1625,33 +1384,66 @@ body {
 .register-page .review-confirmation {
     border-color: rgba(255, 255, 255, 0.14);
 }
-
 .register-page .review-confirmation {
     background: rgba(255, 255, 255, 0.08);
 }
-
 .register-page .confirmation-label input {
     accent-color: #a78bfa;
 }
-
 .register-page .review-error {
     color: #fecaca;
 }
-
 @media (max-width: 700px) {
     .register-page {
         padding: 12px;
     }
-
     .register-page .register-header {
         padding: 18px 18px;
     }
-
     .register-page .registration-progress {
         margin: 18px 18px 22px;
     }
-
     .register-page .registration-card {
         padding: 0 18px 22px;
+    }
+}/* Registration tabs: make navigation buttons equal in size */
+.registration-page .btn-primary,
+.registration-page .btn-secondary,
+.register-page .btn-primary,
+.register-page .btn-secondary {
+    width: 280px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 12px !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px;
+    white-space: nowrap;
+    line-height: 1.2 !important;
+}
+/* Keep icons aligned with button text */
+.registration-page .btn-primary i,
+.registration-page .btn-secondary i,
+.register-page .btn-primary i,
+.register-page .btn-secondary i {
+    flex-shrink: 0;
+}
+
+/* Keep registration container corners consistent on desktop and mobile */
+.register-page,
+.registration-page {
+    border-radius: 16px;
+    overflow: hidden;
+}
+/* Mobile view */
+@media (max-width: 768px) {
+    .register-page,
+    .registration-page {
+        border-radius: 16px !important;
+        overflow: hidden;
+        margin: 12px;
+        width: calc(100% - 24px);
     }
 }

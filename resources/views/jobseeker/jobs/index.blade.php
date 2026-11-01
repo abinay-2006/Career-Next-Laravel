@@ -69,7 +69,7 @@
                 <div class="form-group">
                     <label style="visibility:hidden">Search</label>
                     <button type="submit" class="btn-search">
-                        <i class="fas fa-magnifying-glass"></i> Search
+                        <i class="fas fa-filter"></i> Filter
                     </button>
                 </div>
 
@@ -184,70 +184,70 @@
         @if ($applications->count() > 0)
         <div class="status-table-wrap">
             <div class="responsive-table-wrapper" role="region" aria-label="Scrollable data table" tabindex="0">
-<table class="status-table">
-                <thead>
-                    <tr>
-                        <th><i class="fas fa-building" style="margin-right:6px;opacity:.7"></i>Company</th>
-                        <th><i class="fas fa-briefcase" style="margin-right:6px;opacity:.7"></i>Job Title</th>
-                        <th><i class="fas fa-circle-dot" style="margin-right:6px;opacity:.7"></i>Status</th>
-                        <th><i class="fas fa-comment-dots" style="margin-right:6px;opacity:.7"></i>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($applications as $application)
-                    <tr>
-                        <td>
-                            <span class="company-name">
-                                {{ $application->job->CompanyName ?? '-' }}
-                            </span>
-                        </td>
+                <table class="status-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-building" style="margin-right:6px;opacity:.7"></i>Company</th>
+                            <th><i class="fas fa-briefcase" style="margin-right:6px;opacity:.7"></i>Job Title</th>
+                            <th><i class="fas fa-circle-dot" style="margin-right:6px;opacity:.7"></i>Status</th>
+                            <th><i class="fas fa-comment-dots" style="margin-right:6px;opacity:.7"></i>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($applications as $application)
+                        <tr>
+                            <td>
+                                <span class="company-name">
+                                    {{ $application->job->CompanyName ?? '-' }}
+                                </span>
+                            </td>
 
-                        <td>
-                            <span class="job-title-cell">
-                                {{ $application->job->JobTitle ?? '-' }}
-                            </span>
-                        </td>
+                            <td>
+                                <span class="job-title-cell">
+                                    {{ $application->job->JobTitle ?? '-' }}
+                                </span>
+                            </td>
 
-                        <td>
-                            @php
-                            $status = strtolower($application->Status);
+                            <td>
+                                @php
+                                $status = strtolower($application->Status);
 
-                            if (str_contains($status, 'accept') || str_contains($status, 'approv') || $status == 'selected') {
-                            $bg = 'rgba(74,222,128,.15)';
-                            $border = 'rgba(74,222,128,.3)';
-                            $color = '#86efac';
-                            $icon = 'fa-circle-check';
-                            } elseif (str_contains($status, 'reject') || str_contains($status, 'declin')) {
-                            $bg = 'rgba(248,113,113,.15)';
-                            $border = 'rgba(248,113,113,.3)';
-                            $color = '#fca5a5';
-                            $icon = 'fa-circle-xmark';
-                            } else {
-                            $bg = 'rgba(251,191,36,.15)';
-                            $border = 'rgba(251,191,36,.3)';
-                            $color = '#fde68a';
-                            $icon = 'fa-clock';
-                            }
-                            @endphp
+                                if (str_contains($status, 'accept') || str_contains($status, 'approv') || $status == 'selected') {
+                                $bg = 'rgba(74,222,128,.15)';
+                                $border = 'rgba(74,222,128,.3)';
+                                $color = '#86efac';
+                                $icon = 'fa-circle-check';
+                                } elseif (str_contains($status, 'reject') || str_contains($status, 'declin')) {
+                                $bg = 'rgba(248,113,113,.15)';
+                                $border = 'rgba(248,113,113,.3)';
+                                $color = '#fca5a5';
+                                $icon = 'fa-circle-xmark';
+                                } else {
+                                $bg = 'rgba(251,191,36,.15)';
+                                $border = 'rgba(251,191,36,.3)';
+                                $color = '#fde68a';
+                                $icon = 'fa-clock';
+                                }
+                                @endphp
 
-                            <span class="status-badge"
-                                style="background:{{ $bg }}; border-color:{{ $border }}; color:{{ $color }}">
-                                <i class="fas {{ $icon }}"></i>
-                                {{ $application->Status }}
-                            </span>
-                        </td>
+                                <span class="status-badge"
+                                    style="background:{{ $bg }}; border-color:{{ $border }}; color:{{ $color }}">
+                                    <i class="fas {{ $icon }}"></i>
+                                    {{ $application->Status }}
+                                </span>
+                            </td>
 
-                        <td>
-                            <span class="desc-cell"
-                                title="{{ $application->Description }}">
-                                {{ $application->Description }}
-                            </span>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-</div>
+                            <td>
+                                <span class="desc-cell"
+                                    title="{{ $application->Description }}">
+                                    {{ $application->Description }}
+                                </span>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
             <div class="table-footer">
                 <i class="fas fa-info-circle"></i> Total {{ $applications->count() }} application{{ $applications->count() !== 1 ? 's' : '' }} found
             </div>

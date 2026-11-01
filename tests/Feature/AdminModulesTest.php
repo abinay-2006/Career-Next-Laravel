@@ -29,6 +29,12 @@ class AdminModulesTest extends TestCase
             $table->string('UserName')->nullable(); $table->string('Email')->nullable(); $table->string('Mobile')->nullable();
             $table->string('City')->nullable(); $table->string('Area_Work')->nullable(); $table->string('ContactPerson')->nullable();
         });
+        Schema::create('account_identifiers', function (Blueprint $table): void {
+            $table->id(); $table->string('identifier_type', 20); $table->string('normalized_value', 255);
+            $table->string('account_type', 20); $table->unsignedBigInteger('account_id');
+            $table->unique(['identifier_type', 'normalized_value']);
+            $table->unique(['account_type', 'account_id', 'identifier_type']);
+        });
         Schema::create('job_master', function (Blueprint $table) {
             $table->increments('JobId'); $table->string('CompanyName'); $table->string('JobTitle');
             $table->integer('Vacancy'); $table->string('MinQualification'); $table->string('Description');
@@ -59,9 +65,14 @@ class AdminModulesTest extends TestCase
         $this->postJson(route('admin.users.suspend', ['type' => 'jobseeker', 'id' => $id]))
             ->assertOk()->assertJsonPath('success', true);
         $this->assertSame('Suspended', DB::table('jobseeker_reg')->where('JobSeekId', $id)->value('Status'));
+        DB::table('account_identifiers')->insert([
+            ['identifier_type' => 'username', 'normalized_value' => 'pending-seeker', 'account_type' => 'jobseeker', 'account_id' => $id],
+            ['identifier_type' => 'email', 'normalized_value' => 'pending@example.test', 'account_type' => 'jobseeker', 'account_id' => $id],
+        ]);
         $this->deleteJson(route('admin.users.delete', ['type' => 'jobseeker', 'id' => $id]))
             ->assertOk()->assertJsonPath('success', true);
         $this->assertDatabaseMissing('jobseeker_reg', ['JobSeekId' => $id]);
+        $this->assertDatabaseMissing('account_identifiers', ['account_type' => 'jobseeker', 'account_id' => $id]);
     }
 
     public function test_admin_job_approval_and_rejection_persist_existing_lowercase_status_values(): void
@@ -71,9 +82,17 @@ class AdminModulesTest extends TestCase
             'MinQualification' => 'Graduate', 'Description' => 'Role', 'Status' => 'Pending',
         ], 'JobId');
 
-        $this->post(route('admin.jobs.approve', $id))->assertRedirect(route('admin.manage.jobs'));
+        $this->postJson(route('admin.jobs.approve', $id))
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('id', $id)
+            ->assertJsonPath('status', 'approved');
         $this->assertSame('approved', DB::table('job_master')->where('JobId', $id)->value('Status'));
-        $this->post(route('admin.jobs.reject', $id))->assertRedirect(route('admin.manage.jobs'));
+        $this->postJson(route('admin.jobs.reject', $id))
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('id', $id)
+            ->assertJsonPath('status', 'rejected');
         $this->assertSame('rejected', DB::table('job_master')->where('JobId', $id)->value('Status'));
     }
 
@@ -84,12 +103,18 @@ class AdminModulesTest extends TestCase
             'MinQualification' => 'Graduate', 'Description' => 'Role', 'Status' => 'Pending',
         ], 'JobId');
 
-        $this->get(route('admin.manage.jobs'))
-            ->assertOk()
-            ->assertSee('Approve Job')
+        $response = $this->get(route('admin.manage.jobs'))->assertOk();
+        $html = $response->getContent();
+
+        $response->assertSee('Approve Job')
             ->assertSee('Reject Job')
-            ->assertSee(json_encode(route('admin.jobs.approve', ['id' => 'JOBIDPLACEHOLDER'])), false)
-            ->assertSee(json_encode(route('admin.jobs.reject', ['id' => 'JOBIDPLACEHOLDER'])), false);
+            ->assertSee(route('admin.jobs.approve', ['id' => $id]), false)
+            ->assertSee(route('admin.jobs.reject', ['id' => $id]), false)
+            ->assertSee('id="modalOverlay"', false)
+            ->assertDontSee('id="actionModalOverlay"', false);
+        $this->assertSame(1, substr_count($html, 'class="modal-overlay"'));
+        $this->assertSame(1, substr_count($html, 'id="approveRejectForm"'));
+        $this->assertSame(1, substr_count($html, 'bootstrap.bundle.min.js'));
     }
 
     public function test_admin_job_status_filter_matches_status_case_insensitively(): void

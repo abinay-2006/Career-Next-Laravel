@@ -698,9 +698,8 @@
     }
 
     // Close modal on overlay click
-    document.addEventListener('click', function(e) {
-        const modal = document.getElementById('editModal');
-        if (modal && e.target === modal) closeModal();
+    document.getElementById('editModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
     });
 
     /* ── Edit school modal ── */
@@ -752,9 +751,8 @@
     }
 
     // Close school modal on overlay click
-    document.addEventListener('click', function(e) {
-        const modal = document.getElementById('editSchoolModal');
-        if (modal && e.target === modal) closeSchoolModal();
+    document.getElementById('editSchoolModal').addEventListener('click', function(e) {
+        if (e.target === this) closeSchoolModal();
     });
 
     // Close modal on Escape key

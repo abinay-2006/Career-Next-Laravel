@@ -44,11 +44,13 @@ Route::post('/logout', [LoginController::class, 'logout'])
 
 
 Route::get('/forgot', [PasswordResetController::class, 'show'])->name('forgot');
-Route::post('/forgot', [PasswordResetController::class, 'sendOtp'])->middleware('throttle:3,1')->name('forgot.send');
+Route::post('/forgot', [PasswordResetController::class, 'sendOtp'])
+	->middleware('throttle:password-recovery-send')
+	->name('forgot.send');
 Route::get('/forgot/verify', [PasswordResetController::class, 'showOtp'])->name('forgot.verify');
-Route::post('/forgot/verify', [PasswordResetController::class, 'verifyOtp'])->middleware('throttle:6,1')->name('forgot.verify.submit');
+Route::post('/forgot/verify', [PasswordResetController::class, 'verifyOtp'])->middleware('throttle:password-recovery-verify')->name('forgot.verify.submit');
 Route::get('/forgot/{token}', [PasswordResetController::class, 'showReset'])->name('forgot.token');
-Route::post('/forgot/{token}', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:6,1')->name('forgot.reset');
+Route::post('/forgot/{token}', [PasswordResetController::class, 'resetPassword'])->middleware('throttle:6,1,forgot-reset')->name('forgot.reset');
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/news/{news}', [NewsController::class, 'show'])->name('news.show');
 
@@ -113,7 +115,7 @@ Route::prefix('register')
 
 Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
 
-    Route::get('/', [AdminController::class, 'index'])
+    Route::get('/', [AdminController::class, 'dashboard'])
         ->name('index');
 
     Route::get('/dashboard', [AdminController::class, 'dashboard'])

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use App\Services\ActivityLogger;
 
 class ManageJobsController extends Controller
@@ -18,18 +19,33 @@ class ManageJobsController extends Controller
         $filterStatus = $filters['status'] ?? 'all';
         $search = trim($filters['search'] ?? '');
 
-        $jobs = DB::table('job_master')
+        $jobsQuery = DB::table('job_master');
+
+        // EmployerId was added after the original job table. Keep the admin
+        // review page compatible with older installations while showing the
+        // employer registration details whenever that relationship exists.
+        if (Schema::hasColumn('job_master', 'EmployerId') && Schema::hasTable('employer_reg')) {
+            $jobsQuery->leftJoin('employer_reg', 'job_master.EmployerId', '=', 'employer_reg.EmployerId')
+                ->select('job_master.*',
+                    'employer_reg.ContactPerson as EmployerContactPerson',
+                    'employer_reg.Email as EmployerEmail',
+                    'employer_reg.Mobile as EmployerMobile',
+                    'employer_reg.Address as EmployerAddress',
+                    'employer_reg.City as EmployerCity');
+        }
+
+        $jobs = $jobsQuery
             ->when($filterStatus !== 'all', function ($query) use ($filterStatus) {
-                $query->whereRaw('LOWER(Status) = ?', [$filterStatus]);
+                $query->whereRaw('LOWER(job_master.Status) = ?', [$filterStatus]);
             })
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('CompanyName', 'like', "%{$search}%")
-                        ->orWhere('JobTitle', 'like', "%{$search}%")
-                        ->orWhere('JobId', 'like', "%{$search}%");
+                    $q->where('job_master.CompanyName', 'like', "%{$search}%")
+                        ->orWhere('job_master.JobTitle', 'like', "%{$search}%")
+                        ->orWhere('job_master.JobId', 'like', "%{$search}%");
                 });
             })
-            ->orderByDesc('JobId')
+            ->orderByDesc('job_master.JobId')
             ->get();
 
         $counts = [
