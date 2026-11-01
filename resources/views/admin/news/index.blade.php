@@ -207,12 +207,12 @@
                     @empty
                     <tr>
                         <td colspan="3">
-                            <div class="cn-news-empty">
+                            <div class="cn-news-empty" >
                                 <div class="cn-news-empty-icon">
                                     <i class="bi bi-newspaper"></i>
                                 </div>
-                                <h3>No news updates yet</h3>
-                                <p>Your news announcements will appear here after you add them.</p>
+                                <h3 style="color: white;">No news updates yet</h3>
+                                <p style="color: white;">Your news announcements will appear here after you add them.</p>
                             </div>
                         </td>
                     </tr>
