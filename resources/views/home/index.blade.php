@@ -83,22 +83,22 @@
 
                         <div class="feature-grid">
                             <div class="feature-card">
-                                <i class="fas fa-user-graduate"></i>
+                                <i class="fas fa-user-graduate career-feature-icon"></i>
                                 <h3>For Job Seekers</h3>
                                 <p>Create your profile, upload your resume, and apply to thousands of jobs that match your skills.</p>
                             </div>
                             <div class="feature-card">
-                                <i class="fas fa-building"></i>
+                                <i class="fas fa-building career-feature-icon"></i>
                                 <h3>For Employers</h3>
                                 <p>Post jobs, manage applications, and find the perfect candidates for your organization.</p>
                             </div>
                             <div class="feature-card">
-                                <i class="fas fa-chart-line"></i>
+                                <i class="fas fa-chart-line career-feature-icon"></i>
                                 <h3>Career Growth</h3>
                                 <p>Access resources, tips, and tools to advance your career and professional development.</p>
                             </div>
                             <div class="feature-card">
-                                <i class="fas fa-handshake"></i>
+                                <i class="fas fa-handshake career-feature-icon"></i>
                                 <h3>Direct Connect</h3>
                                 <p>Connect directly with hiring managers and get personalized job recommendations.</p>
                             </div>

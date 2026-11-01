@@ -412,3 +412,12 @@ html[data-color] .cn-dashboard-main :is(.page-header-text h1,.glass-card h2,.gla
 html[data-color] .cn-dashboard-main :is(.page-header-text p,.glass-card p,.glass-card .form-text,.form-label,.cn-analytics-stat-copy > span,.cn-analytics-stat-copy small,.cn-analytics-panel-heading p,.cn-chart-empty) { color:var(--theme-text-secondary) !important; }
 html[data-color] .cn-dashboard-main :is(.form-control,.form-select):focus { background:var(--theme-input-background); color:var(--theme-input-text); border-color:var(--theme-primary); box-shadow:0 0 0 .2rem color-mix(in srgb,var(--theme-primary) 20%,transparent); }
 html[data-color] .cn-dashboard-main .pagination .page-link:hover { background:var(--theme-hover); color:var(--theme-link); }
+
+/* These four homepage feature icons inherited transparent text fill from their
+   gradient treatment, which loses contrast on the dark card surface. Keep the
+   original gradient in light mode and use the selected theme accent in dark. */
+html[data-appearance="dark"] .feature-card .career-feature-icon {
+    background-image: none;
+    -webkit-text-fill-color: var(--theme-accent, #a5b4fc);
+    color: var(--theme-accent, #a5b4fc);
+}
