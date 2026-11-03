@@ -50,7 +50,9 @@
             <form method="POST"
                 action="{{ route('admin.news.store') }}"
                 data-ajax
-                data-ajax-refresh-target=".cn-admin-content">
+                data-ajax-refresh-target=".cn-admin-content"
+                enctype="multipart/form-data">
+                @csrf
 
                 @csrf
 
@@ -125,8 +127,8 @@
                 </div>
 
                 <div >
-                    <h2 style="color: aliceblue;">News Updates</h2>
-                    <p style="color: aliceblue">Review and manage existing announcements.</p>
+                    <h2>News Updates</h2>
+                    <p>Review and manage existing announcements.</p>
                 </div>
             </div>
 
@@ -144,7 +146,12 @@
         </div>
 
         <div class="table-responsive cn-news-table-wrapper">
-            <table class="table cn-news-table align-middle mb-0">
+            <table class="table cn-news-table table-layout-fixed align-middle mb-0">
+                <colgroup>
+                    <col style="width: 22%;">
+                    <col style="width: 48%;">
+                    <col style="width: 30%;">
+                </colgroup>
                 <thead>
                     <tr>
                         <th scope="col">DATE</th>
@@ -211,8 +218,8 @@
                                 <div class="cn-news-empty-icon">
                                     <i class="bi bi-newspaper"></i>
                                 </div>
-                                <h3 style="color: white;">No news updates yet</h3>
-                                <p style="color: white;">Your news announcements will appear here after you add them.</p>
+                                <h3>No news updates yet</h3>
+                                <p>Your news announcements will appear here after you add them.</p>
                             </div>
                         </td>
                     </tr>

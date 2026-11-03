@@ -12,10 +12,13 @@ class ManageDocumentsController extends Controller
 {
     public function index(Request $request)
     {
+        // Every filter link on this page carries an empty search box, and
+        // ConvertEmptyStringsToNull turns that into null, which would fail the
+        // string rule and bounce the request back to the previous URL.
         $filters = $request->validate([
-            'status' => ['sometimes', 'in:all,pending,approved,rejected'],
-            'search' => ['sometimes', 'string', 'max:100'],
-            'per_page' => ['sometimes', 'in:10,25,50,100'],
+            'status' => ['sometimes', 'nullable', 'in:all,pending,approved,rejected'],
+            'search' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'per_page' => ['sometimes', 'nullable', 'in:10,25,50,100'],
         ]);
         $filterStatus = $filters['status'] ?? 'all';
         $search = trim($filters['search'] ?? '');

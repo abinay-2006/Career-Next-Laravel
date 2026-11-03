@@ -18,6 +18,7 @@
     @vite('resources/js/app.js')
     <link rel="stylesheet" href="{{ asset('assets/css/theme.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/theme-dark-mode.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="{{ asset('assets/js/theme-manager.js') }}"></script>
 </head>
@@ -35,8 +36,8 @@
     <div class="cn-admin-shell">
         <aside class="cn-admin-sidebar" aria-label="Admin navigation">
             <a href="{{ route('admin.dashboard') }}" class="brand-logo cn-admin-brand">
-                <img src="{{ asset('images/CareerNext.png') }}" alt="">
-                <span>Career Next</span>
+                <img class="cn-logo-image cn-logo-image--sidebar" src="{{ asset('assets/images/career_next.png') }}" alt="">
+                <span style="color: #ffff;">Career Next</span>
             </a>
             <div class="cn-admin-workspace-label">Admin workspace</div>
             @include('components.admin-navigation-links')
@@ -44,6 +45,8 @@
 
         <div class="cn-admin-main-column">
             <header class="cn-admin-header">
+                <button class="cn-admin-menu-toggle" type="button" aria-label="Open Admin navigation" aria-controls="adminMobileDrawer" aria-expanded="false" data-role-drawer-toggle><i class="fas fa-bars" aria-hidden="true"></i></button>
+                <a href="{{ route('admin.dashboard') }}" class="brand-logo cn-admin-brand cn-admin-mobile-brand"><img class="cn-logo-image cn-logo-image--mobile" src="{{ asset('assets/images/career_next.png') }}" alt=""><span>Career Next</span></a>
                 <div class="cn-admin-theme-controls">
                     <button class="theme-toggle" type="button" aria-label="Choose color theme">
                         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -88,11 +91,11 @@
         </div>
     </div>
 
-    <button class="cn-admin-backdrop" type="button" aria-label="Close Admin navigation" tabindex="-1" data-admin-drawer-close></button>
+    <button class="cn-admin-backdrop" type="button" aria-label="Close Admin navigation" tabindex="-1" data-admin-drawer-close data-role-drawer-close></button>
     <aside class="cn-admin-drawer" id="adminMobileDrawer" role="dialog" aria-modal="true" aria-labelledby="adminMobileDrawerTitle" aria-hidden="true" inert>
         <div class="cn-admin-drawer-header">
             <a href="{{ route('admin.dashboard') }}" class="brand-logo cn-admin-brand cn-admin-drawer-brand">
-                <img src="{{ asset('images/CareerNext.png') }}" alt="">
+                <img class="cn-logo-image cn-logo-image--sidebar" src="{{ asset('assets/images/career_next.png') }}" alt="">
                 <span id="adminMobileDrawerTitle">Career Next</span>
             </a>
             <button type="button" class="cn-admin-theme-toggle theme-toggle" aria-label="Choose color theme">
@@ -111,7 +114,7 @@
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                 </svg>
             </button>
-            <button class="cn-admin-drawer-close" type="button" aria-label="Close Admin navigation" data-admin-drawer-close>
+            <button class="cn-admin-drawer-close" type="button" aria-label="Close Admin navigation" data-admin-drawer-close data-role-drawer-close>
                 <i class="fas fa-xmark" aria-hidden="true"></i>
             </button>
         </div>

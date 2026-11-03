@@ -13,7 +13,7 @@
         <div class="welcome-text">
             <h1>Welcome back, {{ session('Name') }}! 👋</h1>
             <p>You're signed in to the Career Next portal.</p>
-            <div class="role-badge">
+            <div class="role-badge" style="background-color: #f0f0f0; color: #333;">
                 <i class="fas fa-user-circle"></i>
                 {{ session('UserType') }} Account
             </div>

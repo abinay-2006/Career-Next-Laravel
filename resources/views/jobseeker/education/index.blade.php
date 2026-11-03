@@ -43,7 +43,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-university"></i> University / Board <span style="color:#fca5a5">*</span></label>
+                    <label><i class="fas fa-university"></i> University / Board <span style="color:var(--theme-error)">*</span></label>
                     <select name="txtBoard" id="modal_txtBoard">
                         @foreach($boards as $board)
                         <option value="{{ $board }}">{{ $board }}</option>
@@ -63,7 +63,7 @@
                 </div>
 
                 <div class="form-group full">
-                    <label><i class="fas fa-percent"></i> Percentage (%) <span style="color:#fca5a5">*</span></label>
+                    <label><i class="fas fa-percent"></i> Percentage (%) <span style="color:var(--theme-error)">*</span></label>
                     <input type="text" name="txtPer" id="modal_txtPer" placeholder="e.g. 78.50" required>
                 </div>
 
@@ -96,7 +96,7 @@
             <div class="form-grid">
 
                 <div class="form-group">
-                    <label><i class="fas fa-school"></i> School Name <span style="color:#fca5a5">*</span></label>
+                    <label><i class="fas fa-school"></i> School Name <span style="color:var(--theme-error)">*</span></label>
                     <input type="text" name="txtSchoolName" id="modal_txtSchoolName" required>
                 </div>
 
@@ -117,7 +117,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-university"></i> Board Name <span style="color:#fca5a5">*</span></label>
+                    <label><i class="fas fa-university"></i> Board Name <span style="color:var(--theme-error)">*</span></label>
                     <input type="text" name="txtSchoolBoard" id="modal_txtSchoolBoard" required>
                 </div>
 
@@ -133,7 +133,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-percent"></i> Percentage (%) <span style="color:#fca5a5">*</span></label>
+                    <label><i class="fas fa-percent"></i> Percentage (%) <span style="color:var(--theme-error)">*</span></label>
                     <input type="text" name="txtSchoolPer" id="modal_txtSchoolPer" required>
                 </div>
 
@@ -349,7 +349,7 @@
             <div class="form-grid">
 
                 <div class="form-group">
-                    <label><i class="fas fa-file-alt"></i> Document Type <span style="color:#fca5a5">*</span></label>
+                    <label><i class="fas fa-file-alt"></i> Document Type <span style="color:var(--theme-error)">*</span></label>
                     <select name="cmbDocumentType" id="cmbDocumentType" required>
                         <option value="">Select Document Type</option>
                         <option value="resume">Resume</option>
@@ -361,14 +361,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-file-upload"></i> Choose File <span style="color:#fca5a5">*</span></label>
+                    <label><i class="fas fa-file-upload"></i> Choose File <span style="color:var(--theme-error)">*</span></label>
                     <input type="file" name="fileDocument" id="fileDocument" accept=".pdf,.jpg,.jpeg,.png" onchange="previewDocument(this)" required>
-                    <small style="color:rgba(255,255,255,.6);font-size:.75rem;margin-top:4px;">PDF, JPG, PNG only (Max 5MB)</small>
+                    <small style="color:var(--theme-text-secondary);font-size:.75rem;margin-top:4px;">PDF, JPG, PNG only (Max 5MB)</small>
                 </div>
 
                 <div class="form-group full">
                     <label><i class="fas fa-eye"></i> File Preview</label>
-                    <div id="documentPreview" style="background:rgba(255,255,255,.08);border:1px dashed rgba(255,255,255,.2);border-radius:8px;min-height:100px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font-size:.9rem;">
+                    <div id="documentPreview" style="background:var(--theme-surface-secondary);border:1px dashed var(--theme-border);border-radius:8px;min-height:100px;display:flex;align-items:center;justify-content:center;color:var(--theme-text-secondary);font-size:.9rem;">
                         No file selected
                     </div>
                 </div>
@@ -429,7 +429,7 @@
                                 <button class="btn-edit" onclick="confirmDelete(
 '{{ route('jobseeker.education.destroy',$row->EduId) }}',
 '{{ $row->Degree }}'
-)" style="background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.3);color:#fca5a5;">
+)" style="background:color-mix(in srgb,var(--theme-error) 14%,var(--theme-card-background));border-color:color-mix(in srgb,var(--theme-error) 32%,var(--theme-border));color:var(--theme-error);">
                                     <i class="fas fa-trash-alt"></i> Delete
                                 </button>
                             </div>
@@ -504,7 +504,7 @@
                                 <button class="btn-edit" onclick="confirmDelete(
 '{{ route('jobseeker.school.destroy',$s_row->id) }}',
 '{{ $s_row->SchoolName }}'
-)" style="background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.3);color:#fca5a5;">
+)" style="background:color-mix(in srgb,var(--theme-error) 14%,var(--theme-card-background));border-color:color-mix(in srgb,var(--theme-error) 32%,var(--theme-border));color:var(--theme-error);">
                                     <i class="fas fa-trash-alt"></i> Delete
                                 </button>
                             </div>
@@ -554,7 +554,7 @@
                                 <a href="{{ route('jobseeker.documents.view', $doc_row->DocId) }}"
                                     target="_blank"
                                     class="btn-edit"
-                                    style="background:rgba(74,222,128,.2);border-color:rgba(74,222,128,.3);color:#86efac;">
+                                    style="background:color-mix(in srgb,var(--theme-success) 14%,var(--theme-card-background));border-color:color-mix(in srgb,var(--theme-success) 32%,var(--theme-border));color:var(--theme-success);">
                                     <i class="fas fa-eye"></i> View
                                 </a>
                                 <button class="btn-edit"
@@ -562,7 +562,7 @@
 '{{ route('jobseeker.documents.destroy',$doc_row->DocId) }}',
 '{{ addslashes($doc_row->OriginalFileName) }}'
 )"
-                                    style="background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.3);color:#fca5a5;">
+                                    style="background:color-mix(in srgb,var(--theme-error) 14%,var(--theme-card-background));border-color:color-mix(in srgb,var(--theme-error) 32%,var(--theme-border));color:var(--theme-error);">
                                     <i class="fas fa-trash-alt"></i> Delete
                                 </button>
                             </div>
@@ -776,14 +776,14 @@
 
         if (file) {
             if (!allowedTypes.includes(file.type)) {
-                previewDiv.innerHTML = '<i class="fas fa-times-circle" style="color:#fca5a5;margin-right:8px;"></i> Invalid file type. Only PDF, JPG, PNG allowed.';
-                previewDiv.style.color = '#fca5a5';
+                previewDiv.innerHTML = '<i class="fas fa-times-circle" style="color:var(--theme-error);margin-right:8px;"></i> Invalid file type. Only PDF, JPG, PNG allowed.';
+                previewDiv.style.color = 'var(--theme-error)';
                 input.value = ''; // Clear the file input
                 return;
             }
             if (file.size > maxSize) {
-                previewDiv.innerHTML = '<i class="fas fa-times-circle" style="color:#fca5a5;margin-right:8px;"></i> File size exceeds 5MB limit.';
-                previewDiv.style.color = '#fca5a5';
+                previewDiv.innerHTML = '<i class="fas fa-times-circle" style="color:var(--theme-error);margin-right:8px;"></i> File size exceeds 5MB limit.';
+                previewDiv.style.color = 'var(--theme-error)';
                 input.value = ''; // Clear the file input
                 return;
             }
@@ -797,11 +797,11 @@
                 };
                 reader.readAsDataURL(file);
             } else if (file.type === 'application/pdf') {
-                previewDiv.innerHTML = `<i class="fas fa-file-pdf" style="font-size:3rem;color:#fca5a5;"></i><br>${file.name}`;
+                previewDiv.innerHTML = `<i class="fas fa-file-pdf" style="font-size:3rem;color:var(--theme-error);"></i><br>${file.name}`;
                 previewDiv.style.color = 'rgba(255,255,255,.8)';
                 previewDiv.style.fontSize = '.8rem';
             } else {
-                previewDiv.innerHTML = `<i class="fas fa-file" style="font-size:3rem;color:rgba(255,255,255,.5);"></i><br>${file.name}`;
+                previewDiv.innerHTML = `<i class="fas fa-file" style="font-size:3rem;color:var(--theme-text-secondary);"></i><br>${file.name}`;
                 previewDiv.style.color = 'rgba(255,255,255,.8)';
                 previewDiv.style.fontSize = '.8rem';
             }

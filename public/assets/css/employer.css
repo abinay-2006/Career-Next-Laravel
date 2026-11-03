@@ -1705,12 +1705,12 @@ table.jobs-table tbody tr:last-child td {
 }
 
 .btn-view-resume {
-    background: #2563eb;
-    color: #fff;
+    background: var(--theme-primary, #667eea);
+    color: var(--theme-primary-contrast, #fff);
 }
 
 .btn-view-resume:hover {
-    background: #1d4ed8;
+    background: var(--theme-primary-hover, #5143a5);
 }
 
 .btn-download-resume {
@@ -4945,9 +4945,9 @@ body::after {
 
     padding: 0 22px;
 
-    background: #fff;
+    background: var(--theme-primary, #667eea);
 
-    color: #5b5fc7;
+    color: var(--theme-primary-contrast, #fff);
 
     border: none;
 
@@ -4965,11 +4965,13 @@ body::after {
 }
 
 .btn-submit:hover {
-    background: #f5f5f5;
+    background: var(--theme-primary-hover, #5143a5);
+
+    color: var(--theme-primary-hover-contrast, #fff);
 
     transform: translateY(-2px);
 
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 12px 30px color-mix(in srgb, var(--theme-primary, #667eea) 30%, transparent);
 }
 
 /* ==========================================================
@@ -5284,4 +5286,290 @@ body::after {
     text-align: left;
     font: inherit;
     cursor: pointer;
+}
+
+/* =========================================================
+   PROFILE COMPLETION CARD (Employer dashboard)
+
+   Mirrors the jobseeker dashboard card. The rules are token
+   driven, so they theme on their own; they are repeated here
+   only because the employer layout never loads jobseeker.css.
+   ========================================================= */
+
+.profile-completion-card {
+    display: block;
+    margin: 24px 0 30px;
+    padding: 22px 24px;
+    border: 1px solid var(--theme-border);
+    border-radius: 16px;
+    background: var(--theme-card-background);
+    box-shadow: var(--theme-shadow);
+}
+
+/* Header */
+
+.profile-completion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.profile-completion-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.profile-completion-icon {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid var(--theme-border);
+    border-radius: 12px;
+    background: var(--theme-surface-secondary);
+    color: var(--theme-primary-dark);
+    font-size: 18px;
+}
+
+.profile-completion-title h2 {
+    margin: 0 0 4px;
+    color: var(--theme-heading);
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.profile-completion-title p {
+    margin: 0;
+    color: var(--theme-text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.profile-completion-percentage {
+    flex-shrink: 0;
+    color: var(--theme-primary-dark);
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* Progress bar */
+
+.profile-progress {
+    width: 100%;
+    height: 9px;
+    margin-top: 18px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--theme-surface-secondary);
+}
+
+.profile-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--theme-primary-dark);
+    transition: width 0.5s ease;
+}
+
+/* Status */
+
+.profile-completion-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    margin-top: 10px;
+    color: var(--theme-text-secondary);
+    font-size: 12px;
+}
+
+.profile-completion-status strong {
+    color: var(--theme-text-primary);
+    font-weight: 700;
+}
+
+.completion-complete,
+.completion-incomplete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border: 1px solid var(--theme-border);
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.completion-complete {
+    border-color: color-mix(in srgb, var(--theme-success) 35%, var(--theme-border));
+    background: color-mix(in srgb, var(--theme-success) 14%, var(--theme-card-background));
+    color: color-mix(in srgb, var(--theme-success) 75%, var(--theme-text-primary));
+}
+
+.completion-incomplete {
+    border-color: color-mix(in srgb, var(--theme-warning) 35%, var(--theme-border));
+    background: color-mix(in srgb, var(--theme-warning) 14%, var(--theme-card-background));
+    color: color-mix(in srgb, var(--theme-warning) 75%, var(--theme-text-primary));
+}
+
+/* Missing items */
+
+.missing-profile-section {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--theme-divider);
+}
+
+.missing-profile-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    color: var(--theme-text-primary);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.missing-profile-title i {
+    color: var(--theme-primary-dark);
+    font-size: 12px;
+}
+
+.missing-profile-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.complete-profile-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--theme-border);
+    border-radius: 9px;
+    color: var(--theme-link);
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.complete-profile-btn span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.complete-profile-btn i {
+    flex-shrink: 0;
+    font-size: 11px;
+}
+
+.profile-completion-card .complete-profile-btn:hover {
+    border-color: var(--theme-primary);
+    background: var(--theme-hover);
+    color: var(--theme-primary-dark);
+}
+
+.profile-completion-card .missing-profile-section > .complete-profile-btn {
+    justify-content: center;
+    padding: 0 16px;
+    border-color: var(--theme-primary);
+    background: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+    font-size: 13px;
+}
+
+.profile-completion-card .missing-profile-section > .complete-profile-btn:hover {
+    border-color: var(--theme-primary-hover);
+    background: var(--theme-primary-hover);
+    color: var(--theme-primary-hover-contrast);
+}
+
+/* Complete message */
+
+.profile-complete-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    padding: 14px 16px;
+    border: 1px solid color-mix(in srgb, var(--theme-success) 35%, var(--theme-border));
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--theme-success) 12%, var(--theme-card-background));
+}
+
+.profile-complete-message > i {
+    flex-shrink: 0;
+    color: color-mix(in srgb, var(--theme-success) 65%, var(--theme-text-primary));
+    font-size: 20px;
+}
+
+.profile-complete-message strong {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--theme-text-primary);
+    font-size: 13px;
+}
+
+.profile-complete-message span {
+    display: block;
+    color: var(--theme-text-secondary);
+    font-size: 12px;
+}
+
+/* Responsive */
+
+@media (max-width: 767px) {
+    .profile-completion-card {
+        padding: 18px;
+        border-radius: 14px;
+    }
+
+    .profile-completion-percentage {
+        font-size: 21px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-completion-header {
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .profile-completion-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .profile-completion-title {
+        gap: 10px;
+    }
+
+    .profile-completion-title h2 {
+        font-size: 15px;
+    }
+
+    .profile-completion-title p {
+        font-size: 12px;
+    }
+
+    .missing-profile-list {
+        gap: 6px;
+    }
+
+    .complete-profile-btn {
+        flex: 1 1 100%;
+        justify-content: space-between;
+    }
 }

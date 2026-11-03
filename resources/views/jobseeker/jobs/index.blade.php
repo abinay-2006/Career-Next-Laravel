@@ -17,8 +17,25 @@
     </div>
 
     <!-- ── Search Form ── -->
+    <!-- Saved Jobs Shortcut -->
+    <div class="saved-jobs-shortcut glass-card">
+        <div class="saved-jobs-shortcut-info">
+            <div class="saved-jobs-shortcut-icon">
+                <i class="fas fa-bookmark"></i>
+            </div>
+            <div>
+                <h3>Your Saved Jobs</h3>
+                <p>View the jobs you've bookmarked and revisit them anytime.</p>
+            </div>
+        </div>
+
+        <a href="{{ route('jobseeker.saved-jobs.index') }}" class="btn-view-saved">
+            View Saved Jobs
+            <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
     <div class="section-title"><i class="fas fa-sliders"></i> Filter Jobs</div>
-    <div class="glass-card">
+    <div class="glass-card filter-card  ">
         <form method="GET"
             action="{{ route('jobseeker.jobs') }}" data-ajax-html>
             <div class="search-grid">
@@ -79,7 +96,7 @@
 
     <!-- ── Search Results ── -->
 
-    <span style="font-size:.8rem;font-weight:400;color:rgba(255,255,255,.55);margin-left:4px">
+    <span style="font-size:.8rem;font-weight:400;color:var(--theme-text-secondary);margin-left:4px">
         {{ $jobs->count() }} job{{ $jobs->count() !== 1 ? 's' : '' }} found
     </span>
 
@@ -129,6 +146,11 @@
             $alreadyApplied = $applications->contains('JobId', $job->JobId);
             @endphp
 
+            @php
+            $isSaved = collect($savedJobIds ?? [])
+            ->contains(fn($id) => (int) $id === (int) $job->JobId);
+            @endphp
+
             <div class="job-card-actions">
 
                 <a href="{{ route('jobseeker.jobs.show', $job->JobId) }}"
@@ -137,18 +159,49 @@
                     View Details
                 </a>
 
+                {{-- Save / Remove Saved Job --}}
+                @if($isSaved)
+
+                <form action="{{ route('jobseeker.saved-jobs.destroy', $job->JobId) }}"
+                    method="POST"
+                    data-ajax>
+                    @csrf
+
+                    <button type="submit" class="btn-save-job saved">
+                        <i class="fas fa-bookmark"></i>
+                        Saved
+                    </button>
+                </form>
+
+                @else
+
+                <form action="{{ route('jobseeker.saved-jobs.store', $job->JobId) }}"
+                    method="POST"
+                    data-ajax>
+                    @csrf
+
+                    <button type="submit" class="btn-save-job">
+                        <i class="far fa-bookmark"></i>
+                        Save Job
+                    </button>
+                </form>
+
+                @endif
+
+                {{-- Existing Apply Functionality --}}
                 @if($alreadyApplied)
 
-                <button class="btn-apply" disabled
-                    style="background:#6c757d;cursor:not-allowed;">
-                    <i class="fas fa-check"></i>
+                <button class="btn-apply" disabled aria-disabled="true">
+                    <i class="fas fa-check" aria-hidden="true"></i>
                     Applied
                 </button>
 
                 @else
 
                 <form action="{{ route('jobseeker.jobs.apply', $job->JobId) }}"
-                    method="POST" data-ajax data-ajax-mark-applied="Applied">
+                    method="POST"
+                    data-ajax
+                    data-ajax-mark-applied="Applied">
                     @csrf
 
                     <button type="submit" class="btn-apply">
@@ -213,25 +266,18 @@
                                 $status = strtolower($application->Status);
 
                                 if (str_contains($status, 'accept') || str_contains($status, 'approv') || $status == 'selected') {
-                                $bg = 'rgba(74,222,128,.15)';
-                                $border = 'rgba(74,222,128,.3)';
-                                $color = '#86efac';
+                                $tone = 'accepted';
                                 $icon = 'fa-circle-check';
                                 } elseif (str_contains($status, 'reject') || str_contains($status, 'declin')) {
-                                $bg = 'rgba(248,113,113,.15)';
-                                $border = 'rgba(248,113,113,.3)';
-                                $color = '#fca5a5';
+                                $tone = 'rejected';
                                 $icon = 'fa-circle-xmark';
                                 } else {
-                                $bg = 'rgba(251,191,36,.15)';
-                                $border = 'rgba(251,191,36,.3)';
-                                $color = '#fde68a';
+                                $tone = 'pending';
                                 $icon = 'fa-clock';
                                 }
                                 @endphp
 
-                                <span class="status-badge"
-                                    style="background:{{ $bg }}; border-color:{{ $border }}; color:{{ $color }}">
+                                <span class="status-badge {{ $tone }}">
                                     <i class="fas {{ $icon }}"></i>
                                     {{ $application->Status }}
                                 </span>

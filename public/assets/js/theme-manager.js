@@ -88,7 +88,7 @@
     const menu = document.createElement('div');
     menu.className = 'theme-palette';
     menu.setAttribute('aria-label', 'Theme customization');
-    menu.innerHTML = '<div class="theme-palette-heading">Color theme</div>' + COLORS.map(item => `<button class="theme-option" type="button" role="radio" aria-checked="false" data-color-option="${item.id}" style="--theme-swatch:${item.color}"><span class="theme-option-swatch" aria-hidden="true"></span><span>${item.name}</span><span class="theme-option-check" aria-hidden="true"></span></button>`).join('') + '<div class="theme-palette-heading">Appearance</div><div class="theme-mode-options" role="radiogroup" aria-label="Appearance">' + '<button class="theme-mode-option" type="button" role="radio" aria-checked="false" data-appearance-option="light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>Light</button><button class="theme-mode-option" type="button" role="radio" aria-checked="false" data-appearance-option="dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg>Dark</button></div>';
+    menu.innerHTML = '<button class="theme-palette-close" type="button" aria-label="Close theme selector">\u00d7</button><div class="theme-palette-heading">Color theme</div>' + COLORS.map(item => `<button class="theme-option" type="button" role="radio" aria-checked="false" data-color-option="${item.id}" style="--theme-swatch:${item.color}"><span class="theme-option-swatch" aria-hidden="true"></span><span>${item.name}</span><span class="theme-option-check" aria-hidden="true"></span></button>`).join('') + '<div class="theme-palette-heading">Appearance</div><div class="theme-mode-options" role="radiogroup" aria-label="Appearance">' + '<button class="theme-mode-option" type="button" role="radio" aria-checked="false" data-appearance-option="light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>Light</button><button class="theme-mode-option" type="button" role="radio" aria-checked="false" data-appearance-option="dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg>Dark</button></div>';
     wrapper.appendChild(menu);
   }
 
@@ -118,6 +118,8 @@
         document.querySelectorAll('.theme-picker.is-open').forEach(other => { other.classList.remove('is-open'); other.querySelector('.theme-toggle')?.setAttribute('aria-expanded', 'false'); });
         picker.classList.toggle('is-open', opening); trigger.setAttribute('aria-expanded', String(opening)); return;
       }
+      const closeOption = event.target.closest?.('.theme-palette-close');
+      if (closeOption) { event.preventDefault(); closePickers(true); return; }
       const colorOption = event.target.closest?.('[data-color-option]');
       const appearanceOption = event.target.closest?.('[data-appearance-option]');
       if (colorOption || appearanceOption) {

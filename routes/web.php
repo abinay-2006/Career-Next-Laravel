@@ -28,7 +28,7 @@ use App\Http\Controllers\Admin\ManageFeedbackController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\DashboardAnalyticsController;
 use App\Http\Controllers\JobSeeker\ResumeBuilderController;
-
+use App\Http\Controllers\JobSeeker\SavedJobController;
 // Route
 
 // Home Page Route
@@ -46,8 +46,8 @@ Route::post('/logout', [LoginController::class, 'logout'])
 
 Route::get('/forgot', [PasswordResetController::class, 'show'])->name('forgot');
 Route::post('/forgot', [PasswordResetController::class, 'sendOtp'])
-	->middleware('throttle:password-recovery-send')
-	->name('forgot.send');
+    ->middleware('throttle:password-recovery-send')
+    ->name('forgot.send');
 Route::get('/forgot/verify', [PasswordResetController::class, 'showOtp'])->name('forgot.verify');
 Route::post('/forgot/verify', [PasswordResetController::class, 'verifyOtp'])->middleware('throttle:password-recovery-verify')->name('forgot.verify.submit');
 Route::get('/forgot/{token}', [PasswordResetController::class, 'showReset'])->name('forgot.token');
@@ -286,6 +286,9 @@ Route::prefix('jobseeker')
         Route::delete('/documents/{id}', [EducationController::class, 'deleteDocument'])
             ->name('documents.destroy');
 
+
+
+
         //Apply job
         // Job Search
         Route::get('/jobs', [JobSearchController::class, 'index'])
@@ -298,7 +301,7 @@ Route::prefix('jobseeker')
         // Apply for Job
         Route::post('/jobs/{job}/apply', [JobApplicationController::class, 'apply'])
             ->name('jobs.apply');
-        
+
         // Walkin Jobs
 
         Route::get('/walkins', [JobSeekerWalkinController::class, 'index'])
@@ -321,4 +324,17 @@ Route::prefix('jobseeker')
 
         Route::delete('/profile/resume', [JobSeekerProfileController::class, 'removeResume'])
             ->name('profile.resume.remove');
+
+
+        // Saved Jobs
+        Route::get('/saved-jobs', [SavedJobController::class, 'index'])
+            ->name('saved-jobs.index');
+
+        Route::post('/saved-jobs/{job}', [SavedJobController::class, 'store'])
+            ->whereNumber('job')
+            ->name('saved-jobs.store');
+
+        Route::post('/saved-jobs/{job}/remove', [SavedJobController::class, 'destroy'])
+            ->whereNumber('job')
+            ->name('saved-jobs.destroy');
     });

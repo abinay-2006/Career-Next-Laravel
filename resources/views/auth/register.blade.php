@@ -15,7 +15,8 @@
             <h1 class="brand-logo">
 
                 <img
-                    src="{{ asset('assets/images/CareerNext.png') }}"
+                    class="cn-logo-image cn-logo-image--auth"
+                    src="{{ asset('assets/images/career_next.png') }}"
                     alt="Career Next"
                 >
 
@@ -28,7 +29,7 @@
 
         <div class="left-features">
 
-            <h2>
+            <h2 style="color: #fff;">
                 Build your future with Career Next
             </h2>
 
@@ -75,7 +76,7 @@
 
         <div class="left-stats">
 
-            <h2>
+            <h2 style="color: #fff;">
                 Your Gateway to Professional Success
             </h2>
 
@@ -100,6 +101,9 @@
             <div class="panel-subtitle">
                 First, tell us how you want to use Career Next
             </div>
+
+
+            <x-register-progress :current="1" />
 
 
             @if($errors->any())
@@ -147,7 +151,7 @@
 
                         <div class="account-type-icon jobseeker-icon">
 
-                            <i class="fas fa-user-tie"></i>
+                            <i class="fas fa-user-tie" style="color: inherit;"></i>
 
                         </div>
 

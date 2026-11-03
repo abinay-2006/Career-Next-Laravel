@@ -16,10 +16,9 @@
 
                 <span class="logo-icon">
                     <img
-                        src="{{ asset('images/CareerNext.png') }}"
-                        alt="Career Next Logo"
-                        width="42"
-                        height="42">
+                        class="cn-logo-image cn-logo-image--auth"
+                        src="{{ asset('assets/images/career_next.png') }}"
+                        alt="Career Next Logo">
                 </span>
 
                 <span>Career Next</span>
@@ -30,80 +29,12 @@
 
         <!-- Progress -->
 
-        <div class="registration-progress">
-
-            <div class="progress-step completed">
-
-                <div class="step-number">
-                    <i class="fas fa-check"></i>
-                </div>
-
-                <span>Account</span>
-
-            </div>
-
-
-            <div class="progress-line active"></div>
-
-
-            <div class="progress-step active">
-
-                <div class="step-number">
-                    2
-                </div>
-
-                <span>Details</span>
-
-            </div>
-
-
-            <div class="progress-line"></div>
-
-
-            <div class="progress-step">
-
-                <div class="step-number">
-                    3
-                </div>
-
-                <span>Profile</span>
-
-            </div>
-
-
-            <div class="progress-line"></div>
-
-
-            <div class="progress-step">
-
-                <div class="step-number">
-                    4
-                </div>
-
-                <span>Review</span>
-
-            </div>
-
-
-            <div class="progress-line"></div>
-
-
-            <div class="progress-step">
-
-                <div class="step-number">
-                    5
-                </div>
-
-                <span>Verify</span>
-
-            </div>
-
-        </div>
+        <x-register-progress :current="2" />
 
 
         <!-- Main Card -->
 
-        <div class="registration-card">
+        <div class="registration-content">
 
             <div class="card-header">
 
@@ -152,7 +83,7 @@
 
                 <div>
 
-                    <strong>Employer Account</strong>
+                    <strong >Employer Account</strong>
 
                     <span>
                         Hiring and looking for talented candidates

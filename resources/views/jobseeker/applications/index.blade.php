@@ -18,7 +18,7 @@
 
     {{-- Filter Applications --}}
     <div class="section-title">
-        <i class="fas fa-sliders"></i> Filter Applications
+        <i class="fas fa-sliders" ></i> Filter Applications
     </div>
 
     <div class="glass-card">
@@ -137,10 +137,10 @@
                         </td>
 
                         <td>
-                            <a class="application-details-button"
+                            <a class="application-details-button" 
                                 href="{{ route('jobseeker.applications.show', $application) }}">
                                 <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-                                <span>View full details</span>
+                                <span style="width: 130px; height:20px;">View full details</span>
                             </a>
                         </td>
 

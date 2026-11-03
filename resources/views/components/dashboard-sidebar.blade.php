@@ -11,16 +11,16 @@
         ],
         'employer' => [
             ['Dashboard', 'employer.dashboard', 'fas fa-house'],
-            ['Company Profile', 'employer.profile.index', 'fas fa-building'],
             ['Manage Jobs', 'employer.jobs.index', 'fas fa-briefcase'],
-            ['Applications', 'employer.applications.index', 'fas fa-user-check'],
             ['Walk-in Interviews', 'employer.walkins.index', 'fas fa-calendar'],
+            ['Applications', 'employer.applications.index', 'fas fa-user-check'],
+            ['Company Profile', 'employer.profile.index', 'fas fa-building'],
             ['Feedback', 'employer.feedback.create', 'fas fa-comment'],
             ['Career News', 'news.index', 'fas fa-newspaper'],
         ],
         'jobseeker' => [
             ['Dashboard', 'jobseeker.index', 'fas fa-house'],
-            ['Browse Jobs', 'jobseeker.jobs', 'fas fa-magnifying-glass'],
+            ['Browse Jobs', 'jobseeker.jobs', 'fas fa-briefcase'],
             ['Walk-in Interviews', 'jobseeker.walkins', 'fas fa-calendar'],
             ['Profile', 'jobseeker.profile.index', 'fas fa-user'],
             ['Education & Documents', 'jobseeker.education', 'fas fa-graduation-cap'],
@@ -32,9 +32,7 @@
         ],
     ];
 @endphp
-<aside class="cn-sidebar" id="roleSidebar" aria-label="{{ ucfirst($role) }} navigation" data-no-loader>
-    <div class="cn-sidebar-heading">{{ ucfirst($role) }} workspace</div>
-    <nav class="cn-sidebar-nav">
+<nav class="cn-admin-nav" aria-label="{{ ucfirst($role) }} pages" data-no-loader>
         @foreach ($menus[$role] as [$label, $routeName, $icon])
             @php
                 $activePattern = match ($routeName) {
@@ -45,6 +43,7 @@
                     'employer.walkins.index' => 'employer.walkins.*',
                     'employer.feedback.create' => 'employer.feedback.*',
                     'jobseeker.jobs' => 'jobseeker.jobs*',
+                    'jobseeker.saved-jobs.index' => 'jobseeker.saved-jobs.*',
                     'jobseeker.profile.index' => 'jobseeker.profile.*',
                     'jobseeker.education' => 'jobseeker.education*',
                     'jobseeker.resumes.index' => 'jobseeker.resumes.*',
@@ -55,10 +54,9 @@
                     default => $routeName,
                 };
             @endphp
-            <a class="cn-sidebar-link {{ request()->routeIs(...(array) $activePattern) ? 'is-active' : '' }}"
+            <a class="cn-admin-nav-link {{ request()->routeIs(...(array) $activePattern) ? 'is-active' : '' }}"
                href="{{ route($routeName) }}" @if(request()->routeIs(...(array) $activePattern)) aria-current="page" @endif>
                 <i class="{{ $icon }}" aria-hidden="true"></i><span>{{ $label }}</span>
             </a>
         @endforeach
-    </nav>
-</aside>
+</nav>

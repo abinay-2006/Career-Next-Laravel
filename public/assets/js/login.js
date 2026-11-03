@@ -498,7 +498,7 @@ function continueRegistration() {
 }
 
 /**
- * Go back to account selection
+ * Go back to account type
  */
 function backToAccountType() {
     const typeScreen = document.getElementById("register-type-screen");
@@ -508,3 +508,169 @@ function backToAccountType() {
     formScreen.style.display = "none";
     typeScreen.style.display = "block";
 }
+
+/* ── Custom theme-aware account-type dropdown (Login page) ──
+ * Replaces the native <select> so the opened option list can be styled with
+ * the active theme's primary color instead of the browser/OS default blue.
+ * All colors resolve from CSS theme variables, so switching themes updates
+ * the dropdown immediately without a refresh.
+ */
+(function initLoginTypeSelect() {
+    "use strict";
+
+    var wrap = document.getElementById("login-type-wrap");
+    var trigger = document.getElementById("login-type-trigger");
+    var valueEl = document.getElementById("login-type-value");
+    var listbox = document.getElementById("login-type-listbox");
+    var hiddenInput = document.getElementById("login-type");
+    var arrow = trigger && trigger.querySelector(".dropdown-arrow");
+    var options = Array.prototype.slice.call(
+        listbox.querySelectorAll(".select-option")
+    );
+
+    if (!wrap || !trigger || !listbox || !hiddenInput || options.length === 0) {
+        return;
+    }
+
+    var selectedIndex = -1;
+    var highlightedIndex = -1;
+
+    function render() {
+        var isOpen = wrap.classList.contains("open");
+        var label = "Select User Type";
+        var val = "";
+
+        if (selectedIndex >= 0 && options[selectedIndex]) {
+            label = options[selectedIndex].textContent;
+            val = options[selectedIndex].getAttribute("data-value") || "";
+        }
+
+        valueEl.textContent = label;
+        hiddenInput.value = val;
+        trigger.setAttribute("aria-expanded", String(isOpen));
+        if (arrow) arrow.classList.toggle("open", isOpen);
+
+        options.forEach(function (o, i) {
+            o.setAttribute("aria-selected", i === selectedIndex ? "true" : "false");
+            o.setAttribute("data-active", i === highlightedIndex ? "true" : "false");
+            o.tabIndex = i === highlightedIndex ? 0 : -1;
+        });
+    }
+
+    function openListbox() {
+        if (wrap.classList.contains("open")) {
+            return;
+        }
+        wrap.classList.add("open");
+        listbox.style.display = "block";
+        highlightedIndex = selectedIndex >= 0 ? selectedIndex : 0;
+        render();
+        var el = options[highlightedIndex];
+        if (el) {
+            el.focus();
+        }
+    }
+
+    function closeListbox() {
+        if (!wrap.classList.contains("open")) {
+            return;
+        }
+        wrap.classList.remove("open");
+        listbox.style.display = "none";
+        highlightedIndex = -1;
+        render();
+        trigger.focus();
+    }
+
+    function selectIndex(index) {
+        if (index < 0 || index >= options.length) {
+            return;
+        }
+        selectedIndex = index;
+        highlightedIndex = index;
+        closeListbox();
+    }
+
+    function highlight(index) {
+        if (index < 0) {
+            index = 0;
+        }
+        if (index >= options.length) {
+            index = options.length - 1;
+        }
+        highlightedIndex = index;
+        render();
+        var el = options[index];
+        if (el) {
+            el.focus();
+        }
+    }
+
+    trigger.addEventListener("click", function () {
+        if (wrap.classList.contains("open")) {
+            closeListbox();
+        } else {
+            openListbox();
+        }
+    });
+
+    trigger.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openListbox();
+        }
+    });
+
+    listbox.addEventListener("keydown", function (e) {
+        if (!wrap.classList.contains("open")) {
+            return;
+        }
+        if (e.key === "Escape") {
+            e.preventDefault();
+            closeListbox();
+            return;
+        }
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            selectIndex(highlightedIndex);
+            return;
+        }
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            highlight(highlightedIndex + 1);
+            return;
+        }
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            highlight(highlightedIndex - 1);
+            return;
+        }
+        if (e.key === "Home") {
+            e.preventDefault();
+            highlight(0);
+            return;
+        }
+        if (e.key === "End") {
+            e.preventDefault();
+            highlight(options.length - 1);
+            return;
+        }
+    });
+
+    options.forEach(function (o, i) {
+        o.addEventListener("click", function () {
+            selectIndex(i);
+        });
+        o.addEventListener("mouseenter", function () {
+            highlight(i);
+        });
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!wrap.contains(e.target)) {
+            closeListbox();
+        }
+    });
+
+    render();
+})();

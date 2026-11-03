@@ -24,7 +24,7 @@
     <div class="rb-editor">
       <div class="rb-panel-title">
         <div>
-          <h1 class="h5 mb-1" style="color:#ffff">Your information</h1><small class="text-muted" style="color:#ffff">Changes here stay with this resume.</small>
+          <h1 class="h5 mb-1">Your information</h1><small class="text-muted">Changes here stay with this resume.</small>
         </div>
       </div>
       <details class="rb-template-details">

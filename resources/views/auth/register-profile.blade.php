@@ -23,10 +23,9 @@
 
                 <span class="logo-icon">
                     <img
-                        src="{{ asset('images/CareerNext.png') }}"
-                        alt="Career Next Logo"
-                        width="42"
-                        height="42">
+                        class="cn-logo-image cn-logo-image--auth"
+                        src="{{ asset('assets/images/career_next.png') }}"
+                        alt="Career Next Logo">
                 </span>
 
                 <span>Career Next</span>
@@ -40,96 +39,14 @@
              PROGRESS
              ===================================================== -->
 
-        <div class="registration-progress">
-
-            <!-- Step 1 -->
-
-            <div class="progress-step completed">
-
-                <div class="step-number">
-
-                    <i class="fas fa-check"></i>
-
-                </div>
-
-                <span>Account</span>
-
-            </div>
-
-
-            <div class="progress-line active"></div>
-
-
-            <!-- Step 2 -->
-
-            <div class="progress-step completed">
-
-                <div class="step-number">
-
-                    <i class="fas fa-check"></i>
-
-                </div>
-
-                <span>Details</span>
-
-            </div>
-
-
-            <div class="progress-line active"></div>
-
-
-            <!-- Step 3 -->
-
-            <div class="progress-step active">
-
-                <div class="step-number">
-                    3
-                </div>
-
-                <span>Profile</span>
-
-            </div>
-
-
-            <div class="progress-line"></div>
-
-
-            <!-- Step 4 -->
-
-            <div class="progress-step">
-
-                <div class="step-number">
-                    4
-                </div>
-
-                <span>Review</span>
-
-            </div>
-
-
-            <div class="progress-line"></div>
-
-
-            <!-- Step 5 -->
-
-            <div class="progress-step">
-
-                <div class="step-number">
-                    5
-                </div>
-
-                <span>Verify</span>
-
-            </div>
-
-        </div>
+        <x-register-progress :current="3" />
 
 
         <!-- =====================================================
              CARD
              ===================================================== -->
 
-        <div class="registration-card">
+        <div class="registration-content">
 
 
             <!-- Header -->
@@ -361,7 +278,7 @@
 
                 <div class="form-group">
 
-                    <label for="gender">
+                    <label for="gender-select">
 
                         Gender
 
@@ -373,34 +290,23 @@
 
                         <i class="fas fa-venus-mars"></i>
 
-                        <select
-                            id="gender"
-                            name="gender"
-                            required>
+                        @php
+                            $selectedGender = old('gender', $profile['gender'] ?? '');
+                        @endphp
 
-                            <option value="">
-                                Select gender
-                            </option>
-
-                            <option
-                                value="Male"
-                                @selected(old('gender', $profile['gender'] ?? '' )==='Male' )>
-                                Male
-                            </option>
-
-                            <option
-                                value="Female"
-                                @selected(old('gender', $profile['gender'] ?? '' )==='Female' )>
-                                Female
-                            </option>
-
-                            <option
-                                value="Other"
-                                @selected(old('gender', $profile['gender'] ?? '' )==='Other' )>
-                                Other
-                            </option>
-
-                        </select>
+                        <div class="custom-select profile-gender-select" id="gender-select-wrap">
+                            <div class="select-trigger" id="gender-select-trigger" role="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="gender-select-listbox" tabindex="0">
+                                <span class="select-value" id="gender-select-value">{{ $selectedGender === '' ? 'Select gender' : $selectedGender }}</span>
+                                <i class="fas fa-chevron-down dropdown-arrow"></i>
+                            </div>
+                            <div class="select-listbox" id="gender-select-listbox" role="listbox" aria-labelledby="gender-select-trigger">
+                                <div class="select-option" role="option" data-value="" aria-selected="{{ $selectedGender === '' ? 'true' : 'false' }}">Select gender</div>
+                                <div class="select-option" role="option" data-value="Male" aria-selected="{{ $selectedGender === 'Male' ? 'true' : 'false' }}">Male</div>
+                                <div class="select-option" role="option" data-value="Female" aria-selected="{{ $selectedGender === 'Female' ? 'true' : 'false' }}">Female</div>
+                                <div class="select-option" role="option" data-value="Other" aria-selected="{{ $selectedGender === 'Other' ? 'true' : 'false' }}">Other</div>
+                            </div>
+                            <input type="hidden" name="gender" id="gender-select" value="{{ $selectedGender }}" required>
+                        </div>
 
                     </div>
 
@@ -696,6 +602,173 @@
             window.CareerNextButtonLoading?.start(button, 'Saving...');
 
         });
+</script>
+
+<script>
+/*
+|--------------------------------------------------------------------------
+| Custom gender select (theme-aware listbox)
+|--------------------------------------------------------------------------
+*/
+(function initGenderSelect() {
+    "use strict";
+
+    var wrap = document.getElementById("gender-select-wrap");
+    var trigger = document.getElementById("gender-select-trigger");
+    var valueEl = document.getElementById("gender-select-value");
+    var listbox = document.getElementById("gender-select-listbox");
+    var hiddenInput = document.getElementById("gender-select");
+    var arrow = trigger && trigger.querySelector(".dropdown-arrow");
+    var options = Array.prototype.slice.call(
+        listbox.querySelectorAll(".select-option")
+    );
+
+    if (!wrap || !trigger || !listbox || !hiddenInput || options.length === 0) {
+        return;
+    }
+
+    var selectedIndex = -1;
+    var highlightedIndex = -1;
+
+    function render() {
+        var isOpen = wrap.classList.contains("open");
+        var label = "Select gender";
+        var val = "";
+
+        if (selectedIndex >= 0 && options[selectedIndex]) {
+            label = options[selectedIndex].textContent;
+            val = options[selectedIndex].getAttribute("data-value") || "";
+        }
+
+        valueEl.textContent = label;
+        hiddenInput.value = val;
+        trigger.setAttribute("aria-expanded", String(isOpen));
+        if (arrow) arrow.classList.toggle("open", isOpen);
+
+        options.forEach(function (o, i) {
+            o.setAttribute("aria-selected", i === selectedIndex ? "true" : "false");
+            o.setAttribute("data-active", i === highlightedIndex ? "true" : "false");
+            o.tabIndex = i === highlightedIndex ? 0 : -1;
+        });
+    }
+
+    function openListbox() {
+        if (wrap.classList.contains("open")) {
+            return;
+        }
+        wrap.classList.add("open");
+        listbox.style.display = "block";
+        highlightedIndex = selectedIndex >= 0 ? selectedIndex : 0;
+        render();
+        var el = options[highlightedIndex];
+        if (el) {
+            el.focus();
+        }
+    }
+
+    function closeListbox() {
+        if (!wrap.classList.contains("open")) {
+            return;
+        }
+        wrap.classList.remove("open");
+        listbox.style.display = "none";
+        highlightedIndex = -1;
+        render();
+        trigger.focus();
+    }
+
+    function selectIndex(index) {
+        if (index < 0 || index >= options.length) {
+            return;
+        }
+        selectedIndex = index;
+        highlightedIndex = index;
+        closeListbox();
+    }
+
+    function highlight(index) {
+        if (index < 0) {
+            index = 0;
+        }
+        if (index >= options.length) {
+            index = options.length - 1;
+        }
+        highlightedIndex = index;
+        render();
+        var el = options[index];
+        if (el) {
+            el.focus();
+        }
+    }
+
+    trigger.addEventListener("click", function () {
+        if (wrap.classList.contains("open")) {
+            closeListbox();
+        } else {
+            openListbox();
+        }
+    });
+
+    trigger.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openListbox();
+        }
+    });
+
+    listbox.addEventListener("keydown", function (e) {
+        if (!wrap.classList.contains("open")) {
+            return;
+        }
+        if (e.key === "Escape") {
+            e.preventDefault();
+            closeListbox();
+            return;
+        }
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            selectIndex(highlightedIndex);
+            return;
+        }
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            highlight(highlightedIndex + 1);
+            return;
+        }
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            highlight(highlightedIndex - 1);
+            return;
+        }
+        if (e.key === "Home") {
+            e.preventDefault();
+            highlight(0);
+            return;
+        }
+        if (e.key === "End") {
+            e.preventDefault();
+            highlight(options.length - 1);
+            return;
+        }
+    });
+
+    options.forEach(function (o, i) {
+        o.addEventListener("click", function () {
+            selectIndex(i);
+        });
+        o.addEventListener("mouseenter", function () {
+            highlight(i);
+        });
+    });
+
+    document.addEventListener("click", function (e) {
+        if (!wrap.contains(e.target)) {
+            closeListbox();
+        }
+    });
+
+    render();
+})();
 </script>
 
 @endsection

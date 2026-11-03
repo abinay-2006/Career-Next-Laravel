@@ -502,7 +502,7 @@
     <!-- STATISTICS -->
     <div class="stats-grid">
 
-        <a href="?status=all&search={{ urlencode($search) }}&per_page=10"
+        <a href="?status=all&search={{ urlencode($search) }}&per_page={{ $perPage }}"
            class="stat-card {{ $filterStatus === 'all' ? 'active' : '' }}">
             <div class="stat-value">{{ $counts['total'] }}</div>
             <div class="stat-label">
@@ -510,7 +510,7 @@
             </div>
         </a>
 
-        <a href="?status=approved&search={{ urlencode($search) }}&per_page=10"
+        <a href="?status=approved&search={{ urlencode($search) }}&per_page={{ $perPage }}"
            class="stat-card {{ $filterStatus === 'approved' ? 'active' : '' }}">
             <div class="stat-value">{{ $counts['approved'] }}</div>
             <div class="stat-label">
@@ -518,7 +518,7 @@
             </div>
         </a>
 
-        <a href="?status=pending&search={{ urlencode($search) }}&per_page=10"
+        <a href="?status=pending&search={{ urlencode($search) }}&per_page={{ $perPage }}"
            class="stat-card {{ $filterStatus === 'pending' ? 'active' : '' }}">
             <div class="stat-value">{{ $counts['pending'] }}</div>
             <div class="stat-label">

@@ -79,7 +79,7 @@
     <div class="table-card" id="tab-seekers">
         <div class="table-card-header">
             <h3><i class="fas fa-user-tie"></i> Job Seekers</h3>
-            <span style="font-size:0.78rem;color:rgba(255,255,255,0.55);">{{ count($seekers) }} records</span>
+            <span class="table-record-count">{{ count($seekers) }} records</span>
         </div>
         <div class="table-wrap">
             @if($seekers->isEmpty())
@@ -159,7 +159,7 @@
     <div class="table-card" id="tab-employers">
         <div class="table-card-header">
             <h3><i class="fas fa-building"></i> Employers</h3>
-            <span style="font-size:0.78rem;color:rgba(255,255,255,0.55);">{{ count($employers) }} records</span>
+            <span class="table-record-count">{{ count($employers) }} records</span>
         </div>
         <div class="table-wrap">
             @if($employers->isEmpty())

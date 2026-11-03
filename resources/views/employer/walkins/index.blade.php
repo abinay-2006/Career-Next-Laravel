@@ -201,14 +201,14 @@
 <div class="modal-overlay" id="editModal" onclick="handleEditOverlayClick(event)">
     <div class="modal" style="max-width: 600px;">
 
-        <div class="modal-header" style="display: flex; align-items: center; justify-content: space-between; padding: 24px 28px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.13); position: sticky; top: 0; background: rgba(102, 126, 234, 0.6); backdrop-filter: blur(12px); z-index: 2;">
+        <div class="modal-header" style="display: flex; align-items: center; justify-content: space-between; padding: 24px 28px 20px; border-bottom: 1px solid var(--theme-border); position: sticky; top: 0; background: var(--theme-card-background); z-index: 2;">
             <div class="modal-header-left" style="display: flex; align-items: center; gap: 12px;">
                 <div class="form-header-icon" style="width:40px;height:40px;font-size:1rem;margin:0;"><i class="fas fa-pen-to-square"></i></div>
                 <div>
-                    <div class="modal-title" style="font-size: 1.05rem; font-weight: 700; color: #fff;">Edit Walk-in Listing</div>
+                    <div class="modal-title" style="font-size: 1.05rem; font-weight: 700;">Edit Walk-in Listing</div>
                 </div>
             </div>
-            <button class="btn-close" style="width: 34px; height: 34px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 9px; color: rgba(255, 255, 255, 0.7); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: all 0.18s;" onclick="closeEditModal()"><i class="fas fa-xmark"></i></button>
+            <button class="btn-close" style="width: 34px; height: 34px; background: var(--theme-hover); border: 1px solid var(--theme-border); border-radius: 9px; color: var(--theme-text-secondary); cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: all 0.18s;" onclick="closeEditModal()"><i class="fas fa-xmark"></i></button>
         </div>
 
         <form method="POST" data-ajax data-ajax-refresh-target=".cn-dashboard-main"
@@ -259,7 +259,7 @@
 
                 </div>
             </div>
-            <div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 28px 24px;border-top:1px solid rgba(255,255,255,0.13);">
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 28px 24px;border-top:1px solid var(--theme-border);">
                 <button type="button" class="btn-confirm-cancel" onclick="closeEditModal()"><i class="fas fa-xmark"></i> Cancel</button>
                 <button type="submit" class="btn-submit" style="margin:0;"><i class="fas fa-floppy-disk"></i> Save Changes</button>
             </div>

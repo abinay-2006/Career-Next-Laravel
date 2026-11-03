@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const toggle = document.querySelector('.cn-admin-menu-toggle');
-    const drawer = document.getElementById('adminMobileDrawer');
-    const closeControls = document.querySelectorAll('[data-admin-drawer-close]');
+    const toggle = document.querySelector('[data-role-drawer-toggle], .cn-admin-menu-toggle');
+    const drawer = toggle ? document.getElementById(toggle.getAttribute('aria-controls')) : null;
+    const closeControls = document.querySelectorAll('[data-role-drawer-close], [data-admin-drawer-close]');
     if (!toggle || !drawer || closeControls.length === 0) return;
 
     const mobileLayout = window.matchMedia('(max-width: 1023.98px)');
@@ -12,7 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
         drawer.inert = !open;
         drawer.setAttribute('aria-hidden', String(!open));
         toggle.setAttribute('aria-expanded', String(open));
-        toggle.setAttribute('aria-label', open ? 'Close Admin navigation' : 'Open Admin navigation');
+        const role = drawer.getAttribute('aria-label')?.replace(/ navigation$/i, '') || 'Admin';
+        toggle.setAttribute('aria-label', open ? `Close ${role} navigation` : `Open ${role} navigation`);
 
         if (open) {
             previousFocus = document.activeElement;

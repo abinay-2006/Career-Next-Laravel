@@ -23,10 +23,9 @@
 
                 <span class="logo-icon">
                     <img
-                        src="{{ asset('images/CareerNext.png') }}"
-                        alt="Career Next Logo"
-                        width="42"
-                        height="42">
+                        class="cn-logo-image cn-logo-image--auth"
+                        src="{{ asset('assets/images/career_next.png') }}"
+                        alt="Career Next Logo">
                 </span>
 
                 <span>Career Next</span>
@@ -40,98 +39,14 @@
              PROGRESS
              ===================================================== -->
 
-        <div class="registration-progress">
-
-            <!-- Step 1 -->
-
-            <div class="progress-step completed">
-
-                <div class="step-number">
-
-                    <i class="fas fa-check"></i>
-
-                </div>
-
-                <span>Account</span>
-
-            </div>
-
-
-            <div class="progress-line active"></div>
-
-
-            <!-- Step 2 -->
-
-            <div class="progress-step completed">
-
-                <div class="step-number">
-
-                    <i class="fas fa-check"></i>
-
-                </div>
-
-                <span>Details</span>
-
-            </div>
-
-
-            <div class="progress-line active"></div>
-
-
-            <!-- Step 3 -->
-
-            <div class="progress-step active">
-
-                <div class="step-number">
-
-                    <i class="fas fa-check"></i>
-
-                </div>
-
-                <span>Profile</span>
-
-            </div>
-
-
-            <div class="progress-line"></div>
-
-
-            <!-- Step 4 -->
-
-            <div class="progress-step">
-
-                <div class="step-number">
-                    4
-                </div>
-
-                <span>Review</span>
-
-            </div>
-
-
-            <div class="progress-line"></div>
-
-
-            <!-- Step 5 -->
-
-            <div class="progress-step">
-
-                <div class="step-number">
-                    5
-                </div>
-
-                <span>Verify</span>
-
-            </div>
-
-        </div>
+        <x-register-progress :current="4" />
 
 
         <!-- =====================================================
              CARD
              ===================================================== -->
 
-        <div class="registration-card">
+        <div class="registration-content">
 
 
             <!-- Header -->

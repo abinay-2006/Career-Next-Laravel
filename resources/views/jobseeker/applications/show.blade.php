@@ -77,32 +77,32 @@
 @push('styles')
 <style>
     .application-job-hero { display: flex; align-items: center; gap: 1.2rem; padding: 1.6rem; margin-bottom: 1rem; }
-    .application-company-icon { display: grid; place-items: center; flex: 0 0 64px; width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(145deg,#eef1ff,#e4f0ff); color: #4657c8; font-size: 1.5rem; }
+    .application-company-icon { display: grid; place-items: center; flex: 0 0 64px; width: 64px; height: 64px; border-radius: 18px; background: var(--theme-hover); color: var(--theme-primary); font-size: 1.5rem; }
     .application-job-heading { display: grid; justify-items: start; gap: .35rem; }
-    .application-company-name { color: #667085; font-size: .9rem; font-weight: 600; }
-    .application-job-heading h2 { margin: 0; color: #182230; font-size: clamp(1.3rem, 2vw, 1.8rem); font-weight: 750; }
+    .application-company-name { color: var(--theme-text-secondary); font-size: .9rem; font-weight: 600; }
+    .application-job-heading h2 { margin: 0; color: var(--theme-heading); font-size: clamp(1.3rem, 2vw, 1.8rem); font-weight: 750; }
     .application-status-badge { display: inline-flex; align-items: center; gap: .48rem; padding: .42rem .7rem; border: 1px solid transparent; border-radius: 999px; font-size: .78rem; font-weight: 700; white-space: nowrap; }
     .application-status-badge .status-indicator { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-    .application-status-badge.pending { color: #9a6700; background: #fff6db; border-color: #f4df9a; }
-    .application-status-badge.accepted { color: #087443; background: #e8f7ef; border-color: #b8e7cc; }
-    .application-status-badge.rejected { color: #b42318; background: #fff0ee; border-color: #f5c3bd; }
+    .application-status-badge.pending { color: var(--theme-warning); background: color-mix(in srgb, var(--theme-warning) 14%, var(--theme-card-background)); border-color: color-mix(in srgb, var(--theme-warning) 35%, var(--theme-border)); }
+    .application-status-badge.accepted { color: var(--theme-success); background: color-mix(in srgb, var(--theme-success) 14%, var(--theme-card-background)); border-color: color-mix(in srgb, var(--theme-success) 35%, var(--theme-border)); }
+    .application-status-badge.rejected { color: var(--theme-error); background: color-mix(in srgb, var(--theme-error) 12%, var(--theme-card-background)); border-color: color-mix(in srgb, var(--theme-error) 32%, var(--theme-border)); }
     .application-details-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
     .application-info-card { padding: 1.35rem; }
     .application-section-title { display: flex; align-items: center; gap: .85rem; margin-bottom: 1rem; }
-    .application-section-title > span { display: grid; place-items: center; flex: 0 0 42px; height: 42px; border-radius: 13px; background: #f0f2ff; color: #4c5bd4; }
-    .application-section-title h2 { margin: 0 0 .2rem; color: #182230; font-size: 1.05rem; font-weight: 750; }
-    .application-section-title p { margin: 0; color: #667085; font-size: .83rem; }
+    .application-section-title > span { display: grid; place-items: center; flex: 0 0 42px; height: 42px; border-radius: 13px; background: var(--theme-hover); color: var(--theme-primary); }
+    .application-section-title h2 { margin: 0 0 .2rem; color: var(--theme-heading); font-size: 1.05rem; font-weight: 750; }
+    .application-section-title p { margin: 0; color: var(--theme-text-secondary); font-size: .83rem; }
     .application-facts { display: grid; gap: .7rem; margin: 0; }
-    .application-facts > div { display: grid; grid-template-columns: minmax(140px, .8fr) minmax(0,1.2fr); gap: .8rem; padding: .75rem 0; border-top: 1px solid #edf0f5; }
-    .application-facts dt { color: #667085; font-size: .84rem; font-weight: 600; }
-    .application-facts dt i { width: 1.15rem; color: #6978d8; }
-    .application-facts dd { margin: 0; color: #263244; font-size: .9rem; font-weight: 600; overflow-wrap: anywhere; }
+    .application-facts > div { display: grid; grid-template-columns: minmax(140px, .8fr) minmax(0,1.2fr); gap: .8rem; padding: .75rem 0; border-top: 1px solid var(--theme-border); }
+    .application-facts dt { color: var(--theme-text-secondary); font-size: .84rem; font-weight: 600; }
+    .application-facts dt i { width: 1.15rem; color: var(--theme-primary); }
+    .application-facts dd { margin: 0; color: var(--theme-text-primary); font-size: .9rem; font-weight: 600; overflow-wrap: anywhere; }
     .application-note, .application-description-card { grid-column: 1 / -1; }
     .application-description-card { padding: 1.5rem; }
-    .application-job-description { color: #344054; font-size: .95rem; line-height: 1.8; overflow-wrap: anywhere; }
-    .application-muted, .application-missing-job p { color: #667085; }
+    .application-job-description { color: var(--theme-text-primary); font-size: .95rem; line-height: 1.8; overflow-wrap: anywhere; }
+    .application-muted, .application-missing-job p { color: var(--theme-text-secondary); }
     .application-missing-job { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 1rem; padding: 1.5rem; }
-    .application-missing-job h2 { margin: 0 0 .3rem; color: #182230; font-size: 1.2rem; }
+    .application-missing-job h2 { margin: 0 0 .3rem; color: var(--theme-heading); font-size: 1.2rem; }
     .application-missing-job p { margin: 0; }
     .application-missing-job .application-facts { grid-column: 1/-1; width: 100%; }
     @media (max-width: 767.98px) {

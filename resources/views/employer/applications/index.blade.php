@@ -22,7 +22,7 @@
     <!-- No jobs posted yet -->
     <div class="no-jobs-card">
         <i class="fas fa-briefcase"></i>
-        <p>You haven't posted any jobs yet. <a href="{{ route('employer.jobs.index') }}" style="color:rgba(255,255,255,0.8);text-decoration:underline;">Post a job</a> to start receiving applications.</p>
+        <p>You haven't posted any jobs yet. <a href="{{ route('employer.jobs.index') }}">Post a job</a> to start receiving applications.</p>
     </div>
 
     @else
@@ -31,7 +31,7 @@
     <div class="section-title"><i class="fas fa-filter"></i> Filter by Job</div>
 
     <div class="glass-card">
-        <form method="GET" action="{{ route('employer.applications.index') }}" data-ajax-html data-ajax-submit-on-change>
+        <form method="GET" action="{{ route('employer.applications.index') }}" data-ajax-html>
             <div class="filter-bar">
                 <div class="filter-group">
                     <label class="filter-label" for="cmbTitle"><i class="fas fa-list-check"></i> Select Job Title</label>
@@ -71,9 +71,9 @@
                 <i class="fas fa-users"></i>
                 {{ $total }} Total
             </span>
-            @if ($pending > 0)<span class="stat-pill" style="border-color:rgba(251,191,36,0.3);color:#fde68a;"><i class="fas fa-clock"></i>{{ $pending }} Pending</span>@endif
-            @if ($accepted > 0)<span class="stat-pill" style="border-color:rgba(74,222,128,0.3);color:#86efac;"><i class="fas fa-circle-check"></i>{{ $accepted }} Accepted</span>@endif
-            @if ($rejected > 0)<span class="stat-pill" style="border-color:rgba(239,68,68,0.3);color:#fca5a5;"><i class="fas fa-circle-xmark"></i>{{ $rejected }} Rejected</span>@endif
+            @if ($pending > 0)<span class="stat-pill pending"><i class="fas fa-clock"></i>{{ $pending }} Pending</span>@endif
+            @if ($accepted > 0)<span class="stat-pill accepted"><i class="fas fa-circle-check"></i>{{ $accepted }} Accepted</span>@endif
+            @if ($rejected > 0)<span class="stat-pill rejected"><i class="fas fa-circle-xmark"></i>{{ $rejected }} Rejected</span>@endif
         </div>
         @endif
     </div>

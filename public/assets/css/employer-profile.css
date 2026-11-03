@@ -413,13 +413,13 @@
 
     padding: 10px 22px;
 
-    background: rgba(99, 102, 241, 0.4);
+    background: var(--theme-primary, #667eea);
 
-    border: 1px solid rgba(99, 102, 241, 0.55);
+    border: 1px solid var(--theme-primary, #667eea);
 
     border-radius: 11px;
 
-    color: #ffffff;
+    color: var(--theme-primary-contrast, #fff);
 
     font-family: "Poppins", sans-serif;
 
@@ -438,13 +438,15 @@
 }
 
 .btn-edit-profile:hover {
-    background: rgba(99, 102, 241, 0.6);
+    background: var(--theme-primary-hover, #5143a5);
 
-    color: #ffffff;
+    border-color: var(--theme-primary-hover, #5143a5);
+
+    color: var(--theme-primary-hover-contrast, #fff);
 
     transform: translateY(-1px);
 
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 6px 20px color-mix(in srgb, var(--theme-primary, #667eea) 35%, transparent);
 }
 
 /* ==========================================================
@@ -965,21 +967,18 @@
 
     /*
        IMPORTANT:
-       This explicitly prevents Bootstrap
-       or other global CSS from making it white.
+       The !important flags in this block are what keep Bootstrap
+       from re-declaring these surfaces; the values themselves now
+       come from the theme tokens so the modal follows the palette.
     */
 
-    background: linear-gradient(145deg, #764ba2 0%, #667eea 100%) !important;
+    background: var(--theme-card-background, #fff) !important;
 
-    background-color: #667eea !important;
+    border: 1px solid var(--theme-border, #e3e0ef) !important;
 
-    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    box-shadow: var(--theme-shadow, 0 8px 24px rgba(24, 25, 45, 0.12)) !important;
 
-    box-shadow:
-        0 30px 80px rgba(0, 0, 0, 0.45),
-        0 10px 30px rgba(102, 126, 234, 0.25) !important;
-
-    color: #ffffff !important;
+    color: var(--theme-text-primary, #29283b) !important;
 
     transform: translateY(30px) scale(0.96);
 
@@ -1041,13 +1040,13 @@
 
     margin: 0 !important;
 
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: var(--theme-surface-secondary, #f0eef8) !important;
 
     border: 0 !important;
 
-    border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-bottom: 1px solid var(--theme-border, #e3e0ef) !important;
 
-    color: #ffffff !important;
+    color: var(--theme-heading, #29283b) !important;
 }
 
 /* =========================================================
@@ -1081,11 +1080,11 @@
 
     border-radius: 13px !important;
 
-    background: rgba(255, 255, 255, 0.16) !important;
+    background: color-mix(in srgb, var(--theme-primary, #667eea) 14%, var(--theme-card-background, #fff)) !important;
 
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid color-mix(in srgb, var(--theme-primary, #667eea) 30%, var(--theme-border, #e3e0ef)) !important;
 
-    color: #ffffff !important;
+    color: var(--theme-primary-dark, #5143a5) !important;
 
     font-size: 1rem;
 }
@@ -1098,7 +1097,7 @@
     margin: 0 !important;
     padding: 0 !important;
 
-    color: #ffffff !important;
+    color: var(--theme-heading, #29283b) !important;
 
     background: transparent !important;
 
@@ -1116,7 +1115,7 @@
 .profile-modal .profile-modal-subtitle {
     margin-top: 3px !important;
 
-    color: rgba(255, 255, 255, 0.65) !important;
+    color: var(--theme-text-secondary, #67657a) !important;
 
     background: transparent !important;
 
@@ -1144,15 +1143,15 @@
     align-items: center !important;
     justify-content: center !important;
 
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid var(--theme-border, #e3e0ef) !important;
 
     border-radius: 11px !important;
 
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: var(--theme-card-background, #fff) !important;
 
     background-image: none !important;
 
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: var(--theme-text-secondary, #67657a) !important;
 
     opacity: 1 !important;
 
@@ -1167,15 +1166,17 @@
 }
 
 .profile-modal button.btn-close i {
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: var(--theme-text-secondary, #67657a) !important;
 
     font-size: 0.9rem;
 }
 
 .profile-modal button.btn-close:hover {
-    background: rgba(239, 68, 68, 0.22) !important;
+    background: color-mix(in srgb, var(--theme-error, #c53030) 12%, var(--theme-card-background, #fff)) !important;
 
-    color: #ffffff !important;
+    border-color: color-mix(in srgb, var(--theme-error, #c53030) 32%, var(--theme-border, #e3e0ef)) !important;
+
+    color: var(--theme-error, #c53030) !important;
 
     transform: rotate(90deg);
 }
@@ -1200,11 +1201,11 @@
 
     background: transparent !important;
 
-    color: #ffffff !important;
+    color: var(--theme-text-primary, #29283b) !important;
 
     scrollbar-width: thin;
 
-    scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+    scrollbar-color: var(--theme-border, #e3e0ef) transparent;
 }
 
 /* =========================================================
@@ -1220,13 +1221,13 @@
 }
 
 .profile-modal-body::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--theme-border, #e3e0ef);
 
     border-radius: 20px;
 }
 
 .profile-modal-body::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.4);
+    background: var(--theme-text-muted, #777489);
 }
 
 /* =========================================================
@@ -1283,7 +1284,7 @@
     margin: 0 0 7px 2px !important;
     padding: 0 !important;
 
-    color: rgba(255, 255, 255, 0.72) !important;
+    color: var(--theme-form-label, #3d3a50) !important;
 
     background: transparent !important;
 
@@ -1301,7 +1302,7 @@
 }
 
 .profile-modal label.form-label i {
-    color: rgba(255, 255, 255, 0.75) !important;
+    color: var(--theme-text-muted, #777489) !important;
 }
 
 /* =========================================================
@@ -1321,17 +1322,17 @@
 
     padding: 11px 13px !important;
 
-    background: rgba(255, 255, 255, 0.1) !important;
+    background: var(--theme-input-background, #fff) !important;
 
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: var(--theme-input-background, #fff) !important;
 
-    border: 1px solid rgba(255, 255, 255, 0.17) !important;
+    border: 1px solid color-mix(in srgb, var(--theme-primary-dark, #5143a5) 70%, var(--theme-border, #e3e0ef)) !important;
 
     border-radius: 11px !important;
 
-    color: #ffffff !important;
+    color: var(--theme-input-text, #29283b) !important;
 
-    -webkit-text-fill-color: #ffffff !important;
+    -webkit-text-fill-color: var(--theme-input-text, #29283b) !important;
 
     font-family: "Poppins", sans-serif !important;
 
@@ -1379,7 +1380,7 @@
 
 .profile-modal input.form-input::placeholder,
 .profile-modal textarea.form-textarea::placeholder {
-    color: rgba(255, 255, 255, 0.4) !important;
+    color: var(--theme-placeholder, #777489) !important;
 
     opacity: 1 !important;
 }
@@ -1390,32 +1391,32 @@
 
 .profile-modal input.form-input:focus,
 .profile-modal textarea.form-textarea:focus {
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: var(--theme-input-background, #fff) !important;
 
-    background-color: rgba(255, 255, 255, 0.15) !important;
+    background-color: var(--theme-input-background, #fff) !important;
 
-    border-color: rgba(255, 255, 255, 0.42) !important;
+    border-color: var(--theme-primary, #667eea) !important;
 
-    color: #ffffff !important;
+    color: var(--theme-input-text, #29283b) !important;
 
-    -webkit-text-fill-color: #ffffff !important;
+    -webkit-text-fill-color: var(--theme-input-text, #29283b) !important;
 
     outline: none !important;
 
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.07) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-primary, #667eea) 22%, transparent) !important;
 }
 
 /* =========================================================
    AUTOFILL
-   Prevent Chrome from making inputs white
+   Keeps Chrome's yellow fill from breaking the surface
 ========================================================= */
 
 .profile-modal input.form-input:-webkit-autofill,
 .profile-modal input.form-input:-webkit-autofill:hover,
 .profile-modal input.form-input:-webkit-autofill:focus {
-    -webkit-text-fill-color: #ffffff !important;
+    -webkit-text-fill-color: var(--theme-input-text, #29283b) !important;
 
-    -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.1) inset !important;
+    -webkit-box-shadow: 0 0 0 1000px var(--theme-input-background, #fff) inset !important;
 
     transition: background-color 9999s ease-in-out 0s;
 }
@@ -1441,11 +1442,11 @@
 
     padding: 16px 22px !important;
 
-    background: rgba(255, 255, 255, 0.07) !important;
+    background: var(--theme-surface-secondary, #f0eef8) !important;
 
     border: 0 !important;
 
-    border-top: 1px solid rgba(255, 255, 255, 0.13) !important;
+    border-top: 1px solid var(--theme-border, #e3e0ef) !important;
 }
 
 /* =========================================================
@@ -1466,13 +1467,13 @@
 
     margin: 0 !important;
 
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border: 1px solid var(--theme-border, #e3e0ef) !important;
 
     border-radius: 10px !important;
 
-    background: rgba(255, 255, 255, 0.07) !important;
+    background: var(--theme-card-background, #fff) !important;
 
-    color: rgba(255, 255, 255, 0.82) !important;
+    color: var(--theme-text-secondary, #67657a) !important;
 
     font-size: 0.82rem !important;
 
@@ -1488,11 +1489,11 @@
 }
 
 .profile-modal button.btn-cancel:hover {
-    background: rgba(255, 255, 255, 0.13) !important;
+    background: var(--theme-hover, #f1efff) !important;
 
-    border-color: rgba(255, 255, 255, 0.3) !important;
+    border-color: color-mix(in srgb, var(--theme-primary, #667eea) 45%, var(--theme-border, #e3e0ef)) !important;
 
-    color: #ffffff !important;
+    color: var(--theme-primary-dark, #5143a5) !important;
 }
 
 /* =========================================================
@@ -1517,15 +1518,15 @@
 
     border-radius: 10px !important;
 
-    background: #ffffff !important;
+    background: var(--theme-primary, #667eea) !important;
 
-    color: #5b5fc7 !important;
+    color: var(--theme-primary-contrast, #fff) !important;
 
     font-size: 0.82rem !important;
 
     font-weight: 600 !important;
 
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18) !important;
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--theme-primary, #667eea) 35%, transparent) !important;
 
     cursor: pointer;
 
@@ -1535,13 +1536,13 @@
 }
 
 .profile-modal button.btn-submit:hover {
-    background: #ffffff !important;
+    background: var(--theme-primary-hover, #5143a5) !important;
 
-    color: #4f46b5 !important;
+    color: var(--theme-primary-hover-contrast, #fff) !important;
 
     transform: translateY(-1px);
 
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 10px 25px color-mix(in srgb, var(--theme-primary, #667eea) 45%, transparent) !important;
 }
 
 /* =========================================================
@@ -1553,7 +1554,9 @@
 
     margin-top: 5px;
 
-    color: #fecaca !important;
+    /* --theme-error alone is too dark on the dark surface and too light on
+       the light one, so it is pulled toward whichever ink this appearance uses. */
+    color: color-mix(in srgb, var(--theme-error, #c53030) 60%, var(--theme-text-primary, #29283b)) !important;
 
     font-size: 0.72rem;
 }
@@ -1724,9 +1727,9 @@
 
     box-sizing: border-box;
 
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--theme-surface-secondary, #f0eef8);
 
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid var(--theme-border, #e3e0ef);
 
     border-radius: 14px;
 }
@@ -1749,11 +1752,11 @@
 
     border-radius: 14px;
 
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--theme-card-background, #fff);
 
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid var(--theme-border, #e3e0ef);
 
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--theme-primary-dark, #5143a5);
 
     font-size: 1.7rem;
 }
@@ -1780,7 +1783,7 @@
 .profile-logo-title {
     margin-bottom: 4px;
 
-    color: #ffffff;
+    color: var(--theme-heading, #29283b);
 
     font-size: 0.9rem;
 
@@ -1790,7 +1793,7 @@
 .profile-logo-description {
     margin-bottom: 9px;
 
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--theme-text-secondary, #67657a);
 
     font-size: 0.69rem;
 
@@ -1815,13 +1818,13 @@
 
     margin: 0;
 
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid color-mix(in srgb, var(--theme-primary-dark, #5143a5) 70%, var(--theme-border, #e3e0ef));
 
     border-radius: 9px;
 
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--theme-card-background, #fff);
 
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--theme-primary-dark, #5143a5);
 
     font-size: 0.74rem;
 
@@ -1836,11 +1839,11 @@
 }
 
 .profile-logo-button:hover {
-    background: rgba(255, 255, 255, 0.17);
+    background: var(--theme-hover, #f1efff);
 
-    border-color: rgba(255, 255, 255, 0.32);
+    border-color: var(--theme-primary, #667eea);
 
-    color: #ffffff;
+    color: var(--theme-primary-dark, #5143a5);
 
     transform: translateY(-1px);
 }
@@ -1854,7 +1857,8 @@
 
     margin-left: 8px;
 
-    color: rgba(255, 255, 255, 0.45);
+    /* Sits on the tinted upload panel, so the muted ink drops under 4.5:1 here. */
+    color: var(--theme-text-secondary, #67657a);
 
     font-size: 0.68rem;
 

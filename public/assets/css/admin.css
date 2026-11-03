@@ -4347,6 +4347,8 @@ table tbody tr:last-child td {
         --cn-news-muted: #777b91;
         --cn-news-border: #ececf5;
         color: var(--cn-news-text);
+        max-width: none !important;
+        width: 100% !important;
     }
 
     .cn-news-page .cn-news-header {
@@ -4447,6 +4449,8 @@ table tbody tr:last-child td {
         border-radius: 17px;
         background: #fff;
         box-shadow: 0 5px 22px rgba(39, 35, 86, .045);
+        padding: 0;
+        width: 100%;
     }
 
     .cn-news-page .cn-news-card-heading,
@@ -4548,6 +4552,15 @@ table tbody tr:last-child td {
         gap: 10px;
     }
 
+    .cn-news-page .cn-news-row-actions {
+        flex-wrap: nowrap;
+        white-space: nowrap;
+    }
+
+    .cn-news-page .cn-news-row-actions .btn {
+        flex-shrink: 0;
+    }
+
     .cn-news-page .cn-news-form-actions .btn,
     .cn-news-page .cn-news-row-actions .btn {
         min-height: 40px;
@@ -4602,26 +4615,36 @@ table tbody tr:last-child td {
     }
 
     .cn-news-page .cn-news-table-wrapper {
-        width: 100%;
+        width: 100% !important;
+        max-width: 100%;
+        overflow-x: auto;
+        margin: 0;
+        padding: 0 !important;
     }
 
     .cn-news-page .cn-news-table {
-        min-width: 650px;
+        display: table !important;
+        width: 100% !important;
+        min-width: 750px !important;
+        table-layout: fixed !important;
+        border-collapse: collapse;
     }
 
     .cn-news-page .cn-news-table thead th {
-        padding: 15px 22px;
+        padding: 16px 20px;
         border-bottom: 1px solid #e9e8f3;
         background: #f8f8fd;
         color: #777991;
         font-size: 10px;
         font-weight: 750;
         letter-spacing: .8px;
+        text-transform: uppercase;
+        text-align: left;
         white-space: nowrap;
     }
 
     .cn-news-page .cn-news-table tbody td {
-        padding: 17px 22px;
+        padding: 18px 20px;
         border-bottom: 1px solid #f0eff7;
         color: #44445e;
         font-size: 13px;
@@ -4630,6 +4653,19 @@ table tbody tr:last-child td {
 
     .cn-news-page .cn-news-table tbody tr:last-child td {
         border-bottom: 0;
+    }
+
+    /* Column widths: Removed for flexible width */
+    .cn-news-page .cn-news-table thead th:first-child,
+    .cn-news-page .cn-news-table tbody td:first-child {
+    }
+
+    .cn-news-page .cn-news-table thead th:nth-child(2),
+    .cn-news-page .cn-news-table tbody td:nth-child(2) {
+    }
+
+    .cn-news-page .cn-news-table thead th:last-child,
+    .cn-news-page .cn-news-table tbody td:last-child {
     }
 
     .cn-news-page .cn-news-table tbody tr {
@@ -4667,6 +4703,10 @@ table tbody tr:last-child td {
         gap: 11px;
         line-height: 1.7;
         overflow-wrap: anywhere;
+    }
+
+    .cn-news-page .cn-news-content > span:last-child {
+        min-width: 0;
     }
 
     .cn-news-page .cn-news-content-icon {
@@ -5576,8 +5616,8 @@ table tbody tr:last-child td {
     width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
+    /* table-layout: auto !important; */
+    border-collapse: collapse;
 }
 
 /* Remove constraints that prevent columns from expanding */
@@ -5697,8 +5737,8 @@ table tbody tr:last-child td {
         margin: 0 !important;
         table-layout: auto !important;
         border-collapse: collapse;
-        color: #fff !important;
-        background: transparent !important;
+        color: #fff;
+        background: transparent;
 
         --bs-table-color: #fff;
         --bs-table-bg: transparent;
@@ -5717,8 +5757,8 @@ table tbody tr:last-child td {
     .feedback-page .feedback-table>tbody>tr,
     .feedback-page .feedback-table>thead>tr>th,
     .feedback-page .feedback-table>tbody>tr>td {
-        color: #fff !important;
-        background-color: transparent !important;
+        color: #fff;
+        background-color: transparent;
     }
 
     /* Column widths */
@@ -5749,7 +5789,7 @@ table tbody tr:last-child td {
         font-weight: 700;
         letter-spacing: .025em;
         white-space: nowrap;
-        border-bottom: 1px solid rgba(255, 255, 255, .13) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, .13);
     }
 
     /* Table rows */
@@ -5757,17 +5797,17 @@ table tbody tr:last-child td {
         padding: 20px !important;
         font-size: .87rem;
         vertical-align: middle;
-        border-bottom: 1px solid rgba(255, 255, 255, .09) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, .09);
     }
 
     .feedback-page .feedback-table tbody tr:last-child td {
-        border-bottom: none !important;
+        border-bottom: none;
     }
 
     /* Hover effect */
     .feedback-page .feedback-table tbody tr:hover>* {
-        background-color: rgba(255, 255, 255, .055) !important;
-        color: #fff !important;
+        background-color: rgba(255, 255, 255, .055);
+        color: #fff;
     }
 
     /* Sender ID */
@@ -5897,15 +5937,17 @@ table tbody tr:last-child td {
 }
 
 /* Table */
-.cn-news-page table.table {
+.cn-news-page table.table,
+.cn-news-page .cn-news-table-wrapper > table {
+    display: table !important;
     width: 100% !important;
-    min-width: 750px;
+    min-width: 750px !important;
     margin-bottom: 0 !important;
-    table-layout: auto;
+    table-layout: fixed !important;
     border-collapse: collapse;
 
-    color: #fff !important;
-    background: transparent !important;
+    color: #fff;
+    background: transparent;
 
     --bs-table-color: #fff;
     --bs-table-bg: transparent;
@@ -5921,8 +5963,8 @@ table tbody tr:last-child td {
 .cn-news-page .table > tbody > tr,
 .cn-news-page .table > thead > tr > th,
 .cn-news-page .table > tbody > tr > td {
-    color: #fff !important;
-    background-color: transparent !important;
+    color: #fff;
+    background-color: transparent;
 }
 
 /* Table headings */
@@ -5933,7 +5975,26 @@ table tbody tr:last-child td {
     letter-spacing: .035em;
     text-transform: uppercase;
     white-space: nowrap;
-    border-bottom: 1px solid rgba(255,255,255,.14) !important;
+    border-bottom: 1px solid rgba(255,255,255,.14);
+    /* width: 22%; */
+}
+
+/* Date column */
+.cn-news-page .table thead th:first-child,
+.cn-news-page .table tbody td:first-child {
+    /* width: 22%; */
+}
+
+/* News Content column */
+.cn-news-page .table thead th:nth-child(2),
+.cn-news-page .table tbody td:nth-child(2) {
+    /* width: 48%; */
+}
+
+/* Actions column - fill remaining space */
+.cn-news-page .table thead th:last-child,
+.cn-news-page .table tbody td:last-child {
+    /* width: 30%; */
 }
 
 /* Table rows */
@@ -5941,17 +6002,17 @@ table tbody tr:last-child td {
     padding: 18px 20px !important;
     font-size: .86rem;
     vertical-align: middle;
-    border-bottom: 1px solid rgba(255,255,255,.09) !important;
+    border-bottom: 1px solid rgba(255,255,255,.09);
 }
 
 .cn-news-page .table tbody tr:last-child td {
-    border-bottom: none !important;
+    border-bottom: none;
 }
 
 /* Hover */
 .cn-news-page .table tbody tr:hover > * {
-    color: #fff !important;
-    background-color: rgba(255,255,255,.07) !important;
+    color: #fff;
+    background-color: rgba(255,255,255,.07);
 }
 
 /* News content */
@@ -5984,7 +6045,7 @@ table tbody tr:last-child td {
 /* Responsive */
 @media (max-width: 768px) {
     .cn-news-page table.table {
-        min-width: 750px;
+        min-width: 750px !important;
     }
 
     .cn-news-page .table thead th,
@@ -5995,49 +6056,8 @@ table tbody tr:last-child td {
 
 
 /* =====================================================
-   FINAL THEME FIX - ACTIVITY LOGS
-   Keep this block at the VERY END of admin.css
+   Activity Logs table dimensions
 ===================================================== */
-
-.activity-logs-page {
-    color: #fff !important;
-}
-
-/* Information card */
-.activity-logs-page .activity-info-card {
-    background: rgba(255, 255, 255, .13) !important;
-    border: 1px solid rgba(255, 255, 255, .22) !important;
-    color: #fff !important;
-    backdrop-filter: blur(16px);
-}
-
-.activity-logs-page .activity-info-card h6,
-.activity-logs-page .activity-info-card p {
-    color: #fff !important;
-}
-
-/* Filter and table cards */
-.activity-logs-page .activity-card {
-    background: rgba(255, 255, 255, .13) !important;
-    border: 1px solid rgba(255, 255, 255, .22) !important;
-    box-shadow: 0 8px 25px rgba(35, 20, 80, .10) !important;
-    backdrop-filter: blur(16px);
-}
-
-/* Card headings */
-.activity-logs-page .activity-card-heading {
-    border-bottom: 1px solid rgba(255, 255, 255, .15) !important;
-}
-
-.activity-logs-page .activity-card-heading h5,
-.activity-logs-page .activity-card-heading p {
-    color: #fff !important;
-}
-
-.activity-logs-page .activity-heading-icon {
-    background: rgba(255, 255, 255, .17) !important;
-    color: #fff !important;
-}
 
 /* Table wrapper */
 .activity-logs-page .activity-table-wrapper {
@@ -6053,29 +6073,13 @@ table tbody tr:last-child td {
     min-width: 1050px;
     max-width: none !important;
     margin: 0 !important;
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
-
-    --bs-table-bg: transparent;
-    --bs-table-color: #fff;
-    --bs-table-hover-bg: rgba(255,255,255,.08);
-    --bs-table-hover-color: #fff;
-    --bs-table-border-color: rgba(255,255,255,.12);
-}
-
-/* Override Bootstrap table cell backgrounds */
-.activity-logs-page .activity-table > :not(caption) > * > * {
-    color: #fff !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
+    /* table-layout: auto !important; */
+    border-collapse: collapse;
 }
 
 /* Table header */
 .activity-logs-page .activity-table thead th {
     padding: 16px 18px !important;
-    background: rgba(255,255,255,.12) !important;
-    color: rgba(255,255,255,.85) !important;
-    border-bottom: 1px solid rgba(255,255,255,.18) !important;
     font-size: 10px;
     font-weight: 750;
     letter-spacing: .65px;
@@ -6085,100 +6089,7 @@ table tbody tr:last-child td {
 /* Table body */
 .activity-logs-page .activity-table tbody td {
     padding: 17px 18px !important;
-    background: transparent !important;
-    color: #fff !important;
-    border-bottom: 1px solid rgba(255,255,255,.10) !important;
     vertical-align: middle;
-}
-
-.activity-logs-page .activity-table tbody tr:last-child td {
-    border-bottom: none !important;
-}
-
-/* Row hover */
-.activity-logs-page .activity-table tbody tr:hover > * {
-    background: rgba(255,255,255,.08) !important;
-    color: #fff !important;
-}
-
-/* Table content */
-.activity-logs-page .activity-primary-text,
-.activity-logs-page .activity-date,
-.activity-logs-page .activity-muted,
-.activity-logs-page .activity-subtext {
-    color: #fff !important;
-}
-
-.activity-logs-page .activity-actor small {
-    color: rgba(255,255,255,.68) !important;
-}
-
-.activity-logs-page .activity-avatar {
-    background: rgba(255,255,255,.16) !important;
-    color: #fff !important;
-}
-
-.activity-logs-page .activity-action-badge,
-.activity-logs-page .activity-id-badge {
-    background: rgba(255,255,255,.15) !important;
-    border: 1px solid rgba(255,255,255,.20) !important;
-    color: #fff !important;
-}
-
-/* Metadata */
-.activity-logs-page .activity-metadata summary {
-    color: #e5ddff !important;
-}
-
-.activity-logs-page .activity-metadata pre {
-    background: rgba(35,25,75,.48) !important;
-    border-color: rgba(255,255,255,.16) !important;
-    color: #fff !important;
-}
-
-/* Empty state */
-.activity-logs-page .activity-empty-state,
-.activity-logs-page .activity-empty-state h6,
-.activity-logs-page .activity-empty-state p {
-    color: #fff !important;
-}
-
-/* Pagination */
-.activity-logs-page .activity-pagination {
-    border-top: 1px solid rgba(255,255,255,.15) !important;
-}
-
-.activity-logs-page .activity-pagination .page-link {
-    background: rgba(255,255,255,.12) !important;
-    border-color: rgba(255,255,255,.20) !important;
-    color: #fff !important;
-}
-
-.activity-logs-page .activity-pagination .page-item.active .page-link {
-    background: rgba(139,92,246,.65) !important;
-    border-color: rgba(255,255,255,.35) !important;
-}
-
-/* Filter labels */
-.activity-logs-page .activity-filter-form .form-label {
-    color: #fff !important;
-}
-
-/* Keep filter inputs readable */
-.activity-logs-page .activity-filter-form .form-control,
-.activity-logs-page .activity-filter-form .form-select {
-    background: rgba(255,255,255,.12) !important;
-    border-color: rgba(255,255,255,.25) !important;
-    color: #fff !important;
-}
-
-.activity-logs-page .activity-filter-form .form-control::placeholder {
-    color: rgba(255,255,255,.65) !important;
-}
-
-.activity-logs-page .activity-filter-form .form-select option {
-    color: #222 !important;
-    background: #fff !important;
 }
 
 @media (max-width: 767.98px) {
@@ -6186,244 +6097,6 @@ table tbody tr:last-child td {
         min-width: 1050px !important;
     }
 }
-
-
-/* =====================================================
-   FINAL THEME FIX - MANAGE NEWS TABLE
-===================================================== */
-
-.cn-news-page .cn-news-list-card {
-    background: rgba(255,255,255,.13) !important;
-    border-color: rgba(255,255,255,.22) !important;
-    box-shadow: 0 8px 25px rgba(35,20,80,.10) !important;
-    backdrop-filter: blur(16px);
-}
-
-/* News table wrapper */
-.cn-news-page .cn-news-table-wrapper {
-    width: 100% !important;
-    overflow-x: auto;
-}
-
-/* Main table */
-.cn-news-page table.cn-news-table {
-    display: table !important;
-    width: 100% !important;
-    min-width: 750px;
-    margin: 0 !important;
-    table-layout: auto;
-    border-collapse: collapse;
-
-    --bs-table-bg: transparent;
-    --bs-table-color: #fff;
-    --bs-table-hover-bg: rgba(255,255,255,.08);
-    --bs-table-hover-color: #fff;
-    --bs-table-border-color: rgba(255,255,255,.12);
-}
-
-/* Remove Bootstrap backgrounds */
-.cn-news-page .cn-news-table > :not(caption) > * > * {
-    background-color: transparent !important;
-    color: #fff !important;
-    box-shadow: none !important;
-}
-
-/* Table header */
-.cn-news-page .cn-news-table thead th {
-    padding: 16px 20px !important;
-    background: rgba(255,255,255,.12) !important;
-    color: rgba(255,255,255,.88) !important;
-    border-bottom: 1px solid rgba(255,255,255,.18) !important;
-    font-size: 10px;
-    font-weight: 750;
-    letter-spacing: .7px;
-}
-
-/* Table body */
-.cn-news-page .cn-news-table tbody td {
-    padding: 18px 20px !important;
-    background: transparent !important;
-    color: #fff !important;
-    border-bottom: 1px solid rgba(255,255,255,.10) !important;
-    font-size: 13px;
-}
-
-.cn-news-page .cn-news-table tbody tr:last-child td {
-    border-bottom: none !important;
-}
-
-/* Hover */
-.cn-news-page .cn-news-table tbody tr:hover > * {
-    background: rgba(255,255,255,.08) !important;
-    color: #fff !important;
-}
-
-/* News date and content */
-.cn-news-page .cn-news-date,
-.cn-news-page .cn-news-content {
-    color: #fff !important;
-}
-
-.cn-news-page .cn-news-date-icon,
-.cn-news-page .cn-news-content-icon {
-    background: rgba(255,255,255,.16) !important;
-    color: #fff !important;
-}
-
-/* Existing action buttons remain distinct */
-.cn-news-page .cn-news-edit-btn {
-    background: rgba(255,255,255,.15) !important;
-    border-color: rgba(255,255,255,.25) !important;
-    color: #fff !important;
-}
-
-.cn-news-page .cn-news-delete-btn {
-    background: rgba(239,68,68,.16) !important;
-    border-color: rgba(255,160,160,.25) !important;
-    color: #ffe0e0 !important;
-}
-
-/* News pagination */
-.cn-news-page .cn-news-pagination {
-    border-top: 1px solid rgba(255,255,255,.15) !important;
-}
-
-.cn-news-page .cn-news-pagination .page-link {
-    background: rgba(255,255,255,.12) !important;
-    border-color: rgba(255,255,255,.20) !important;
-    color: #fff !important;
-}
-
-.cn-news-page .cn-news-pagination .page-item.active .page-link {
-    background: rgba(139,92,246,.65) !important;
-    border-color: rgba(255,255,255,.35) !important;
-    color: #fff !important;
-}
-
-@media (max-width: 767.98px) {
-    .cn-news-page .cn-news-table {
-        min-width: 750px !important;
-    }
-}
-
-/* =====================================================
-   FINAL THEME FIX - MANAGE NEWS TABLE
-===================================================== */
-
-.cn-news-page .cn-news-list-card {
-    background: rgba(255,255,255,.13) !important;
-    border-color: rgba(255,255,255,.22) !important;
-    box-shadow: 0 8px 25px rgba(35,20,80,.10) !important;
-    backdrop-filter: blur(16px);
-}
-
-/* News table wrapper */
-.cn-news-page .cn-news-table-wrapper {
-    width: 100% !important;
-    overflow-x: auto;
-}
-
-/* Main table */
-.cn-news-page table.cn-news-table {
-    display: table !important;
-    width: 100% !important;
-    min-width: 750px;
-    margin: 0 !important;
-    table-layout: auto;
-    border-collapse: collapse;
-
-    --bs-table-bg: transparent;
-    --bs-table-color: #fff;
-    --bs-table-hover-bg: rgba(255,255,255,.08);
-    --bs-table-hover-color: #fff;
-    --bs-table-border-color: rgba(255,255,255,.12);
-}
-
-/* Remove Bootstrap backgrounds */
-.cn-news-page .cn-news-table > :not(caption) > * > * {
-    background-color: transparent !important;
-    color: #fff !important;
-    box-shadow: none !important;
-}
-
-/* Table header */
-.cn-news-page .cn-news-table thead th {
-    padding: 16px 20px !important;
-    background: rgba(255,255,255,.12) !important;
-    color: rgba(255,255,255,.88) !important;
-    border-bottom: 1px solid rgba(255,255,255,.18) !important;
-    font-size: 10px;
-    font-weight: 750;
-    letter-spacing: .7px;
-}
-
-/* Table body */
-.cn-news-page .cn-news-table tbody td {
-    padding: 18px 20px !important;
-    background: transparent !important;
-    color: #fff !important;
-    border-bottom: 1px solid rgba(255,255,255,.10) !important;
-    font-size: 13px;
-}
-
-.cn-news-page .cn-news-table tbody tr:last-child td {
-    border-bottom: none !important;
-}
-
-/* Hover */
-.cn-news-page .cn-news-table tbody tr:hover > * {
-    background: rgba(255,255,255,.08) !important;
-    color: #fff !important;
-}
-
-/* News date and content */
-.cn-news-page .cn-news-date,
-.cn-news-page .cn-news-content {
-    color: #fff !important;
-}
-
-.cn-news-page .cn-news-date-icon,
-.cn-news-page .cn-news-content-icon {
-    background: rgba(255,255,255,.16) !important;
-    color: #fff !important;
-}
-
-/* Existing action buttons remain distinct */
-.cn-news-page .cn-news-edit-btn {
-    background: rgba(255,255,255,.15) !important;
-    border-color: rgba(255,255,255,.25) !important;
-    color: #fff !important;
-}
-
-.cn-news-page .cn-news-delete-btn {
-    background: rgba(239,68,68,.16) !important;
-    border-color: rgba(255,160,160,.25) !important;
-    color: #ffe0e0 !important;
-}
-
-/* News pagination */
-.cn-news-page .cn-news-pagination {
-    border-top: 1px solid rgba(255,255,255,.15) !important;
-}
-
-.cn-news-page .cn-news-pagination .page-link {
-    background: rgba(255,255,255,.12) !important;
-    border-color: rgba(255,255,255,.20) !important;
-    color: #fff !important;
-}
-
-.cn-news-page .cn-news-pagination .page-item.active .page-link {
-    background: rgba(139,92,246,.65) !important;
-    border-color: rgba(255,255,255,.35) !important;
-    color: #fff !important;
-}
-
-@media (max-width: 767.98px) {
-    .cn-news-page .cn-news-table {
-        min-width: 750px !important;
-    }
-}
-
 
 
 /* ==========================================
@@ -6434,11 +6107,11 @@ table tbody tr:last-child td {
 .cn-news-page .cn-news-form-card {
     width: 100%;
     overflow: hidden;
-    background: rgba(255, 255, 255, .12) !important;
-    border: 1px solid rgba(255, 255, 255, .22) !important;
-    border-radius: 16px !important;
-    box-shadow: 0 8px 25px rgba(35, 20, 80, .12) !important;
-    color: #fff !important;
+    background: rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(35, 20, 80, .12);
+    color: #fff;
 }
 
 .cn-news-page .cn-news-form-card .cn-news-card-heading {
@@ -6446,20 +6119,20 @@ table tbody tr:last-child td {
     align-items: center;
     gap: 14px;
     padding: 20px 24px;
-    background: rgba(255, 255, 255, .07) !important;
+    background: rgba(255, 255, 255, .07);
     border-bottom: 1px solid rgba(255, 255, 255, .15);
 }
 
 .cn-news-page .cn-news-form-card .cn-news-card-heading h2 {
     margin: 0 0 4px;
-    color: #fff !important;
+    color: #fff;
     font-size: 1.05rem;
     font-weight: 700;
 }
 
 .cn-news-page .cn-news-form-card .cn-news-card-heading p {
     margin: 0;
-    color: rgba(255, 255, 255, .72) !important;
+    color: rgba(255, 255, 255, .72);
     font-size: .83rem;
 }
 
@@ -6471,31 +6144,31 @@ table tbody tr:last-child td {
     align-items: center;
     justify-content: center;
     border-radius: 12px;
-    color: #fff !important;
-    background: rgba(255, 255, 255, .17) !important;
+    color: #fff;
+    background: rgba(255, 255, 255, .17);
     font-size: 1.05rem;
 }
 
 .cn-news-page .cn-news-card-body {
     padding: 24px !important;
-    background: transparent !important;
+    background: transparent;
 }
 
 .cn-news-page .cn-news-label {
     display: block;
     margin-bottom: 9px;
-    color: #fff !important;
+    color: #fff;
     font-size: .87rem;
     font-weight: 650;
 }
 
 .cn-news-page .cn-news-input {
     width: 100%;
-    color: #fff !important;
-    background: rgba(255, 255, 255, .12) !important;
-    border: 1px solid rgba(255, 255, 255, .25) !important;
-    border-radius: 10px !important;
-    box-shadow: none !important;
+    color: #fff;
+    background: rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, .25);
+    border-radius: 10px;
+    box-shadow: none;
 }
 
 .cn-news-page textarea.cn-news-input {
@@ -6510,17 +6183,17 @@ table tbody tr:last-child td {
 }
 
 .cn-news-page .cn-news-input::placeholder {
-    color: rgba(255, 255, 255, .62) !important;
+    color: rgba(255, 255, 255, .62);
 }
 
 .cn-news-page .cn-news-input:focus {
-    border-color: rgba(221, 214, 254, .85) !important;
-    box-shadow: 0 0 0 3px rgba(196, 181, 253, .15) !important;
+    border-color: rgba(221, 214, 254, .85);
+    box-shadow: 0 0 0 3px rgba(196, 181, 253, .15);
 }
 
 .cn-news-page .cn-news-field-help {
     margin-top: 8px;
-    color: rgba(255, 255, 255, .7) !important;
+    color: rgba(255, 255, 255, .7);
     font-size: .78rem;
 }
 
@@ -6540,19 +6213,19 @@ table tbody tr:last-child td {
 }
 
 .cn-news-page .cn-news-reset-btn {
-    color: #fff !important;
-    background: rgba(255, 255, 255, .12) !important;
-    border: 1px solid rgba(255, 255, 255, .25) !important;
+    color: #fff;
+    background: rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, .25);
 }
 
 .cn-news-page .cn-news-submit-btn {
-    color: #fff !important;
-    background: #6554df !important;
-    border: 1px solid rgba(255, 255, 255, .2) !important;
+    color: #fff;
+    background: #6554df;
+    border: 1px solid rgba(255, 255, 255, .2);
 }
 
 .cn-news-page .cn-news-submit-btn:hover {
-    background: #5544cf !important;
+    background: #5544cf;
 }
 
 @media (max-width: 767px) {

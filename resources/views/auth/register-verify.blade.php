@@ -16,10 +16,9 @@
 
                 <span class="logo-icon">
                     <img
-                        src="{{ asset('images/CareerNext.png') }}"
-                        alt="Career Next Logo"
-                        width="42"
-                        height="42">
+                        class="cn-logo-image cn-logo-image--auth"
+                        src="{{ asset('assets/images/career_next.png') }}"
+                        alt="Career Next Logo">
                 </span>
 
                 <span>Career Next</span>
@@ -31,80 +30,12 @@
 
         <!-- Progress -->
 
-        <div class="registration-progress">
-
-            <div class="progress-step completed">
-
-                <div class="step-number">
-                    <i class="fas fa-check"></i>
-                </div>
-
-                <span>Account</span>
-
-            </div>
-
-
-            <div class="progress-line active"></div>
-
-
-            <div class="progress-step completed">
-
-                <div class="step-number">
-                    <i class="fas fa-check"></i>
-                </div>
-
-                <span>Details</span>
-
-            </div>
-
-
-            <div class="progress-line active"></div>
-
-
-            <div class="progress-step completed">
-
-                <div class="step-number">
-                    <i class="fas fa-check"></i>
-                </div>
-
-                <span>Profile</span>
-
-            </div>
-
-
-            <div class="progress-line active"></div>
-
-
-            <div class="progress-step completed">
-
-                <div class="step-number">
-                    <i class="fas fa-check"></i>
-                </div>
-
-                <span>Review</span>
-
-            </div>
-
-
-            <div class="progress-line active"></div>
-
-
-            <div class="progress-step active">
-
-                <div class="step-number">
-                    5
-                </div>
-
-                <span>Verify</span>
-
-            </div>
-
-        </div>
+        <x-register-progress :current="6" />
 
 
         <!-- Main Card -->
 
-        <div class="registration-card">
+        <div class="registration-content">
 
             <!-- Header -->
 
@@ -318,17 +249,17 @@
 
                     @csrf
 
-                    <button
-                        type="submit"
-                        id="resend-button"
-                        style="
-                            border:0;
-                            background:none;
-                            padding:0;
-                            color:#2563eb;
-                            font-weight:600;
-                            cursor:pointer;
-                        ">
+                        <button
+                            type="submit"
+                            id="resend-button"
+                            style="
+                                border:0;
+                                background:none;
+                                padding:0;
+                                color:var(--theme-link, var(--theme-primary));
+                                font-weight:600;
+                                cursor:pointer;
+                            ">
 
                         Resend Code
 

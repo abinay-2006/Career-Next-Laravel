@@ -31,7 +31,7 @@
             <div class="header-content">
                 <div class="logo">
                     <h1 class="brand-logo">
-                        <img src="{{ asset('images/CareerNext.png') }}" alt="Career Next Logo" width="50" height="50">
+                        <img class="cn-logo-image" src="{{ asset('assets/images/career_next.png') }}" alt="Career Next Logo">
                         <span>Career Next</span>
                     </h1>
                 </div>
@@ -102,6 +102,16 @@
                                 <h3>Direct Connect</h3>
                                 <p>Connect directly with hiring managers and get personalized job recommendations.</p>
                             </div>
+                            <div class="feature-card">
+                                <i class="fas fa-file-lines career-feature-icon"></i>
+                                <h3>Resume Builder</h3>
+                                <p>Build a polished, recruiter-ready resume with ready-made sections and professional templates.</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-crosshairs career-feature-icon"></i>
+                                <h3>Smart Job Matching</h3>
+                                <p>Get vacancies ranked by your skills, experience and preferences so the right roles surface first.</p>
+                            </div>
                         </div>
 
                         <p>Our platform provides job seekers with powerful tools to search for positions based on their qualifications, experience, and preferences. Create your detailed profile, showcase your educational background, work experience, and skills to attract potential employers.</p>
@@ -134,12 +144,14 @@
 
 
                         <div class="job-alert">
-                            <h4><i class="fas fa-bell"></i> Job Alerts</h4>
-                            <p>Get notified about new jobs matching your preferences</p>
-                            <div class="alert-input">
-                                <input type="email" placeholder="Your email address">
-                                <button><i class="fas fa-paper-plane"></i></button>
-                            </div>
+                            <h4 style="color: #ffff;"><i class="fas fa-bell"></i> Job Alerts</h4>
+                            <p style="color: #ffff;">Get notified about new jobs matching your preferences</p>
+                            <form onsubmit="route('login')">
+                                <div class="alert-input">
+                                    <input type="email" placeholder="Your email address" required>
+                                    <a href="{{ route('login') }}"><button type="submit"><i class="fas fa-paper-plane"></i></button></a>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -151,7 +163,7 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h4>About Us</h4>
-                    <p style="color: #bdc3c7; line-height: 1.6;">We're dedicated to connecting talented professionals with their dream careers and helping companies build amazing teams.</p>
+                    <p style="line-height: 1.6;">We're dedicated to connecting talented professionals with their dream careers and helping companies build amazing teams.</p>
 
                 </div>
 
@@ -189,7 +201,7 @@
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2025 JOB PORTAL. All rights reserved. | Made with <i class="fas fa-heart" style="color: #e74c3c;"></i> for better careers</p>
+                <p>&copy; 2025 JOB PORTAL. All rights reserved. | Made with <i class="fas fa-heart" aria-hidden="true"></i> for better careers</p>
                 <p style="margin-top: 10px; font-size: 0.8rem;">
                     <a>Terms</a> | <a>Privacy</a> | <a>Cookies</a> | <a>Accessibility</a>
                 </p>

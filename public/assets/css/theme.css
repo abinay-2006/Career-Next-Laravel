@@ -38,6 +38,10 @@
   --theme-table-header-background: #eeeafb;
   --theme-table-header-text: #403b5d;
   --theme-surface-secondary: #f0eef8;
+  --theme-table-row-alt: var(--theme-surface-secondary);
+  --theme-divider: var(--theme-border);
+  --theme-shadow: 0 8px 24px rgba(24, 25, 45, .12);
+  --theme-focus-outline: var(--theme-accent);
   --theme-sidebar-active: rgba(255,255,255,.2);
   --color-primary: var(--theme-primary);
   --color-primary-dark: var(--theme-primary-hover);
@@ -50,14 +54,27 @@
   --color-text-primary: var(--theme-text-primary);
   --color-text-secondary: var(--theme-text-secondary);
   --color-muted: var(--theme-text-muted);
+  --theme-admin-surface: var(--theme-card-background);
+  --theme-admin-surface-subtle: var(--theme-surface-secondary);
+  --theme-admin-surface-raised: var(--theme-nav-background);
+  --theme-admin-text: var(--theme-text-primary);
+  --theme-admin-muted: var(--theme-text-secondary);
+  --theme-admin-border: var(--theme-border);
+  --theme-admin-input: var(--theme-input-background);
+  --theme-admin-input-text: var(--theme-input-text);
+  --theme-admin-table-header: var(--theme-table-header-background);
+  --theme-admin-table-header-text: var(--theme-table-header-text);
+  --theme-admin-table-row: var(--theme-table-bg);
+  --theme-admin-table-text: var(--theme-table-text);
+  --theme-admin-hover: var(--theme-hover);
 }
 
-:root[data-color="purple"] { --theme-primary:#667eea; --theme-primary-hover:#5143a5; --theme-secondary:#764ba2; --theme-accent:#818cf8; --theme-page-background:#f5f4fb; --theme-page-gradient:linear-gradient(135deg,#667eea 0%,#764ba2 100%); --theme-nav-background:#fff; --theme-sidebar-background:linear-gradient(160deg,#5143a5,#3a2c70); --theme-active-nav:#e9e6fb; --theme-hover:#f1efff; --theme-border:#e3e0ef; --theme-primary-dark:#5143a5; --theme-primary-contrast:#211a45; --theme-primary-hover-contrast:#fff; }
+:root[data-color="purple"] { --theme-primary:#667eea; --theme-primary-hover:#5143a5; --theme-secondary:#764ba2; --theme-accent:#818cf8; --theme-page-background:#f5f4fb; --theme-page-gradient:linear-gradient(135deg,#667eea 0%,#764ba2 100%); --theme-nav-background:#fff; --theme-sidebar-background:linear-gradient(160deg,#5143a5,#3a2c70); --theme-active-nav:#e9e6fb; --theme-hover:#f1efff; --theme-border:#e3e0ef; --theme-primary-dark:#5143a5; --theme-primary-contrast:#fff; --theme-primary-hover-contrast:#fff; }
 :root[data-color="blue"] { --theme-primary:#2563eb; --theme-primary-hover:#1d4ed8; --theme-secondary:#164e9b; --theme-accent:#38bdf8; --theme-page-background:#f2f7ff; --theme-page-gradient:linear-gradient(135deg,#3b82f6,#164e9b); --theme-nav-background:#f8fbff; --theme-sidebar-background:linear-gradient(160deg,#2563eb,#164e9b); --theme-active-nav:#dbeafe; --theme-hover:#e9f2ff; --theme-border:#dce7f6; --theme-primary-dark:#1d4ed8; --theme-primary-contrast:#fff; }
 :root[data-color="green"] { --theme-primary:#16834a; --theme-primary-hover:#116b3c; --theme-secondary:#0f5f46; --theme-accent:#34d399; --theme-page-background:#f1f8f3; --theme-page-gradient:linear-gradient(135deg,#22a05d,#0f5f46); --theme-nav-background:#f7fcf8; --theme-sidebar-background:linear-gradient(160deg,#116b3c,#0f5f46); --theme-active-nav:#d7f0df; --theme-hover:#e7f6ec; --theme-border:#dcebe0; --theme-primary-dark:#116b3c; --theme-primary-contrast:#fff; }
 :root[data-color="red"] { --theme-primary:#c53030; --theme-primary-hover:#a3232d; --theme-secondary:#8f1d2c; --theme-accent:#fb7185; --theme-page-background:#fff4f4; --theme-page-gradient:linear-gradient(135deg,#dc4545,#8f1d2c); --theme-nav-background:#fff9f9; --theme-sidebar-background:linear-gradient(160deg,#a3232d,#741a27); --theme-active-nav:#ffe0e0; --theme-hover:#fff0f0; --theme-border:#f0dede; --theme-primary-dark:#a3232d; --theme-primary-contrast:#fff; }
 :root[data-color="yellow"] { --theme-primary:#facc15; --theme-primary-hover:#eab308; --theme-secondary:#926300; --theme-accent:#eab308; --theme-page-background:#fff9e8; --theme-page-gradient:linear-gradient(135deg,#facc15,#926300); --theme-nav-background:#fffaf0; --theme-sidebar-background:linear-gradient(160deg,#765100,#503800); --theme-active-nav:#ffecad; --theme-hover:#fff4cc; --theme-border:#efe3bf; --theme-primary-dark:#654300; --theme-primary-contrast:#332400; }
-:root[data-color="orange"] { --theme-primary:#ea580c; --theme-primary-hover:#c2410c; --theme-secondary:#9a3412; --theme-accent:#fb923c; --theme-page-background:#fff5ed; --theme-page-gradient:linear-gradient(135deg,#f97316,#9a3412); --theme-nav-background:#fffaf6; --theme-sidebar-background:linear-gradient(160deg,#b63d08,#7c2806); --theme-active-nav:#ffedd5; --theme-hover:#fff1e6; --theme-border:#f3dfd1; --theme-primary-dark:#c2410c; --theme-primary-contrast:#321604; --theme-primary-hover-contrast:#fff; }
+:root[data-color="orange"] { --theme-primary:#ea580c; --theme-primary-hover:#c2410c; --theme-secondary:#9a3412; --theme-accent:#fb923c; --theme-page-background:#fff5ed; --theme-page-gradient:linear-gradient(135deg,#f97316,#9a3412); --theme-nav-background:#fffaf6; --theme-sidebar-background:linear-gradient(160deg,#b63d08,#7c2806); --theme-active-nav:#ffedd5; --theme-hover:#fff1e6; --theme-border:#f3dfd1; --theme-primary-dark:#c2410c; --theme-primary-contrast:#fff; --theme-primary-hover-contrast:#fff; }
 
 :root[data-color="purple"] { --theme-card-background:#fff; --theme-input-background:#fff; --theme-table-bg:#fff; --theme-table-text:#29283b; --theme-text-primary:#29283b; --theme-text-secondary:#67657a; --theme-text-muted:#777489; --theme-heading:#29283b; --theme-header-text:#29283b; --theme-footer-text:#67657a; --theme-link:#5143a5; --theme-form-label:#3d3a50; --theme-placeholder:#777489; --theme-table-header-background:#eeeafb; --theme-table-header-text:#403b5d; --theme-surface-secondary:#f0eef8; }
 :root[data-color="blue"] { --theme-card-background:#fff; --theme-input-background:#fff; --theme-table-bg:#fff; --theme-table-text:#202b3c; --theme-text-primary:#202b3c; --theme-text-secondary:#536174; --theme-text-muted:#657388; --theme-heading:#202b3c; --theme-header-text:#202b3c; --theme-footer-text:#536174; --theme-link:#1d4ed8; --theme-form-label:#34445c; --theme-placeholder:#657388; --theme-table-header-background:#e9f2ff; --theme-table-header-text:#233b61; --theme-surface-secondary:#eaf2fc; }
@@ -95,11 +112,27 @@
 :root[data-appearance="dark"][data-color="orange"] { --theme-primary:#fb923c; --theme-primary-hover:#fdba74; --theme-primary-contrast:#2b1b10; --theme-primary-hover-contrast:#2b1b10; }
 :root[data-appearance="dark"][data-color="yellow"] { --theme-primary:#facc15; --theme-primary-hover:#fde047; --theme-primary-contrast:#332400; --theme-primary-hover-contrast:#332400; }
 
+/* Dark appearances need dark interaction surfaces as well as dark cards.
+   Keep the selected palette visible without retaining its light-mode washes. */
+:root[data-appearance="dark"] {
+  --theme-divider: var(--theme-border);
+  --theme-shadow: 0 10px 28px rgba(0, 0, 0, .34);
+  --theme-focus-outline: var(--theme-accent);
+  --theme-table-row-alt: var(--theme-surface-secondary);
+}
+:root[data-appearance="dark"][data-color="purple"] { --theme-hover:#302d40; --theme-active-nav:#3c3655; }
+:root[data-appearance="dark"][data-color="blue"] { --theme-hover:#233149; --theme-active-nav:#2c3d5b; }
+:root[data-appearance="dark"][data-color="green"] { --theme-hover:#24382e; --theme-active-nav:#2d4939; }
+:root[data-appearance="dark"][data-color="red"] { --theme-hover:#3b2930; --theme-active-nav:#4b303a; }
+:root[data-appearance="dark"][data-color="orange"] { --theme-hover:#3b2e25; --theme-active-nav:#4c382b; }
+:root[data-appearance="dark"][data-color="yellow"] { --theme-hover:#38331f; --theme-active-nav:#443b1d; }
+
 /* Restrained shared component accents. Existing layout CSS owns dimensions and structure. */
 .theme-picker { position:relative; display:inline-flex; align-items:center; z-index:1601; }
 .theme-toggle { display:inline-flex; min-height:2.5rem; align-items:center; justify-content:center; gap:.48rem; padding:.38rem .65rem; border:1px solid var(--theme-border,#e3e0ef); border-radius:.65rem; background:var(--theme-card-background,#fff); color:var(--theme-text-primary,#29283b); font:inherit; font-size:.84rem; font-weight:600; cursor:pointer; }
 .theme-toggle:hover,.theme-toggle:focus-visible { border-color:var(--theme-primary,#667eea); background:var(--theme-hover,#f1efff); }
-.theme-toggle:focus-visible,.theme-option:focus-visible,.theme-mode-option:focus-visible { outline:3px solid var(--theme-accent,#818cf8); outline-offset:2px; }
+.theme-toggle:focus-visible,.theme-option:focus-visible,.theme-mode-option:focus-visible { outline:3px solid var(--theme-focus-outline,var(--theme-accent,#818cf8)); outline-offset:2px; }
+html[data-color] :is(a,button,input,select,textarea,[tabindex]):focus-visible { outline:2px solid var(--theme-focus-outline,var(--theme-accent,#818cf8)); outline-offset:2px; }
 .theme-current-swatch,.theme-option-swatch { display:inline-block; width:.9rem; height:.9rem; flex:0 0 .9rem; border:1px solid rgba(20,20,35,.2); border-radius:50%; background:var(--theme-swatch,var(--theme-primary,#667eea)); }
 .theme-palette { position:absolute; z-index:1602; top:calc(100% + .5rem); right:0; display:none; width:15rem; max-height:min(80vh,32rem); overflow:auto; padding:.55rem; border:1px solid var(--theme-border,#e3e0ef); border-radius:.8rem; background:var(--theme-card-background,#fff); color:var(--theme-text-primary,#29283b); box-shadow:0 14px 34px rgba(24,25,45,.2); }
 .theme-picker.is-open .theme-palette { display:grid; gap:.15rem; }
@@ -111,7 +144,10 @@
 .theme-mode-options { display:grid; grid-template-columns:1fr 1fr; gap:.35rem; padding:.2rem .35rem .4rem; }
 .theme-mode-option { display:flex; justify-content:center; gap:.45rem; border:1px solid var(--theme-border,#e3e0ef); }
 .theme-mode-option svg { width:1rem; height:1rem; }
+.theme-palette-close { display:none; position:absolute; top:.3rem; right:.3rem; width:2rem; height:2rem; min-height:0; place-items:center; border:0; border-radius:.5rem; background:transparent; color:var(--theme-text-secondary,#67657a); font:inherit; font-size:1.15rem; line-height:1; cursor:pointer; }
+.theme-palette-close:hover { background:var(--theme-hover,#f1efff); color:var(--theme-text-primary,#29283b); }
 @media(max-width:520px) { .theme-palette { right:0; width:min(15rem,calc(100vw - 1rem)); } .theme-current-name { display:none; } }
+@media(max-width:767.98px) { .theme-palette-close { display:grid; } }
 
 
 /* Theme picker placement and visibility safeguards. */

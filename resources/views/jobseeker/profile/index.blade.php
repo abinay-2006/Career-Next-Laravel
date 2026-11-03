@@ -6,7 +6,7 @@
 @php($jobSeekerPhotoUrl = \App\Support\ProfilePhoto::url($jobSeeker->Photo))
 
 <!-- ══ MAIN ══ -->
-<div class="main-content">
+<div class="main-content account-profile-page jobseeker-account-profile">
 
     <!-- Page Header -->
     <div class="page-header">
@@ -75,7 +75,7 @@
         <!-- Hero Information -->
         <div class="hero-info">
 
-            <div class="hero-name">
+            <div class="hero-name" style="color:#fff;">
                 {{ $jobSeeker->JobSeekerName ?? 'Unknown' }}
             </div>
 
@@ -682,7 +682,7 @@
                                 accept="image/jpeg,image/png,image/jpg"
                                 onchange="previewProfilePhoto(this)">
 
-                            <small style="color: #ccc; font-size: 0.8rem;">
+                            <small style="color: var(--theme-text-secondary); font-size: 0.8rem;">
                                 JPG, JPEG or PNG. Maximum size: 2 MB.
                             </small>
 
@@ -1010,7 +1010,7 @@
                     <small style="
                         display:block;
                         margin-top:8px;
-                        color:rgba(255,255,255,.6);
+                        color:var(--theme-text-secondary);
                     ">
                         Accepted formats: PDF, DOC, DOCX
                     </small>
@@ -1072,11 +1072,11 @@
 
                 <div
                     class="modal-header-icon"
-                    style="background:rgba(239,68,68,.18);">
+                    style="background:color-mix(in srgb,var(--theme-error) 14%,var(--theme-card-background));">
 
                     <i
                         class="fas fa-trash"
-                        style="color:#fca5a5;">
+                        style="color:var(--theme-error);">
                     </i>
 
                 </div>
@@ -1129,9 +1129,9 @@
 
                 <div class="confirmation-text">
 
-                    <h3 style="color:rgba(255,255,255,.9);">Remove your resume?</h3>
+                    <h3>Remove your resume?</h3>
 
-                    <p style="color:rgba(255,255,255,.7);">
+                    <p>
                         Are you sure you want to remove your uploaded resume?
                         You will need to upload it again if you want to use it
                         in the future.

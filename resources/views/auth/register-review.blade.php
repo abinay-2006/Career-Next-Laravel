@@ -12,57 +12,24 @@
         <div class="register-header">
             <a href="{{ route('register.index') }}" class="register-logo">
                 <span class="logo-icon">
-                    <img src="{{ asset('images/CareerNext.png') }}" alt="Career Next Logo" width="42" height="42">
+                    <img class="cn-logo-image cn-logo-image--auth" src="{{ asset('assets/images/career_next.png') }}" alt="Career Next Logo">
                 </span>
                 <span>Career Next</span>
             </a>
         </div>
 
-        <div class="registration-card">
-            <div class="registration-header">
-                <div class="registration-icon">
+        <div class="registration-content">
+            <div class="card-header">
+                <div class="step-badge">
                     <i class="fas fa-clipboard-check" aria-hidden="true"></i>
                 </div>
-                <h1>Review Your Details</h1>
-                <p>Please review your information carefully before continuing.</p>
-            </div>
-
-            <div class="registration-progress" aria-label="Registration progress">
-                <div class="progress-step completed">
-                    <span>1</span>
-                    <small>Account</small>
-                </div>
-                <div class="progress-line completed"></div>
-
-                <div class="progress-step completed">
-                    <span>2</span>
-                    <small>Details</small>
-                </div>
-                <div class="progress-line completed"></div>
-
-                <div class="progress-step completed">
-                    <span>3</span>
-                    <small>Profile</small>
-                </div>
-                <div class="progress-line completed"></div>
-
-                <div class="progress-step completed">
-                    <span>4</span>
-                    <small>Professional</small>
-                </div>
-                <div class="progress-line completed"></div>
-
-                <div class="progress-step active" aria-current="step">
-                    <span>5</span>
-                    <small>Review</small>
-                </div>
-                <div class="progress-line"></div>
-
-                <div class="progress-step">
-                    <span>6</span>
-                    <small>Verify</small>
+                <div>
+                    <h1>Review Your Details</h1>
+                    <p>Please review your information carefully before continuing.</p>
                 </div>
             </div>
+
+            <x-register-progress :current="5" />
 
             {{-- Account Type --}}
             <section class="review-section">

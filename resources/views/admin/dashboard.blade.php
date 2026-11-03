@@ -189,7 +189,7 @@
                             <td>{{ $j->CompanyName }}</td>
                             <td>{{ $j->JobTitle }}</td>
                             <td style="text-align:center;">
-                                <span style="background:rgba(96,165,250,0.25);color:#93c5fd;padding:2px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;">
+                                <span class="vacancy-chip">
                                     {{ $j->Vacancy }}
                                 </span>
                             </td>

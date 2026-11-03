@@ -82,7 +82,7 @@
             @else
 
             <span class="completion-incomplete">
-                <i class="fas fa-circle-exclamation m-4"></i>
+                <i class="fas fa-circle-exclamation"></i>
                 {{ count($missingProfileItems) }} remaining
             </span>
 
@@ -121,7 +121,7 @@
                 @foreach($missingProfileItems as $item)
 
                 <a href="{{ route($item['route']) }}"
-                    class="missing-profile-item">
+                    class="btn complete-profile-btn">
 
                     <span>
                         <i class="fas {{ $profileSectionIcons[$item['key']] ?? 'fa-circle-exclamation' }}"></i>
@@ -139,7 +139,7 @@
 
             <a
                 href="{{ route('jobseeker.profile.index') }}"
-                class="complete-profile-btn">
+                class="btn complete-profile-btn">
 
                 <i class="fas fa-pen"></i>
                 Complete Profile

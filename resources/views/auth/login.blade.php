@@ -12,13 +12,13 @@
     <div class="left-panel">
         <div class="brand">
             <h1 class="brand-logo">
-                <img src="{{ asset('assets/images/CareerNext.png') }}" alt="Career Next">
+                <img class="cn-logo-image cn-logo-image--auth" src="{{ asset('assets/images/career_next.png') }}" alt="Career Next">
                 <span>Career Next</span>
             </h1>
         </div>
 
         <div class="left-features">
-            <h2>Find your dream job with us today</h2>
+            <h2 style="color: #fff;">Find your dream job with us today</h2>
             <div class="feature-item">
                 <div class="dot"><i class="fas fa-search"></i></div>
                 <span>Browse thousands of curated job listings across all industries</span>
@@ -34,7 +34,7 @@
         </div>
 
         <div class="left-stats">
-            <h2>Your Gateway to Professional Success</h2>
+            <h2 style="color: #fff;">Your Gateway to Professional Success</h2>
         </div>
     </div>
 
@@ -59,13 +59,19 @@
                     <label>I am a</label>
                     <div class="input-wrap">
                         <i class="fas fa-users lead-icon"></i>
-                        <select name="cmbUser" id="login-type" required>
-                            <option value="">Select User Type</option>
-                            <option value="JobSeeker">Job Seeker</option>
-                            <option value="Employer">Employer</option>
-                            <option value="Administrator">Administrator</option>
-                        </select>
-                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                        <div class="custom-select" id="login-type-wrap">
+                            <div class="select-trigger" id="login-type-trigger" role="button" aria-haspopup="listbox" aria-expanded="false" aria-controls="login-type-listbox" tabindex="0">
+                                <span class="select-value" id="login-type-value">Select User Type</span>
+                                <i class="fas fa-chevron-down dropdown-arrow"></i>
+                            </div>
+                            <div class="select-listbox" id="login-type-listbox" role="listbox" aria-labelledby="login-type-trigger">
+                                <div class="select-option" role="option" data-value="" aria-selected="false">Select User Type</div>
+                                <div class="select-option" role="option" data-value="JobSeeker" aria-selected="false">Job Seeker</div>
+                                <div class="select-option" role="option" data-value="Employer" aria-selected="false">Employer</div>
+                                <div class="select-option" role="option" data-value="Administrator" aria-selected="false">Administrator</div>
+                            </div>
+                            <input type="hidden" name="cmbUser" id="login-type" value="" required>
+                        </div>
                     </div>
                 </div>
 
@@ -105,7 +111,7 @@
             <div class="switch-text">
                 Don't have an account? <a
                     href="{{ route('register.index') }}"
-                    style="color:purple">
+                    class="switch-link">
                     Create one
                 </a>
             </div>

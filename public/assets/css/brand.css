@@ -1,11 +1,22 @@
-/* Shared brand logo styles */
+/* Shared Career Next identity and logo sizing. The generated mark includes
+   transparent glow padding, so its image box is slightly larger than the
+   desired visible mark height. */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap');
+
+:root {
+  --cn-logo-header-height: 3.5rem;
+  --cn-logo-sidebar-height: 3.25rem;
+  --cn-logo-mobile-height: 2.75rem;
+  --cn-logo-auth-height: 3.5rem;
+  --cn-logo-gap: 0.55em;
+}
 
 .brand-logo {
   --brand-size: 1.4rem;
   display: inline-flex;
+  min-width: 0;
   align-items: center;
-  gap: 0.55em;
+  gap: var(--cn-logo-gap);
   font-family: 'Poppins', sans-serif;
   font-weight: 700;
   letter-spacing: -0.3px;
@@ -15,16 +26,46 @@
   color: inherit;
 }
 
-.brand-logo img {
-  width: 2.2em;
-  height: 2.2em;
-  border-radius: 0.4em;
-  object-fit: cover;
-  background: rgba(255, 255, 255, 0.15);
-  flex-shrink: 0;
+.cn-logo-image {
+  display: block;
+  width: var(--cn-logo-header-height);
+  height: var(--cn-logo-header-height);
+  max-width: none;
+  object-fit: contain;
+  object-position: center;
+  overflow: visible;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.cn-logo-image--sidebar {
+  width: var(--cn-logo-sidebar-height);
+  height: var(--cn-logo-sidebar-height);
+}
+
+.cn-logo-image--mobile {
+  width: var(--cn-logo-mobile-height);
+  height: var(--cn-logo-mobile-height);
+}
+
+.cn-logo-image--auth {
+  width: var(--cn-logo-auth-height);
+  height: var(--cn-logo-auth-height);
 }
 
 .brand-logo span {
+  min-width: 0;
   font-size: 1em;
   line-height: 1;
+}
+
+@media (max-width: 767.98px) {
+  :root {
+    --cn-logo-header-height: var(--cn-logo-mobile-height);
+    --cn-logo-sidebar-height: 2.65rem;
+    --cn-logo-auth-height: 3.25rem;
+  }
 }

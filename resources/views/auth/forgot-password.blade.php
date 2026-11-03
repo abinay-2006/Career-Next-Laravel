@@ -4,7 +4,7 @@
 <div class="page-wrapper">
     <div class="left-panel">
         <div class="brand">
-            <h1 class="brand-logo"><img src="{{ asset('assets/images/CareerNext.png') }}" alt="Career Next"><span>Career Next</span></h1>
+            <h1 class="brand-logo"><img class="cn-logo-image cn-logo-image--auth" src="{{ asset('assets/images/career_next.png') }}" alt="Career Next"><span>Career Next</span></h1>
         </div>
         <div class="left-features">
             <h2>Get back to your next opportunity</h2>

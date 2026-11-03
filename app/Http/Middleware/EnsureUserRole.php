@@ -12,6 +12,9 @@ class EnsureUserRole
     public function handle(Request $request, Closure $next, string $role): Response
     {
         if (!in_array($role, ['admin', 'employer', 'jobseeker'], true)) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['message' => 'Forbidden'], 403);
+            }
             abort(403);
         }
 
@@ -21,10 +24,16 @@ class EnsureUserRole
         ));
 
         if ($authenticatedRoles === []) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['message' => 'Unauthenticated'], 401);
+            }
             return redirect()->guest(route('login'));
         }
 
         if (count($authenticatedRoles) !== 1 || $authenticatedRoles[0] !== $role) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['message' => 'This browser session has an inconsistent account identity. Sign out and sign in again.'], 403);
+            }
             abort(403, 'This browser session has an inconsistent account identity. Sign out and sign in again.');
         }
 
@@ -36,6 +45,14 @@ class EnsureUserRole
                 Auth::guard($role)->logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
+
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'message' => $status === 'suspended'
+                            ? 'Your account has been suspended. Please contact the administrator.'
+                            : 'Your account is no longer active. Please contact the administrator.',
+                    ], 403);
+                }
 
                 return redirect()->route('login')->with(
                     'error',

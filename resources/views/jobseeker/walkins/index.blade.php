@@ -453,7 +453,7 @@
       <i class="fas fa-person-walking-arrow-right"></i>
     </div>
 
-    <h2 style="color: #fff;">No Walk-in Interviews Available</h2>
+    <h2>No Walk-in Interviews Available</h2>
 
     <p>
       There are currently no walk-in interviews scheduled.

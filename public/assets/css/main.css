@@ -60,7 +60,6 @@ code, kbd, samp {font-family:monospace; font-size:110%;}
 
 /* Shared brand logo */
 .brand-logo {--brand-size:1.4rem; display:inline-flex; align-items:center; gap:0.55em; font-family:'Poppins',sans-serif; font-weight:700; letter-spacing:-0.3px; text-decoration:none; font-size:var(--brand-size); line-height:1; color:inherit;}
-.brand-logo img {width:2.2em; height:2.2em; border-radius:0.4em; object-fit:cover; background:rgba(255,255,255,0.15); flex-shrink:0;}
 .brand-logo span {font-size:1em; line-height:1;}
 
 /* Floating */

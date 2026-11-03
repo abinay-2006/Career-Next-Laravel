@@ -38,6 +38,10 @@ class LoginController extends Controller
             'txtUser' => 'required',
             'txtPass' => 'required',
             'cmbUser' => 'required',
+        ], [
+            // cmbUser is the hidden input behind the user-type picker, so its
+            // default message would name a control the user never sees.
+            'cmbUser.required' => 'Please select account type.',
         ]);
 
         $username = trim($request->txtUser);

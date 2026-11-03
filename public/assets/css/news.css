@@ -19,7 +19,6 @@
 }
 
 .cn-news-public-header .brand-logo { color: #35324a; }
-.cn-news-public-header .brand-logo img { width: 2rem; height: 2rem; }
 .cn-news-public-header nav { display: flex; align-items: center; gap: 1.25rem; }
 .cn-news-public-header nav a { color: #55536b; font-size: .86rem; font-weight: 500; text-decoration: none; }
 .cn-news-public-header nav a:hover, .cn-news-public-header nav a[aria-current] { color: #5b4ca8; }

@@ -9,7 +9,7 @@
     <div class="page-header activity-header">
         <div class="page-header-text">
             <h1><i class="bi bi-clock-history"></i> Activity Logs</h1>
-            <p style="color: rgba(255, 255, 255, 0.8);">Monitor system activity, review user actions, and track recorded events.</p>
+            <p>Monitor system activity, review user actions, and track recorded events.</p>
         </div>
 
         <div class="activity-header-badge">

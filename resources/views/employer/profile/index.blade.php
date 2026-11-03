@@ -9,7 +9,7 @@
      MAIN
 ═══════════════════════════════════════════════════════ -->
 
-<div class="main-content">
+<div class="main-content account-profile-page employer-account-profile">
 
     <!-- ═════════════════════════════════════════════════════
          ALERTS

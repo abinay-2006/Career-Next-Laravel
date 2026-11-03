@@ -1,6 +1,6 @@
 /* Shared theme bindings: only recognizable shared components are adjusted. */
 html[data-color] body {
-    background-color: var(--theme-page-background, #f5f4fb);
+    background: var(--theme-page-background, #f5f4fb);
     color: var(--theme-text-primary, #29283b);
 }
 html[data-color] .cn-admin-header,
@@ -95,6 +95,18 @@ html[data-color] .btn-register:hover {
     border-color: var(--theme-primary-hover, #5143a5);
     color: var(--theme-primary-hover-contrast, #fff);
 }
+
+/* Guarantee register button visibility in Dark Mode: light background + dark text. */
+html[data-color][data-appearance="dark"] .btn-register {
+    background-color: var(--theme-primary, #818cf8);
+    border-color: var(--theme-primary, #818cf8);
+    color: var(--theme-primary-contrast, #171423);
+}
+html[data-color][data-appearance="dark"] .btn-register:hover {
+    background-color: var(--theme-primary-hover, #a5b4fc);
+    border-color: var(--theme-primary-hover, #a5b4fc);
+    color: var(--theme-primary-hover-contrast, #171423);
+}
 html[data-color] .btn-outline-primary {
     color: var(--theme-primary-dark, #5143a5);
     border-color: var(--theme-primary, #667eea);
@@ -105,6 +117,27 @@ html[data-color] .btn-outline-primary:hover {
 }
 html[data-color] .theme-toggle {
     color: var(--theme-text-primary, #29283b);
+}
+
+/* Apply the selected appearance to page copy across every authenticated role.
+   Keep actions and badges out of these selectors so their status colors remain. */
+html[data-color] .cn-admin-content {
+    color: var(--theme-text-primary, #29283b);
+}
+html[data-color] .cn-admin-content :is(h1, h2, h3, h4, h5, h6, label, dt, dd, li, td, th, .section-title, .card-title, .form-label) {
+    color: var(--theme-heading, var(--theme-text-primary, #29283b));
+}
+html[data-color] .cn-admin-content :is(p, small, .text-muted, .form-text, .text-secondary, .page-description) {
+    color: var(--theme-text-secondary, #67657a);
+}
+html[data-color] .cn-admin-content .profile-hero :is(h1, h2, h3, h4, p, small) {
+    color: #fff;
+}
+html[data-color] .cn-admin-content a:not(.btn):not([class*="btn-"]):not(.cn-admin-nav-link):not(.cn-sidebar-link):not(.dropdown-item):not(.btn-view-saved) {
+    color: var(--theme-link, var(--theme-primary-dark, #5143a5));
+}
+html[data-color] .cn-admin-content :is(input, select, textarea, .form-control, .form-select) {
+    color: var(--theme-input-text, var(--theme-text-primary, #29283b));
 }
 
 html[data-appearance="dark"] body {
@@ -204,84 +237,6 @@ html[data-appearance="dark"] .cn-news-footer {
     border-color: var(--theme-border, #3a3e4e);
 }
 
-/* Admin dashboard: the original dashboard stylesheet was designed for a dark glass
-   background and hard-coded white text. Rebind those selectors in both modes. */
-html[data-appearance="light"] .cn-admin-content .main-content,
-html[data-appearance="light"] .cn-admin-content .main-content * {
-    --cn-dashboard-ink: var(--theme-text-primary, #29283b);
-}
-html[data-appearance="light"] .cn-admin-content .page-header h1,
-html[data-appearance="light"] .cn-admin-content .chart-title,
-html[data-appearance="light"] .cn-admin-content .section-title,
-html[data-appearance="light"] .cn-admin-content .stat-card,
-html[data-appearance="light"] .cn-admin-content .action-card,
-html[data-appearance="light"] .cn-admin-content tbody td {
-    color: var(--theme-text-primary, #29283b) !important;
-}
-html[data-appearance="light"] .cn-admin-content .page-header p,
-html[data-appearance="light"] .cn-admin-content .stat-badge,
-html[data-appearance="light"] .cn-admin-content .tab-btn,
-html[data-appearance="light"] .cn-admin-content thead th {
-    color: var(--theme-text-secondary, #67657a) !important;
-}
-html[data-appearance="light"] .cn-admin-content .stat-card,
-html[data-appearance="light"] .cn-admin-content .chart-card,
-html[data-appearance="light"] .cn-admin-content .tabs-wrap,
-html[data-appearance="light"] .cn-admin-content .action-card {
-    background: var(--theme-card-background, #fff) !important;
-    border: 1px solid var(--theme-border, #e3e0ef) !important;
-    box-shadow: 0 8px 24px rgba(39, 35, 75, 0.055);
-    backdrop-filter: none;
-}
-html[data-appearance="light"] .cn-admin-content .tab-header {
-    border-bottom-color: var(--theme-border, #e3e0ef);
-}
-html[data-appearance="light"] .cn-admin-content .tab-btn:hover,
-html[data-appearance="light"] .cn-admin-content .tab-btn.active {
-    color: var(--theme-primary-dark, #5143a5) !important;
-    background: var(--theme-hover, #f1efff);
-    border-bottom-color: var(--theme-primary, #667eea);
-}
-html[data-appearance="light"] .cn-admin-content thead th {
-    background: #f0eef8;
-}
-html[data-appearance="light"] .cn-admin-content tbody tr {
-    border-top-color: var(--theme-border, #e3e0ef);
-}
-html[data-appearance="light"] .cn-admin-content tbody tr:hover {
-    background: var(--theme-hover, #f1efff);
-}
-html[data-appearance="dark"] .cn-admin-content .page-header h1,
-html[data-appearance="dark"] .cn-admin-content .chart-title,
-html[data-appearance="dark"] .cn-admin-content .section-title,
-html[data-appearance="dark"] .cn-admin-content .stat-card,
-html[data-appearance="dark"] .cn-admin-content .action-card,
-html[data-appearance="dark"] .cn-admin-content tbody td {
-    color: var(--theme-text-primary, #f3f4f6) !important;
-}
-html[data-appearance="dark"] .cn-admin-content .page-header p,
-html[data-appearance="dark"] .cn-admin-content .stat-badge,
-html[data-appearance="dark"] .cn-admin-content .tab-btn,
-html[data-appearance="dark"] .cn-admin-content thead th {
-    color: var(--theme-text-secondary, #b5bac8) !important;
-}
-html[data-appearance="dark"] .cn-admin-content .stat-card,
-html[data-appearance="dark"] .cn-admin-content .chart-card,
-html[data-appearance="dark"] .cn-admin-content .tabs-wrap,
-html[data-appearance="dark"] .cn-admin-content .action-card {
-    background: var(--theme-card-background, #242735) !important;
-    border-color: var(--theme-border, #3a3e4e) !important;
-}
-html[data-appearance="dark"] .cn-admin-content thead th {
-    background: #2b2f40;
-}
-html[data-appearance="dark"] .cn-admin-content .tab-btn:hover,
-html[data-appearance="dark"] .cn-admin-content .tab-btn.active {
-    color: var(--theme-primary-dark, #c4b5fd) !important;
-    background: var(--theme-hover, #383247);
-    border-bottom-color: var(--theme-accent, #818cf8);
-}
-
 /* Shared navigation and page-specific dark glass surfaces. */
 html[data-color] .cn-admin-brand,
 html[data-color] .cn-admin-header-account,
@@ -296,9 +251,6 @@ html[data-color] .cn-admin-nav-link.is-active { background: var(--theme-active-n
 html[data-color] .cn-admin-drawer .cn-admin-nav-link { color: var(--theme-sidebar-text, #fff); }
 html[data-color] .cn-admin-drawer .cn-admin-nav-link:hover,
 html[data-color] .cn-admin-drawer .cn-admin-nav-link.is-active { background: var(--theme-active-nav, #e9e6fb); color: var(--theme-primary-dark, #5143a5); }
-html[data-color] .modern-menu .nav-links a { color: var(--theme-text-primary, #29283b); }
-html[data-color] .modern-menu .nav-links a.active { background: var(--theme-primary, #667eea); color: var(--theme-primary-contrast, #fff); }
-html[data-color] .modern-menu .nav-links a:hover { color: var(--theme-primary-dark, #5143a5); }
 html[data-color] .cn-admin-header .btn-logout,
 html[data-color] .navbar-user .profile-trigger { border-color: var(--theme-border, #e3e0ef); }
 
@@ -313,22 +265,24 @@ html[data-appearance="dark"] .cn-admin-drawer .cn-admin-nav-link { color: var(--
 html[data-appearance="dark"] .cn-admin-drawer .cn-admin-nav-link:hover,
 html[data-appearance="dark"] .cn-admin-drawer .cn-admin-nav-link.is-active { background: var(--theme-hover, #383247); color: var(--theme-primary-dark, #c4b5fd); }
 
-html[data-color] #main, html[data-color] #page, html[data-color] #page-in {
-    background-color: var(--theme-page-background, #f5f4fb);
-    color: var(--theme-text-primary, #29283b);
-}
-
-/* Shared semantic bindings for former white text over purple glass surfaces. */
+/* Shared semantic bindings for former white text over purple glass surfaces — applies in both modes via theme variables. */
 html[data-color] body { background:var(--theme-page-background); color:var(--theme-text-primary); }
 html[data-color] :is(h1,h2,h3,h4,h5,h6,.page-header h1,.section-title,.card-title,.modal-title) { color:var(--theme-heading); }
 html[data-color] :is(p,small,.text-muted,.form-text,.page-header p) { color:var(--theme-text-secondary); }
-html[data-color] a:not(.btn):not(.brand-logo):not(.cn-admin-nav-link):not(.cn-sidebar-link):not(.dropdown-item) { color:var(--theme-link); }
+html[data-color] a:not(.btn):not([class*="btn-"]):not(.brand-logo):not(.cn-admin-nav-link):not(.cn-sidebar-link):not(.dropdown-item):not(.active):not(.btn-login):not(.btn-register):not(.btn-view-saved) { color:var(--theme-link); }
 html[data-color] :is(.cn-dashboard-main,.cn-admin-content,.cn-news-main,.main-content) { background:var(--theme-page-background); color:var(--theme-text-primary); }
-html[data-color] #content,html[data-color] #col { background:var(--theme-card-background); color:var(--theme-text-primary); border-color:var(--theme-border); }
+
+/* Home page structural surfaces — Light Mode only (Dark Mode handled separately at html[data-appearance="dark"]). */
+html[data-color][data-appearance="light"] #main,
+html[data-color][data-appearance="light"] #page,
+html[data-color][data-appearance="light"] #page-in {
+    background-color: var(--theme-page-background, #f5f4fb);
+    color: var(--theme-text-primary, #29283b);
+}
 html[data-color] .cn-dashboard-main :is(h1,h2,h3,h4,h5,h6) { color:var(--theme-heading); }
 html[data-color] .cn-dashboard-main :is(p,small,.text-muted,.form-text) { color:var(--theme-text-secondary); }
 html[data-color] .cn-dashboard-main label { color:var(--theme-form-label); }
-html[data-color] .cn-dashboard-main a:not(.btn):not(.cn-sidebar-link):not(.dropdown-item) { color:var(--theme-link); }
+html[data-color] .cn-dashboard-main a:not(.btn):not([class*="btn-"]):not(.cn-sidebar-link):not(.dropdown-item):not(.btn-view-saved) { color:var(--theme-link); }
 
 /* Authenticated role navigation, headers and footers. */
 html[data-color] .navbar { color:var(--theme-header-text); }
@@ -347,6 +301,9 @@ html[data-color] .cn-admin-header .btn-logout:hover { background:#ffe4e6; color:
 html[data-color] .cn-admin-drawer-brand { color:var(--theme-sidebar-text); }
 html[data-color] .cn-admin-drawer-close { color:var(--theme-sidebar-text); }
 html[data-color] .cn-admin-drawer-logout { background:var(--theme-card-background); color:var(--theme-error); border-color:var(--theme-border); }
+/* --theme-error (#c53030) on a dark card measures 2.71:1, so the label goes
+   white there and the danger stays in the border. */
+html[data-color][data-appearance="dark"] .cn-admin-drawer-logout { color:var(--theme-text-primary); border-color:color-mix(in srgb, var(--theme-error) 55%, var(--theme-border)); }
 html[data-color] :is(.footer,.cn-admin-footer,.cn-news-footer) { background:var(--theme-nav-background); color:var(--theme-footer-text); border-color:var(--theme-border); }
 html[data-color] .cn-news-public-header nav a { color:var(--theme-text-secondary); }
 html[data-color] .cn-news-public-header nav a:hover,html[data-color] .cn-news-public-header nav a[aria-current] { color:var(--theme-link); }
@@ -369,7 +326,7 @@ html[data-color] :is(.welcome-card,.glass-card,.feature-card,.auth-card,.registr
  .application-card) :is(p,small,.card-desc,.form-text,.stat-badge) { color:var(--theme-text-secondary); }
 html[data-color] :is(.auth-container,.registration-card,.auth-card) { background:var(--theme-card-background); color:var(--theme-text-primary); }
 html[data-color] .cn-analytics-stat-icon,html[data-color] .cn-analytics-panel-heading > i { color:var(--theme-primary-dark); }
-html[data-color] .cn-analytics-panel-heading a,html[data-color] .cn-dashboard-main .table a:not(.btn) { color:var(--theme-link); }
+html[data-color] .cn-analytics-panel-heading a:not([class*="btn-"]),html[data-color] .cn-dashboard-main .table a:not(.btn):not([class*="btn-"]) { color:var(--theme-link); }
 
 /* Forms, tables, menus, dialogs and interactive states. */
 html[data-color] :is(input,select,textarea,.form-control,.form-select) { background-color:var(--theme-input-background); color:var(--theme-input-text); border-color:var(--theme-border); }
@@ -398,7 +355,8 @@ html[data-appearance="dark"] .modern-header { background:var(--theme-sidebar-bac
 html[data-color] .modern-header :is(h1,h2,h3,p,.brand-logo) { color:#fff; }
 html[data-color] .modern-menu .nav-links a { color:var(--theme-text-primary); }
 html[data-color] .modern-menu .nav-links a.active { background:var(--theme-primary); color:var(--theme-primary-contrast); }
-html[data-color] .modern-menu .nav-links a:hover { color:var(--theme-link); }
+html[data-color] .modern-menu .nav-links a:hover { background:var(--theme-hover); color:var(--theme-link); }
+html[data-color] .modern-menu .nav-links a.active:hover { background:var(--theme-primary-hover); color:var(--theme-primary-hover-contrast); }
 html[data-color] .job-alert { background:var(--theme-page-gradient); color:#fff; }
 html[data-color] .job-alert button { color:var(--theme-link); }
 html[data-appearance="dark"] .job-alert { background:var(--theme-sidebar-background); }
@@ -406,6 +364,15 @@ html[data-color] .btn-login { color:var(--theme-link); border-color:var(--theme-
 html[data-color] .btn-login:hover { background:var(--theme-primary); color:var(--theme-primary-contrast); }
 html[data-color] .article h2::after,html[data-color] #col-in h3::after,html[data-color] .footer-section h4::after { background:var(--theme-primary); }
 html[data-color] .welcome-letter,html[data-color] .feature-card i { background-image:var(--theme-page-gradient); }
+
+/* Quick Actions: style.css writes these in fixed greys with an indigo glyph and
+   indigo hover, so they stayed blue whatever palette was chosen. primary-dark is
+   used over --theme-link because --theme-link only changes with appearance, not
+   with the colour, so dark mode would keep showing the purple default. */
+html[data-color] #col-in h3 { color:var(--theme-heading); }
+html[data-color] #col-in ul li a { color:var(--theme-text-primary); }
+html[data-color] #col-in ul li a i { color:var(--theme-primary-dark); }
+html[data-color] #col-in ul li a:hover { background:var(--theme-hover); color:var(--theme-primary-dark); }
 
 /* Former glass dashboard text roles, rebased explicitly for both surfaces. */
 html[data-color] .cn-dashboard-main :is(.page-header-text h1,.glass-card h2,.glass-card h3,.dashboard-shortcut,.cn-analytics-stat-copy strong,.cn-analytics-panel-heading h3) { color:var(--theme-heading); }
@@ -420,4 +387,2388 @@ html[data-appearance="dark"] .feature-card .career-feature-icon {
     background-image: none;
     -webkit-text-fill-color: var(--theme-accent, #a5b4fc);
     color: var(--theme-accent, #a5b4fc);
+}
+
+/* Shared Admin component theme. Every rule stays inside the Admin content
+   shell, and all surfaces resolve from the same light/dark semantic tokens. */
+html[data-color] .cn-admin-content {
+    color: var(--theme-admin-text);
+}
+
+html[data-color] .cn-admin-content .main-content {
+    color: var(--theme-admin-text);
+}
+
+html[data-color] .cn-admin-content :is(h1, h2, h3, h4, h5, h6, .modal-title, .section-title, .chart-title, .table-card-header h3, .cell-name, .field-value, .stat-value, .activity-primary-text, .activity-date, .activity-subtext, .cn-news-date, .cn-news-content, .documents-user-name, .documents-file-type, .feedback-message, .feedback-date) {
+    color: var(--theme-admin-text);
+}
+
+html[data-color] .cn-admin-content :is(p, small, .text-muted, .form-text, .page-header p, .page-header-text p, .cell-sub, .table-record-count, .table-footer span, .records-count, .pagination-info, .empty-state, .cn-admin-empty-state, .empty-state p, .activity-empty-state, .activity-muted, .activity-actor small, .stat-label, .stat-badge, .cn-news-field-help, .documents-user-id, .documents-file-name, .field-label, .modal-text, .modal-subtitle, .modal-body, .modal-info-box .info-label, .modal-info-box p, .feedback-table-footer) {
+    color: var(--theme-admin-muted);
+}
+
+html[data-color] .cn-admin-content :is(label, .form-label, .cn-news-label, .documents-page label) {
+    color: var(--theme-form-label);
+}
+
+/* Shared panel and card surfaces used by current and future Admin pages. */
+html[data-color] .cn-admin-content :is(.cn-admin-card, .cn-admin-panel, .cn-admin-filter, .cn-admin-info, .page-header, .card, .glass-card, .table-card, .table-wrapper, .filter-bar, .filter-card, .filter-panel, .info-panel, .activity-card, .activity-info-card, .feedback-filter-card, .feedback-table-card, .cn-news-form-card, .cn-news-list-card, .cn-news-notice, .documents-list-card, .sum-card, .stat-card, .chart-card, .action-card, .welcome-card, .tabs-wrap, .custom-modal, .modal-content, .modal-info-box, .field-item, .tab-content) {
+    background: var(--theme-admin-surface);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-admin-text);
+    box-shadow: var(--theme-admin-shadow);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+/* The surface list above also reaches the role dashboards through their shared
+   .cn-admin-content wrapper, but their own stylesheets never gave the header a
+   radius or any inner space, so it lands as a flush slab with square corners.
+   Match the cards it sits beside. */
+html[data-color] .cn-dashboard-main .page-header {
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+}
+
+html[data-color] .cn-admin-content :is(.cn-admin-card-header, .cn-admin-panel-header, .card-header, .card-footer, .table-card-header, .activity-card-heading, .cn-news-card-heading, .cn-news-list-heading, .documents-page .card-header, .modal-header, .modal-footer, .tab-header) {
+    background: var(--theme-admin-surface-subtle);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-admin-text);
+}
+
+html[data-color] .cn-admin-content :is(.cn-admin-card-body, .cn-admin-nested-section, .card-body, .cn-news-card-body) {
+    background: var(--theme-admin-surface);
+    color: var(--theme-admin-text);
+}
+
+html[data-color] .cn-admin-content :is(.page-header-icon, .activity-info-icon, .activity-heading-icon, .cn-news-section-icon, .cn-news-empty-icon, .documents-user-avatar, .modal-info-box) {
+    background-color: var(--theme-admin-surface-subtle);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-primary-dark);
+}
+
+html[data-color] .cn-admin-content .activity-metadata pre {
+    background: var(--theme-admin-surface-subtle);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-admin-text);
+}
+
+html[data-color] .cn-admin-content :is(.activity-action-badge, .activity-id-badge, .activity-header-badge, .feedback-count-badge, .feedback-role, .feedback-sender-id, .cn-news-count, .vacancy-chip, .id-badge, .role-badge, .badge-pill) {
+    background: var(--theme-admin-surface-subtle);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-link);
+}
+
+html[data-color] .cn-admin-content .feedback-sender-id {
+    background: none;
+    border: 0;
+    color: var(--theme-link);
+}
+
+html[data-color] .cn-admin-content .badge-pill.amber {
+    background: color-mix(in srgb, var(--theme-warning) 14%, var(--theme-admin-surface));
+    border-color: color-mix(in srgb, var(--theme-warning) 35%, var(--theme-admin-border));
+    color: var(--theme-warning);
+}
+
+/* Keep the existing branded News banner contrast on its dark gradient. */
+html[data-color] .cn-admin-content .cn-news-header,
+html[data-color] .cn-admin-content .cn-news-header :is(h1, p) {
+    color: #fff;
+}
+
+html[data-color] .cn-admin-content .cn-news-header {
+    background: linear-gradient(120deg, #6657df 0%, #8273ef 55%, #a18bf6 100%);
+}
+
+/* Theme-aware controls and dropdowns. */
+html[data-color] .cn-admin-content :is(.cn-admin-input, .cn-admin-select, .form-control, .form-select, .form-input, .search-wrap input, input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]), select, textarea, .per-page-select) {
+    background-color: var(--theme-admin-input);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-admin-input-text);
+}
+
+html[data-color] .cn-admin-content :is(input, textarea, .form-control, .form-input)::placeholder {
+    color: var(--theme-placeholder);
+    opacity: 1;
+}
+
+html[data-color] .cn-admin-content select option {
+    background: var(--theme-admin-input);
+    color: var(--theme-admin-input-text);
+}
+
+html[data-color] .cn-admin-content :is(.form-control, .form-select, .form-input, input, select, textarea):focus {
+    border-color: var(--theme-primary);
+    box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--theme-primary) 20%, transparent);
+}
+
+html[data-color] .cn-admin-content :is(.form-control, .form-select, .form-input, input, select, textarea):not(:focus) {
+    border-color: color-mix(in srgb, var(--theme-primary) 24%, var(--theme-border));
+}
+
+html[data-color] .cn-admin-content :is(.dropdown-menu, .modal-content, .custom-modal, .popover) {
+    background: var(--theme-admin-surface);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-admin-text);
+}
+
+html[data-color] .cn-admin-content .dropdown-item {
+    color: var(--theme-admin-text);
+}
+
+html[data-color] .cn-admin-content .dropdown-item:hover,
+html[data-color] .cn-admin-content .dropdown-item:focus {
+    background: var(--theme-admin-hover);
+    color: var(--theme-link);
+}
+
+html[data-color] .cn-admin-content #confirmModal .modal-content {
+    background: var(--theme-admin-surface);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-admin-text);
+}
+
+html[data-color] .cn-admin-content #confirmModal .btn-close {
+    filter: var(--theme-admin-close-filter, none);
+    background-color: var(--theme-admin-surface-subtle);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-admin-text);
+}
+
+/* Consistent table colors while preserving each page's widths and scrolling. */
+html[data-color] .cn-admin-content :is(table, .cn-admin-table) {
+    --bs-table-bg: var(--theme-admin-table-row);
+    --bs-table-color: var(--theme-admin-table-text);
+    --bs-table-hover-bg: var(--theme-admin-hover);
+    --bs-table-hover-color: var(--theme-admin-table-text);
+    --bs-table-border-color: var(--theme-admin-border);
+    color: var(--theme-admin-table-text);
+    border-color: var(--theme-admin-border);
+}
+
+html[data-color] .cn-admin-content :is(table, .cn-admin-table) thead th {
+    background: var(--theme-admin-table-header);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-admin-table-header-text);
+}
+
+html[data-color] .cn-admin-content :is(table, .cn-admin-table) tbody tr > :is(td, th) {
+    background: var(--theme-admin-table-row);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-admin-table-text);
+}
+
+html[data-color] .cn-admin-content :is(table, .cn-admin-table) tbody tr:hover > :is(td, th) {
+    background: var(--theme-admin-hover);
+    color: var(--theme-admin-table-text);
+}
+
+html[data-color] .cn-admin-content :is(table, .cn-admin-table) tbody tr:nth-of-type(even) > :is(td, th) {
+    background: var(--theme-table-row-alt);
+}
+
+html[data-color] .cn-admin-content :is(.table-responsive, .table-wrap, .responsive-table-wrapper, .documents-table-scroll, .activity-table-wrapper) {
+    border-color: var(--theme-admin-border);
+}
+
+html[data-color] .cn-admin-content :is(.cn-admin-pagination .page-link, .pagination .page-link, .activity-pagination .page-link, .cn-news-pagination .page-link) {
+    background: var(--theme-admin-surface);
+    border-color: var(--theme-admin-border);
+    color: var(--theme-link);
+}
+
+html[data-color] .cn-admin-content :is(.cn-admin-pagination .page-item.active .page-link, .pagination .page-item.active .page-link, .activity-pagination .page-item.active .page-link, .cn-news-pagination .page-item.active .page-link) {
+    background: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+
+html[data-color] .cn-admin-content :is(.tab-btn, .btn-reset, .btn-secondary, .btn-outline, .cn-news-reset-btn, .cn-news-edit-btn, .btn-back, .btn-cancel, .btn-modal-cancel, .modal-cancel) {
+    color: var(--theme-link);
+    border-color: var(--theme-admin-border);
+}
+
+html[data-color] .cn-admin-content :is(.btn-search, .btn-submit, .btn-view, .btn-view-profile, .btn-view-resume, .btn-edit-profile, .btn-view-saved, .application-details-button) {
+    border: 1px solid var(--theme-primary);
+    background: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+    box-shadow: 0 5px 14px color-mix(in srgb, var(--theme-primary) 20%, transparent);
+}
+
+html[data-color] .cn-admin-content :is(.btn-search, .btn-submit, .btn-view, .btn-view-profile, .btn-view-resume, .btn-edit-profile, .btn-view-saved):hover {
+    border-color: var(--theme-primary-hover);
+    background: var(--theme-primary-hover);
+    color: var(--theme-primary-hover-contrast);
+}
+
+/* Light mode paints the profile hero with --theme-page-gradient, whose first
+   stop is --theme-primary, so a primary-filled button on it merges (measured
+   1.17:1). A surface-coloured ring cuts the button out of the gradient while
+   keeping its themed fill. */
+html[data-color][data-appearance="light"] .cn-admin-content .profile-hero .btn-edit-profile {
+    border-color: var(--theme-card-background);
+    box-shadow:
+        0 0 0 1px var(--theme-card-background),
+        0 5px 14px color-mix(in srgb, var(--theme-primary) 20%, transparent);
+}
+
+html[data-color] .cn-admin-content .btn-apply:not(:disabled) {
+    border-color: var(--theme-primary);
+    background: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+
+html[data-color] .cn-admin-content .btn-apply:not(:disabled):hover {
+    border-color: var(--theme-primary-hover);
+    background: var(--theme-primary-hover);
+    color: var(--theme-primary-hover-contrast);
+}
+
+html[data-color] .cn-admin-content .btn-apply:disabled {
+    border-color: var(--theme-border);
+    background: var(--theme-surface-secondary);
+    color: var(--theme-text-muted);
+    opacity: .75;
+}
+
+html[data-color] .cn-admin-content .btn-details {
+    border-color: var(--theme-border);
+    background: var(--theme-card-background);
+    color: var(--theme-link);
+}
+
+html[data-color] .cn-admin-content .btn-details:hover {
+    border-color: var(--theme-primary);
+    background: var(--theme-hover);
+    color: var(--theme-primary-dark);
+}
+
+html[data-color] .cn-admin-content .btn-edit {
+    border-color: var(--theme-border);
+    background: var(--theme-card-background);
+    color: var(--theme-link);
+}
+
+html[data-color] .cn-admin-content .btn-edit:hover {
+    border-color: var(--theme-primary);
+    background: var(--theme-hover);
+    color: var(--theme-primary-dark);
+}
+
+/* These secondary buttons sit on the dark card itself, so the link tint reads
+   as coloured text inside a dark button rather than as white ink. */
+html[data-color][data-appearance="dark"] :is(.cn-admin-content .btn-details, .cn-admin-content .btn-edit, .job-card-actions .btn-details) {
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .cn-admin-content .btn-confirm-cancel {
+    border-color: var(--theme-border);
+    background: var(--theme-card-background);
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .cn-admin-content .btn-confirm-cancel:hover {
+    border-color: var(--theme-primary);
+    background: var(--theme-hover);
+    color: var(--theme-primary-dark);
+}
+
+html[data-color] .cn-admin-content .btn-confirm-delete {
+    border-color: var(--theme-error);
+    background: var(--theme-error);
+    color: #fff;
+}
+
+html[data-color] .cn-admin-content .btn-confirm-delete:hover {
+    filter: brightness(.92);
+}
+
+html[data-color] .cn-admin-content .stat-pill.pending,
+html[data-color] .cn-admin-content .status-badge.pending {
+    border-color: color-mix(in srgb, var(--theme-warning) 35%, var(--theme-border));
+    background: color-mix(in srgb, var(--theme-warning) 14%, var(--theme-card-background));
+    color: var(--theme-warning);
+}
+
+html[data-color] .cn-admin-content .stat-pill.accepted,
+html[data-color] .cn-admin-content .status-badge:is(.accepted, .approved, .confirmed, .success) {
+    border-color: color-mix(in srgb, var(--theme-success) 35%, var(--theme-border));
+    background: color-mix(in srgb, var(--theme-success) 14%, var(--theme-card-background));
+    color: var(--theme-success);
+}
+
+html[data-color] .cn-admin-content .stat-pill.rejected,
+html[data-color] .cn-admin-content .status-badge:is(.rejected, .declined, .error) {
+    border-color: color-mix(in srgb, var(--theme-error) 32%, var(--theme-border));
+    background: color-mix(in srgb, var(--theme-error) 12%, var(--theme-card-background));
+    color: var(--theme-error);
+}
+
+html[data-color] .cn-admin-content .application-details-button {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .55rem .7rem;
+    border-radius: .55rem;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+html[data-color] .cn-admin-content .application-status-badge.pending {
+    color: var(--theme-warning);
+    background: color-mix(in srgb, var(--theme-warning) 14%, var(--theme-card-background));
+    border-color: color-mix(in srgb, var(--theme-warning) 35%, var(--theme-border));
+}
+
+html[data-color] .cn-admin-content .application-status-badge.accepted {
+    color: var(--theme-success);
+    background: color-mix(in srgb, var(--theme-success) 14%, var(--theme-card-background));
+    border-color: color-mix(in srgb, var(--theme-success) 35%, var(--theme-border));
+}
+
+html[data-color] .cn-admin-content .application-status-badge.rejected {
+    color: var(--theme-error);
+    background: color-mix(in srgb, var(--theme-error) 12%, var(--theme-card-background));
+    border-color: color-mix(in srgb, var(--theme-error) 32%, var(--theme-border));
+}
+
+html[data-color] .cn-admin-content :is(.profile-modal, .confirmation-modal, .modal-overlay .modal, .modal-content) {
+    border-color: var(--theme-border);
+    background: var(--theme-card-background);
+    color: var(--theme-text-primary);
+    box-shadow: var(--theme-admin-shadow);
+}
+
+html[data-color] .cn-admin-content :is(.profile-modal-header, .profile-modal-body, .profile-modal-footer, .modal-header, .modal-footer) {
+    border-color: var(--theme-border);
+    background-color: var(--theme-card-background);
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .cn-admin-content :is(.profile-modal, .confirmation-modal, .modal-overlay .modal) :is(h1, h2, h3, h4, .modal-title, p, label) {
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .cn-admin-content :is(.profile-modal, .confirmation-modal, .modal-overlay .modal) :is(.modal-header-icon, .confirmation-icon, .form-header-icon) {
+    border-color: var(--theme-border);
+    background: var(--theme-hover);
+    color: var(--theme-primary);
+}
+
+html[data-color] .cn-admin-content :is(.job-details-hero, .job-info-card, .details-section, .no-description, .eligibility-box, .application-card, .summary-card, .job-bottom-navigation) {
+    border-color: var(--theme-border);
+    background: var(--theme-card-background);
+    color: var(--theme-text-primary);
+    box-shadow: var(--theme-admin-shadow);
+}
+
+html[data-color] .cn-admin-content :is(.job-hero-content h2, .details-section-heading h3, .application-card h3, .summary-card h3, .eligibility-box strong, .info-card-content strong) {
+    color: var(--theme-heading);
+}
+
+html[data-color] .cn-admin-content :is(.job-status-label, .company-name-large, .job-id, .info-card-content span, .details-section-heading p, .job-description, .no-description, .eligibility-box span, .application-card p, .summary-item span, .summary-item strong) {
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .cn-admin-content .job-description *,
+html[data-color] .cn-admin-content .summary-item > i,
+html[data-color] .cn-admin-content .summary-item > i::before,
+html[data-color] .cn-admin-content .company-name-large i,
+html[data-color] .cn-admin-content .no-description i {
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .cn-admin-content :is(.job-apply-button, .bottom-apply-button, .sidebar-apply-button) i {
+    color: var(--theme-primary-contrast);
+}
+
+html[data-color] .cn-admin-content :is(.company-logo-box, .info-card-icon, .heading-icon, .eligibility-icon, .application-card-icon) {
+    border-color: var(--theme-border);
+    background: var(--theme-hover);
+    color: var(--theme-primary);
+}
+
+html[data-color] .cn-admin-content :is(.company-logo-box, .info-card-icon, .heading-icon, .eligibility-icon, .application-card-icon) i {
+    color: var(--theme-primary);
+}
+
+html[data-color] .cn-admin-content :is(.job-apply-button, .bottom-apply-button, .sidebar-apply-button) {
+    border-color: var(--theme-primary);
+    background: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+
+html[data-color] .cn-admin-content :is(.job-apply-button, .bottom-apply-button, .sidebar-apply-button):hover {
+    border-color: var(--theme-primary-hover);
+    background: var(--theme-primary-hover);
+    color: var(--theme-primary-hover-contrast);
+}
+
+html[data-color] .cn-admin-content :is(.back-to-search, .back-to-search i) {
+    color: var(--theme-link);
+}
+
+html[data-color] .cn-admin-content :is(.application-complete, .application-complete i, .applied-label, .applied-label i, .bottom-applied, .bottom-applied i) {
+    color: var(--theme-success);
+}
+
+html[data-color] .cn-admin-content :is(.summary-item, .application-facts > div) {
+    border-color: var(--theme-border);
+}
+
+html[data-color] .cn-admin-content :is(.tab-btn:hover, .tab-btn.active, .btn-reset:hover, .btn-secondary:hover, .btn-outline:hover, .cn-news-reset-btn:hover, .cn-news-edit-btn:hover, .btn-back:hover, .btn-cancel:hover, .btn-modal-cancel:hover, .modal-cancel:hover) {
+    background: var(--theme-admin-hover);
+    color: var(--theme-link);
+}
+
+html[data-color] .cn-admin-content :is(.cn-news-reset-btn, .cn-news-edit-btn, .btn-cancel, .btn-modal-cancel, .modal-cancel) {
+    background: var(--theme-admin-surface-subtle);
+}
+
+html[data-appearance="light"] .cn-admin-content .cn-news-delete-btn {
+    background: color-mix(in srgb, var(--theme-error) 10%, var(--theme-admin-surface));
+    border-color: color-mix(in srgb, var(--theme-error) 32%, var(--theme-admin-border));
+    color: var(--theme-error);
+}
+
+html[data-color] .cn-admin-content :is(.stat-card.active, .sum-card.active-filter) {
+    border-color: var(--theme-primary);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-primary) 22%, transparent), var(--theme-admin-shadow);
+}
+
+html[data-color] .cn-admin-content :is(.pagination-container, .feedback-table-footer, .feedback-pagination, .activity-pagination, .cn-news-pagination, .table-footer) {
+    border-color: var(--theme-admin-border);
+}
+
+html[data-color] .cn-admin-content .table-record-count {
+    font-size: .78rem;
+}
+
+html[data-color] .cn-admin-content .vacancy-chip {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: .72rem;
+    font-weight: 600;
+}
+
+html[data-color] .cn-admin-content :is(.btn-primary, .btn-filter, .cn-news-submit-btn) {
+    background: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+
+html[data-color] .cn-admin-content :is(.btn-primary, .btn-filter, .cn-news-submit-btn):hover {
+    background: var(--theme-primary-hover);
+    border-color: var(--theme-primary-hover);
+    color: var(--theme-primary-hover-contrast);
+}
+
+html[data-appearance="dark"] {
+    --theme-admin-shadow: 0 10px 28px rgba(0, 0, 0, .22);
+    --theme-admin-close-filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+html[data-appearance="light"] {
+    --theme-admin-shadow: 0 8px 24px rgba(35, 30, 15, .06);
+    --theme-admin-close-filter: none;
+}
+
+html[data-appearance="light"] .cn-admin-content :is(.gender-chip, .badge, .status-badge) {
+    color: var(--theme-admin-text);
+}
+
+html[data-appearance="light"] .cn-admin-content :is(.badge.approved, .badge.Confirm, .badge.confirmed, .status-badge.approved) {
+    background: color-mix(in srgb, var(--theme-success) 14%, var(--theme-admin-surface));
+    border-color: color-mix(in srgb, var(--theme-success) 35%, var(--theme-admin-border));
+    color: var(--theme-success);
+}
+
+html[data-appearance="light"] .cn-admin-content :is(.badge.pending, .badge.Pending, .status-badge.pending) {
+    background: color-mix(in srgb, var(--theme-warning) 14%, var(--theme-admin-surface));
+    border-color: color-mix(in srgb, var(--theme-warning) 35%, var(--theme-admin-border));
+    color: var(--theme-warning);
+}
+
+html[data-appearance="light"] .cn-admin-content :is(.badge.rejected, .badge.Suspended, .status-badge.rejected) {
+    background: color-mix(in srgb, var(--theme-error) 12%, var(--theme-admin-surface));
+    border-color: color-mix(in srgb, var(--theme-error) 32%, var(--theme-admin-border));
+    color: var(--theme-error);
+}
+
+html[data-appearance="dark"] .cn-admin-content .badge-pill.amber {
+    background: rgba(245, 158, 11, .18);
+    border-color: rgba(245, 158, 11, .35);
+    color: #fcd34d;
+}
+
+/* Shared Admin, Employer and Job Seeker shell theme bindings. */
+html[data-color] .cn-admin-workspace-label {
+    color: color-mix(in srgb, var(--theme-sidebar-text) 72%, transparent);
+}
+
+html[data-color] .cn-admin-nav-link,
+html[data-color] .cn-admin-nav-link i {
+    color: var(--theme-sidebar-text);
+}
+
+html[data-color] .cn-admin-nav-link:hover,
+html[data-color] .cn-admin-nav-link.is-active {
+    background: var(--theme-active-nav);
+    border-color: var(--theme-border);
+    color: var(--theme-primary-dark);
+}
+
+html[data-color] .cn-admin-nav-link:hover i,
+html[data-color] .cn-admin-nav-link.is-active i {
+    color: var(--theme-primary-dark);
+}
+
+html[data-color] .cn-admin-drawer {
+    background: var(--theme-sidebar-background);
+    color: var(--theme-sidebar-text);
+}
+
+html[data-color] .cn-admin-drawer .cn-admin-workspace-label,
+html[data-color] .cn-admin-drawer .cn-admin-drawer-brand,
+html[data-color] .cn-admin-drawer .cn-admin-drawer-close,
+html[data-color] .cn-admin-drawer .cn-admin-user-copy strong,
+html[data-color] .cn-admin-drawer .cn-admin-user-copy small {
+    color: var(--theme-sidebar-text);
+}
+
+html[data-color] .cn-admin-drawer .cn-admin-nav-link,
+html[data-color] .cn-admin-drawer .cn-admin-nav-link i {
+    color: var(--theme-sidebar-text);
+}
+
+html[data-color] .cn-admin-drawer .cn-admin-nav-link:hover,
+html[data-color] .cn-admin-drawer .cn-admin-nav-link.is-active {
+    background: var(--theme-active-nav);
+    border-color: var(--theme-border);
+    color: var(--theme-primary-dark);
+}
+
+html[data-color] .cn-admin-drawer .cn-admin-nav-link:hover i,
+html[data-color] .cn-admin-drawer .cn-admin-nav-link.is-active i {
+    color: var(--theme-primary-dark);
+}
+
+html[data-color] .cn-admin-drawer-account {
+    border-color: var(--theme-border);
+}
+
+/* Career News cards need explicit surfaces in the authenticated role shell. */
+html[data-color] .cn-admin-content .cn-news-page {
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .cn-admin-content :is(.cn-news-featured, .cn-news-empty, .empty-state, .resume-empty) {
+    background: var(--theme-card-background);
+    border: 1px solid var(--theme-border);
+    color: var(--theme-text-primary);
+    box-shadow: var(--theme-admin-shadow);
+}
+
+html[data-color] .cn-admin-content :is(.cn-news-featured, .cn-news-empty, .empty-state, .resume-empty) :is(h1, h2, h3, h4, p, time, span) {
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .cn-admin-content .cn-news-featured-mark,
+html[data-color] .cn-admin-content .cn-news-featured .cn-news-read-link,
+html[data-color] .cn-admin-content .cn-news-empty a {
+    color: var(--theme-link);
+}
+
+html[data-color] .cn-admin-content .cn-news-search {
+    border-color: var(--theme-border);
+    background: var(--theme-card-background);
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .cn-admin-content .cn-news-search > i,
+html[data-color] .cn-admin-content .cn-news-search input,
+html[data-color] .cn-admin-content .cn-news-clear {
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .cn-admin-content .cn-news-search button {
+    border-color: var(--theme-primary);
+    background: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+
+html[data-color] .cn-admin-content .cn-news-empty > span,
+html[data-color] .cn-admin-content .resume-empty i {
+    background: var(--theme-hover);
+    color: var(--theme-primary-dark);
+}
+
+/* Job search cards keep their own layout while every text layer follows theme. */
+html[data-color] .cn-admin-content .job-card {
+    border-color: var(--theme-border);
+    background: var(--theme-card-background);
+    color: var(--theme-text-primary);
+    box-shadow: var(--theme-admin-shadow);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+html[data-color] .cn-admin-content .job-card:hover {
+    border-color: color-mix(in srgb, var(--theme-primary) 45%, var(--theme-border));
+    background: var(--theme-hover);
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--theme-primary) 12%, transparent);
+}
+
+html[data-color] .cn-admin-content .job-card .job-title {
+    color: var(--theme-heading);
+}
+
+html[data-color] .cn-admin-content .job-card .job-company,
+html[data-color] .cn-admin-content .job-card .job-desc {
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .cn-admin-content .job-company-icon {
+    border: 1px solid var(--theme-border);
+    background: var(--theme-hover);
+    color: var(--theme-primary);
+}
+
+html[data-color] .cn-admin-content .meta-pill {
+    border-color: var(--theme-border);
+    background: var(--theme-surface-secondary);
+    color: var(--theme-text-secondary);
+}
+
+/* Walk-in interview cards. The generic card bindings only rebind headings and
+   paragraphs, so this page's small labels, its job sub-line and its colour-coded
+   status pills kept the translucent white text they were designed for over the
+   dark glass gradient and vanished on the light card surface. */
+html[data-color] .cn-admin-content :is(.walkin-stat-card span, .walkin-info-item span, .walkin-date-time-item span) {
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .cn-admin-content :is(.walkin-job-title, .walkin-description-title) {
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .cn-admin-content .walkin-status.upcoming {
+    color: var(--theme-success);
+    background: color-mix(in srgb, var(--theme-success) 14%, var(--theme-card-background));
+    border-color: color-mix(in srgb, var(--theme-success) 35%, var(--theme-border));
+}
+
+html[data-color] .cn-admin-content .walkin-status.upcoming span {
+    background: var(--theme-success);
+}
+
+html[data-color] .cn-admin-content .walkin-status.past {
+    color: var(--theme-text-secondary);
+    background: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+}
+
+html[data-color] .cn-admin-content .walkin-status.past span {
+    background: var(--theme-text-muted);
+}
+
+html[data-color] .cn-admin-content .walkin-stat-icon.upcoming-icon {
+    color: var(--theme-success);
+    background: color-mix(in srgb, var(--theme-success) 14%, var(--theme-card-background));
+}
+
+html[data-color] .cn-admin-content .walkin-stat-icon.past-icon {
+    color: var(--theme-text-muted);
+    background: var(--theme-surface-secondary);
+}
+
+/* Same page, second half of the problem: every inner panel, icon tile and
+   divider on this page is a translucent white layer meant to sit on the dark
+   glass gradient, so on the light card they disappear and the copy inside them
+   floats in blank space. */
+html[data-color] .cn-admin-content :is(.walkin-info-item, .walkin-description, .walkin-datetime, .walkin-no-upcoming, .walkin-empty-state) {
+    background: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+}
+
+html[data-color] .cn-admin-content :is(.walkin-stat-icon, .walkin-info-icon, .walkin-date-icon, .walkin-no-upcoming-icon, .walkin-empty-icon) {
+    background: var(--theme-hover);
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .cn-admin-content .walkin-company-logo {
+    background: var(--theme-hover);
+    border-color: var(--theme-border);
+    color: var(--theme-primary);
+}
+
+html[data-color] .cn-admin-content .walkin-date-divider {
+    background: var(--theme-border);
+}
+
+html[data-color] .cn-admin-content .walkin-dashboard-button {
+    background: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+}
+
+html[data-color] .cn-admin-content .walkin-dashboard-button:hover {
+    background: var(--theme-hover);
+    border-color: var(--theme-primary);
+}
+
+/* This page ends with a block that paints every one of its glyphs #fff. On the
+   tinted tiles that left a white smudge, so the icons take the palette and the
+   colour-coded tiles keep their own semantic shade. */
+html[data-color] .cn-admin-content :is(.walkin-stat-icon, .walkin-info-icon, .walkin-date-icon, .walkin-no-upcoming-icon, .walkin-empty-icon, .walkin-company-logo) i {
+    color: var(--theme-primary);
+}
+
+html[data-color] .cn-admin-content .walkin-stat-icon.upcoming-icon i {
+    color: var(--theme-success);
+}
+
+html[data-color] .cn-admin-content .walkin-stat-icon.past-icon i {
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .cn-admin-content :is(.walkin-job-title, .walkin-description-title) i {
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .cn-admin-content :is(.walkin-status i, .walkin-dashboard-button i) {
+    color: inherit;
+}
+
+/* --theme-success has no dark variant, so the green would sink into the dark
+   tile instead of reading as the brighter shade the dark design used. */
+html[data-color][data-appearance="dark"] .cn-admin-content :is(.walkin-stat-icon.upcoming-icon, .walkin-stat-icon.upcoming-icon i, .walkin-status.upcoming) {
+    color: #4ade80;
+}
+
+html[data-color][data-appearance="dark"] .cn-admin-content :is(.walkin-stat-icon.upcoming-icon, .walkin-status.upcoming) span {
+    background-color: #4ade80;
+}
+
+/* Login form surfaces and copy follow the active appearance. The promo panel
+   remains branded; the form panel uses the selected readable surface. */
+html[data-color] .page-wrapper .right-panel {
+    background: var(--theme-card-background);
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .page-wrapper .right-panel :is(.panel-title, .form-group label) {
+    color: var(--theme-heading);
+}
+
+html[data-color] .page-wrapper .right-panel :is(.panel-subtitle, .switch-text, .back-home a, .divider) {
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .page-wrapper .right-panel :is(.forgot-link a, .switch-text a, .back-home a:hover) {
+    color: var(--theme-link);
+}
+
+html[data-color] .page-wrapper .right-panel :is(.tabs, .tab-btn.active) {
+    background: var(--theme-surface-secondary);
+}
+
+html[data-color] .page-wrapper .right-panel .tab-btn {
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .page-wrapper .right-panel .tab-btn.active {
+    color: var(--theme-primary-dark);
+}
+
+html[data-color] .page-wrapper .right-panel :is(.input-wrap input, .input-wrap select) {
+    background: var(--theme-input-background);
+    border-color: var(--theme-border);
+    color: var(--theme-input-text);
+}
+
+html[data-color] .page-wrapper .right-panel :is(.input-wrap input, .input-wrap select)::placeholder {
+    color: var(--theme-placeholder);
+}
+
+html[data-color] .page-wrapper .right-panel :is(.lead-icon, .toggle-pass) {
+    color: var(--theme-text-muted);
+}
+
+html[data-color] .page-wrapper .right-panel :is(.input-wrap input, .input-wrap select):focus {
+    border-color: var(--theme-primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-primary) 20%, transparent);
+    background: var(--theme-input-background);
+    color: var(--theme-input-text);
+}
+
+html[data-color] .page-wrapper .right-panel .lead-icon {
+    color: var(--theme-primary);
+}
+
+html[data-color] .page-wrapper .right-panel .toggle-pass:hover {
+    color: var(--theme-primary);
+}
+
+html[data-color] .page-wrapper #reg-type,
+html[data-color] .page-wrapper select[name="cmbUser"] {
+    border-color: var(--theme-border);
+}
+
+html[data-color] .page-wrapper #reg-type:focus,
+html[data-color] .page-wrapper select[name="cmbUser"]:focus {
+    border-color: var(--theme-primary);
+    outline: 3px solid color-mix(in srgb, var(--theme-primary) 30%, transparent);
+    outline-offset: 1px;
+}
+
+html[data-color] .page-wrapper .dropdown-arrow {
+    color: var(--theme-primary);
+}
+
+/* Registration-only control styling. Keep every surface and state tied to
+   live theme tokens so appearance changes apply without reloading. */
+html[data-color] .register-page :is(input, select, textarea, .form-control, .form-select, .form-input, .form-textarea) {
+    color-scheme: inherit;
+    background-color: var(--theme-input-background);
+    border-color: var(--theme-border);
+    color: var(--theme-input-text);
+}
+
+html[data-color] .register-page :is(input, textarea, .form-control, .form-input, .form-textarea)::placeholder {
+    color: var(--theme-placeholder);
+    opacity: 1;
+}
+
+html[data-color] .register-page select option {
+    background: var(--theme-input-background);
+    color: var(--theme-input-text);
+}
+
+html[data-color] .register-page :is(input, select, textarea, .form-control, .form-select, .form-input, .form-textarea):focus {
+    background-color: var(--theme-input-background);
+    border-color: var(--theme-primary);
+    color: var(--theme-input-text);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-primary) 20%, transparent);
+}
+
+html[data-color] .register-page :is(input, select, textarea, .form-control, .form-select, .form-input, .form-textarea):disabled,
+html[data-color] .register-page :is(input, textarea, .form-control, .form-input, .form-textarea)[readonly] {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-muted);
+    opacity: 1;
+}
+
+html[data-color] .register-page :is(.form-group label, label, .form-label) {
+    color: var(--theme-form-label, var(--theme-text-primary));
+}
+
+html[data-color] .register-page :is(.input-wrapper > i, .account-type-display > i) {
+    color: var(--theme-primary);
+}
+
+html[data-color] .register-page .account-type-display > i {
+    color: var(--theme-primary-contrast);
+}
+
+html[data-color] .register-page .step-badge > .fas {
+    display: inline-block;
+    font-family: "Font Awesome 6 Free";
+    font-style: normal;
+    font-weight: 900;
+    line-height: 1;
+}
+
+html[data-color] .register-page .fas.fa-user-tie {
+    color: var(--theme-primary-contrast);
+}
+
+html[data-color] .register-page .profile-gender-select .select-trigger,
+html[data-color] .register-page .profile-gender-select .select-listbox {
+    background: var(--theme-input-background);
+    border-color: var(--theme-border);
+    color: var(--theme-input-text);
+}
+
+html[data-color] .register-page .profile-gender-select .select-option {
+    background: var(--theme-input-background);
+    color: var(--theme-input-text);
+}
+
+html[data-color] .register-page .profile-gender-select .select-option:is(:hover, :focus, [data-active="true"]),
+html[data-color] .register-page .profile-gender-select .select-option[aria-selected="true"] {
+    background: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+
+html[data-color] .register-page :is(.btn-primary, .btn-secondary) {
+    min-height: 48px;
+}
+
+html[data-color] .register-page .btn-primary {
+    border-color: var(--theme-primary);
+    background: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+
+html[data-color] .register-page .btn-primary:is(:hover, :focus-visible, :active) {
+    border-color: var(--theme-primary-hover);
+    background: var(--theme-primary-hover);
+    color: var(--theme-primary-hover-contrast, var(--theme-primary-contrast));
+}
+
+html[data-color] .register-page .btn-primary i {
+    color: inherit;
+}
+
+html[data-color] .register-page .btn-secondary {
+    border-color: var(--theme-border);
+    background: var(--theme-surface-secondary);
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .register-page .btn-secondary:is(:hover, :focus-visible, :active) {
+    border-color: var(--theme-primary);
+    background: var(--theme-hover);
+    color: var(--theme-primary);
+}
+
+html[data-color] .register-page .btn-secondary i {
+    color: inherit;
+}
+
+html[data-color] .register-page .btn-primary:disabled,
+html[data-color] .register-page .btn-secondary:disabled {
+    border-color: var(--theme-border);
+    background: var(--theme-surface-secondary);
+    color: var(--theme-text-muted);
+    opacity: 0.7;
+}
+
+html[data-color] .register-page :is(.field-error, .error-message, .invalid-feedback, .text-danger) {
+    color: var(--theme-error);
+}
+
+html[data-color] .register-page :is(.registration-alert, .alert-danger) {
+    border-color: var(--theme-error);
+    background: color-mix(in srgb, var(--theme-error) 12%, var(--theme-card-background));
+    color: var(--theme-error);
+}
+
+html[data-color] :is(.register-page, .page-wrapper) .registration-progress .step-number {
+    border-color: var(--theme-border);
+    background: var(--theme-surface-secondary);
+    color: var(--theme-text-secondary);
+    border-radius: 13px;
+}
+
+/* Keep every registration progress variant bound to the live theme tokens.
+   This sheet follows register.css, so these scoped selectors intentionally
+   override its presentation rules without changing step state or behavior. */
+html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-step {
+    color: var(--theme-text-muted);
+}
+
+html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-step > .step-number {
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--theme-border);
+    border-radius: 13px;
+    background: var(--theme-card-background, var(--theme-surface-secondary));
+    color: var(--theme-text-secondary);
+    line-height: 1;
+}
+
+/* Completed and active circles are filled with the primary, so their number
+   (or tick) has to use the pairing contrast token rather than a text colour. */
+html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-step.completed > .step-number {
+    border-color: var(--theme-primary);
+    background: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+    box-shadow: 0 3px 10px color-mix(in srgb, var(--theme-primary) 24%, transparent);
+}
+
+html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-step.active > .step-number {
+    border-color: var(--theme-primary);
+    background: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-primary) 18%, transparent), 0 5px 14px color-mix(in srgb, var(--theme-primary) 30%, transparent);
+    transform: scale(1.06);
+}
+
+/* Labels sit on the card, where a bright primary (yellow, orange) is unreadable. */
+html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-step.completed > span:not(.step-number) {
+    color: var(--theme-primary-dark);
+}
+
+html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-step.active > span:not(.step-number) {
+    color: var(--theme-heading);
+}
+
+html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-step:not(.completed):not(.active) > span:not(.step-number) {
+    color: var(--theme-text-muted);
+}
+
+html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-step.active .step-number::after {
+    border-radius: 16px;
+}
+
+html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-line {
+    align-self: flex-start;
+    flex: 1 1 0;
+    min-width: 14px;
+    border-radius: 999px;
+    background: var(--theme-border);
+}
+
+html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-line:is(.active, .completed) {
+    background: var(--theme-primary);
+    box-shadow: 0 1px 5px color-mix(in srgb, var(--theme-primary) 22%, transparent);
+}
+
+@media (max-width: 700px) {
+    html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-step > .step-number {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+    }
+}
+
+/* The two-panel auth shell only gives the bar the 430px right column (354px of
+   content), so the six steps need the same compact geometry the narrow layout
+   uses; otherwise "Verify" is clipped by the shell's overflow:hidden. */
+@media (min-width: 769px) {
+    html[data-color] .page-wrapper .registration-progress .progress-step {
+        min-width: 46px;
+        padding: 0 2px;
+        gap: 7px;
+    }
+    html[data-color] .page-wrapper .registration-progress .progress-step > .step-number,
+    html[data-color] .page-wrapper .registration-progress .progress-step > .step-number i {
+        font-size: 12px;
+    }
+    html[data-color] .page-wrapper .registration-progress .progress-step > .step-number {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+    }
+    html[data-color] .page-wrapper .registration-progress .progress-step > span:not(.step-number) {
+        font-size: 10px;
+    }
+    html[data-color] .page-wrapper .registration-progress .progress-line {
+        min-width: 10px;
+        height: 2px;
+        margin-top: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-step.active .step-number::after,
+    html[data-color] :is(.register-page, .page-wrapper) .registration-progress .progress-step.completed .step-number i {
+        animation: none;
+    }
+}
+
+html[data-color] .register-page :is(.account-type-content h3, .review-section-header h3, .summary-item strong, .summary-address strong, .review-item strong, .review-account-type strong) {
+    color: var(--theme-heading);
+}
+
+html[data-color] .register-page :is(.account-type-content p, .account-type-features span, .review-section-header p, .summary-item span, .summary-address span, .review-item span, .review-account-type span, .review-complete span) {
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .register-page :is(.review-section, .review-confirmation, .review-item, .review-account-type, .review-complete, .summary-title, .summary-item) {
+    border-color: var(--theme-border);
+    background: var(--theme-card-background);
+}
+
+html[data-color] .register-page :is(.registration-info-box, .professional-summary, .account-type-display, .file-upload-label) {
+    border-color: var(--theme-border);
+    background: var(--theme-surface-secondary);
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .register-page :is(.register-logo, .registration-card h1, .registration-card h2, .registration-card h3, .form-group label, .confirmation-label, .registration-info-box strong, .registration-info-box p, .review-section-header h3, .summary-title, .summary-item strong, .summary-address strong) {
+    color: var(--theme-text-primary);
+}
+
+/* Field captions keep register.css's secondary token so they stay distinct
+   from the values they label. */
+html[data-color] .register-page .review-item span {
+    color: var(--theme-text-secondary);
+}
+
+/* Registration headings and the values they introduce follow the chosen
+   accent, the way the wordmark above them already does, instead of reading as
+   plain black. primary-dark is the appearance-aware shade, so dark mode gets
+   the light tint. */
+html[data-color] .register-page .registration-content > .card-header h1,
+html[data-color] .register-page .review-section-header h3,
+html[data-color] .register-page .review-account-type strong,
+html[data-color] .register-page .review-item strong {
+    color: var(--theme-primary-dark);
+}
+
+html[data-color] .register-page :is(.field-help, .registration-footer, .login-link, .register-header) {
+    color: var(--theme-text-secondary);
+}
+
+html[data-color] .register-page :is(.input-wrapper input, .input-wrapper select, .input-wrapper textarea) {
+    background: var(--theme-input-background);
+    border-color: var(--theme-border);
+    color: var(--theme-input-text);
+}
+
+html[data-color] .register-page :is(.input-wrapper input, .input-wrapper textarea)::placeholder {
+    color: var(--theme-placeholder);
+}
+
+html[data-color] .register-page :is(.review-edit, .login-link a) {
+    color: var(--theme-link);
+}
+
+html[data-color] .cn-dashboard-main table {
+    --bs-table-bg: var(--theme-table-bg);
+    --bs-table-color: var(--theme-table-text);
+    background: var(--theme-table-bg);
+    border-color: var(--theme-border);
+    color: var(--theme-table-text);
+}
+
+html[data-color] .cn-dashboard-main table thead :is(th, td) {
+    background: var(--theme-table-header-background);
+    border-color: var(--theme-border);
+    color: var(--theme-table-header-text);
+}
+
+html[data-color] .cn-dashboard-main table tbody :is(th, td) {
+    background: var(--theme-table-bg);
+    border-color: var(--theme-border);
+    color: var(--theme-table-text);
+}
+
+html[data-color] .cn-dashboard-main table tbody tr:hover > * {
+    background: var(--theme-hover);
+    color: var(--theme-text-primary);
+}
+
+html[data-color] .cn-dashboard-main :is(.info-card, .resume-card, .profile-page-completion, .application-card, .job-card, .empty-state, .glass-card) {
+    color: var(--theme-text-primary);
+}
+
+/* The account-type selection lives in the login stylesheet, outside the
+   registration-card selectors above. Give its cards and copy dark surfaces. */
+html[data-appearance="dark"] .page-wrapper .account-type-card {
+    border-color: var(--theme-border);
+    background: var(--theme-card-background);
+    color: var(--theme-text-primary);
+}
+
+html[data-appearance="dark"] .page-wrapper .account-type-card:hover,
+html[data-appearance="dark"] .page-wrapper .account-type-card.selected {
+    border-color: var(--theme-primary);
+    background: var(--theme-hover);
+}
+
+html[data-appearance="dark"] .page-wrapper .account-type-content :is(h3, p, .account-type-features span) {
+    color: var(--theme-text-primary);
+}
+
+html[data-appearance="dark"] .page-wrapper .account-type-features i {
+    color: var(--theme-success);
+}
+
+html[data-appearance="dark"] .page-wrapper .account-type-check {
+    border-color: var(--theme-border);
+    color: var(--theme-primary-contrast);
+}
+
+html[data-appearance="dark"] .page-wrapper .account-type-card.selected .account-type-check {
+    border-color: var(--theme-primary);
+    background: var(--theme-primary);
+}
+
+/* Keep the Career Next wordmark readable wherever the shared logo is used. */
+html[data-color] :is(.cn-news-public-header, .navbar, .cn-admin-header) .brand-logo {
+    color: var(--theme-header-text);
+}
+
+html[data-color] .cn-admin-header .cn-admin-brand:hover {
+    color: var(--theme-header-text);
+}
+
+html[data-color] :is(.cn-admin-sidebar, .cn-admin-drawer) .cn-admin-brand {
+    color: var(--theme-sidebar-text);
+}
+
+html[data-color] .page-wrapper .left-panel .brand-logo,
+html[data-color] .modern-header .brand-logo {
+    color: #fff;
+}
+
+html[data-color] .register-page .register-logo {
+    color: var(--theme-heading);
+}
+
+html[data-color] .page-wrapper .account-type-content h3 {
+    color: var(--theme-heading);
+}
+
+html[data-color] .page-wrapper .account-type-content p,
+html[data-color] .page-wrapper .account-type-features span {
+    color: var(--theme-text-secondary);
+}
+
+/* ============================================
+   Light-mode component visibility overrides
+   Override hardcoded dark-mode values (rgba
+   white backgrounds, #fff text) from role
+   stylesheets so every component is readable
+   when data-appearance is light. Variables
+   resolve correctly in both light and dark
+   modes via data-appearance.
+   ============================================ */
+
+/* ── Page & structural surfaces ── */
+html[data-color] .main-content,
+html[data-color] .page-wrapper {
+    background-color: var(--theme-page-background);
+    color: var(--theme-text-primary);
+}
+
+/* Home page structural surfaces — Light Mode only. */
+html[data-color][data-appearance="light"] #main,
+html[data-color][data-appearance="light"] #page,
+html[data-color][data-appearance="light"] #page-in {
+    background-color: var(--theme-page-background);
+    color: var(--theme-text-primary);
+}
+
+/* ── Navbar & header ── */
+html[data-color] .navbar {
+    background: var(--theme-nav-background);
+    border-color: var(--theme-border);
+    color: var(--theme-header-text);
+}
+html[data-color] .navbar-brand,
+html[data-color] .brand-logo { color: var(--theme-header-text); }
+html[data-color] .nav-link { color: var(--theme-text-primary); }
+html[data-color] .nav-link:hover,
+html[data-color] .nav-link.active { background: var(--theme-hover); color: var(--theme-primary-dark); }
+html[data-color] .page-header h1,
+html[data-color] .page-header-text h1 { color: var(--theme-heading); }
+html[data-color] .page-header p,
+html[data-color] .page-header-text p { color: var(--theme-text-secondary); }
+html[data-color] .section-title { color: var(--theme-heading); }
+html[data-color] .section-title::after { background: var(--theme-border); }
+html[data-color] .back-btn {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .back-btn:hover { background-color: var(--theme-hover); }
+
+/* ── Cards & containers ── */
+html[data-color] .card,
+html[data-color] .glass-card,
+html[data-color] .welcome-card,
+html[data-color] .action-card,
+html[data-color] .stat-card,
+html[data-color] .chart-card,
+html[data-color] .table-card,
+html[data-color] .info-card,
+html[data-color] .profile-card,
+html[data-color] .job-card,
+html[data-color] .application-card,
+html[data-color] .summary-card,
+html[data-color] .resume-card,
+html[data-color] .no-jobs-card,
+html[data-color] .dashboard-shortcut,
+html[data-color] .filter-card,
+html[data-color] .filter-panel,
+html[data-color] .info-panel,
+html[data-color] .activity-card,
+html[data-color] .activity-info-card,
+html[data-color] .cn-analytics-panel,
+html[data-color] .cn-analytics-stat {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+/* Text inside cards */
+html[data-color] .card h1,
+html[data-color] .card h2,
+html[data-color] .card h3,
+html[data-color] .card h4,
+html[data-color] .card h5,
+html[data-color] .card h6,
+html[data-color] .glass-card h2,
+html[data-color] .glass-card h3,
+html[data-color] .welcome-card h1,
+html[data-color] .action-card .card-title,
+html[data-color] .stat-card .stat-value,
+html[data-color] .chart-card .chart-title,
+html[data-color] .page-header-icon,
+html[data-color] .dashboard-shortcut strong,
+html[data-color] .cn-analytics-stat-copy strong,
+html[data-color] .form-header-title,
+html[data-color] .table-title,
+html[data-color] .cn-analytics-panel-heading h3 { color: var(--theme-heading); }
+html[data-color] .card p,
+html[data-color] .glass-card p,
+html[data-color] .welcome-card p,
+html[data-color] .action-card .card-desc,
+html[data-color] .stat-card .stat-label,
+html[data-color] .chart-card p,
+html[data-color] .dashboard-shortcut small,
+html[data-color] .cn-analytics-stat-copy > span,
+html[data-color] .form-header-sub,
+html[data-color] .table-subtitle,
+html[data-color] .desc-cell,
+html[data-color] .cn-analytics-panel-heading p,
+html[data-color] .cn-analytics-stat-copy small { color: var(--theme-text-secondary); }
+
+/* ── Tables ── */
+html[data-color] table,
+html[data-color] .table,
+html[data-color] .data-table,
+html[data-color] .jobs-table,
+html[data-color] .feedback-table,
+html[data-color] .activity-table,
+html[data-color] .documents-table {
+    --bs-table-bg: var(--theme-table-bg);
+    --bs-table-color: var(--theme-table-text);
+    --bs-table-border-color: var(--theme-border);
+    background-color: var(--theme-table-bg);
+    color: var(--theme-table-text);
+    border-color: var(--theme-border);
+}
+html[data-color] table thead,
+html[data-color] .table thead,
+html[data-color] .data-table thead,
+html[data-color] .jobs-table thead,
+html[data-color] .feedback-table thead,
+html[data-color] .activity-table thead,
+html[data-color] .documents-table thead {
+    background-color: var(--theme-table-header-background);
+    border-color: var(--theme-border);
+}
+html[data-color] table thead th,
+html[data-color] .table thead th,
+html[data-color] .data-table th,
+html[data-color] .jobs-table th,
+html[data-color] .feedback-table th,
+html[data-color] .activity-table th,
+html[data-color] .documents-table th {
+    background-color: var(--theme-table-header-background);
+    color: var(--theme-table-header-text);
+    border-color: var(--theme-border);
+}
+html[data-color] table tbody td,
+html[data-color] .table tbody td,
+html[data-color] .data-table td,
+html[data-color] .jobs-table td,
+html[data-color] .feedback-table td,
+html[data-color] .activity-table td,
+html[data-color] .documents-table td {
+    background-color: var(--theme-table-bg);
+    color: var(--theme-table-text);
+    border-color: var(--theme-border);
+}
+html[data-color] table tbody tr:hover > *,
+html[data-color] .table tbody tr:hover > *,
+html[data-color] .data-table tbody tr:hover > *,
+html[data-color] .jobs-table tbody tr:hover > *,
+html[data-color] .feedback-table tbody tr:hover > *,
+html[data-color] .activity-table tbody tr:hover > *,
+html[data-color] .documents-table tbody tr:hover > * {
+    background-color: var(--theme-hover);
+    color: var(--theme-table-text);
+}
+html[data-color] table tbody tr:nth-of-type(even) > *,
+html[data-color] .table tbody tr:nth-of-type(even) > * {
+    background-color: var(--theme-table-row-alt);
+}
+
+/* ── Table wrappers & headers ── */
+html[data-color] .table-wrapper,
+html[data-color] .table-wrap,
+html[data-color] .responsive-table-wrapper,
+html[data-color] .documents-table-wrapper,
+html[data-color] .activity-table-wrapper,
+html[data-color] .table-header {
+    border-color: var(--theme-border);
+    background-color: var(--theme-card-background);
+    color: var(--theme-text-primary);
+}
+html[data-color] .table-header,
+html[data-color] .table-card-header,
+html[data-color] .card-header {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-heading);
+}
+html[data-color] .table-header-icon,
+html[data-color] .card-header-icon,
+html[data-color] .form-header-icon,
+html[data-color] .page-header-icon {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-primary-dark);
+}
+
+/* ── Forms & inputs ── */
+html[data-color] input,
+html[data-color] select,
+html[data-color] textarea,
+html[data-color] .form-control,
+html[data-color] .form-select,
+html[data-color] .form-input,
+html[data-color] .form-textarea,
+html[data-color] .search-wrap input,
+html[data-color] .per-page-select,
+html[data-color] .filter-select {
+    background-color: var(--theme-input-background);
+    color: var(--theme-input-text);
+    border-color: var(--theme-border);
+}
+html[data-color] input::placeholder,
+html[data-color] textarea::placeholder,
+html[data-color] .form-control::placeholder,
+html[data-color] .form-input::placeholder,
+html[data-color] .form-textarea::placeholder {
+    color: var(--theme-placeholder);
+    opacity: 1;
+}
+html[data-color] select option {
+    background-color: var(--theme-input-background);
+    color: var(--theme-input-text);
+}
+html[data-color] .form-label,
+html[data-color] label,
+html[data-color] .filter-label,
+html[data-color] .form-group label {
+    color: var(--theme-form-label);
+}
+html[data-color] .search-wrap i { color: var(--theme-text-muted); }
+
+/* The dashboard fields took the palest token in the palette, so against a white
+   card the outline all but vanished. Pulling the palette colour into the border
+   restores the edge; kept to the light appearance because the dark one already
+   reads at its own contrast, and left off :focus, which paints its own ring.
+   --theme-primary-dark, not --theme-primary, because the yellow palette's own
+   primary is too bright to mark an edge. 70% is the floor that keeps every
+   palette above 3:1 -- at 55% blue, green and orange still fell short. The
+   weight has to match the shared binding further up the sheet, whose :is() list
+   carries four :not() attribute guards, so this one answers with its own two
+   plus the appearance attribute. */
+html[data-color][data-appearance="light"] .cn-dashboard-main :is(.form-control, .form-select, .form-input, .form-textarea, input:not([type="checkbox"]):not([type="radio"]), select, textarea):not(:focus) {
+    border-color: color-mix(in srgb, var(--theme-primary-dark) 70%, var(--theme-border));
+}
+
+/* ── Buttons ── */
+html[data-color] .btn-brand,
+html[data-color] .btn-outline,
+html[data-color] .btn-submit,
+html[data-color] .btn-reset,
+html[data-color] .btn-filter,
+html[data-color] .btn-view,
+html[data-color] .btn-detail,
+html[data-color] .btn-back,
+html[data-color] .btn-cancel,
+html[data-color] .btn-save,
+html[data-color] .btn-confirm-cancel,
+html[data-color] .btn-modal-cancel,
+html[data-color] .btn-secondary,
+html[data-color] .btn-action,
+html[data-color] .btn-view-profile,
+html[data-color] .btn-delete,
+html[data-color] .btn-edit,
+html[data-color] .btn-apply,
+html[data-color] .btn-view-resume,
+html[data-color] .btn-download-resume,
+html[data-color] .btn-resume,
+html[data-color] .complete-profile-btn {
+    border-color: var(--theme-border);
+    color: var(--theme-link);
+    background-color: var(--theme-card-background);
+}
+html[data-color] .btn-brand,
+html[data-color] .btn-submit,
+html[data-color] .btn-filter,
+html[data-color] .btn-view,
+html[data-color] .btn-save,
+html[data-color] .btn-apply,
+html[data-color] .btn-view-resume,
+html[data-color] .btn-download-resume,
+html[data-color] .btn-resume {
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+html[data-color] .btn-action.view { background-color: color-mix(in srgb, var(--theme-primary) 15%, var(--theme-card-background)); color: var(--theme-primary-dark); }
+html[data-color] .btn-action.approve { background-color: rgba(16,185,129,0.15); color: var(--theme-success); }
+html[data-color] .btn-action.reject { background-color: rgba(239,68,68,0.15); color: var(--theme-error); }
+
+/* ── Dropdowns ── */
+html[data-color] .dropdown-menu,
+html[data-color] .employer-dropdown-menu {
+    background-color: var(--theme-card-background);
+    color: var(--theme-text-primary);
+    border-color: var(--theme-border);
+    box-shadow: var(--theme-shadow);
+}
+html[data-color] .dropdown-item,
+html[data-color] .employer-dropdown-item { color: var(--theme-text-primary); }
+html[data-color] .dropdown-item:hover,
+html[data-color] .employer-dropdown-item:hover,
+html[data-color] .dropdown-item:focus,
+html[data-color] .employer-dropdown-item:focus {
+    background-color: var(--theme-hover);
+    color: var(--theme-primary-dark);
+}
+html[data-color] .dropdown-item.danger { color: var(--theme-error); }
+html[data-color] .dropdown-item.danger:hover { background-color: var(--theme-error); color: #fff; }
+html[data-color] .dropdown-header { border-color: var(--theme-border); }
+html[data-color] .dropdown-header .dh-name { color: var(--theme-heading); }
+html[data-color] .dropdown-header .dh-role { color: var(--theme-text-secondary); }
+html[data-color] .dropdown-item i { color: var(--theme-text-secondary); }
+
+/* ── Profile trigger & user badge ── */
+html[data-color] .profile-trigger,
+html[data-color] .user-badge {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-header-text);
+}
+html[data-color] .profile-trigger:hover,
+html[data-color] .user-badge:hover { background-color: var(--theme-hover); }
+html[data-color] .user-avatar,
+html[data-color] .applicant-avatar,
+html[data-color] .user-avatar-sm {
+    background-color: var(--theme-hover);
+    color: var(--theme-text-primary);
+}
+html[data-color] .user-name { color: var(--theme-heading); }
+html[data-color] .user-role { color: var(--theme-text-secondary); }
+html[data-color] .chevron { color: var(--theme-text-muted); }
+
+/* ── Badges & status indicators ── */
+html[data-color] .badge,
+html[data-color] .status-badge,
+html[data-color] .vacancy-badge,
+html[data-color] .role-tag,
+html[data-color] .gender-chip,
+html[data-color] .qual-badge,
+html[data-color] .id-badge,
+html[data-color] .record-count,
+html[data-color] .stat-pill,
+html[data-color] .cn-status-pill {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .badge.Confirm,
+html[data-color] .badge.pending,
+html[data-color] .badge.Pending,
+html[data-color] .badge.approved,
+html[data-color] .badge.rejected,
+html[data-color] .badge.Suspended,
+html[data-color] .status-badge.accepted,
+html[data-color] .status-badge.rejected,
+html[data-color] .status-badge.pending {
+    color: var(--theme-text-primary);
+}
+
+/* The walk-in date and time chips carry their dark-mode pastel glyph colour, which
+   lands on a tint of the same hue in the light appearance and disappears. Only the
+   text moves, and only in light mode, so the dark chips keep their bright copy. */
+html[data-color][data-appearance="light"] .date-badge,
+html[data-color][data-appearance="light"] .date-badge i {
+    color: var(--theme-info);
+}
+html[data-color][data-appearance="light"] .time-badge,
+html[data-color][data-appearance="light"] .time-badge i {
+    color: var(--theme-warning);
+}
+
+/* ── Pagination ── */
+html[data-color] .pagination-container,
+html[data-color] .pagination,
+html[data-color] .activity-pagination,
+html[data-color] .cn-news-pagination,
+html[data-color] .feedback-pagination {
+    border-color: var(--theme-border);
+}
+html[data-color] .page-link,
+html[data-color] .pagination .page-link,
+html[data-color] .activity-pagination .page-link,
+html[data-color] .cn-news-pagination .page-link {
+    background-color: var(--theme-card-background);
+    color: var(--theme-link);
+    border-color: var(--theme-border);
+}
+html[data-color] .page-item.active > .page-link,
+html[data-color] .pagination .page-item.active .page-link,
+html[data-color] .activity-pagination .page-item.active .page-link,
+html[data-color] .cn-news-pagination .page-item.active .page-link {
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+html[data-color] .page-link:hover {
+    background-color: var(--theme-hover);
+    color: var(--theme-link);
+}
+
+/* ── Empty states ── */
+html[data-color] .empty-state,
+html[data-color] .no-jobs-card,
+html[data-color] .resume-empty,
+html[data-color] .cn-analytics-empty-row {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .empty-state i,
+html[data-color] .no-jobs-card i,
+html[data-color] .resume-empty i { color: var(--theme-text-muted); }
+
+/* ── Tabs ── */
+html[data-color] .tabs-wrap,
+html[data-color] .tabs,
+html[data-color] .tab-header {
+    border-color: var(--theme-border);
+    background-color: var(--theme-card-background);
+    color: var(--theme-text-primary);
+}
+html[data-color] .tab-btn {
+    background-color: var(--theme-card-background);
+    color: var(--theme-text-secondary);
+    border-color: var(--theme-border);
+}
+html[data-color] .tab-btn:hover,
+html[data-color] .tab-btn.active {
+    background-color: var(--theme-hover);
+    color: var(--theme-heading);
+}
+
+/* ── Modals ── */
+html[data-color] .modal-overlay {
+    background-color: rgba(0,0,0,0.35);
+}
+html[data-color] .custom-modal,
+html[data-color] .modal,
+html[data-color] .modal-content,
+html[data-color] .profile-modal,
+html[data-color] .custom-confirm-modal {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+html[data-color] .modal-header,
+html[data-color] .modal-footer,
+html[data-color] .profile-modal-header,
+html[data-color] .profile-modal-footer,
+html[data-color] .modal-header-left {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .modal-title,
+html[data-color] .profile-modal-title,
+html[data-color] .modal-body,
+html[data-color] .profile-modal-body,
+html[data-color] .modal-subtitle,
+html[data-color] .profile-modal-subtitle { color: var(--theme-text-primary); }
+html[data-color] .modal-text,
+html[data-color] .modal-info-box p,
+html[data-color] .profile-modal-text { color: var(--theme-text-secondary); }
+html[data-color] .modal-info-box,
+html[data-color] .profile-modal .info-label {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .btn-close,
+html[data-color] .profile-modal .btn-close,
+html[data-color] .modal-close {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .btn-close:hover,
+html[data-color] .profile-modal .btn-close:hover,
+html[data-color] .modal-close:hover { background-color: var(--theme-hover); color: var(--theme-heading); }
+/* The role sheets pin these neutral buttons to a muted grey with !important,
+   which on the dark card surface reads as washed-out text. */
+html[data-color][data-appearance="dark"] :is(.profile-modal, .confirmation-modal, .modal-content) :is(.btn-close, .btn-cancel),
+html[data-color][data-appearance="dark"] :is(.profile-modal, .confirmation-modal, .modal-content) :is(.btn-close, .btn-cancel):hover {
+    color: var(--theme-text-primary) !important;
+}
+html[data-color] .modal-icon,
+html[data-color] .profile-modal-header-icon {
+    background-color: var(--theme-hover);
+    border-color: var(--theme-border);
+    color: var(--theme-primary);
+}
+
+/* ── Alerts, toasts, flash messages ── */
+html[data-color] .toast,
+html[data-color] .flash-message,
+html[data-color] .alert {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .toast-title,
+html[data-color] .toast-msg { color: var(--theme-text-primary); }
+html[data-color] .toast-msg { color: var(--theme-text-secondary); }
+
+/* ── Field items & labels ── */
+html[data-color] .field-item {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .field-label { color: var(--theme-form-label); }
+html[data-color] .field-value { color: var(--theme-text-primary); }
+
+/* ── Search & filter ── */
+html[data-color] .filter-bar,
+html[data-color] .filter-group { border-color: var(--theme-border); }
+html[data-color] .filter-label { color: var(--theme-form-label); }
+
+/* ── Stats & analytics ── */
+html[data-color] .stats-grid,
+html[data-color] .stats-strip { border-color: var(--theme-border); }
+html[data-color] .sum-card,
+html[data-color] .stat-pill,
+html[data-color] .cn-status-pill {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .sum-val { color: var(--theme-heading); }
+html[data-color] .sum-label { color: var(--theme-text-secondary); }
+html[data-color] .stat-icon { color: var(--theme-primary-dark); }
+html[data-color] .cn-analytics-heading h2,
+html[data-color] .cn-analytics-heading p { color: var(--theme-heading); }
+html[data-color] .cn-analytics-heading p,
+html[data-color] .cn-analytics-filter { color: var(--theme-text-secondary); }
+/* account-ui.css pins the eyebrow's lavender with !important for the gradient header;
+   on the light card it needs to lose that, so this answers in kind. */
+html[data-color] .cn-analytics-eyebrow { color: var(--theme-text-secondary) !important; }
+
+/* ── Profile sections ── */
+html[data-color] .profile-hero,
+html[data-color] .info-grid,
+html[data-color] .info-card,
+html[data-color] .info-row,
+html[data-color] .resume-card {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .hero-name,
+html[data-color] .info-value,
+html[data-color] .cell-name,
+html[data-color] .field-value { color: var(--theme-heading); }
+html[data-color] .hero-meta,
+html[data-color] .info-label,
+html[data-color] .cell-sub,
+html[data-color] .info-card-title { color: var(--theme-text-secondary); }
+html[data-color] .info-card-title i { color: var(--theme-primary-dark); }
+/* The row labels carry their own glyph colour, so naming the span above leaves the
+   icon behind; the glyph follows the muted label tone in both appearances. */
+html[data-color] .info-label i { color: var(--theme-text-muted); }
+html[data-color] .hero-pill {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+
+/* The profile hero keeps its branded gradient banner in the light appearance and
+   responsive.css — which is linked a second time after this sheet — paints the
+   banner copy white, which left white text inside a pale chip. The chip follows
+   the card palette, so its copy has to follow it. */
+html[data-color] .account-profile-page .profile-hero .hero-pill {
+    color: var(--theme-text-primary);
+}
+html[data-color] .gender-badge,
+html[data-color] .qual-badge {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .resume-label { color: var(--theme-heading); }
+html[data-color] .resume-sub { color: var(--theme-text-secondary); }
+
+/* ── Applicant / profile details ── */
+html[data-color] .profile-card,
+html[data-color] .applicant-profile-left,
+html[data-color] .applicant-profile-image {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .profile-right h2 { color: var(--theme-heading); }
+html[data-color] .quick-info label { color: var(--theme-text-secondary); }
+html[data-color] .quick-info span { color: var(--theme-text-primary); }
+html[data-color] .info-item span { color: var(--theme-text-secondary); }
+html[data-color] .info-item strong { color: var(--theme-text-primary); }
+html[data-color] .card-title { color: var(--theme-heading); }
+
+/* ── Resume preview ── */
+html[data-color] .resume-details h4 { color: var(--theme-heading); }
+html[data-color] .resume-details p { color: var(--theme-text-secondary); }
+html[data-color] .resume-icon { color: var(--theme-primary); background-color: var(--theme-surface-secondary); }
+
+/* ── Action buttons grid ── */
+html[data-color] .action-buttons,
+html[data-color] .job-detail-actions,
+html[data-color] .job-confirm-actions,
+html[data-color] .modal-actions,
+html[data-color] .modal-footer { border-color: var(--theme-border); }
+
+/* ── Status cards & alerts ── */
+html[data-color] .alert-success { background-color: color-mix(in srgb, var(--theme-success) 12%, var(--theme-card-background)); color: var(--theme-success); border-color: color-mix(in srgb, var(--theme-success) 30%, var(--theme-border)); }
+html[data-color] .alert-danger,
+html[data-color] .alert.error { background-color: color-mix(in srgb, var(--theme-error) 12%, var(--theme-card-background)); color: var(--theme-error); border-color: color-mix(in srgb, var(--theme-error) 30%, var(--theme-border)); }
+
+/* ── Footer ── */
+html[data-color] .footer,
+html[data-color] .cn-admin-footer,
+html[data-color] .cn-news-footer {
+    background-color: var(--theme-nav-background);
+    border-color: var(--theme-border);
+    color: var(--theme-footer-text);
+}
+html[data-color] .footer { color: var(--theme-footer-text); }
+
+/* The landing page footer still carries style.css's #bdc3c7 on every link, the
+   bottom bar and its separator, which is unreadable on the light themed
+   surface, and the site-wide anchor rule paints them with --theme-link — one
+   purple shade for all six colours in dark mode. Rescoping that token to the
+   colour's own shade inside the footer moves links, hover and active states
+   onto the palette without touching the global rule or the other footers. */
+html[data-color] .modern-footer { --theme-link: var(--theme-primary-dark); }
+html[data-color] .footer-section h4 { color: var(--theme-heading); }
+html[data-color] .footer-bottom { color: var(--theme-text-secondary); border-top-color: var(--theme-border); }
+html[data-color] .modern-footer .fa-heart { color: var(--theme-primary-dark); }
+
+/* ── CN-news page (admin news) ── */
+html[data-color] .cn-news-page {
+    background-color: var(--theme-page-background);
+    color: var(--theme-text-primary);
+}
+html[data-color] .cn-news-page .cn-news-header {
+    background: var(--theme-page-gradient);
+    color: #fff;
+}
+html[data-color] .cn-news-page .cn-news-header h1,
+html[data-color] .cn-news-page .cn-news-header p { color: #fff; }
+html[data-color] .cn-news-page .cn-news-form-card,
+html[data-color] .cn-news-page .cn-news-list-card {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .cn-news-page .cn-news-card-heading,
+html[data-color] .cn-news-page .cn-news-list-heading {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .cn-news-page .cn-news-card-heading h2,
+html[data-color] .cn-news-page .cn-news-list-heading h2 { color: var(--theme-heading); }
+html[data-color] .cn-news-page .cn-news-card-heading p,
+html[data-color] .cn-news-page .cn-news-list-heading p { color: var(--theme-text-secondary); }
+html[data-color] .cn-news-page .cn-news-input {
+    background-color: var(--theme-input-background);
+    color: var(--theme-input-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .cn-news-page .cn-news-input::placeholder { color: var(--theme-placeholder); opacity: 1; }
+html[data-color] .cn-news-page .cn-news-submit-btn {
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+html[data-color] .cn-news-page .cn-news-reset-btn {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-link);
+}
+html[data-color] .cn-news-page .cn-news-table thead th {
+    background-color: var(--theme-table-header-background);
+    color: var(--theme-table-header-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .cn-news-page .cn-news-table tbody td {
+    background-color: var(--theme-table-bg);
+    color: var(--theme-table-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .cn-news-page .cn-news-table tbody tr:hover > td {
+    background-color: var(--theme-hover);
+    color: var(--theme-table-text);
+}
+html[data-color] .cn-news-page .cn-news-empty,
+html[data-color] .cn-news-page .cn-news-notice {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .cn-news-page .cn-news-count {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-heading);
+}
+html[data-color] .cn-news-page .cn-news-edit-btn,
+html[data-color] .cn-news-page .cn-news-delete-btn {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-link);
+}
+
+/* ── Activity logs (admin) ── */
+html[data-color] .activity-logs-page { color: var(--theme-text-primary); }
+html[data-color] .activity-logs-page .activity-header h1 { color: var(--theme-heading); }
+html[data-color] .activity-logs-page .activity-header p { color: var(--theme-text-secondary); }
+html[data-color] .activity-header-badge,
+html[data-color] .activity-info-card {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .activity-info-icon,
+html[data-color] .activity-heading-icon {
+    background-color: var(--theme-hover);
+    border-color: var(--theme-border);
+    color: var(--theme-primary-dark);
+}
+html[data-color] .activity-card {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .activity-card-heading {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .activity-card-heading h5 { color: var(--theme-heading); }
+html[data-color] .activity-card-heading p { color: var(--theme-text-secondary); }
+html[data-color] .activity-filter-form { background-color: var(--theme-card-background); border-color: var(--theme-border); }
+html[data-color] .activity-filter-form .form-label { color: var(--theme-form-label); }
+html[data-color] .activity-filter-form .form-control,
+html[data-color] .activity-filter-form .form-select {
+    background-color: var(--theme-input-background);
+    color: var(--theme-input-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .activity-filter-btn {
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+html[data-color] .activity-table {
+    background-color: var(--theme-table-bg);
+    color: var(--theme-table-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .activity-table thead th {
+    background-color: var(--theme-table-header-background);
+    color: var(--theme-table-header-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .activity-table tbody td {
+    background-color: var(--theme-table-bg);
+    color: var(--theme-table-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .activity-table tbody tr:hover td {
+    background-color: var(--theme-hover);
+    color: var(--theme-table-text);
+}
+html[data-color] .activity-actor small,
+html[data-color] .activity-subtext { color: var(--theme-text-secondary); }
+html[data-color] .activity-primary-text { color: var(--theme-heading); }
+html[data-color] .activity-action-badge,
+html[data-color] .activity-id-badge {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-link);
+}
+html[data-color] .activity-muted { color: var(--theme-text-muted); }
+html[data-color] .activity-metadata pre {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .activity-date { color: var(--theme-text-secondary); }
+html[data-color] .activity-empty-state { background-color: var(--theme-card-background); border-color: var(--theme-border); color: var(--theme-text-primary); }
+html[data-color] .activity-empty-icon { background-color: var(--theme-hover); color: var(--theme-primary-dark); }
+html[data-color] .activity-empty-state h6 { color: var(--theme-heading); }
+html[data-color] .activity-empty-state p { color: var(--theme-text-secondary); }
+html[data-color] .activity-pagination { border-color: var(--theme-border); }
+html[data-color] .activity-pagination .page-link {
+    background-color: var(--theme-card-background);
+    color: var(--theme-link);
+    border-color: var(--theme-border);
+}
+html[data-color] .activity-pagination .page-item.active .page-link {
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+html[data-color] .activity-pagination .page-item.disabled .page-link {
+    background-color: var(--theme-surface-secondary);
+    color: var(--theme-text-muted);
+    border-color: var(--theme-border);
+}
+
+/* ── Documents table ── */
+html[data-color] .documents-user-name,
+html[data-color] .documents-file-type,
+html[data-color] .documents-user-id,
+html[data-color] .documents-file-name { color: var(--theme-text-primary); }
+html[data-color] .documents-user-avatar {
+    background-color: var(--theme-hover);
+    color: var(--theme-text-primary);
+}
+html[data-color] .documents-table .status-badge {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .documents-table .btn-action {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-link);
+}
+
+/* ── Feedback page ── */
+html[data-color] .feedback-page { color: var(--theme-text-primary); }
+html[data-color] .feedback-page .page-header h1 { color: var(--theme-heading); }
+html[data-color] .feedback-page .feedback-count-badge,
+html[data-color] .feedback-page .feedback-role,
+html[data-color] .feedback-page .feedback-sender-id,
+html[data-color] .feedback-page .feedback-date {
+    color: var(--theme-text-primary);
+}
+html[data-color] .feedback-page .feedback-filter-card {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .feedback-page .feedback-filter-card label { color: var(--theme-form-label); }
+html[data-color] .feedback-page .feedback-filter-card select {
+    background-color: var(--theme-input-background);
+    color: var(--theme-input-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .feedback-page .feedback-table {
+    background-color: var(--theme-table-bg);
+    color: var(--theme-table-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .feedback-page .feedback-table thead th {
+    background-color: var(--theme-table-header-background);
+    color: var(--theme-table-header-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .feedback-page .feedback-table tbody td {
+    background-color: var(--theme-table-bg);
+    color: var(--theme-table-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .feedback-page .feedback-table tbody tr:hover > * {
+    background-color: var(--theme-hover);
+    color: var(--theme-table-text);
+}
+html[data-color] .feedback-page .feedback-message { color: var(--theme-text-primary); }
+html[data-color] .feedback-page .feedback-table-footer {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .feedback-page .feedback-pagination { border-color: var(--theme-border); }
+
+/* ── News table card ── */
+html[data-color] .cn-news-page table.table {
+    background-color: var(--theme-table-bg);
+    color: var(--theme-table-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .cn-news-page table.table thead th {
+    background-color: var(--theme-table-header-background);
+    color: var(--theme-table-header-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .cn-news-page table.table tbody td {
+    background-color: var(--theme-table-bg);
+    color: var(--theme-table-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .cn-news-page table.table tbody tr:hover > * {
+    background-color: var(--theme-hover);
+    color: var(--theme-table-text);
+}
+html[data-color] .cn-news-page .pagination .page-link {
+    background-color: var(--theme-card-background);
+    color: var(--theme-link);
+    border-color: var(--theme-border);
+}
+html[data-color] .cn-news-page .pagination .page-item.active .page-link {
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+
+/* ── Manage news add form ── */
+html[data-color] .cn-news-page .cn-news-form-card {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .cn-news-page .cn-news-form-card .cn-news-card-heading {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .cn-news-page .cn-news-form-card .cn-news-card-heading h2 { color: var(--theme-heading); }
+html[data-color] .cn-news-page .cn-news-form-card .cn-news-card-heading p { color: var(--theme-text-secondary); }
+html[data-color] .cn-news-page .cn-news-section-icon {
+    background-color: var(--theme-hover);
+    border-color: var(--theme-border);
+    color: var(--theme-primary);
+}
+html[data-color] .cn-news-page .cn-news-card-body { background-color: var(--theme-card-background); color: var(--theme-text-primary); }
+html[data-color] .cn-news-page .cn-news-label { color: var(--theme-form-label); }
+html[data-color] .cn-news-page .cn-news-input {
+    background-color: var(--theme-input-background);
+    color: var(--theme-input-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .cn-news-page .cn-news-input::placeholder { color: var(--theme-placeholder); opacity: 1; }
+html[data-color] .cn-news-page .cn-news-field-help { color: var(--theme-text-secondary); }
+html[data-color] .cn-news-page .cn-news-submit-btn {
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+html[data-color] .cn-news-page .cn-news-reset-btn {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-link);
+}
+
+/* ── Admin manage users / jobs tables (glass style) ── */
+html[data-color] .cn-admin-content table,
+html[data-color] .cn-admin-content .table {
+    --bs-table-bg: var(--theme-admin-table-row);
+    --bs-table-color: var(--theme-admin-table-text);
+    --bs-table-border-color: var(--theme-admin-border);
+    background-color: var(--theme-admin-table-row);
+    color: var(--theme-admin-table-text);
+    border-color: var(--theme-admin-border);
+}
+html[data-color] .cn-admin-content table thead th,
+html[data-color] .cn-admin-content .table thead th {
+    background-color: var(--theme-admin-table-header);
+    color: var(--theme-admin-table-header-text);
+    border-color: var(--theme-admin-border);
+}
+html[data-color] .cn-admin-content table tbody td,
+html[data-color] .cn-admin-content .table tbody td {
+    background-color: var(--theme-admin-table-row);
+    color: var(--theme-admin-table-text);
+    border-color: var(--theme-admin-border);
+}
+html[data-color] .cn-admin-content table tbody tr:hover > * {
+    background-color: var(--theme-admin-hover);
+    color: var(--theme-admin-table-text);
+}
+
+/* ── Admin manage documents page (override internal dark-mode styles) ── */
+html[data-color] .documents-page {
+    background-color: var(--theme-page-background);
+    color: var(--theme-text-primary);
+}
+html[data-color] .documents-page .page-header h1 { color: var(--theme-heading); }
+html[data-color] .documents-page .page-header p { color: var(--theme-text-secondary); }
+html[data-color] .documents-page .section-title { color: var(--theme-heading); }
+html[data-color] .documents-page .stat-card {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .documents-page .stat-value { color: var(--theme-heading); }
+html[data-color] .documents-page .stat-label { color: var(--theme-text-secondary); }
+html[data-color] .documents-page .glass-card {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .documents-page .form-label { color: var(--theme-form-label); }
+html[data-color] .documents-page .form-input,
+html[data-color] .documents-page .form-select,
+html[data-color] .documents-page input,
+html[data-color] .documents-page select {
+    background-color: var(--theme-input-background);
+    color: var(--theme-input-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .documents-page .btn-brand {
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
+    color: var(--theme-primary-contrast);
+}
+html[data-color] .documents-page .btn-outline {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-link);
+}
+html[data-color] .documents-page table.documents-table {
+    --bs-table-bg: var(--theme-table-bg);
+    --bs-table-color: var(--theme-table-text);
+    --bs-table-border-color: var(--theme-border);
+    background-color: var(--theme-table-bg);
+    color: var(--theme-table-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .documents-page .documents-table thead th {
+    background-color: var(--theme-table-header-background);
+    color: var(--theme-table-header-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .documents-page .documents-table tbody td {
+    background-color: var(--theme-table-bg);
+    color: var(--theme-table-text);
+    border-color: var(--theme-border);
+}
+html[data-color] .documents-page .documents-table tbody tr:hover td {
+    background-color: var(--theme-hover);
+    color: var(--theme-table-text);
+}
+html[data-color] .documents-page .documents-user-avatar {
+    background-color: var(--theme-hover);
+    color: var(--theme-text-primary);
+}
+html[data-color] .documents-page .documents-user-name,
+html[data-color] .documents-page .documents-file-type { color: var(--theme-heading); }
+html[data-color] .documents-page .documents-user-id,
+html[data-color] .documents-page .documents-file-name { color: var(--theme-text-secondary); }
+html[data-color] .documents-page .status-badge {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .documents-page .btn-action {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-link);
+}
+html[data-color] .documents-page .empty-state {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .documents-page .pagination-info { color: var(--theme-text-secondary); }
+html[data-color] .documents-page .modal-overlay {
+    background-color: rgba(0,0,0,0.35);
+}
+html[data-color] .documents-page .custom-modal {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .documents-page .modal-body,
+html[data-color] .documents-page .modal-title,
+html[data-color] .documents-page .modal-text,
+html[data-color] .documents-page .modal-info-box p { color: var(--theme-text-primary); }
+html[data-color] .documents-page .modal-info-box {
+    background-color: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+html[data-color] .documents-page .modal-info-box .info-label { color: var(--theme-text-secondary); }
+html[data-color] .documents-page .btn-modal-cancel,
+html[data-color] .documents-page .btn-modal-confirm {
+    background-color: var(--theme-card-background);
+    border-color: var(--theme-border);
+    color: var(--theme-text-primary);
+}
+
+/* The list card heading: admin.css gives the title and its sub-line the white
+   they were meant to sit on a dark gradient, so on the themed light surface both
+   went invisible. */
+html[data-color] .documents-page .card-header-title { color: var(--theme-heading); }
+html[data-color] .documents-page .card-header-sub { color: var(--theme-text-secondary); }
+
+/* Dropdown pickers. The blue selected row inside every select menu is painted by
+   the operating system, which neither accent-color nor option styling can reach, so
+   each select opts into the customizable-select rendering that turns the picker and
+   its rows into real CSS boxes. Guarded because the feature is not Baseline:
+   browsers without it keep their native picker untouched. */
+@supports (appearance: base-select) {
+    html[data-color] select,
+    html[data-color] ::picker(select) {
+        appearance: base-select;
+    }
+    /* Bootstrap keeps .form-select at display:block, which drops the picker icon onto
+       a line of its own and doubles the height of the field, and it paints a second
+       chevron into the background. One flex row with the themed icon replaces both; the
+       other select styles already map to a flex row on their own. */
+    html[data-color] .form-select {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-image: none;
+        padding-right: 14px;
+    }
+    html[data-color] ::picker(select) {
+        background-color: var(--theme-input-background);
+        border: 1px solid var(--theme-border);
+        border-radius: 10px;
+        color: var(--theme-input-text);
+    }
+    html[data-color] select option {
+        padding: 8px 12px;
+        color: var(--theme-input-text);
+    }
+    /* Every state keeps the select in its selector: Chrome only matches an option's
+       :checked state when the rule also names the owning select. */
+    html[data-color] select option:hover,
+    html[data-color] select option:focus {
+        background-color: var(--theme-hover);
+        color: var(--theme-input-text);
+    }
+    html[data-color] select option:checked {
+        background-color: var(--theme-primary);
+        color: var(--theme-primary-contrast);
+    }
+}
+html[data-color] .documents-page .form-input:focus-visible,
+html[data-color] .documents-page .form-select:focus-visible,
+html[data-color] .documents-page .per-page-select:focus-visible {
+    outline-color: var(--theme-primary-dark);
+}
+html[data-color] .documents-page ::selection {
+    background-color: var(--theme-primary);
+    color: var(--theme-primary-contrast);
 }
