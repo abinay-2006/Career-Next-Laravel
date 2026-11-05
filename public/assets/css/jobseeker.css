@@ -7945,6 +7945,15 @@ html[data-color] .cn-admin-content .status-table .status-badge:is(.rejected, .de
     text-transform: uppercase;
 }
 
+.job-match-caption {
+    margin-left: auto;
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--theme-text-secondary, #67657a);
+}
+
 .job-match-track {
     height: 6px;
     border-radius: 50px;
@@ -8087,6 +8096,270 @@ html[data-color] .cn-admin-content .status-table .status-badge:is(.rejected, .de
     color: var(--theme-primary-dark, #5143a5);
 }
 
+/* ---------- Job Suitability Assessment ---------- */
+/* Reads the same theme variables as Smart Job Match so light, dark and custom
+   colour themes all recolour it; nothing here is a fixed blue or black. */
+.job-fit {
+    --fit-color: var(--theme-text-secondary, #67657a);
+    --fit-ink: color-mix(in srgb, var(--fit-color) 70%, var(--theme-text-primary, #29283b));
+    --fit-ink-success: color-mix(in srgb, var(--theme-success, #16834a) 72%, var(--theme-text-primary, #29283b));
+    --fit-ink-warning: color-mix(in srgb, var(--theme-warning, #926300) 72%, var(--theme-text-primary, #29283b));
+    --fit-ink-error: color-mix(in srgb, var(--theme-error, #c53030) 72%, var(--theme-text-primary, #29283b));
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--fit-color) 30%, var(--theme-border, #e3e0ef));
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--fit-color) 8%, var(--theme-card-background, #fff));
+}
+
+.job-fit-success { --fit-color: var(--theme-success, #16834a); }
+.job-fit-warning { --fit-color: var(--theme-warning, #926300); }
+.job-fit-danger { --fit-color: var(--theme-error, #c53030); }
+.job-fit-muted { --fit-color: var(--theme-text-secondary, #67657a); }
+
+/* The badge and chip text is only ~11px, and the raw status tokens measure
+   between 2.5:1 and 4.4:1 once the theme is dark - they were written for a
+   white card. Pulling each toward the theme's own text colour keeps the hue and
+   clears 4.5:1 in both appearances without a fixed colour anywhere. */
+html[data-color][data-appearance="dark"] .job-fit {
+    --fit-ink: color-mix(in srgb, var(--fit-color) 52%, var(--theme-text-primary, #f3f4f6));
+    --fit-ink-success: color-mix(in srgb, var(--theme-success, #16834a) 52%, var(--theme-text-primary, #f3f4f6));
+    --fit-ink-warning: color-mix(in srgb, var(--theme-warning, #926300) 52%, var(--theme-text-primary, #f3f4f6));
+    --fit-ink-error: color-mix(in srgb, var(--theme-error, #c53030) 42%, var(--theme-text-primary, #f3f4f6));
+}
+
+.job-fit-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.job-fit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border: 1px solid color-mix(in srgb, var(--fit-color) 32%, var(--theme-border, #e3e0ef));
+    border-radius: 50px;
+    background: color-mix(in srgb, var(--fit-color) 12%, var(--theme-card-background, #fff));
+    color: var(--fit-ink);
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+.job-fit-badge i {
+    color: var(--fit-ink);
+    font-size: .74rem;
+}
+
+.job-fit-score {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.job-fit-value {
+    font-size: .95rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--fit-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.job-fit-detailed .job-fit-value {
+    font-size: 1.35rem;
+}
+
+.job-fit-score-caption {
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: var(--theme-text-secondary, #67657a);
+}
+
+.job-fit-score-note {
+    margin: 0;
+    font-size: .7rem;
+    line-height: 1.5;
+    color: var(--theme-text-secondary, #67657a);
+    overflow-wrap: anywhere;
+}
+
+.job-fit-explanation {
+    margin: 0;
+    font-size: .72rem;
+    line-height: 1.45;
+    color: var(--theme-text-muted, #777489);
+    overflow-wrap: anywhere;
+}
+
+/* Detailed breakdown on the job page. */
+.job-fit-detailed {
+    gap: 12px;
+    padding: 16px;
+}
+
+.job-fit-criteria {
+    display: grid;
+    gap: 10px;
+}
+
+.job-fit-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--theme-border, #e3e0ef);
+}
+
+.job-fit-row:first-child {
+    padding-top: 0;
+    border-top: 0;
+}
+
+.job-fit-row i:first-child {
+    padding-top: 3px;
+    font-size: .8rem;
+    color: var(--theme-text-muted, #777489);
+}
+
+.job-fit-row-met i:first-child { color: var(--fit-ink-success); }
+.job-fit-row-partial i:first-child { color: var(--fit-ink-warning); }
+.job-fit-row-unmet i:first-child { color: var(--fit-ink-error); }
+
+.job-fit-row-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.job-fit-row-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: .82rem;
+    color: var(--theme-text-primary, #29283b);
+}
+
+.job-fit-status {
+    padding: 1px 8px;
+    border: 1px solid var(--theme-border, #e3e0ef);
+    border-radius: 50px;
+    background: var(--theme-hover, #f1efff);
+    color: var(--theme-text-secondary, #67657a);
+    font-size: .66rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+.job-fit-status-met {
+    border-color: color-mix(in srgb, var(--theme-success, #16834a) 34%, var(--theme-border, #e3e0ef));
+    background: color-mix(in srgb, var(--theme-success, #16834a) 12%, var(--theme-card-background, #fff));
+    color: var(--fit-ink-success);
+}
+
+.job-fit-status-partial {
+    border-color: color-mix(in srgb, var(--theme-warning, #926300) 34%, var(--theme-border, #e3e0ef));
+    background: color-mix(in srgb, var(--theme-warning, #926300) 12%, var(--theme-card-background, #fff));
+    color: var(--fit-ink-warning);
+}
+
+.job-fit-status-unmet {
+    border-color: color-mix(in srgb, var(--theme-error, #c53030) 34%, var(--theme-border, #e3e0ef));
+    background: color-mix(in srgb, var(--theme-error, #c53030) 12%, var(--theme-card-background, #fff));
+    color: var(--fit-ink-error);
+}
+
+.job-fit-required {
+    font-size: .66rem;
+    font-weight: 600;
+    color: var(--theme-text-secondary, #67657a);
+}
+
+.job-fit-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin: 0;
+    font-size: .74rem;
+    line-height: 1.5;
+    color: var(--theme-text-secondary, #67657a);
+    overflow-wrap: anywhere;
+}
+
+.job-fit-values small {
+    display: block;
+    font-size: .62rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--theme-text-muted, #777489);
+}
+
+/* The job details stylesheet paints every descendant of .job-details-layout
+   near-white, so a value that only inherits is invisible on this cream panel. */
+.job-fit-values span {
+    color: var(--theme-text-primary, #29283b);
+}
+
+.job-fit-reason {
+    margin: 0;
+    font-size: .74rem;
+    line-height: 1.5;
+    color: var(--theme-text-secondary, #67657a);
+    overflow-wrap: anywhere;
+}
+
+.job-fit-group,
+.job-fit-suggestions {
+    padding: 10px 12px;
+    border: 1px solid var(--theme-border, #e3e0ef);
+    border-radius: 10px;
+    background: var(--theme-surface-secondary, #f0eef8);
+}
+
+.job-fit-suggestions {
+    border-color: color-mix(in srgb, var(--theme-primary, #667eea) 24%, var(--theme-border, #e3e0ef));
+    background: color-mix(in srgb, var(--theme-primary, #667eea) 8%, var(--theme-card-background, #fff));
+}
+
+.job-fit-group h4,
+.job-fit-suggestions h4 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 6px;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--theme-text-primary, #29283b);
+}
+
+.job-fit-group h4 i { color: var(--theme-text-muted, #777489); }
+.job-fit-suggestions h4 i { color: var(--theme-primary-dark, #5143a5); }
+
+.job-fit-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: .74rem;
+    line-height: 1.6;
+    color: var(--theme-text-secondary, #67657a);
+    overflow-wrap: anywhere;
+}
+
+.job-fit-list-muted {
+    color: var(--theme-text-muted, #777489);
+}
+
 @media (max-width: 575px) {
     .match-controls-note {
         flex: 1 1 100%;
@@ -8098,6 +8371,529 @@ html[data-color] .cn-admin-content .status-table .status-badge:is(.rejected, .de
 
     .job-match-detailed {
         padding: 12px;
+    }
+
+    .job-fit-detailed {
+        padding: 12px;
+    }
+
+    .job-fit-row-top {
+        font-size: .78rem;
+    }
+}
+
+/* ---------- Career roadmap: gap-to-job steps on job cards and job details ---------- */
+/* Reads the same theme variables as the suitability panel, so the purple accents
+   and every light, dark and custom colour theme recolour it; no fixed colours. */
+.job-roadmap {
+    --road-color: var(--theme-primary, #667eea);
+    --road-ink: color-mix(in srgb, var(--road-color) 62%, var(--theme-text-primary, #29283b));
+    --road-ink-success: color-mix(in srgb, var(--theme-success, #16834a) 72%, var(--theme-text-primary, #29283b));
+    --road-ink-warning: color-mix(in srgb, var(--theme-warning, #926300) 72%, var(--theme-text-primary, #29283b));
+    --road-ink-error: color-mix(in srgb, var(--theme-error, #c53030) 72%, var(--theme-text-primary, #29283b));
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in srgb, var(--road-color) 26%, var(--theme-border, #e3e0ef));
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--road-color) 7%, var(--theme-card-background, #fff));
+}
+
+.job-roadmap-success { --road-color: var(--theme-success, #16834a); }
+.job-roadmap-warning { --road-color: var(--theme-warning, #926300); }
+.job-roadmap-danger { --road-color: var(--theme-error, #c53030); }
+.job-roadmap-muted { --road-color: var(--theme-text-secondary, #67657a); }
+
+/* Same dark-appearance pull as .job-fit: small coloured text needs to clear 4.5:1
+   against a dark card, and the raw status tokens were written for a white one. */
+html[data-color][data-appearance="dark"] .job-roadmap {
+    --road-ink: color-mix(in srgb, var(--road-color) 48%, var(--theme-text-primary, #f3f4f6));
+    --road-ink-success: color-mix(in srgb, var(--theme-success, #16834a) 52%, var(--theme-text-primary, #f3f4f6));
+    --road-ink-warning: color-mix(in srgb, var(--theme-warning, #926300) 52%, var(--theme-text-primary, #f3f4f6));
+    --road-ink-error: color-mix(in srgb, var(--theme-error, #c53030) 42%, var(--theme-text-primary, #f3f4f6));
+}
+
+.job-roadmap-head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.job-roadmap-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    color: var(--road-ink);
+}
+
+.job-roadmap-value {
+    font-size: .95rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--road-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.job-roadmap-caption {
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: var(--theme-text-secondary, #67657a);
+}
+
+.job-roadmap-track {
+    height: 6px;
+    border-radius: 50px;
+    background: color-mix(in srgb, var(--road-color) 14%, var(--theme-surface-secondary, #f0eef8));
+    overflow: hidden;
+}
+
+.job-roadmap-track span {
+    display: block;
+    height: 100%;
+    border-radius: 50px;
+    background: var(--road-color);
+}
+
+.job-roadmap-line {
+    margin: 0;
+    font-size: .7rem;
+    line-height: 1.45;
+    color: var(--theme-text-secondary, #67657a);
+    overflow-wrap: anywhere;
+}
+
+.job-roadmap-link {
+    align-self: flex-start;
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--theme-primary-dark, #5143a5);
+    text-decoration: none;
+}
+
+.job-roadmap-link:hover {
+    text-decoration: underline;
+}
+
+/* Compact default view on the job page: the score, the bar and the gaps only.
+   The rules that carry colour compound two classes because the theme stylesheet
+   paints every bare p and small with --theme-text-secondary. */
+.job-roadmap .job-roadmap-score {
+    margin: 0;
+    font-size: .78rem;
+    line-height: 1.4;
+    color: var(--theme-text-secondary, #67657a);
+}
+
+.job-roadmap .job-roadmap-score strong {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--road-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.job-roadmap-detailed .job-roadmap-track {
+    height: 8px;
+}
+
+.job-roadmap-gaps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 7px;
+}
+
+.job-roadmap-gap {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.job-roadmap-gap-copy {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.job-roadmap .job-roadmap-gap-copy strong {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--theme-text-primary, #29283b);
+    overflow-wrap: anywhere;
+}
+
+.job-roadmap .job-roadmap-gap-copy small {
+    font-size: .7rem;
+    line-height: 1.45;
+    color: var(--theme-text-secondary, #67657a);
+    overflow-wrap: anywhere;
+}
+
+/* A neutral chip: the category tells you what kind of requirement it is, so it
+   must not compete with the tone colour of the panel. */
+.job-roadmap-cat {
+    flex: 0 0 auto;
+    padding: 2px 9px;
+    border: 1px solid color-mix(in srgb, var(--theme-text-secondary, #67657a) 26%, var(--theme-border, #e3e0ef));
+    border-radius: 50px;
+    background: color-mix(in srgb, var(--theme-text-secondary, #67657a) 8%, var(--theme-card-background, #fff));
+    color: color-mix(in srgb, var(--theme-text-secondary, #67657a) 80%, var(--theme-text-primary, #29283b));
+    font-size: .6rem;
+    font-weight: 600;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.job-roadmap .job-roadmap-positive {
+    margin: 0;
+    padding: 8px 10px;
+    border: 1px solid color-mix(in srgb, var(--theme-success, #16834a) 30%, var(--theme-border, #e3e0ef));
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--theme-success, #16834a) 9%, var(--theme-card-background, #fff));
+    font-size: .78rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--road-ink-success);
+    overflow-wrap: anywhere;
+}
+
+.job-roadmap .job-roadmap-quiet {
+    margin: 0;
+    font-size: .74rem;
+    line-height: 1.5;
+    color: var(--theme-text-secondary, #67657a);
+    overflow-wrap: anywhere;
+}
+
+.job-roadmap .job-roadmap-unknown {
+    margin: 0;
+    font-size: .68rem;
+    line-height: 1.45;
+    color: var(--theme-text-muted, #777489);
+    overflow-wrap: anywhere;
+}
+
+/* One primary action; the secondary links live inside the collapsed section.
+   The fill is the primary pulled 22% toward the page ink: --theme-primary with
+   --theme-primary-contrast only measures 3.66:1 (purple) and 3.56:1 (orange) in
+   light mode, and this button carries body-size text. */
+.btn-roadmap-primary {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border: 1px solid color-mix(in srgb, var(--theme-primary, #667eea) 78%, var(--theme-text-primary, #29283b));
+    border-radius: 50px;
+    background: color-mix(in srgb, var(--theme-primary, #667eea) 78%, var(--theme-text-primary, #29283b));
+    color: var(--theme-primary-contrast, #fff);
+    font-size: .8rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.btn-roadmap-primary:hover {
+    background: color-mix(in srgb, var(--theme-primary, #667eea) 66%, var(--theme-text-primary, #29283b));
+    border-color: color-mix(in srgb, var(--theme-primary, #667eea) 66%, var(--theme-text-primary, #29283b));
+    color: var(--theme-primary-contrast, #fff);
+}
+
+.btn-roadmap-primary:focus-visible,
+.job-roadmap-all summary:focus-visible {
+    outline: 2px solid var(--theme-primary-dark, #5143a5);
+    outline-offset: 2px;
+}
+
+/* The full roadmap, matched requirements and extra links sit behind a
+   disclosure so the default view stays readable in a few seconds. */
+.job-roadmap-all {
+    display: grid;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--road-color) 20%, var(--theme-border, #e3e0ef));
+}
+
+.job-roadmap-all summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    font-size: .76rem;
+    font-weight: 600;
+    color: var(--theme-primary-dark, #5143a5);
+    cursor: pointer;
+    list-style: none;
+}
+
+.job-roadmap-all summary::-webkit-details-marker {
+    display: none;
+}
+
+.job-roadmap-all summary i {
+    color: inherit;
+}
+
+.job-roadmap-chevron {
+    font-size: .62rem;
+    transition: transform .2s ease;
+}
+
+.job-roadmap-all[open] .job-roadmap-chevron {
+    transform: rotate(180deg);
+}
+
+/* Detailed roadmap on the job page. */
+.job-roadmap-detailed {
+    gap: 12px;
+    padding: 16px;
+}
+
+.job-roadmap-note {
+    margin: 0;
+    font-size: .7rem;
+    line-height: 1.5;
+    color: var(--theme-text-secondary, #67657a);
+    overflow-wrap: anywhere;
+}
+
+.job-roadmap-groups {
+    display: grid;
+    gap: 12px;
+}
+
+.job-roadmap-group {
+    padding: 10px 12px;
+    border: 1px solid var(--theme-border, #e3e0ef);
+    border-radius: 10px;
+    background: var(--theme-surface-secondary, #f0eef8);
+}
+
+.job-roadmap-group-learn {
+    border-color: color-mix(in srgb, var(--theme-primary, #667eea) 24%, var(--theme-border, #e3e0ef));
+    background: color-mix(in srgb, var(--theme-primary, #667eea) 7%, var(--theme-card-background, #fff));
+}
+
+.job-roadmap-group h4 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 0 0 4px;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--theme-text-primary, #29283b);
+}
+
+.job-roadmap-group h4 i {
+    color: var(--theme-primary-dark, #5143a5);
+    font-size: .74rem;
+}
+
+.job-roadmap-count {
+    padding: 1px 8px;
+    border: 1px solid var(--theme-border, #e3e0ef);
+    border-radius: 50px;
+    background: var(--theme-hover, #f1efff);
+    color: var(--theme-text-secondary, #67657a);
+    font-size: .62rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+}
+
+.job-roadmap-group-note {
+    margin: 0 0 8px;
+    font-size: .7rem;
+    line-height: 1.5;
+    color: var(--theme-text-muted, #777489);
+    overflow-wrap: anywhere;
+}
+
+.job-roadmap-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.job-roadmap-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.job-roadmap-step > i:first-child {
+    padding-top: 3px;
+    font-size: .78rem;
+    color: var(--theme-text-muted, #777489);
+}
+
+.job-roadmap-step-matched > i:first-child { color: var(--road-ink-success); }
+.job-roadmap-step-gap > i:first-child { color: var(--road-ink-error); }
+
+.job-roadmap-step-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.job-roadmap-step-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.job-roadmap-step-body strong {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--theme-text-primary, #29283b);
+    overflow-wrap: anywhere;
+}
+
+.job-roadmap-state {
+    padding: 1px 8px;
+    border: 1px solid color-mix(in srgb, var(--theme-success, #16834a) 30%, transparent);
+    border-radius: 50px;
+    background: color-mix(in srgb, var(--theme-success, #16834a) 10%, transparent);
+    color: var(--road-ink-success);
+    font-size: .58rem;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.job-roadmap-step-body p {
+    margin: 0;
+    font-size: .72rem;
+    line-height: 1.5;
+    color: var(--theme-text-secondary, #67657a);
+    overflow-wrap: anywhere;
+}
+
+.job-roadmap-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin: 0;
+    font-size: .72rem;
+    line-height: 1.5;
+}
+
+/* The job details stylesheet paints every descendant of .job-details-layout
+   near-white, so a value that only inherits is invisible on this cream panel. */
+.job-roadmap-values span {
+    color: var(--theme-text-primary, #29283b);
+}
+
+.job-roadmap-values small {
+    display: block;
+    font-size: .6rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--theme-text-muted, #777489);
+}
+
+.job-roadmap-step-link {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .68rem;
+    font-weight: 600;
+    color: var(--theme-primary-dark, #5143a5);
+    text-decoration: none;
+}
+
+/* The global ".job-details-layout *" rule paints every descendant near-white,
+   which would hide these glyphs behind their own link text. */
+.job-roadmap-step-link i,
+.btn-roadmap-action i {
+    color: inherit;
+}
+
+.job-roadmap-step-link:hover {
+    text-decoration: underline;
+}
+
+.job-roadmap-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.btn-roadmap-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid color-mix(in srgb, var(--theme-primary, #667eea) 34%, var(--theme-border, #e3e0ef));
+    border-radius: 50px;
+    background: color-mix(in srgb, var(--theme-primary, #667eea) 10%, var(--theme-card-background, #fff));
+    color: var(--road-ink);
+    font-size: .72rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.btn-roadmap-action:hover {
+    background: color-mix(in srgb, var(--theme-primary, #667eea) 18%, var(--theme-card-background, #fff));
+}
+
+/* Plain line rather than a bordered callout: it is a caution, not a task. */
+.job-roadmap .job-roadmap-disclaimer {
+    margin: 0;
+    font-size: .68rem;
+    line-height: 1.45;
+    color: var(--theme-text-muted, #777489);
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 575px) {
+    .job-roadmap-detailed {
+        padding: 12px;
+    }
+
+    .job-roadmap-gap {
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .job-roadmap-cat {
+        padding: 1px 7px;
+        font-size: .56rem;
+    }
+
+    .btn-roadmap-primary {
+        align-self: stretch;
+        justify-content: center;
+    }
+
+    .job-roadmap-actions {
+        gap: 6px;
+    }
+
+    .btn-roadmap-action {
+        flex: 1 1 calc(50% - 6px);
+        justify-content: center;
     }
 }
 

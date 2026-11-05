@@ -113,7 +113,15 @@ class AdminModulesTest extends TestCase
             ->assertSee('id="modalOverlay"', false)
             ->assertDontSee('id="actionModalOverlay"', false);
         $this->assertSame(1, substr_count($html, 'class="modal-overlay"'));
-        $this->assertSame(1, substr_count($html, 'id="approveRejectForm"'));
+        // The single shared approve/reject <form> was replaced by two named
+        // buttons in one action area, with each row carrying its own per-job
+        // URLs, so the same "one modal, two named actions" guarantee is checked
+        // against the markup that actually drives the fetch.
+        $this->assertSame(1, substr_count($html, 'id="modalActions"'));
+        $this->assertSame(1, substr_count($html, 'id="approveJobButton"'));
+        $this->assertSame(1, substr_count($html, 'id="rejectJobButton"'));
+        $this->assertSame(1, substr_count($html, 'data-approve-url="' . route('admin.jobs.approve', ['id' => $id]) . '"'));
+        $this->assertSame(1, substr_count($html, 'data-reject-url="' . route('admin.jobs.reject', ['id' => $id]) . '"'));
         $this->assertSame(1, substr_count($html, 'bootstrap.bundle.min.js'));
     }
 

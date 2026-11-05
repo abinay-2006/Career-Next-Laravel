@@ -43,11 +43,17 @@
             </form>
             @else
             <div class="panel-title">Reset your password</div>
-            <div class="panel-subtitle">Enter the email address for your account and we’ll send a one-time verification code.</div>
+            <div class="panel-subtitle">Enter the email address for your account, choose its account type, and we’ll send a one-time verification code.</div>
             <form method="POST" action="{{ route('forgot.send') }}">
                 @csrf
                 <div class="form-group"><label for="email">Email Address</label>
                     <div class="input-wrap"><i class="fas fa-envelope lead-icon"></i><input id="email" type="email" name="email" value="{{ old('email') }}" maxlength="150" required autocomplete="email" autofocus></div>
+                </div>
+                <div class="form-group"><label for="account_type">Account Type</label>
+                    <div class="input-wrap"><i class="fas fa-user-tie lead-icon"></i><select id="account_type" name="account_type" required>
+                        <option value="jobseeker" @selected(old('account_type', 'jobseeker') === 'jobseeker')>Job Seeker</option>
+                        <option value="employer" @selected(old('account_type') === 'employer')>Employer</option>
+                    </select></div>
                 </div>
                 <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Send Verification Code</button>
             </form>

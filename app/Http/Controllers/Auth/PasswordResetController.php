@@ -35,25 +35,28 @@ class PasswordResetController extends Controller
     {
         $data = $request->validate([
             'email' => ['required', 'email', 'max:150'],
-            'account_type' => ['nullable', 'in:employer,jobseeker'],
+            'account_type' => ['required', 'in:employer,jobseeker'],
         ]);
         $email = Str::lower(trim($data['email']));
-        $matches = collect([
-            ...JobSeeker::query()->whereRaw('LOWER(Email) = ?', [$email])->get(),
-            ...Employer::query()->whereRaw('LOWER(Email) = ?', [$email])->get(),
-        ]);
+        $accountType = $data['account_type'];
 
-        $request->session()->forget('password_recovery_email');
+        // The selected account type chooses which table is searched, so an
+        // address shared across account types only receives a code for the
+        // chosen account. Admin accounts have no stored email and are not a
+        // supported recovery target.
+        $matches = $accountType === 'jobseeker'
+            ? JobSeeker::query()->whereRaw('LOWER(Email) = ?', [$email])->get()
+            : Employer::query()->whereRaw('LOWER(Email) = ?', [$email])->get();
+
+        $request->session()->forget(['password_recovery_email', 'password_recovery_account_type']);
         $request->session()->put('password_recovery_email', $email);
+        $request->session()->put('password_recovery_account_type', $accountType);
 
-        // Send a distinct code for each matching account. This avoids asking the
-        // user to guess the account type when an email is shared across accounts.
         if ($matches->isNotEmpty()) {
             foreach ($matches as $account) {
-                $type = $account instanceof JobSeeker ? 'jobseeker' : 'employer';
                 $otp = (string) random_int(100000, 999999);
                 DB::table('password_recovery_tokens')->insert([
-                    'account_type' => $type,
+                    'account_type' => $accountType,
                     'account_id' => $account->getKey(),
                     'email' => $email,
                     'token_hash' => hash_hmac('sha256', $otp, (string) config('app.key')),
@@ -70,12 +73,12 @@ class PasswordResetController extends Controller
                 } catch (\Throwable $exception) {
                     DB::table('password_recovery_tokens')->where('token_hash', hash_hmac('sha256', $otp, (string) config('app.key')))->delete();
                     Log::warning('Password recovery email could not be sent', ['exception' => $exception::class]);
-                    return redirect()->route('forgot')->withInput($request->only('email'))->with('error', 'We could not send the verification email. Please try again later or contact support.');
+                    return redirect()->route('forgot')->withInput($request->only('email', 'account_type'))->with('error', 'We could not send the verification email. Please try again later or contact support.');
                 }
 
                 // A logging failure must not invalidate a code that has already been emailed.
                 try {
-                    app(ActivityLogger::class)->record('password_recovery_requested', $type, $account->getKey());
+                    app(ActivityLogger::class)->record('password_recovery_requested', $accountType, $account->getKey());
                 } catch (\Throwable $exception) {
                     Log::warning('Password recovery request could not be logged', ['exception' => $exception::class]);
                 }
@@ -98,11 +101,17 @@ class PasswordResetController extends Controller
             return back()->withErrors(['otp' => 'Too many attempts. Request a new verification code.']);
         }
 
-        $recovery = DB::table('password_recovery_tokens')
+        // Keep verification bound to the account type chosen at the email step,
+        // so a code issued for one account type can never advance another.
+        $accountType = $request->session()->get('password_recovery_account_type');
+        $recoveryQuery = DB::table('password_recovery_tokens')
             ->where('email', $email)
             ->where('token_hash', hash_hmac('sha256', $validated['otp'], (string) config('app.key')))
-            ->where('expires_at', '>', now())
-            ->first();
+            ->where('expires_at', '>', now());
+        if (in_array($accountType, ['jobseeker', 'employer'], true)) {
+            $recoveryQuery->where('account_type', $accountType);
+        }
+        $recovery = $recoveryQuery->first();
 
         if (!$recovery) {
             RateLimiter::hit($limiterKey, 600);

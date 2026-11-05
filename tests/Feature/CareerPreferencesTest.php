@@ -319,6 +319,34 @@ class CareerPreferencesTest extends TestCase
             ->assertSee('Data Analyst');
     }
 
+    public function test_dashboard_recommends_from_a_pay_preference_without_a_preferred_title(): void
+    {
+        // A seeker who only said what they must earn is not left with an empty
+        // card, and a listing that states nothing they asked for is not shown.
+        $seeker = $this->createSeeker('Salaries Only');
+        $this->createJob('Warehouse Supervisor');
+        DB::table('job_master')->where('JobTitle', 'Warehouse Supervisor')->update([
+            'SalaryFrom' => '45000',
+            'SalaryTo' => '70000',
+        ]);
+        $this->createJob('Quiet Archivist');
+
+        $this->actingAs($seeker, 'jobseeker')
+            ->put(route('jobseeker.preferences.update'), [
+                'minimum_salary' => '40000',
+                'maximum_salary' => '80000',
+                'salary_period' => 'monthly',
+                'currency' => 'INR',
+            ]);
+
+        $this->actingAs($seeker, 'jobseeker')
+            ->get(route('jobseeker.index'))
+            ->assertOk()
+            ->assertSee('Warehouse Supervisor')
+            ->assertSee('Salary ₹45,000 – ₹70,000')
+            ->assertDontSee('Quiet Archivist');
+    }
+
     public function test_the_preferences_page_carries_the_same_skills_section_as_the_profile(): void
     {
         $seeker = $this->createSeeker('Blender Fan');

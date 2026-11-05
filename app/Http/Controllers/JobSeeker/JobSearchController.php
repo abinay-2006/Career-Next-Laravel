@@ -7,15 +7,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Job;
 use App\Models\Application;
+use App\Services\CareerRoadmapService;
 use App\Services\JobMatchService;
+use App\Services\JobSuitabilityService;
 
 class JobSearchController extends Controller
 {
     /** Match thresholds offered by the Smart Match filter. */
     private const MATCH_THRESHOLDS = [40, 60, 80];
 
-    public function __construct(private readonly JobMatchService $jobMatch)
-    {
+    public function __construct(
+        private readonly JobMatchService $jobMatch,
+        private readonly JobSuitabilityService $suitability,
+        private readonly CareerRoadmapService $roadmap,
+    ) {
     }
 
     /**
@@ -65,6 +70,11 @@ class JobSearchController extends Controller
         $candidate = $this->jobMatch->candidateLists($jobSeeker->JobSeekId);
         $candidateSkills = $candidate['skills'];
 
+        // So is the rest of the profile the suitability assessment reads, which is
+        // why each listing is assessed from this one context. The skill lists are
+        // handed over rather than read a second time.
+        $context = $this->suitability->candidateContext($jobSeeker, $candidate);
+
         $matches = $jobs->mapWithKeys(fn (Job $job) => [
             $job->JobId => $this->jobMatch->calculate($candidateSkills, $job, $candidate['software']),
         ]);
@@ -99,6 +109,18 @@ class JobSearchController extends Controller
             ->orderByDesc('ApplicationId')
             ->get();
 
+        // Suitability sits next to Smart Job Match rather than replacing it. The
+        // match calculated above is handed over, so each listing is scored once.
+        $suitabilities = $jobs->mapWithKeys(fn (Job $job) => [
+            $job->JobId => $this->suitability->assess($context, $job, $matches->get($job->JobId)),
+        ]);
+
+        // The roadmap is derived from those same assessments - no requirement is
+        // compared twice, and no profile data is read again per card.
+        $roadmaps = $jobs->mapWithKeys(fn (Job $job) => [
+            $job->JobId => $this->roadmap->build($context, $job, $suitabilities->get($job->JobId)),
+        ]);
+
         return view('jobseeker.jobs.index', [
             'jobs'             => $jobs,
             'applications'     => $applications,
@@ -106,6 +128,8 @@ class JobSearchController extends Controller
             'companies'        => $companies,
             'titles'           => $titles,
             'matches'          => $matches,
+            'suitabilities'    => $suitabilities,
+            'roadmaps'         => $roadmaps,
             'candidateSkills'  => $candidateSkills,
             'minimumMatch'     => $minimumMatch,
             'sort'             => $sort,
@@ -141,10 +165,22 @@ class JobSearchController extends Controller
             $candidate['software']
         );
 
+        $context = $this->suitability->candidateContext($jobSeeker, $candidate);
+
+        // The suitability breakdown shown under the match panel. Only this
+        // seeker's own profile is read, and nothing is stored.
+        $suitability = $this->suitability->assess($context, $job, $match);
+
+        // The gap-to-job roadmap under the assessment, built from that same
+        // assessment so the listing's requirements are only ever compared once.
+        $roadmap = $this->roadmap->build($context, $job, $suitability);
+
         return view('jobseeker.jobs.show', compact(
             'job',
             'alreadyApplied',
-            'match'
+            'match',
+            'suitability',
+            'roadmap'
         ));
     }
 

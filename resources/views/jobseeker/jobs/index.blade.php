@@ -156,7 +156,7 @@
                     <div class="job-company">
                         {{ $job->CompanyName }}
                     </div>
-                    <div class="job-card-id">ID: {{ $job->JobId }}</div>
+                    
                 </div>
 
                 <div class="job-company-icon">
@@ -220,7 +220,26 @@
 
             @php
             $match = $matches[$job->JobId] ?? null;
+            $suitability = ($suitabilities ?? [])[$job->JobId] ?? null;
             @endphp
+
+            @if($suitability)
+            <div class="job-fit job-fit-{{ $suitability['tone'] }}">
+                <div class="job-fit-head">
+                    <span class="job-fit-badge">
+                        <i class="fas {{ $suitability['icon'] }}" aria-hidden="true"></i>
+                        {{ $suitability['label'] }}
+                    </span>
+                    @if($suitability['percentage'] !== null)
+                    <span class="job-fit-score">
+                        <span class="job-fit-value">{{ $suitability['percentage'] }}%</span>
+                        <span class="job-fit-score-caption">of essential requirements</span>
+                    </span>
+                    @endif
+                </div>
+                <p class="job-fit-explanation">{{ $suitability['explanation'] }}</p>
+            </div>
+            @endif
 
             @if($match && $match['status'] === \App\Services\JobMatchService::STATUS_SCORED)
             @php
@@ -234,6 +253,7 @@
                 <div class="job-match-head">
                     <span class="job-match-value">{{ $match['percentage'] }}%</span>
                     <span class="job-match-label">{{ $match['label'] }}</span>
+                    <span class="job-match-caption">Skill Match</span>
                 </div>
 
                 <div class="job-match-track" aria-hidden="true">
@@ -264,6 +284,55 @@
                 <span>{{ $match['explanation'] }}</span>
             </p>
 
+            @endif
+
+            @php
+            $roadmap = ($roadmaps ?? [])[$job->JobId] ?? null;
+            @endphp
+
+            {{-- Compact roadmap preview: one progress line plus one short line per
+                 group that still has outstanding steps. A card with nothing to
+                 work on shows nothing at all. --}}
+            @if($roadmap && $roadmap['steps_total'] > 0)
+            @php
+            $roadmapLines = [];
+
+            foreach ($roadmap['groups'] as $roadmapGroup) {
+                $pending = $roadmapGroup['total'] - $roadmapGroup['completed'];
+
+                if ($pending === 0) {
+                    continue;
+                }
+
+                $roadmapLines[] = $roadmapGroup['label'].': '.$pending
+                    .($pending === 1 ? ' step' : ' steps').' left';
+            }
+            @endphp
+
+            <div class="job-roadmap job-roadmap-{{ $roadmap['tone'] }}">
+                <div class="job-roadmap-head">
+                    <span class="job-roadmap-title">
+                        <i class="fas fa-route" aria-hidden="true"></i>
+                        Roadmap
+                    </span>
+                    <span class="job-roadmap-value">{{ $roadmap['percentage'] }}%</span>
+                    <span class="job-roadmap-caption">
+                        {{ $roadmap['steps_completed'] }}/{{ $roadmap['steps_total'] }} steps covered
+                    </span>
+                </div>
+
+                <div class="job-roadmap-track" aria-hidden="true">
+                    <span style="width: {{ $roadmap['percentage'] }}%"></span>
+                </div>
+
+                @foreach(array_slice($roadmapLines, 0, 2) as $roadmapLine)
+                <p class="job-roadmap-line">{{ $roadmapLine }}</p>
+                @endforeach
+
+                <a href="{{ route('jobseeker.jobs.show', $job->JobId) }}#jobRoadmap" class="job-roadmap-link">
+                    See the full roadmap
+                </a>
+            </div>
             @endif
 
             @php

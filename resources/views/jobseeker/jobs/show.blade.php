@@ -372,6 +372,7 @@
                     <div class="job-match-head">
                         <span class="job-match-value">{{ $match['percentage'] }}%</span>
                         <span class="job-match-label">{{ $match['label'] }}</span>
+                        <span class="job-match-caption">Skill Match</span>
                     </div>
 
                     <div class="job-match-track" aria-hidden="true">
@@ -500,6 +501,334 @@
                 @endif
 
             </div>
+
+
+            <!-- Job Suitability Assessment -->
+
+            @if(isset($suitability))
+            @php
+            $fitIcons = [
+                \App\Services\JobSuitabilityService::CRITERION_MET => 'fa-circle-check',
+                \App\Services\JobSuitabilityService::CRITERION_PARTIAL => 'fa-circle-half-stroke',
+                \App\Services\JobSuitabilityService::CRITERION_UNMET => 'fa-circle-xmark',
+                \App\Services\JobSuitabilityService::CRITERION_UNKNOWN => 'fa-circle-question',
+                \App\Services\JobSuitabilityService::CRITERION_NOT_STATED => 'fa-circle-minus',
+            ];
+            @endphp
+
+            <div class="details-section job-fit-panel">
+
+                <div class="details-section-heading">
+
+                    <div class="heading-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+
+                    <div>
+                        <h3>Job Suitability Assessment</h3>
+                        <p>Whether your profile meets what this employer asked for. Private to you, and nothing here is saved.</p>
+                    </div>
+
+                </div>
+
+                <div class="job-fit job-fit-{{ $suitability['tone'] }} job-fit-detailed">
+
+                    <div class="job-fit-head">
+                        <span class="job-fit-badge">
+                            <i class="fas {{ $suitability['icon'] }}" aria-hidden="true"></i>
+                            {{ $suitability['label'] }}
+                        </span>
+                        @if($suitability['percentage'] !== null)
+                        <span class="job-fit-score">
+                            <span class="job-fit-value">{{ $suitability['percentage'] }}%</span>
+                            <span class="job-fit-score-caption">of essential requirements</span>
+                        </span>
+                        @endif
+                    </div>
+
+                    @if($suitability['percentage'] !== null)
+                    <p class="job-fit-score-note">
+                        Counts only what this listing makes a condition: {{ $suitability['essential_met'] }} of {{ $suitability['essential_total'] }} essential requirement{{ $suitability['essential_total'] === 1 ? '' : 's' }} confirmed.
+                        Preferred skills, salary, employment type and work arrangement are not part of this number.
+                    </p>
+                    @endif
+
+                    <p class="job-fit-explanation">{{ $suitability['explanation'] }}</p>
+
+                    <div class="job-fit-criteria">
+                        @foreach($suitability['criteria'] as $criterion)
+                        <div class="job-fit-row job-fit-row-{{ $criterion['status'] }}">
+
+                            <i class="fas {{ $fitIcons[$criterion['status']] ?? 'fa-circle-question' }}" aria-hidden="true"></i>
+
+                            <div class="job-fit-row-body">
+
+                                <div class="job-fit-row-top">
+                                    <strong>{{ $criterion['name'] }}</strong>
+                                    <span class="job-fit-status job-fit-status-{{ $criterion['status'] }}">
+                                        {{ $criterion['label'] }}
+                                    </span>
+                                    @if($criterion['essential'])
+                                    <span class="job-fit-required">Required by this listing</span>
+                                    @endif
+                                </div>
+
+                                @if($criterion['expected'] !== null || $criterion['candidate'] !== null)
+                                <p class="job-fit-values">
+                                    @if($criterion['expected'] !== null)
+                                    <span><small>Listing</small> {{ $criterion['expected'] }}</span>
+                                    @endif
+                                    @if($criterion['candidate'] !== null)
+                                    <span><small>Your profile</small> {{ $criterion['candidate'] }}</span>
+                                    @endif
+                                </p>
+                                @endif
+
+                                <p class="job-fit-reason">{{ $criterion['explanation'] }}</p>
+
+                            </div>
+
+                        </div>
+                        @endforeach
+                    </div>
+
+                    @if($suitability['missing_requirements'] !== [])
+                    <div class="job-fit-group">
+                        <h4><i class="fas fa-circle-minus" aria-hidden="true"></i> What is missing</h4>
+                        <ul class="job-fit-list">
+                            @foreach($suitability['missing_requirements'] as $line)
+                            <li>{{ $line }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
+                    @if($suitability['unknown_requirements'] !== [])
+                    <div class="job-fit-group">
+                        <h4><i class="fas fa-circle-question" aria-hidden="true"></i> Could not be checked</h4>
+                        <ul class="job-fit-list job-fit-list-muted">
+                            @foreach($suitability['unknown_requirements'] as $line)
+                            <li>{{ $line }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
+                    @if($suitability['suggestions'] !== [])
+                    <div class="job-fit-suggestions">
+                        <h4><i class="fas fa-lightbulb" aria-hidden="true"></i> To improve your suitability</h4>
+                        <ul class="job-fit-list">
+                            @foreach($suitability['suggestions'] as $suggestion)
+                            <li>{{ $suggestion }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
+                </div>
+
+            </div>
+
+            @endif
+
+
+            <!-- Career Gap-to-Job Roadmap -->
+
+            @if(isset($roadmap))
+            @php
+            $roadmapStateIcons = [
+                \App\Services\CareerRoadmapService::STATE_MATCHED => 'fa-circle-check',
+                \App\Services\CareerRoadmapService::STATE_GAP => 'fa-circle-minus',
+                \App\Services\CareerRoadmapService::STATE_UNRECORDED => 'fa-circle-question',
+            ];
+
+            $roadmapActions = [
+                'skills' => ['label' => 'Update Skills', 'icon' => 'fa-toolbox', 'route' => route('jobseeker.profile.skills.update')],
+                'education' => ['label' => 'Update Education', 'icon' => 'fa-graduation-cap', 'route' => route('jobseeker.education')],
+                'experience' => ['label' => 'Update Experience', 'icon' => 'fa-layer-group', 'route' => route('jobseeker.preferences.edit')],
+                'resume' => ['label' => 'Update Resume', 'icon' => 'fa-file-lines', 'route' => route('jobseeker.resumes.index')],
+            ];
+
+            // The default view is the work: a step the profile does not cover yet,
+            // whether that is a shortfall or a value nobody has recorded.
+            $roadmapOutstanding = array_values(array_filter(
+                $roadmap['steps'],
+                static fn (array $step): bool => $step['state'] !== \App\Services\CareerRoadmapService::STATE_MATCHED
+            ));
+
+            $roadmapUnrecorded = count(array_filter(
+                $roadmapOutstanding,
+                static fn (array $step): bool => $step['state'] === \App\Services\CareerRoadmapService::STATE_UNRECORDED
+            ));
+
+            $roadmapWidth = $roadmap['percentage'] ?? 0;
+
+            // When nothing at all could be weighed, the roadmap's own note already
+            // says so; this line is for a partly filled profile, where a few of the
+            // counted steps are still unknown.
+            $roadmapUnknownLine = '';
+
+            if ($roadmapUnrecorded > 0 && $roadmap['steps_total'] > 0) {
+                $roadmapUnknownLine = $roadmapUnrecorded.' requirement'.($roadmapUnrecorded === 1 ? '' : 's')
+                    .($roadmapUnrecorded === 1 ? ' is' : ' are').' not recorded in your profile, so '
+                    .($roadmapUnrecorded === 1 ? 'it is' : 'they are').' counted as neither matched nor missed.';
+            }
+            @endphp
+
+            <div class="details-section" id="jobRoadmap">
+
+                <div class="details-section-heading">
+
+                    <div class="heading-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+
+                    <div>
+                        <h3>Your Job Readiness</h3>
+                    </div>
+
+                </div>
+
+                <div class="job-roadmap job-roadmap-detailed job-roadmap-{{ $roadmap['tone'] }}">
+
+                    <p class="job-roadmap-score">
+                        Requirements matched:
+                        <strong>{{ $roadmap['steps_total'] > 0 ? $roadmap['steps_completed'].'/'.$roadmap['steps_total'] : 'not measured yet' }}</strong>
+                    </p>
+
+                    <div class="job-roadmap-track" role="progressbar" aria-label="Requirements matched by your profile"
+                         aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $roadmapWidth }}">
+                        <span style="width: {{ $roadmapWidth }}%"></span>
+                    </div>
+
+                    @if($roadmap['steps_total'] === 0)
+
+                    <p class="job-roadmap-quiet">{{ $roadmap['note'] }}</p>
+
+                    @elseif($roadmapOutstanding === [])
+
+                    <p class="job-roadmap-positive">Your profile meets all the requirements listed for this job.</p>
+
+                    @endif
+
+                    @if($roadmapOutstanding !== [])
+
+                    <ul class="job-roadmap-gaps">
+                        @foreach($roadmapOutstanding as $step)
+                        <li class="job-roadmap-gap">
+                            <span class="job-roadmap-gap-copy">
+                                <strong>{{ $step['title'] }}</strong>
+                                <small>{{ $step['hint'] }}</small>
+                            </span>
+                            <span class="job-roadmap-cat">{{ $step['category'] }}</span>
+                        </li>
+                        @endforeach
+                    </ul>
+
+                    @endif
+
+                    @if($roadmapUnknownLine !== '')
+                    <p class="job-roadmap-unknown">{{ $roadmapUnknownLine }}</p>
+                    @endif
+
+                    <a href="{{ route('jobseeker.profile.index') }}" class="btn-roadmap-primary">Improve My Profile</a>
+
+                    @if(count($roadmap['steps']) > 0)
+
+                    <details class="job-roadmap-all">
+                        <summary>
+                            View all requirements
+                            <i class="fas fa-chevron-down job-roadmap-chevron" aria-hidden="true"></i>
+                        </summary>
+
+                        <p class="job-roadmap-note">
+                            Recalculated from what your profile holds right now - ticking a step here changes nothing.
+                        </p>
+
+                        <div class="job-roadmap-groups">
+
+                            @foreach($roadmap['groups'] as $roadmapGroup)
+
+                            <div class="job-roadmap-group job-roadmap-group-{{ $roadmapGroup['key'] }}">
+
+                                <h4>
+                                    <i class="fas {{ $roadmapGroup['icon'] }}" aria-hidden="true"></i>
+                                    {{ $roadmapGroup['label'] }}
+                                    @php
+                                    $roadmapGroupPending = $roadmapGroup['total'] - $roadmapGroup['completed'];
+                                    @endphp
+                                    <span class="job-roadmap-count">
+                                        {{ $roadmapGroupPending === 0 ? 'all covered' : $roadmapGroupPending.' of '.$roadmapGroup['total'].' left' }}
+                                    </span>
+                                </h4>
+
+                                <p class="job-roadmap-group-note">{{ $roadmapGroup['note'] }}</p>
+
+                                <ul class="job-roadmap-steps">
+                                    @foreach($roadmapGroup['steps'] as $step)
+                                    <li class="job-roadmap-step job-roadmap-step-{{ $step['state'] }}">
+
+                                        <i class="fas {{ $roadmapStateIcons[$step['state']] ?? 'fa-circle-question' }}" aria-hidden="true"></i>
+
+                                        <div class="job-roadmap-step-body">
+                                            <span class="job-roadmap-step-label">
+                                                <strong>{{ $step['label'] }}</strong>
+                                                @if($step['state'] === \App\Services\CareerRoadmapService::STATE_MATCHED)
+                                                <em class="job-roadmap-state">Already Matched</em>
+                                                @endif
+                                            </span>
+                                            <p>{{ $step['detail'] }}</p>
+
+                                            @if($step['expected'] !== null || $step['current'] !== null)
+                                            <p class="job-roadmap-values">
+                                                @if($step['expected'] !== null)
+                                                <span><small>Listing</small> {{ $step['expected'] }}</span>
+                                                @endif
+                                                @if($step['current'] !== null)
+                                                <span><small>Your profile</small> {{ $step['current'] }}</span>
+                                                @endif
+                                            </p>
+                                            @endif
+
+                                            @if($step['state'] !== \App\Services\CareerRoadmapService::STATE_MATCHED && isset($roadmapActions[$step['action']]))
+                                            <a href="{{ $roadmapActions[$step['action']]['route'] }}" class="job-roadmap-step-link">
+                                                <i class="fas {{ $roadmapActions[$step['action']]['icon'] }}" aria-hidden="true"></i>
+                                                {{ $roadmapActions[$step['action']]['label'] }}
+                                            </a>
+                                            @endif
+                                        </div>
+
+                                    </li>
+                                    @endforeach
+                                </ul>
+
+                            </div>
+
+                            @endforeach
+
+                        </div>
+
+                        <div class="job-roadmap-actions">
+                            @foreach($roadmapActions as $roadmapAction)
+                            <a href="{{ $roadmapAction['route'] }}" class="btn-roadmap-action">
+                                <i class="fas {{ $roadmapAction['icon'] }}" aria-hidden="true"></i>
+                                {{ $roadmapAction['label'] }}
+                            </a>
+                            @endforeach
+                        </div>
+                    </details>
+
+                    @endif
+
+                    <p class="job-roadmap-disclaimer">
+                        Completing these steps does not guarantee shortlisting or the job - the employer decides that.
+                    </p>
+
+                </div>
+
+            </div>
+
+            @endif
 
 
             <!-- Qualification Section -->

@@ -192,7 +192,7 @@
                     <article class="cn-recommended-job">
                         <div class="cn-recommended-job-top">
                             <h3 class="cn-recommended-job-title">{{ $recommended['job']->JobTitle }}</h3>
-                            <span class="cn-recommended-job-match" title="Preference match based on your selected job titles">
+                            <span class="cn-recommended-job-match" title="Preference match based on your {{ empty($recommended['matched_titles']) ? 'saved career preferences' : 'selected job titles' }}">
                                 {{ $recommended['percentage'] }}%
                             </span>
                         </div>
