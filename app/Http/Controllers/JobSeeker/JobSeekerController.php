@@ -7,10 +7,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 use App\Services\DashboardAnalyticsService;
+use App\Services\CareerPreferenceMatchService;
 
 class JobSeekerController extends Controller
 {
-    public function index(DashboardAnalyticsService $analytics)
+    public function index(DashboardAnalyticsService $analytics, CareerPreferenceMatchService $preferences)
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
 
@@ -167,6 +168,14 @@ class JobSeekerController extends Controller
             'missingProfileItems'
         );
         $dashboardData['analytics'] = $analytics->jobSeeker($jobSeeker);
+
+        $careerPreferences = $jobSeeker->careerPreferences;
+        $recommendedJobs = $careerPreferences?->hasAnyPreference()
+            ? $preferences->recommendations($careerPreferences)
+            : [];
+
+        $dashboardData['careerPreferences'] = $careerPreferences;
+        $dashboardData['recommendedJobs'] = $recommendedJobs;
 
         return view('jobseeker.index', $dashboardData);
     }

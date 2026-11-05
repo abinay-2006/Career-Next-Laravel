@@ -2,6 +2,11 @@
 
 @section('title','Manage Jobs')
 
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css">
+<link rel="stylesheet" href="{{ asset('assets/css/job-requirements.css') }}?v={{ @filemtime(public_path('assets/css/job-requirements.css')) ?: 1 }}">
+@endpush
+
 @section('content')
 
 <!-- ══ MAIN ══ -->
@@ -74,10 +79,62 @@
             <input class="form-input" type="text" name="txtOther" id="txtOther" placeholder="Specify if Other selected">
           </div>
 
+          <div class="form-group">
+            <label class="form-label" for="cmbExperience"><i class="fas fa-layer-group"></i> Experience Level</label>
+            <select class="form-select" name="cmbExperience" id="cmbExperience">
+              <option value="">Not specified</option>
+              @foreach ($experienceLevels as $slug => $label)
+              <option value="{{ $slug }}">{{ $label }}</option>
+              @endforeach
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cmbArrangement"><i class="fas fa-house-laptop"></i> Work Arrangement</label>
+            <select class="form-select" name="cmbArrangement" id="cmbArrangement">
+              <option value="">Not specified</option>
+              @foreach ($workArrangements as $option)
+              <option value="{{ $option }}">{{ $option }}</option>
+              @endforeach
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="cmbEmployment"><i class="fas fa-file-signature"></i> Employment Type</label>
+            <select class="form-select" name="cmbEmployment" id="cmbEmployment">
+              <option value="">Not specified</option>
+              @foreach ($employmentTypes as $option)
+              <option value="{{ $option }}">{{ $option }}</option>
+              @endforeach
+            </select>
+          </div>
+
           <div class="form-group full">
             <label class="form-label" for="txtDesc"><i class="fas fa-align-left"></i> Description</label>
             <textarea class="form-textarea" name="txtDesc" id="txtDesc" placeholder="Describe the role, responsibilities, and requirements..."></textarea>
             <span class="field-error" id="err-txtDesc"><i class="fas fa-triangle-exclamation"></i> Required</span>
+          </div>
+
+          <div class="form-group full">
+            <label class="form-label"><i class="fas fa-puzzle-piece"></i> Required Skills</label>
+            <div class="cn-req-picker" data-cn-req-picker="required_skills" data-cn-req-kind="skills">
+              <select class="js-req-select" multiple aria-label="Required skills"></select>
+              <div class="cn-req-rows js-req-rows"></div>
+              <input type="hidden" name="required_skills" value="{{ old('required_skills') }}">
+            </div>
+            <p class="cn-req-hint">Optional — but adding at least one skill helps Smart Job Match recommend your listing to the right candidates.</p>
+            <span class="cn-req-error" data-cn-error-for="required_skills" id="err-required_skills"></span>
+          </div>
+
+          <div class="form-group full">
+            <label class="form-label"><i class="fas fa-laptop-code"></i> Required Software</label>
+            <div class="cn-req-picker" data-cn-req-picker="required_software" data-cn-req-kind="software">
+              <select class="js-req-select" multiple aria-label="Required software"></select>
+              <div class="cn-req-rows js-req-rows"></div>
+              <input type="hidden" name="required_software" value="{{ old('required_software') }}">
+            </div>
+            <p class="cn-req-hint">Optional — list tools candidates should know (IDEs, design, analytics, ERP, etc.).</p>
+            <span class="cn-req-error" data-cn-error-for="required_software" id="err-required_software"></span>
           </div>
 
         </div>
@@ -156,6 +213,16 @@
             <td>
               <div style="display: flex; gap: 8px;">
                 <a href="#" class="btn-edit"
+                  data-job-id="{{ $job->JobId }}"
+                  data-requirements="{{ json_encode([
+                      'skills' => $job->RequiredSkills ?? [],
+                      'software' => $job->RequiredSoftware ?? [],
+                  ]) }}"
+                  data-classification="{{ json_encode([
+                      'experience' => $job->ExperienceLevel,
+                      'arrangement' => $job->WorkArrangement,
+                      'employment' => $job->EmploymentType,
+                  ]) }}"
                   onclick="openEditModal('{{ $job->JobId }}', '{{ $job->JobTitle }}', '{{ $job->Vacancy }}', '{{ $job->MinQualification }}', '{{ $job->Description }}', '{{ $job->SalaryFrom }}', '{{ $job->SalaryTo }}'); return false;">
                   <i class="fas fa-pen-to-square"></i> Edit
                 </a>
@@ -208,7 +275,7 @@
 
 <!-- ══ EDIT CONFIRM MODAL ══ -->
 <div class="modal-overlay" id="editModal" onclick="handleEditOverlayClick(event)">
-  <div class="modal" style="max-width: 600px;">
+  <div class="modal edit-job-modal">
 
     <div class="modal-header">
       <div class="modal-header-left">
@@ -268,10 +335,62 @@
             <input class="form-input" type="text" name="txtOther" id="edit_txtOther" placeholder="Specify if Other selected">
           </div>
 
+          <div class="form-group">
+            <label class="form-label" for="edit_cmbExperience"><i class="fas fa-layer-group"></i> Experience Level</label>
+            <select class="form-select" name="cmbExperience" id="edit_cmbExperience">
+              <option value="">Not specified</option>
+              @foreach ($experienceLevels as $slug => $label)
+              <option value="{{ $slug }}">{{ $label }}</option>
+              @endforeach
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit_cmbArrangement"><i class="fas fa-house-laptop"></i> Work Arrangement</label>
+            <select class="form-select" name="cmbArrangement" id="edit_cmbArrangement">
+              <option value="">Not specified</option>
+              @foreach ($workArrangements as $option)
+              <option value="{{ $option }}">{{ $option }}</option>
+              @endforeach
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="edit_cmbEmployment"><i class="fas fa-file-signature"></i> Employment Type</label>
+            <select class="form-select" name="cmbEmployment" id="edit_cmbEmployment">
+              <option value="">Not specified</option>
+              @foreach ($employmentTypes as $option)
+              <option value="{{ $option }}">{{ $option }}</option>
+              @endforeach
+            </select>
+          </div>
+
           <div class="form-group full">
             <label class="form-label" for="edit_txtDesc"><i class="fas fa-align-left"></i> Description</label>
             <textarea class="form-textarea" name="txtDesc" id="edit_txtDesc"></textarea>
             <span class="field-error" id="err-edit_txtDesc"><i class="fas fa-triangle-exclamation"></i> Required</span>
+          </div>
+
+          <div class="form-group full">
+            <label class="form-label"><i class="fas fa-puzzle-piece"></i> Required Skills</label>
+            <div class="cn-req-picker" id="editSkillPicker" data-cn-req-picker="required_skills" data-cn-req-kind="skills">
+              <select class="js-req-select" multiple aria-label="Required skills"></select>
+              <div class="cn-req-rows js-req-rows"></div>
+              <input type="hidden" name="required_skills" value="">
+            </div>
+            <p class="cn-req-hint">Optional — adding at least one skill improves Smart Job Match accuracy.</p>
+            <span class="cn-req-error" data-cn-error-for="required_skills" id="err-edit_required_skills"></span>
+          </div>
+
+          <div class="form-group full">
+            <label class="form-label"><i class="fas fa-laptop-code"></i> Required Software</label>
+            <div class="cn-req-picker" id="editSoftwarePicker" data-cn-req-picker="required_software" data-cn-req-kind="software">
+              <select class="js-req-select" multiple aria-label="Required software"></select>
+              <div class="cn-req-rows js-req-rows"></div>
+              <input type="hidden" name="required_software" value="">
+            </div>
+            <p class="cn-req-hint">Optional — tools candidates should know for this role.</p>
+            <span class="cn-req-error" data-cn-error-for="required_software" id="err-edit_required_software"></span>
           </div>
 
         </div>
@@ -284,7 +403,69 @@
   </div>
 </div>
 @endsection
+@push('styles')
+<style>
+  /* Keep the edit form and its footer inside the viewport; only the form scrolls. */
+  #editModal .edit-job-modal {
+    display: flex !important;
+    width: min(600px, 100%) !important;
+    max-width: 600px !important;
+    height: auto !important;
+    max-height: calc(100vh - 40px) !important;
+    overflow: hidden !important;
+  }
+
+  #editModal #editJobForm {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  #editModal #editJobForm > .form-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+  }
+
+  #editModal .cn-req-picker,
+  #editModal .cn-req-picker .ts-wrapper,
+  #editModal .cn-req-picker .ts-control {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  #editModal .cn-req-picker .ts-control {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  #editModal .cn-req-picker .ts-control > input {
+    min-width: 5rem;
+  }
+
+  #editModal .cn-req-picker .ts-dropdown {
+    max-width: 100%;
+  }
+
+  @media (max-width: 480px) {
+    #editModal .edit-job-modal {
+      max-height: calc(100vh - 16px) !important;
+    }
+
+    #editModal #editJobForm > div:last-child {
+      padding: 12px 14px !important;
+    }
+  }
+</style>
+@endpush
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script src="{{ asset('assets/js/job-requirements.js') }}?v={{ @filemtime(public_path('assets/js/job-requirements.js')) ?: 1 }}"></script>
 <script>
   // ── "Other" qualification field toggle ──
   function initializeJobQualificationInputs() {
@@ -410,6 +591,44 @@
 
     document.getElementById('editModal').classList.add('open');
     document.body.style.overflow = 'hidden';
+
+    // Load this job's saved requirement entries into the modal pickers.
+    // They are read from the row itself because an AJAX refresh replaces the
+    // table, so anything cached outside that region can go stale.
+    var trigger = document.querySelector('.btn-edit[data-job-id="' + id + '"]');
+    var saved = {};
+
+    try {
+      saved = JSON.parse((trigger && trigger.dataset.requirements) || '{}');
+    } catch (error) {
+      saved = {};
+    }
+
+    if (window.CareerNextRequirementPickers) {
+      window.CareerNextRequirementPickers.load('#editSkillPicker', saved.skills);
+      window.CareerNextRequirementPickers.load('#editSoftwarePicker', saved.software);
+    }
+
+    // The classification selects are read from the same row for the same reason.
+    var classification = {};
+
+    try {
+      classification = JSON.parse((trigger && trigger.dataset.classification) || '{}');
+    } catch (error) {
+      classification = {};
+    }
+
+    setSelectOption('edit_cmbExperience', classification.experience);
+    setSelectOption('edit_cmbArrangement', classification.arrangement);
+    setSelectOption('edit_cmbEmployment', classification.employment);
+  }
+
+  function setSelectOption(id, value) {
+    const select = document.getElementById(id);
+
+    if (select) {
+      select.value = value || '';
+    }
   }
 
   function closeEditModal() {

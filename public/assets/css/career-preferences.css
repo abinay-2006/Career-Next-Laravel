@@ -1,0 +1,218 @@
+/* Career Preferences page. Theme-aware: uses tokens from theme.css only. */
+.cn-career-prefs {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.cn-prefs-hero h1 {
+  font-size: 1.5rem;
+  color: var(--theme-heading);
+  margin-bottom: .35rem;
+}
+
+.cn-prefs-hero h1 i {
+  color: var(--theme-primary);
+  margin-right: .4rem;
+}
+
+.cn-prefs-hero p {
+  color: var(--theme-text-secondary);
+  margin-bottom: 1.25rem;
+}
+
+.cn-prefs-card {
+  background: var(--theme-card-background);
+  border: 1px solid var(--theme-border);
+  border-radius: 14px;
+  box-shadow: var(--theme-shadow);
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1rem;
+  overflow: visible;
+}
+
+.cn-prefs-card h2 {
+  font-size: 1.05rem;
+  color: var(--theme-heading);
+  margin-bottom: .2rem;
+}
+
+.cn-prefs-card h2 i {
+  color: var(--theme-primary);
+  margin-right: .45rem;
+}
+
+.cn-prefs-hint {
+  font-size: .85rem;
+  color: var(--theme-text-muted);
+  margin-bottom: .75rem;
+}
+
+.cn-prefs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.cn-prefs-grid-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cn-prefs-grid .cn-prefs-card,
+.cn-prefs-grid-two .cn-prefs-card {
+  margin-bottom: 0;
+}
+
+.cn-prefs-grid-four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.cn-prefs-field label {
+  display: block;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--theme-form-label);
+  margin-bottom: .3rem;
+}
+
+.cn-prefs-salary-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+  margin-bottom: .75rem;
+}
+
+.cn-prefs-salary-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Collapsible additional preferences */
+.cn-prefs-extra-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--theme-heading);
+  cursor: pointer;
+}
+
+.cn-prefs-extra-toggle i {
+  color: var(--theme-primary);
+  margin-right: .45rem;
+}
+
+.cn-prefs-extra-fields {
+  margin-top: 1rem;
+}
+
+.cn-prefs-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .75rem;
+  margin: 1.25rem 0 2rem;
+}
+
+.cn-prefs-skip {
+  color: var(--theme-link);
+  background: transparent;
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  padding: .5rem 1rem;
+}
+
+.cn-prefs-skip:hover {
+  background: var(--theme-hover);
+  color: var(--theme-primary-hover);
+}
+
+/* ---- Tom Select theme overrides (no default blue) ---- */
+.cn-career-prefs .ts-wrapper.single .ts-control,
+.cn-career-prefs .ts-wrapper .ts-control {
+  background: var(--theme-input-background);
+  color: var(--theme-input-text);
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  padding: .45rem .6rem;
+  font-size: .9rem;
+}
+
+.cn-career-prefs .ts-wrapper .ts-control input::placeholder {
+  color: var(--theme-placeholder);
+}
+
+.cn-career-prefs .ts-wrapper.focus .ts-control {
+  border-color: var(--theme-focus-outline);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-focus-outline) 25%, transparent);
+}
+
+.cn-career-prefs .ts-control > .item {
+  background: var(--theme-active-nav);
+  color: var(--theme-text-primary);
+  border: 1px solid var(--theme-border);
+  border-radius: 999px;
+  padding: .2rem .65rem;
+  font-size: .82rem;
+}
+
+.cn-career-prefs .ts-control > .item a[data-ts-item] {
+  color: var(--theme-text-muted);
+}
+
+.cn-career-prefs .ts-control > .item a[data-ts-item]:hover {
+  color: var(--theme-error);
+}
+
+.cn-career-prefs .ts-dropdown {
+  background: var(--theme-card-background);
+  color: var(--theme-text-primary);
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  box-shadow: var(--theme-shadow);
+  z-index: 1050;
+}
+
+.cn-career-prefs .ts-dropdown .dropdown-input-wrap input {
+  background: var(--theme-input-background);
+  color: var(--theme-input-text);
+}
+
+.cn-career-prefs .ts-dropdown .optgroup-header {
+  background: var(--theme-surface-secondary);
+  color: var(--theme-text-secondary);
+  font-size: .75rem;
+}
+
+.cn-career-prefs .ts-dropdown .option {
+  padding: .45rem .7rem;
+  color: var(--theme-text-primary);
+}
+
+.cn-career-prefs .ts-dropdown .option:hover,
+.cn-career-prefs .ts-dropdown .option.active {
+  background: var(--theme-hover);
+  color: var(--theme-primary-hover);
+}
+
+.cn-career-prefs .ts-dropdown .no-results {
+  background: var(--theme-card-background);
+  color: var(--theme-text-muted);
+}
+
+@media (max-width: 900px) {
+  .cn-prefs-grid,
+  .cn-prefs-grid-two,
+  .cn-prefs-grid-four {
+    grid-template-columns: 1fr;
+  }
+
+  .cn-prefs-actions {
+    justify-content: stretch;
+  }
+
+  .cn-prefs-actions .btn {
+    flex: 1;
+  }
+}

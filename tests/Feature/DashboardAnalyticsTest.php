@@ -53,6 +53,25 @@ class DashboardAnalyticsTest extends TestCase
         Schema::create('news_master', function (Blueprint $table): void {
             $table->increments('NewsId'); $table->string('News', 200); $table->date('NewsDate');
         });
+        Schema::create('jobseeker_career_preferences', function (Blueprint $table): void {
+            $table->bigIncrements('id'); $table->integer('JobSeekId')->unique();
+            $table->json('preferred_job_titles')->nullable();
+            $table->json('preferred_locations')->nullable();
+            $table->json('employment_types')->nullable();
+            $table->json('work_arrangements')->nullable();
+            $table->json('preferred_industries')->nullable();
+            $table->decimal('minimum_salary', 12, 2)->nullable();
+            $table->decimal('maximum_salary', 12, 2)->nullable();
+            $table->string('salary_period', 10)->nullable();
+            $table->string('currency', 3)->nullable();
+            $table->string('experience_level', 30)->nullable();
+            $table->string('willing_to_relocate', 10)->nullable();
+            $table->string('notice_period', 20)->nullable();
+            $table->string('preferred_working_hours', 10)->nullable();
+            $table->string('job_search_status', 30)->nullable();
+            $table->timestamp('completed_at')->nullable();
+            $table->timestamps();
+        });
     }
 
     public function test_employer_analytics_only_include_jobs_and_applications_owned_by_the_employer(): void

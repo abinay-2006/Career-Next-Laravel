@@ -76,6 +76,16 @@ class RoleAuthenticationTest extends TestCase
             $table->dateTime('ApplicationDate')->nullable();
             $table->timestamps();
         });
+        Schema::create('jobseeker_career_preferences', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('JobSeekId')->unique();
+            $table->json('preferred_job_titles')->nullable();
+            $table->json('preferred_locations')->nullable();
+            $table->json('employment_types')->nullable();
+            $table->json('work_arrangements')->nullable();
+            $table->json('preferred_industries')->nullable();
+            $table->timestamps();
+        });
 
         \DB::table('user_master')->insert(['UserName' => 'admin', 'Password' => Hash::make('secret')]);
         \DB::table('employer_reg')->insert([

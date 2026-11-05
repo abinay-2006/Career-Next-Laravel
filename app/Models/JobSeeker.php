@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\JobSeekerDocument;
 
 class JobSeeker extends Authenticatable
@@ -78,6 +79,18 @@ public function schoolEducation(): HasMany
     {
         return $this->hasMany(
             JobSeekerDocument::class,
+            'JobSeekId',
+            'JobSeekId'
+        );
+    }
+
+    /**
+     * Optional career preferences (one record per seeker).
+     */
+    public function careerPreferences(): HasOne
+    {
+        return $this->hasOne(
+            JobSeekerCareerPreference::class,
             'JobSeekId',
             'JobSeekId'
         );

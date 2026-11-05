@@ -2,6 +2,10 @@
 
 @section('title', 'Job Seeker Profile')
 
+@push('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css">
+@endpush
+
 @section('content')
 @php($jobSeekerPhotoUrl = \App\Support\ProfilePhoto::url($jobSeeker->Photo))
 
@@ -585,6 +589,13 @@
         </div>
 
     </div>
+
+
+    <!-- ═══════════════════════════════════════
+     SKILLS AND SOFTWARE
+═══════════════════════════════════════ -->
+
+    <x-seeker-skills />
 
 </div>
 <!-- ═══════════════════════════════════════
@@ -1176,6 +1187,8 @@
 </div>
 @endsection
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script src="{{ asset('assets/js/job-requirements.js') }}?v={{ @filemtime(public_path('assets/js/job-requirements.js')) ?: 1 }}"></script>
 <script>
     /* ── Profile Photo Preview ── */
     function previewProfilePhoto(input) {

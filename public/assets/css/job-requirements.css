@@ -1,0 +1,323 @@
+/* Structured requirement pickers (employer job forms and the seeker's own
+   Skills & Software section). Theme-token only. */
+.cn-req-picker {
+  margin-top: .35rem;
+}
+
+.cn-req-picker .ts-control {
+  background: var(--theme-input-background);
+  color: var(--theme-input-text);
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  padding: .4rem .55rem;
+  font-size: .88rem;
+}
+
+.cn-req-picker .ts-control input::placeholder {
+  color: var(--theme-placeholder);
+}
+
+.cn-req-picker.focus .ts-control,
+.cn-req-picker .ts-wrapper.focus .ts-control {
+  border-color: var(--theme-focus-outline);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--theme-focus-outline) 25%, transparent);
+}
+
+.cn-req-picker .ts-control:focus-within {
+  outline: none;
+}
+
+.cn-req-picker .ts-dropdown {
+  background: var(--theme-card-background);
+  color: var(--theme-text-primary);
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  box-shadow: var(--theme-shadow);
+  z-index: 1050;
+}
+
+.cn-req-picker .ts-dropdown .optgroup-header {
+  background: var(--theme-surface-secondary);
+  color: var(--theme-text-secondary);
+  font-size: .74rem;
+  font-weight: 600;
+}
+
+.cn-req-picker .ts-dropdown .option {
+  padding: .4rem .65rem;
+  color: var(--theme-text-primary);
+}
+
+.cn-req-picker .ts-dropdown .option:hover,
+.cn-req-picker .ts-dropdown .option.active {
+  background: var(--theme-hover);
+  color: var(--theme-primary-hover);
+}
+
+.cn-req-picker .ts-control > .item,
+.cn-req-rows + .ts-wrapper .ts-control > .item {
+  background: var(--theme-active-nav);
+  color: var(--theme-text-primary);
+  border: 1px solid var(--theme-border);
+  border-radius: 999px;
+  padding: .15rem .6rem;
+  font-size: .8rem;
+}
+
+.cn-req-rows {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  margin-top: .6rem;
+}
+
+.cn-req-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: .6rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  background: var(--theme-surface-secondary);
+  padding: .4rem .6rem;
+}
+
+.cn-req-name {
+  font-size: .86rem;
+  font-weight: 600;
+  color: var(--theme-text-primary);
+  overflow-wrap: anywhere;
+}
+
+.cn-req-cell {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .74rem;
+  color: var(--theme-text-muted);
+  margin: 0;
+}
+
+.cn-req-row select {
+  width: auto;
+  font-size: .8rem;
+  padding: .22rem 1.6rem .22rem .5rem;
+  background-color: var(--theme-input-background);
+  color: var(--theme-input-text);
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+}
+
+.cn-req-remove {
+  border: none;
+  background: transparent;
+  color: var(--theme-text-muted);
+  cursor: pointer;
+  font-size: .9rem;
+  line-height: 1;
+  padding: .25rem .35rem;
+  border-radius: 6px;
+}
+
+.cn-req-remove:hover {
+  color: var(--theme-error);
+  background: var(--theme-hover);
+}
+
+.cn-req-hint {
+  font-size: .78rem;
+  color: var(--theme-text-muted);
+  margin: .3rem 0 0;
+}
+
+.cn-req-hint.cn-req-hint-encourage {
+  color: var(--theme-warning);
+}
+
+.cn-req-error {
+  display: block;
+  color: var(--theme-error);
+  font-weight: 600;
+  margin: .3rem 0 0;
+}
+
+.cn-req-error:empty {
+  display: none;
+}
+
+/* The validated control is the hidden JSON field, so flag the visible picker. */
+.cn-req-picker:has(input.cn-field-invalid) .ts-control {
+  border-color: var(--theme-error);
+}
+
+@media (max-width: 640px) {
+  .cn-req-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  .cn-req-name {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Seeker-side requirement badges */
+.job-req-section {
+  margin-top: 14px;
+}
+
+.job-req-section h4 {
+  font-size: .85rem;
+  font-weight: 600;
+  color: var(--theme-heading);
+  margin: 0 0 8px;
+}
+
+.job-req-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Group label for views that show one field per requirement type. */
+.job-req-inline-label {
+  display: block;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--theme-text-muted);
+  margin: 6px 0 4px;
+}
+
+.job-req-inline-label:first-child {
+  margin-top: 0;
+}
+
+.job-req-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--theme-border);
+  border-radius: 999px;
+  background: var(--theme-surface-secondary);
+  color: var(--theme-text-primary);
+  font-size: .78rem;
+  padding: 3px 10px;
+}
+
+.job-req-badge .job-req-prof {
+  font-size: .68rem;
+  color: var(--theme-text-secondary);
+  border-left: 1px solid var(--theme-border);
+  padding-left: 6px;
+}
+
+.job-req-badge-mandatory {
+  border-color: color-mix(in srgb, var(--theme-primary) 45%, var(--theme-border));
+  background: color-mix(in srgb, var(--theme-primary) 12%, var(--theme-card-background));
+}
+
+.job-req-card-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.job-req-card-summary .job-req-badge {
+  font-size: .72rem;
+  padding: 2px 8px;
+}
+
+/* Match breakdown groups on the job details page */
+.job-match-group {
+  margin-top: 8px;
+  font-size: .8rem;
+  color: var(--theme-text-secondary);
+}
+
+.job-match-group strong {
+  color: var(--theme-text-primary);
+}
+
+/* ── Job seeker "Skills & Software" section (profile + career preferences) ── */
+.cn-seeker-skills {
+  background: var(--theme-card-background);
+  border: 1px solid var(--theme-border);
+  border-radius: 14px;
+  box-shadow: var(--theme-shadow);
+  padding: 1.1rem 1.25rem;
+  margin: 0 0 1rem;
+  overflow: visible;
+}
+
+.cn-seeker-skills h2 {
+  font-size: 1.05rem;
+  color: var(--theme-heading);
+  margin-bottom: .2rem;
+}
+
+.cn-seeker-skills h2 i {
+  color: var(--theme-primary);
+  margin-right: .45rem;
+}
+
+.cn-seeker-skills-intro {
+  font-size: .85rem;
+  color: var(--theme-text-secondary);
+  margin: 0 0 1rem;
+  max-width: 70ch;
+}
+
+.cn-seeker-skills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.cn-seeker-skills-label {
+  display: block;
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--theme-form-label);
+}
+
+.cn-seeker-skills-label i {
+  margin-right: .35rem;
+  color: var(--theme-primary);
+}
+
+.cn-seeker-skills-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .6rem;
+  margin-top: 1.1rem;
+}
+
+.cn-seeker-skills-copy {
+  border: 1px solid var(--theme-border);
+  border-radius: 999px;
+  background: var(--theme-surface-secondary);
+  color: var(--theme-text-primary);
+  font-size: .82rem;
+  padding: .4rem .9rem;
+}
+
+.cn-seeker-skills-copy:hover {
+  background: var(--theme-hover);
+  color: var(--theme-primary-hover);
+}
+
+.cn-seeker-skills-note {
+  font-size: .8rem;
+  color: var(--theme-text-secondary);
+}
+
+.cn-seeker-skills-save {
+  margin-left: auto;
+}
+
+@media (max-width: 768px) {
+  .cn-seeker-skills-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

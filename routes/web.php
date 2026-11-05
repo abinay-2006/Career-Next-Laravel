@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Employer\EmployerController;
 use App\Http\Controllers\JobSeeker\JobSeekerController;
+use App\Http\Controllers\JobSeeker\JobSeekerSkillController;
 use App\Http\Controllers\Admin\ManageUsersController;
 use App\Http\Controllers\Admin\ManageJobsController;
 use App\Http\Controllers\Admin\ManageDocumentsController;
@@ -29,6 +30,7 @@ use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\DashboardAnalyticsController;
 use App\Http\Controllers\JobSeeker\ResumeBuilderController;
 use App\Http\Controllers\JobSeeker\SavedJobController;
+use App\Http\Controllers\JobSeeker\CareerPreferencesController;
 // Route
 
 // Home Page Route
@@ -325,6 +327,10 @@ Route::prefix('jobseeker')
         Route::delete('/profile/resume', [JobSeekerProfileController::class, 'removeResume'])
             ->name('profile.resume.remove');
 
+        // Skills and software the seeker knows
+        Route::put('/profile/skills', [JobSeekerSkillController::class, 'update'])
+            ->name('profile.skills.update');
+
 
         // Saved Jobs
         Route::get('/saved-jobs', [SavedJobController::class, 'index'])
@@ -337,4 +343,11 @@ Route::prefix('jobseeker')
         Route::post('/saved-jobs/{job}/remove', [SavedJobController::class, 'destroy'])
             ->whereNumber('job')
             ->name('saved-jobs.destroy');
+
+        // Career Preferences (optional)
+        Route::get('/career-preferences', [CareerPreferencesController::class, 'edit'])
+            ->name('preferences.edit');
+
+        Route::put('/career-preferences', [CareerPreferencesController::class, 'update'])
+            ->name('preferences.update');
     });

@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/news.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/resume-builder.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/my-resume.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/job-requirements.css') }}">
     @vite('resources/js/app.js')
     <link rel="stylesheet" href="{{ asset('assets/css/theme.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/theme-dark-mode.css') }}">

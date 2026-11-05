@@ -23,6 +23,7 @@
             ['Browse Jobs', 'jobseeker.jobs', 'fas fa-briefcase'],
             ['Walk-in Interviews', 'jobseeker.walkins', 'fas fa-calendar'],
             ['Profile', 'jobseeker.profile.index', 'fas fa-user'],
+            ['Career Preferences', 'jobseeker.preferences.edit', 'fas fa-sliders'],
             ['Education & Documents', 'jobseeker.education', 'fas fa-graduation-cap'],
             ['Resume Builder', 'jobseeker.resumes.index', 'fas fa-file-lines'],
             ['My Resumes', 'jobseeker.my-resumes.index', 'fas fa-folder-open'],

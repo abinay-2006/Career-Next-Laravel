@@ -169,5 +169,71 @@
         @endif
 
     </div>
+
+    <div class="cn-recommended-jobs-card profile-completion-card">
+        <div class="cn-recommended-jobs-header">
+            <h2 class="cn-recommended-jobs-title">
+                <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
+                Recommended Jobs
+            </h2>
+            <a href="{{ route('jobseeker.preferences.edit') }}" class="cn-recommended-jobs-edit">
+                <i class="fas fa-sliders" aria-hidden="true"></i>
+                Edit Preferences
+            </a>
+        </div>
+
+        @if(!empty($recommendedJobs))
+            <p class="cn-recommended-jobs-note">
+                Matched against your career preferences. This is separate from the
+                <strong>Skill Match</strong> score you see on Browse Jobs.
+            </p>
+            <div class="cn-recommended-jobs-grid">
+                @foreach($recommendedJobs as $recommended)
+                    <article class="cn-recommended-job">
+                        <div class="cn-recommended-job-top">
+                            <h3 class="cn-recommended-job-title">{{ $recommended['job']->JobTitle }}</h3>
+                            <span class="cn-recommended-job-match" title="Preference match based on your selected job titles">
+                                {{ $recommended['percentage'] }}%
+                            </span>
+                        </div>
+                        <p class="cn-recommended-job-company">
+                            <i class="fas fa-building" aria-hidden="true"></i>
+                            {{ $recommended['job']->CompanyName }}
+                        </p>
+                        @if(!empty($recommended['matched_titles']))
+                            <p class="cn-recommended-job-matched">
+                                Matches: {{ implode(', ', $recommended['matched_titles']) }}
+                            </p>
+                        @endif
+                        @if(!empty($recommended['matched_classifications']))
+                            <p class="cn-recommended-job-matched">
+                                Also matches: {{ implode(', ', $recommended['matched_classifications']) }}
+                            </p>
+                        @endif
+                        <a href="{{ route('jobseeker.jobs.show', $recommended['job']->JobId) }}"
+                           class="btn complete-profile-btn cn-recommended-job-link">
+                            View job <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </article>
+                @endforeach
+            </div>
+        @else
+            @if(!empty($careerPreferences) && $careerPreferences->hasAnyPreference())
+                <p class="cn-recommended-jobs-empty">
+                    No approved jobs match your preferences right now — matching jobs will appear
+                    here as they are posted.
+                </p>
+            @else
+                <p class="cn-recommended-jobs-empty">
+                    Tell us what kind of job you're looking for to receive more relevant recommendations.
+                </p>
+                <a href="{{ route('jobseeker.preferences.edit') }}" class="btn complete-profile-btn">
+                    <i class="fas fa-sliders" aria-hidden="true"></i>
+                    Set Career Preferences
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            @endif
+        @endif
+    </div>
 </div><!-- /main-content -->
 @endsection

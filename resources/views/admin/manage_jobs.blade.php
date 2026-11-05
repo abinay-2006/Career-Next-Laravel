@@ -4,6 +4,9 @@
 
 @section('content')
 
+{{-- The details modal reuses the requirement badges styled for the job forms. --}}
+<link rel="stylesheet" href="{{ asset('assets/css/job-requirements.css') }}?v={{ @filemtime(public_path('assets/css/job-requirements.css')) ?: 1 }}">
+
 <div class="main-content">
 
     <div class="page-header">
@@ -241,6 +244,20 @@
                     <div class="field-value" id="mDescription">—</div>
                 </div>
 
+                <div class="field-item full">
+                    <div class="field-label">
+                        <i class="fas fa-puzzle-piece"></i> Required Skills
+                    </div>
+                    <div class="field-value" id="mRequiredSkills">—</div>
+                </div>
+
+                <div class="field-item full">
+                    <div class="field-label">
+                        <i class="fas fa-laptop-code"></i> Required Software
+                    </div>
+                    <div class="field-value" id="mRequiredSoftware">—</div>
+                </div>
+
                 <div class="field-item">
                     <div class="field-label">
                         <i class="fas fa-users"></i> Vacancies
@@ -260,6 +277,27 @@
                         <i class="fas fa-graduation-cap"></i> Minimum Qualification
                     </div>
                     <div class="field-value" id="mQualification">—</div>
+                </div>
+
+                <div class="field-item">
+                    <div class="field-label">
+                        <i class="fas fa-layer-group"></i> Experience Level
+                    </div>
+                    <div class="field-value" id="mExperience">—</div>
+                </div>
+
+                <div class="field-item">
+                    <div class="field-label">
+                        <i class="fas fa-house-laptop"></i> Work Arrangement
+                    </div>
+                    <div class="field-value" id="mWorkArrangement">—</div>
+                </div>
+
+                <div class="field-item">
+                    <div class="field-label">
+                        <i class="fas fa-file-signature"></i> Employment Type
+                    </div>
+                    <div class="field-value" id="mEmploymentType">—</div>
                 </div>
 
                 <div class="field-item">
@@ -371,6 +409,7 @@
 
         const jobs = @json($jobs->values());
         const csrfToken = @json(csrf_token());
+        const experienceLabels = @json(\App\Models\Job::EXPERIENCE_LEVELS);
 
         const jobMap = {};
 
@@ -407,6 +446,82 @@
                         ? String(value)
                         : '—';
             }
+        }
+
+
+        // REQUIRED SKILLS AND SOFTWARE
+        //
+        // The listing query uses the query builder, so these two columns arrive
+        // as the raw JSON strings stored in job_master rather than arrays.
+
+        function requirementEntries(value) {
+            let entries = value;
+
+            if (typeof entries === 'string') {
+                try {
+                    entries = JSON.parse(entries);
+                } catch (error) {
+                    entries = null;
+                }
+            }
+
+            if (!Array.isArray(entries)) return [];
+
+            return entries.filter(function (entry) {
+                return entry && typeof entry.name === 'string' && entry.name.trim() !== '';
+            });
+        }
+
+        function setRequirements(id, value) {
+            const element = document.getElementById(id);
+
+            if (!element) return;
+
+            const entries = requirementEntries(value);
+
+            element.textContent = '';
+
+            if (entries.length === 0) {
+                element.textContent = '—';
+                return;
+            }
+
+            ['mandatory', 'preferred'].forEach(function (type) {
+                const group = entries.filter(function (entry) {
+                    return String(entry.type || 'mandatory').toLowerCase() === type;
+                });
+
+                if (group.length === 0) return;
+
+                const label = document.createElement('span');
+                label.className = 'job-req-inline-label';
+                label.textContent = type === 'mandatory' ? 'Mandatory' : 'Preferred';
+
+                const badges = document.createElement('div');
+                badges.className = 'job-req-badges';
+
+                group.forEach(function (entry) {
+                    const badge = document.createElement('span');
+                    badge.className = type === 'mandatory'
+                        ? 'job-req-badge job-req-badge-mandatory'
+                        : 'job-req-badge';
+                    badge.textContent = entry.name.trim();
+
+                    const proficiency = String(entry.proficiency || '').trim();
+
+                    if (proficiency !== '') {
+                        const level = document.createElement('span');
+                        level.className = 'job-req-prof';
+                        level.textContent = proficiency.charAt(0).toUpperCase() + proficiency.slice(1);
+                        badge.appendChild(level);
+                    }
+
+                    badges.appendChild(badge);
+                });
+
+                element.appendChild(label);
+                element.appendChild(badges);
+            });
         }
 
 
@@ -473,6 +588,8 @@
             setText('mCompany', job.CompanyName);
             setText('mTitle', job.JobTitle);
             setText('mDescription', job.Description || 'No description provided.');
+            setRequirements('mRequiredSkills', job.RequiredSkills);
+            setRequirements('mRequiredSoftware', job.RequiredSoftware);
             setText('mVacancy', job.Vacancy);
 
             const salaryFrom = job.SalaryFrom;
@@ -488,6 +605,9 @@
 
             setText('mSalary', salary);
             setText('mQualification', job.MinQualification);
+            setText('mExperience', experienceLabels[job.ExperienceLevel] || job.ExperienceLevel);
+            setText('mWorkArrangement', job.WorkArrangement);
+            setText('mEmploymentType', job.EmploymentType);
             setText('mStatus', status);
 
             setText('mEmployerContact', job.EmployerContactPerson);
