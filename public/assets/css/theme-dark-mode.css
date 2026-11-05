@@ -14,10 +14,7 @@ html[data-color] .modern-menu {
 html[data-color] .cn-admin-sidebar,
 html[data-color] .cn-sidebar,
 html[data-color] .cn-admin-drawer {
-    background: var(
-        --theme-sidebar-background,
-        linear-gradient(160deg, #667eea, #764ba2)
-    );
+    background: var(--theme-sidebar-background, #3a2c70);
     color: var(--theme-sidebar-text, #fff);
 }
 html[data-color] .cn-dashboard-main,
@@ -363,7 +360,6 @@ html[data-appearance="dark"] .job-alert { background:var(--theme-sidebar-backgro
 html[data-color] .btn-login { color:var(--theme-link); border-color:var(--theme-primary); }
 html[data-color] .btn-login:hover { background:var(--theme-primary); color:var(--theme-primary-contrast); }
 html[data-color] .article h2::after,html[data-color] #col-in h3::after,html[data-color] .footer-section h4::after { background:var(--theme-primary); }
-html[data-color] .welcome-letter,html[data-color] .feature-card i { background-image:var(--theme-page-gradient); }
 
 /* Quick Actions: style.css writes these in fixed greys with an indigo glyph and
    indigo hover, so they stayed blue whatever palette was chosen. primary-dark is
@@ -380,12 +376,10 @@ html[data-color] .cn-dashboard-main :is(.page-header-text p,.glass-card p,.glass
 html[data-color] .cn-dashboard-main :is(.form-control,.form-select):focus { background:var(--theme-input-background); color:var(--theme-input-text); border-color:var(--theme-primary); box-shadow:0 0 0 .2rem color-mix(in srgb,var(--theme-primary) 20%,transparent); }
 html[data-color] .cn-dashboard-main .pagination .page-link:hover { background:var(--theme-hover); color:var(--theme-link); }
 
-/* These four homepage feature icons inherited transparent text fill from their
-   gradient treatment, which loses contrast on the dark card surface. Keep the
-   original gradient in light mode and use the selected theme accent in dark. */
+/* These four homepage feature icons sit on the dark card surface, where the
+   light-mode brand tone is too deep to read. The selected accent keeps them
+   visible without a wash behind the glyph. */
 html[data-appearance="dark"] .feature-card .career-feature-icon {
-    background-image: none;
-    -webkit-text-fill-color: var(--theme-accent, #a5b4fc);
     color: var(--theme-accent, #a5b4fc);
 }
 
@@ -471,14 +465,19 @@ html[data-color] .cn-admin-content .badge-pill.amber {
     color: var(--theme-warning);
 }
 
-/* Keep the existing branded News banner contrast on its dark gradient. */
+/* Keep the branded News banner readable with a flat fill in every palette. The
+   shared `.cn-admin-content :is(p, …, .modal-info-box .info-label)` rule out-specifies
+   a plain class, so the label has to answer in kind. */
 html[data-color] .cn-admin-content .cn-news-header,
 html[data-color] .cn-admin-content .cn-news-header :is(h1, p) {
-    color: #fff;
+    color: #fff !important;
 }
 
-html[data-color] .cn-admin-content .cn-news-header {
-    background: linear-gradient(120deg, #6657df 0%, #8273ef 55%, #a18bf6 100%);
+html[data-color][data-appearance="light"] .cn-admin-content .cn-news-header {
+    background: var(--theme-page-gradient);
+}
+html[data-appearance="dark"] .cn-admin-content .cn-news-header {
+    background: var(--theme-sidebar-background);
 }
 
 /* Theme-aware controls and dropdowns. */

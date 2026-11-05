@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use App\Models\Job;
+use App\Services\JobQualityService;
 
 class EmployerJobController extends Controller
 {
@@ -20,7 +21,7 @@ class EmployerJobController extends Controller
     /**
      * Display all jobs posted by the logged-in employer.
      */
-    public function index()
+    public function index(JobQualityService $quality)
     {
         $employer = Auth::guard('employer')->user();
 
@@ -62,6 +63,7 @@ class EmployerJobController extends Controller
         return view('employer.jobs.index', [
             'jobs' => $jobs,
             'totalRecords' => $totalRecords,
+            'jobQuality' => $quality->summariseMany($jobs, $employer),
             'degrees' => $degrees,
             'experienceLevels' => Job::EXPERIENCE_LEVELS,
             'workArrangements' => Job::WORK_ARRANGEMENTS,

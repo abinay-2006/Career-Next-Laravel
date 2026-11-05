@@ -9,52 +9,12 @@
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -521,52 +481,12 @@ body::after {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -816,11 +736,7 @@ body::after {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(
-        90deg,
-        rgba(167, 139, 250, 0.9),
-        rgba(96, 165, 250, 0.9)
-    );
+    background: var(--theme-accent, #a78bfa);
     border-radius: 22px 22px 0 0;
 }
 
@@ -828,11 +744,7 @@ body::after {
     width: 86px;
     height: 86px;
     border-radius: 50%;
-    background: linear-gradient(
-        135deg,
-        rgba(167, 139, 250, 0.6),
-        rgba(96, 165, 250, 0.6)
-    );
+    background: color-mix(in srgb, var(--theme-accent, #a78bfa) 55%, transparent);
     border: 3px solid rgba(255, 255, 255, 0.3);
     display: flex;
     align-items: center;
@@ -1168,11 +1080,11 @@ body::after {
 }
 
 .toast.success .toast-progress {
-    background: linear-gradient(90deg, #4ade80, #86efac);
+    background: #4ade80;
 }
 
 .toast.error .toast-progress {
-    background: linear-gradient(90deg, #f87171, #fca5a5);
+    background: #f87171;
 }
 
 /* ── EDIT MODAL ── */
@@ -1197,11 +1109,7 @@ body::after {
 }
 
 .modal {
-    background: linear-gradient(
-        145deg,
-        rgba(80, 50, 140, 0.95),
-        rgba(50, 30, 100, 0.95)
-    );
+    background-color: rgba(65, 40, 120, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 24px;
     padding: 36px;
@@ -1419,11 +1327,7 @@ body::after {
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: linear-gradient(
-        135deg,
-        rgba(167, 139, 250, 0.5),
-        rgba(96, 165, 250, 0.5)
-    );
+    background: color-mix(in srgb, var(--theme-accent, #a78bfa) 50%, transparent);
     border: 2px solid rgba(255, 255, 255, 0.25);
     display: flex;
     align-items: center;
@@ -2062,11 +1966,7 @@ body::after {
 
     border-radius: 20px;
 
-    background: linear-gradient(
-        145deg,
-        rgba(118, 75, 162, 0.98),
-        rgba(102, 126, 234, 0.98)
-    );
+    background-color: rgba(110, 78, 168, 0.98);
 
     border: 1px solid rgba(255, 255, 255, 0.18);
 
@@ -2485,52 +2385,12 @@ body::after {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -3135,11 +2995,11 @@ body::after {
 }
 
 .toast.success .toast-progress {
-    background: linear-gradient(90deg, #4ade80, #86efac);
+    background: #4ade80;
 }
 
 .toast.error .toast-progress {
-    background: linear-gradient(90deg, #f87171, #fca5a5);
+    background: #f87171;
 }
 
 /* ════════════════════════════════
@@ -3186,11 +3046,7 @@ body::after {
 }
 
 .modal {
-    background: linear-gradient(
-        145deg,
-        rgba(80, 50, 140, 0.95),
-        rgba(50, 30, 100, 0.95)
-    );
+    background-color: rgba(65, 40, 120, 0.96);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 24px;
     padding: 36px;
@@ -3437,52 +3293,12 @@ body::after {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -4123,52 +3939,12 @@ body::after {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -4488,20 +4264,12 @@ body::after {
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(
-        90deg,
-        rgba(167, 139, 250, 0.8),
-        rgba(96, 165, 250, 0.8)
-    );
+    background: var(--theme-accent, #a78bfa);
     border-radius: 20px 20px 0 0;
 }
 
 .walkin-card.past::before {
-    background: linear-gradient(
-        90deg,
-        rgba(156, 163, 175, 0.5),
-        rgba(107, 114, 128, 0.5)
-    );
+    background: rgba(156, 163, 175, 0.5);
 }
 
 .walkin-card:hover {
@@ -5601,11 +5369,7 @@ body::after {
     border: 1px solid rgba(239, 68, 68, 0.45);
     border-radius: 10px;
 
-    background: linear-gradient(
-        135deg,
-        rgba(220, 38, 38, 0.95),
-        rgba(185, 28, 28, 0.95)
-    );
+    background-color: rgba(220, 38, 38, 0.95);
 
     color: #fff;
 
@@ -5627,7 +5391,7 @@ body::after {
 }
 
 .btn-delete-confirm:hover {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
+    background-color: #dc2626;
 
     color: #fff;
 
@@ -5992,11 +5756,7 @@ body::after {
 
     border-radius: 22px;
 
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.1),
-        rgba(255, 255, 255, 0.045)
-    );
+    background-color: rgba(255, 255, 255, 0.07);
 
     border: 1px solid rgba(255, 255, 255, 0.13);
 
@@ -6024,11 +5784,7 @@ body::after {
 
     border-radius: 18px;
 
-    background: linear-gradient(
-        145deg,
-        rgba(255, 255, 255, 0.17),
-        rgba(255, 255, 255, 0.07)
-    );
+    background-color: rgba(255, 255, 255, 0.12);
 
     border: 1px solid rgba(255, 255, 255, 0.15);
 
@@ -6469,11 +6225,7 @@ body::after {
 
     border-radius: 18px;
 
-    background: linear-gradient(
-        145deg,
-        rgba(255, 255, 255, 0.095),
-        rgba(255, 255, 255, 0.045)
-    );
+    background-color: rgba(255, 255, 255, 0.07);
 
     border: 1px solid rgba(255, 255, 255, 0.11);
 
@@ -6980,11 +6732,7 @@ body::after {
 
     border-radius: 18px;
 
-    background: linear-gradient(
-        145deg,
-        rgba(255, 255, 255, 0.075),
-        rgba(255, 255, 255, 0.04)
-    );
+    background-color: rgba(255, 255, 255, 0.06);
 
     border: 1px solid rgba(255, 255, 255, 0.1);
 
@@ -7001,11 +6749,7 @@ body::after {
 .walkin-modern-card:hover {
     transform: translateY(-3px);
 
-    background: linear-gradient(
-        145deg,
-        rgba(255, 255, 255, 0.095),
-        rgba(255, 255, 255, 0.05)
-    );
+    background-color: rgba(255, 255, 255, 0.09);
 
     border-color: rgba(255, 255, 255, 0.14);
 }

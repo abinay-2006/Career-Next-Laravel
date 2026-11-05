@@ -141,8 +141,6 @@ textarea {
 
 /* Shared authenticated dashboard frame and role sidebar. */
 :root {
-    --cn-brand-start: #667eea;
-    --cn-brand-end: #764ba2;
     --cn-sidebar-width: 16rem;
     --cn-sidebar-surface: rgba(255, 255, 255, .12);
     --cn-sidebar-border: rgba(255, 255, 255, .2);
@@ -211,7 +209,7 @@ th {
     .cn-dashboard-layout { display: block; padding: .9rem var(--cn-page-gutter); }
     .cn-dashboard-main { width: 100%; }
     .cn-dashboard-main > .main-content { padding: 0; }
-    .cn-sidebar { position: fixed; z-index: 1100; inset: 0 auto 0 0; width: min(19rem, calc(100vw - 3rem)); max-height: 100dvh; border: 0; border-radius: 0 .85rem .85rem 0; background: linear-gradient(145deg, var(--cn-brand-start), var(--cn-brand-end)); transform: translateX(-105%); transition: transform .2s ease; }
+    .cn-sidebar { position: fixed; z-index: 1100; inset: 0 auto 0 0; width: min(19rem, calc(100vw - 3rem)); max-height: 100dvh; border: 0; border-radius: 0 .85rem .85rem 0; background: var(--theme-sidebar-background, #3a2c70); transform: translateX(-105%); transition: transform .2s ease; }
     body.cn-sidebar-open { overflow: hidden; }
     body.cn-sidebar-open .cn-sidebar { transform: translateX(0); }
     body.cn-sidebar-open .cn-sidebar-backdrop { display: block; position: fixed; z-index: 1090; inset: 0; background: rgba(16, 29, 45, .48); }
@@ -251,7 +249,7 @@ html[data-appearance="light"] .account-profile-page :is(.info-row, .profile-page
 }
 
 html[data-appearance="light"] .account-profile-page .profile-hero {
-    background: var(--theme-page-gradient, linear-gradient(135deg, #667eea, #764ba2));
+    background: var(--theme-page-gradient, #5143a5);
 }
 
 html[data-appearance="light"] .account-profile-page :is(.hero-name, .hero-pill, .profile-completion-percentage) {

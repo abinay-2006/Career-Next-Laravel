@@ -5,6 +5,7 @@
 @push('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css">
 <link rel="stylesheet" href="{{ asset('assets/css/job-requirements.css') }}?v={{ @filemtime(public_path('assets/css/job-requirements.css')) ?: 1 }}">
+<link rel="stylesheet" href="{{ asset('assets/css/job-quality.css') }}?v={{ @filemtime(public_path('assets/css/job-quality.css')) ?: 1 }}">
 @endpush
 
 @section('content')
@@ -140,6 +141,8 @@
         </div>
       </div>
 
+      <x-job-quality-report form-id="postJobForm" />
+
       <div class="form-footer">
         <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Post Job</button>
         <button type="reset" class="btn-reset"><i class="fas fa-rotate-left"></i> Clear</button>
@@ -173,6 +176,7 @@
             <th>Description</th>
             <th>Salary</th>
             <th>Status</th>
+            <th>Job Quality</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -208,6 +212,24 @@
               <span class="status-badge pending">
                 {{ ucfirst($job->Status) }}
               </span>
+              @endif
+            </td>
+            <td>
+              {{-- Scored from the stored row each time the page is built; the
+                   number is never kept in the database. --}}
+              @php($quality = $jobQuality[$job->JobId] ?? null)
+              @if ($quality)
+              <div class="cn-quality-cell" data-band="{{ $quality['band'] }}">
+                <span class="cn-quality-badge">
+                  <span>{{ $quality['score'] }}% Completed - </span>
+                  <span class="cn-quality-badge-word">{{ $quality['label'] }}</span>
+                </span>
+                @if ($quality['missing'] !== [])
+                <span class="cn-quality-hint">{{ $quality['missing'][0] }}</span>
+                @endif
+              </div>
+              @else
+              <span class="cn-quality-hint">Not scored</span>
               @endif
             </td>
             <td>
@@ -466,6 +488,7 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script src="{{ asset('assets/js/job-requirements.js') }}?v={{ @filemtime(public_path('assets/js/job-requirements.js')) ?: 1 }}"></script>
+<script src="{{ asset('assets/js/job-quality.js') }}?v={{ @filemtime(public_path('assets/js/job-quality.js')) ?: 1 }}"></script>
 <script>
   // ── "Other" qualification field toggle ──
   function initializeJobQualificationInputs() {
@@ -621,6 +644,7 @@
     setSelectOption('edit_cmbExperience', classification.experience);
     setSelectOption('edit_cmbArrangement', classification.arrangement);
     setSelectOption('edit_cmbEmployment', classification.employment);
+
   }
 
   function setSelectOption(id, value) {

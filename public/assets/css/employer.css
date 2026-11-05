@@ -7,52 +7,12 @@
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -660,52 +620,12 @@ table.data-table tbody tr:last-child td {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -1321,11 +1241,7 @@ table.jobs-table tbody tr:last-child td {
 }
 
 .modal {
-    background: linear-gradient(
-        145deg,
-        rgba(118, 75, 162, 0.96),
-        rgba(102, 126, 234, 0.96)
-    );
+    background-color: rgba(118, 75, 162, 0.96);
     backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 20px;
@@ -1884,52 +1800,12 @@ table.jobs-table tbody tr:last-child td {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -2531,11 +2407,7 @@ table.data-table tbody tr:last-child td {
 }
 
 .modal {
-    background: linear-gradient(
-        145deg,
-        rgba(118, 75, 162, 0.96),
-        rgba(102, 126, 234, 0.96)
-    );
+    background-color: rgba(118, 75, 162, 0.96);
     backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 20px;
@@ -2679,52 +2551,12 @@ table.data-table tbody tr:last-child td {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -3505,11 +3337,11 @@ body::after {
 }
 
 .toast.success .toast-progress {
-    background: linear-gradient(90deg, #4ade80, #86efac);
+    background: #4ade80;
 }
 
 .toast.error .toast-progress {
-    background: linear-gradient(90deg, #f87171, #fca5a5);
+    background: #f87171;
 }
 
 @media (max-width: 700px) {
@@ -3558,52 +3390,12 @@ body::after {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -4028,52 +3820,12 @@ body::after {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -4229,11 +3981,7 @@ body::after {
     align-items: center;
     gap: 24px;
     padding: 32px 36px;
-    background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.12),
-        rgba(255, 255, 255, 0.05)
-    );
+    background-color: rgba(255, 255, 255, 0.08);
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
@@ -4553,11 +4301,7 @@ body::after {
 
     border-radius: 22px;
 
-    background: linear-gradient(
-        145deg,
-        rgba(118, 75, 162, 0.96),
-        rgba(102, 126, 234, 0.96)
-    );
+    background-color: rgba(118, 75, 162, 0.96);
 
     border: 1px solid rgba(255, 255, 255, 0.18);
 

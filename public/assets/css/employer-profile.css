@@ -245,11 +245,7 @@
 
     height: 3px;
 
-    background: linear-gradient(
-        90deg,
-        rgba(167, 139, 250, 0.9),
-        rgba(96, 165, 250, 0.9)
-    );
+    background: var(--theme-accent, #a78bfa);
 
     border-radius: 22px 22px 0 0;
 }
@@ -272,11 +268,7 @@
 
     border-radius: 50%;
 
-    background: linear-gradient(
-        135deg,
-        rgba(167, 139, 250, 0.6),
-        rgba(96, 165, 250, 0.6)
-    );
+    background: color-mix(in srgb, var(--theme-accent, #a78bfa) 55%, transparent);
 
     border: 3px solid rgba(255, 255, 255, 0.3);
 
@@ -725,11 +717,7 @@
 }
 
 .avatar-circle {
-    background: linear-gradient(
-        135deg,
-        rgba(167, 139, 250, 0.6),
-        rgba(96, 165, 250, 0.6)
-    );
+    background: color-mix(in srgb, var(--theme-accent, #a78bfa) 55%, transparent);
 
     border: 3px solid rgba(255, 255, 255, 0.3);
 
@@ -1952,7 +1940,7 @@
 
     border-radius: 50%;
 
-    background: linear-gradient(135deg, #764ba2, #667eea);
+    background: var(--theme-secondary, #764ba2);
 
     border: 2px solid rgba(255, 255, 255, 0.18);
 

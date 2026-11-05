@@ -6,7 +6,7 @@
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     color: #333;
 }
@@ -25,36 +25,11 @@ body {
 }
 
 .modern-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-gradient, #5143a5);
     padding: 30px 40px;
     color: white;
     position: relative;
     overflow: hidden;
-}
-
-.modern-header::before {
-    content: "";
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(
-        circle,
-        rgba(255, 255, 255, 0.1) 0%,
-        transparent 70%
-    );
-    animation: shine 8s infinite;
-}
-
-@keyframes shine {
-    0% {
-        transform: translateX(-100%) translateY(-100%) rotate(45deg);
-    }
-
-    100% {
-        transform: translateX(100%) translateY(100%) rotate(45deg);
-    }
 }
 
 .header-content {
@@ -135,7 +110,7 @@ body {
 
 .nav-links a.active {
     color: white;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-gradient, #5143a5);
 }
 
 .nav-links a i {
@@ -167,7 +142,7 @@ body {
 }
 
 .btn-register {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-gradient, #5143a5);
     color: white;
 }
 
@@ -212,7 +187,7 @@ body {
     left: 0;
     width: 60px;
     height: 3px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-primary, #667eea);
     border-radius: 3px;
 }
 
@@ -229,9 +204,7 @@ body {
 
 .welcome-letter {
     font-size: 1.2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--theme-primary-dark, #5143a5);
     font-weight: 600;
 }
 
@@ -259,9 +232,7 @@ body {
 
 .feature-card i {
     font-size: 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--theme-primary-dark, #5143a5);
     margin-bottom: 15px;
 }
 
@@ -314,7 +285,7 @@ body {
     left: 0;
     width: 40px;
     height: 2px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-primary, #667eea);
 }
 
 #col-in h3:first-of-type {
@@ -352,7 +323,7 @@ body {
 }
 
 .job-alert {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-gradient, #5143a5);
     color: white;
     padding: 20px;
     border-radius: 12px;

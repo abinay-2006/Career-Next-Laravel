@@ -41,7 +41,7 @@
 .cn-dashboard-main .glass-card {
     border: 1px solid rgba(255, 255, 255, .2);
     border-radius: 1rem;
-    background: linear-gradient(145deg, rgba(255, 255, 255, .17), rgba(255, 255, 255, .095));
+    background: rgba(255, 255, 255, .13);
     box-shadow: 0 14px 36px rgba(35, 23, 81, .14);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
@@ -232,7 +232,7 @@
     overflow-y: auto;
     border: 0;
     border-radius: .75rem;
-    background: linear-gradient(160deg, var(--cn-brand-start), var(--cn-brand-end));
+    background: var(--theme-sidebar-background, #3a2c70);
     box-shadow: 8px 0 28px rgba(30, 35, 80, .12);
 }
 .cn-sidebar-heading { padding: 1.65rem .8rem .85rem; color: rgba(255,255,255,.7); font-size: .72rem; letter-spacing: .09em; }
@@ -259,7 +259,7 @@
 .cn-analytics-stat-copy strong { color: #fff; font-size: 1.4rem; line-height: 1.3; }
 .cn-analytics-stat-copy small { color: rgba(255,255,255,.58); font-size: .68rem; }
 .cn-analytics-charts { display: grid; grid-template-columns: minmax(0,1.5fr) repeat(2,minmax(0,1fr)); gap: .85rem; margin-top: .85rem; }
-.cn-analytics-panel { min-width: 0; padding: 1.1rem; border: 1px solid rgba(255,255,255,.2); border-radius: .95rem; background: linear-gradient(145deg,rgba(255,255,255,.16),rgba(255,255,255,.09)); box-shadow: 0 12px 30px rgba(35,23,81,.12); }
+.cn-analytics-panel { min-width: 0; padding: 1.1rem; border: 1px solid rgba(255,255,255,.2); border-radius: .95rem; background: rgba(255,255,255,.12); box-shadow: 0 12px 30px rgba(35,23,81,.12); }
 .cn-analytics-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; margin-bottom: .75rem; }
 .cn-analytics-panel-heading h3 { margin: 0; color: #fff; font-size: .96rem; font-weight: 650; }
 .cn-analytics-panel-heading p { margin: .25rem 0 0; color: rgba(255,255,255,.62); font-size: .72rem; }

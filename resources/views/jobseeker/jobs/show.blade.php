@@ -65,6 +65,8 @@
 
         <div class="job-hero-right">
 
+            <x-compare-toggle :job="$job" button-class="cn-cmp-btn cn-cmp-btn-quiet" />
+
             @if($alreadyApplied)
 
             <div class="applied-label">
@@ -990,7 +992,7 @@
 
     </div>
 
-
+    <x-compare-tray />
 
 
 </div>

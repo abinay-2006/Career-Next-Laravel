@@ -17,6 +17,7 @@ use App\Http\Controllers\Employer\WalkinController;
 use App\Http\Controllers\Employer\EmployerApplicationController;
 use App\Http\Controllers\JobSeeker\EducationController;
 use App\Http\Controllers\JobSeeker\JobSearchController;
+use App\Http\Controllers\Employer\JobQualityController;
 use App\Http\Controllers\JobSeeker\JobSeekerWalkinController;
 use App\Http\Controllers\JobSeeker\JobApplicationController;
 use App\Http\Controllers\Employer\EmployerProfileController;
@@ -31,6 +32,7 @@ use App\Http\Controllers\DashboardAnalyticsController;
 use App\Http\Controllers\JobSeeker\ResumeBuilderController;
 use App\Http\Controllers\JobSeeker\SavedJobController;
 use App\Http\Controllers\JobSeeker\CareerPreferencesController;
+use App\Http\Controllers\JobSeeker\JobComparisonController;
 // Route
 
 // Home Page Route
@@ -199,6 +201,12 @@ Route::prefix('employer')
         Route::delete('/jobs/{id}', [EmployerJobController::class, 'destroy'])
             ->name('jobs.destroy');
 
+        // Live scoring for the job form. The employer types, this answers with the
+        // report, and nothing is written - see JobQualityService.
+        Route::post('/jobs/quality-check', [JobQualityController::class, 'check'])
+            ->middleware('throttle:120,1')
+            ->name('jobs.qualityCheck');
+
         //Walkin Routes
         Route::get('/walkins', [WalkinController::class, 'index'])
             ->name('walkins.index');
@@ -350,4 +358,30 @@ Route::prefix('jobseeker')
 
         Route::put('/career-preferences', [CareerPreferencesController::class, 'update'])
             ->name('preferences.update');
+
+        // Job Offer Comparison Lab (selection lives in the session)
+        Route::get('/compare-jobs', [JobComparisonController::class, 'index'])
+            ->name('compare.index');
+
+        Route::post('/compare-jobs/clear', [JobComparisonController::class, 'clear'])
+            ->name('compare.clear');
+
+        Route::post('/compare-jobs/priorities', [JobComparisonController::class, 'weights'])
+            ->name('compare.weights');
+
+        Route::post('/compare-jobs/{job}', [JobComparisonController::class, 'add'])
+            ->whereNumber('job')
+            ->name('compare.add');
+
+        Route::post('/compare-jobs/{job}/remove', [JobComparisonController::class, 'remove'])
+            ->whereNumber('job')
+            ->name('compare.remove');
+
+        Route::post('/compare-jobs/{job}/replace', [JobComparisonController::class, 'replace'])
+            ->whereNumber('job')
+            ->name('compare.replace');
+
+        Route::post('/compare-jobs/{job}/move', [JobComparisonController::class, 'move'])
+            ->whereNumber('job')
+            ->name('compare.move');
     });

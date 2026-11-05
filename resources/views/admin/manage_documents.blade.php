@@ -355,7 +355,7 @@
     overflow: hidden;
     border: 1px solid rgba(255,255,255,.22);
     border-radius: 17px;
-    background: linear-gradient(145deg,#7167c9,#7951a8);
+    background: var(--theme-page-gradient, #7167c9);
     box-shadow: 0 20px 60px rgba(0,0,0,.25);
 }
 

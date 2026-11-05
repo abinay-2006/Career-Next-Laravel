@@ -1,7 +1,5 @@
 :root {
     --cn-admin-sidebar-width: 260px;
-    --cn-admin-brand-start: #667eea;
-    --cn-admin-brand-end: #764ba2;
     --cn-admin-ink: #26283a;
     --cn-admin-muted: #77798b;
 }
@@ -28,7 +26,7 @@
     min-height: 0;
     overflow: hidden;
     padding: 1.5rem 1rem 1rem;
-    background: linear-gradient(160deg, var(--cn-admin-brand-start), var(--cn-admin-brand-end));
+    background: var(--theme-sidebar-background, #3a2c70);
     color: #fff;
     box-shadow: 8px 0 28px rgba(30, 35, 80, .12);
 }
@@ -111,7 +109,7 @@
     .cn-admin-shell { display: block; }
     .cn-admin-sidebar, .cn-admin-header-account { display: none; }
     .cn-admin-main-column { min-height: 100vh; min-height: 100dvh; }
-    .cn-admin-header { min-height: 4.25rem; justify-content: space-between; padding: .55rem 1rem; gap: .75rem; background: linear-gradient(120deg, var(--cn-admin-brand-start), var(--cn-admin-brand-end)); }
+    .cn-admin-header { min-height: 4.25rem; justify-content: space-between; padding: .55rem 1rem; gap: .75rem; background: var(--theme-sidebar-background, #3a2c70); }
     .cn-admin-theme-controls { display: none; }
     .cn-admin-menu-toggle { display: inline-flex; width: 2.75rem; height: 2.75rem; flex: 0 0 2.75rem; align-items: center; justify-content: center; border: 1px solid rgba(255, 255, 255, .35); border-radius: .55rem; background: rgba(255, 255, 255, .12); color: #fff; cursor: pointer; }
     .cn-admin-menu-toggle:hover { background: rgba(255, 255, 255, .22); }

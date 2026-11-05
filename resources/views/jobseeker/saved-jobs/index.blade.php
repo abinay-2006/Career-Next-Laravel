@@ -15,9 +15,7 @@
         padding: 30px;
         margin-bottom: 25px;
         border-radius: 20px;
-        background: linear-gradient(120deg,
-                var(--cn-primary, #6750b8),
-                var(--cn-primary-hover, #5143a5));
+        background: var(--cn-primary-hover, var(--theme-page-gradient, #5143a5));
         color: #fff;
         box-shadow: 0 12px 30px rgba(80, 60, 150, .17);
     }
@@ -43,7 +41,7 @@
     }
 
     .cn-saved-hero p {
-        color: rgba(255, 255, 255, .88) !important;
+        color: #fff !important;
         margin: 0;
         max-width: 520px;
     }
@@ -55,10 +53,12 @@
         margin-top: 20px;
         padding: 9px 15px;
         border-radius: 30px;
-        background: rgba(255, 255, 255, .18);
+        /* A white tint would lighten the flat hero enough to drop the label under
+           AA in the green and orange palettes, so the chip sinks instead. */
+        background: rgba(0, 0, 0, .18);
         color: #fff;
         font-weight: 700;
-        border: 1px solid rgba(255, 255, 255, .25);
+        border: 1px solid rgba(255, 255, 255, .35);
     }
 
     .cn-saved-grid {
@@ -191,6 +191,19 @@
         background: #dc3545;
         border-color: #dc3545;
         color: #fff;
+    }
+
+    .cn-saved-compare {
+        background: transparent;
+        color: var(--cn-text-secondary, var(--theme-text-secondary, #777));
+        border: 1px solid var(--cn-border, var(--theme-border, #ddd));
+    }
+
+    .cn-saved-compare:hover,
+    .cn-saved-compare.in-compare {
+        background: color-mix(in srgb, var(--cn-primary, #6750b8) 62%, var(--cn-text, var(--theme-text-primary, #29283b)));
+        border-color: color-mix(in srgb, var(--cn-primary, #6750b8) 62%, var(--cn-text, var(--theme-text-primary, #29283b)));
+        color: var(--theme-primary-contrast, #fff);
     }
 
     .cn-saved-empty {
@@ -332,6 +345,8 @@
                     View Details
                 </a>
 
+                <x-compare-toggle :job="$job" button-class="cn-saved-btn cn-saved-compare" />
+
                 <form action="{{ route('jobseeker.saved-jobs.destroy', $job->JobId) }}"
                     method="POST"
                     data-ajax
@@ -401,6 +416,8 @@
     </div>
 
     @endif
+
+    <x-compare-tray />
 
 </div>
 @endsection

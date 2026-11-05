@@ -21,6 +21,7 @@
         'jobseeker' => [
             ['Dashboard', 'jobseeker.index', 'fas fa-house'],
             ['Browse Jobs', 'jobseeker.jobs', 'fas fa-briefcase'],
+            ['Compare Jobs', 'jobseeker.compare.index', 'fas fa-scale-balanced'],
             ['Walk-in Interviews', 'jobseeker.walkins', 'fas fa-calendar'],
             ['Profile', 'jobseeker.profile.index', 'fas fa-user'],
             ['Career Preferences', 'jobseeker.preferences.edit', 'fas fa-sliders'],
@@ -44,6 +45,7 @@
                     'employer.walkins.index' => 'employer.walkins.*',
                     'employer.feedback.create' => 'employer.feedback.*',
                     'jobseeker.jobs' => 'jobseeker.jobs*',
+                    'jobseeker.compare.index' => 'jobseeker.compare.*',
                     'jobseeker.saved-jobs.index' => 'jobseeker.saved-jobs.*',
                     'jobseeker.profile.index' => 'jobseeker.profile.*',
                     'jobseeker.education' => 'jobseeker.education*',
@@ -58,6 +60,9 @@
             <a class="cn-admin-nav-link {{ request()->routeIs(...(array) $activePattern) ? 'is-active' : '' }}"
                href="{{ route($routeName) }}" @if(request()->routeIs(...(array) $activePattern)) aria-current="page" @endif>
                 <i class="{{ $icon }}" aria-hidden="true"></i><span>{{ $label }}</span>
+                @if ($role === 'jobseeker' && $routeName === 'jobseeker.compare.index' && ($compareCount = \App\Support\JobComparisonState::count()) > 0)
+                    <span class="cn-cmp-nav-count">{{ $compareCount }}</span>
+                @endif
             </a>
         @endforeach
 </nav>

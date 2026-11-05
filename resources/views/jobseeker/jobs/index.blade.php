@@ -381,6 +381,9 @@
 
                 @endif
 
+                {{-- Add to Compare --}}
+                <x-compare-toggle :job="$job" />
+
                 {{-- Existing Apply Functionality --}}
                 @if($alreadyApplied)
 
@@ -421,6 +424,8 @@
         </div>
     </div>
     @endif
+
+    <x-compare-tray />
 
 
     <!-- ── Application Status ── -->

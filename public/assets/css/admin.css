@@ -6,52 +6,12 @@
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -369,51 +329,11 @@ body::after {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.3;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ────────────────────────────────────────────────── */
@@ -997,52 +917,12 @@ tbody td {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -1517,7 +1397,7 @@ tbody td {
    custom modal styles used elsewhere on the admin pages. */
 #confirmModal .modal-content {
     color: #fff;
-    background: linear-gradient(145deg, rgba(75, 55, 130, 0.98), rgba(52, 65, 125, 0.98));
+    background-color: rgba(64, 60, 128, 0.98);
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -1709,11 +1589,7 @@ tbody td {
     gap: 8px;
     padding: 11px 24px;
     border-radius: 10px;
-    background: linear-gradient(
-        135deg,
-        rgba(16, 185, 129, 0.4),
-        rgba(5, 150, 105, 0.5)
-    );
+    background: rgba(16, 185, 129, 0.45);
     border: 1px solid rgba(16, 185, 129, 0.45);
     color: #fff;
     font-family: "Poppins", sans-serif;
@@ -1725,11 +1601,7 @@ tbody td {
 }
 
 .btn-approve:hover {
-    background: linear-gradient(
-        135deg,
-        rgba(16, 185, 129, 0.6),
-        rgba(5, 150, 105, 0.7)
-    );
+    background: rgba(16, 185, 129, 0.65);
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
@@ -1825,52 +1697,12 @@ tbody td {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -2476,11 +2308,7 @@ tbody td {
     gap: 8px;
     padding: 11px 24px;
     border-radius: 10px;
-    background: linear-gradient(
-        135deg,
-        rgba(16, 185, 129, 0.4),
-        rgba(5, 150, 105, 0.5)
-    );
+    background: rgba(16, 185, 129, 0.45);
     border: 1px solid rgba(16, 185, 129, 0.45);
     color: #fff;
     font-family: "Poppins", sans-serif;
@@ -2492,11 +2320,7 @@ tbody td {
 }
 
 .btn-approve:hover {
-    background: linear-gradient(
-        135deg,
-        rgba(16, 185, 129, 0.6),
-        rgba(5, 150, 105, 0.7)
-    );
+    background: rgba(16, 185, 129, 0.65);
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
@@ -2593,51 +2417,11 @@ tbody td {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.3;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 /* ── Navbar ── */
@@ -3284,7 +3068,7 @@ tbody td {
 }
 
 .custom-modal {
-    background: linear-gradient(145deg, #4c3b8e, #3b2d6e);
+    background-color: #443780;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 20px;
     padding: 32px;
@@ -3434,52 +3218,12 @@ tbody td {
 
 body {
     font-family: "Poppins", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-page-background, #f5f4fb);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     position: relative;
     overflow-x: hidden;
-}
-
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-    z-index: 0;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
 }
 
 [x-cloak] {
@@ -4132,11 +3876,7 @@ table tbody tr:last-child td {
 }
 
 .custom-modal {
-    background: linear-gradient(
-        145deg,
-        rgba(118, 75, 162, 0.96),
-        rgba(102, 126, 234, 0.96)
-    );
+    background-color: rgba(118, 75, 162, 0.96);
     backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.22);
     border-radius: 20px;
@@ -4361,7 +4101,7 @@ table tbody tr:last-child td {
         margin-bottom: 22px;
         border-radius: 18px;
         color: #fff;
-        background: linear-gradient(120deg, #6657df 0%, #8273ef 55%, #a18bf6 100%);
+        background: var(--theme-page-gradient, #6657df);
         box-shadow: 0 8px 24px rgba(109, 92, 232, .16);
     }
 
@@ -5051,14 +4791,14 @@ table tbody tr:last-child td {
     padding: 9px 12px;
     border: none;
     border-radius: 9px;
-    background: linear-gradient(135deg, #7665df, #6651ce);
+    background: var(--theme-page-gradient, #6651ce);
     font-size: 13px;
     font-weight: 650;
     white-space: nowrap;
 }
 
 .activity-filter-btn:hover {
-    background: linear-gradient(135deg, #6655d0, #5742bd);
+    background: var(--theme-primary-dark, #5742bd);
 }
 
 .activity-table-heading {

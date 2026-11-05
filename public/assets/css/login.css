@@ -17,44 +17,6 @@ body {
     color: var(--theme-text-primary);
 }
 
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.35;
-    animation: blob 12s infinite ease-in-out;
-    pointer-events: none;
-}
-
-body::before {
-    width: 520px;
-    height: 520px;
-    background: #a78bfa;
-    top: -160px;
-    left: -160px;
-}
-
-body::after {
-    width: 420px;
-    height: 420px;
-    background: #60a5fa;
-    bottom: -110px;
-    right: -110px;
-    animation-delay: -6s;
-}
-
-@keyframes blob {
-    0%,
-    100% {
-        transform: translate(0, 0) scale(1);
-    }
-    50% {
-        transform: translate(30px, 30px) scale(1.07);
-    }
-}
-
 .page-wrapper {
     display: flex;
     width: 100%;
@@ -70,7 +32,7 @@ body::after {
 /* ── Left panel ── */
 .left-panel {
     flex: 1;
-    background: linear-gradient(160deg, #5a67d8 0%, #6b46c1 100%);
+    background: var(--theme-page-gradient, #5143a5);
     padding: 50px 40px;
     display: flex;
     flex-direction: column;

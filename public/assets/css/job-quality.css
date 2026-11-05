@@ -1,0 +1,467 @@
+/*
+ * Job Quality Checker.
+ *
+ * Everything is painted from theme tokens so the panel follows the purple theme,
+ * the alternate palettes and dark mode without a single hardcoded colour. Status
+ * text mixes the token with --theme-text-primary because the raw status colours
+ * measure below AA on a dark card - the same treatment the rest of the employer
+ * screens already use.
+ */
+
+.cn-quality {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 18px 0 4px;
+  padding: 16px 18px 14px;
+  border: 1px solid var(--theme-border);
+  border-radius: 14px;
+  background: var(--theme-surface-secondary, var(--theme-card-background));
+  color: var(--theme-text-primary);
+}
+
+.cn-quality:focus {
+  outline: none;
+}
+
+.cn-quality-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.cn-quality-head-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--theme-primary) 22%, transparent);
+  color: color-mix(in srgb, var(--theme-primary) 55%, var(--theme-text-primary));
+  font-size: 1rem;
+}
+
+.cn-quality-head-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cn-quality-title {
+  color: var(--theme-text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+
+.cn-quality-sub {
+  color: var(--theme-text-secondary);
+  font-size: .8rem;
+  line-height: 1.45;
+}
+
+.cn-quality-readout {
+  display: flex;
+  align-items: baseline;
+  flex: 0 0 auto;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cn-quality-score {
+  color: var(--theme-text-primary);
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.cn-quality-of {
+  color: var(--theme-text-secondary);
+  font-size: .75rem;
+  font-weight: 600;
+}
+
+.cn-quality[data-band="excellent"] .cn-quality-score { color: color-mix(in srgb, var(--theme-success) 62%, var(--theme-text-primary)); }
+.cn-quality[data-band="good"] .cn-quality-score { color: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary)); }
+.cn-quality[data-band="needs_improvement"] .cn-quality-score { color: color-mix(in srgb, var(--theme-warning) 62%, var(--theme-text-primary)); }
+.cn-quality[data-band="incomplete"] .cn-quality-score { color: color-mix(in srgb, var(--theme-error) 55%, var(--theme-text-primary)); }
+
+.cn-quality-meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cn-quality-track {
+  display: block;
+  flex: 1 1 auto;
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--theme-text-primary) 12%, transparent);
+}
+
+.cn-quality-fill {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--theme-primary);
+  transition: width .35s ease, background-color .35s ease;
+}
+
+.cn-quality[data-band="excellent"] .cn-quality-fill { background: var(--theme-success); }
+.cn-quality[data-band="good"] .cn-quality-fill { background: var(--theme-primary); }
+.cn-quality[data-band="needs_improvement"] .cn-quality-fill { background: var(--theme-warning); }
+.cn-quality[data-band="incomplete"] .cn-quality-fill { background: var(--theme-error); }
+
+.cn-quality-band {
+  flex: 0 0 auto;
+  color: var(--theme-text-secondary);
+  font-size: .78rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.cn-quality-band.is-error {
+  color: color-mix(in srgb, var(--theme-error) 55%, var(--theme-text-primary));
+}
+
+/* ── per-category points ── */
+
+.cn-quality-parts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cn-quality-part {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cn-quality-part-label {
+  flex: 1 1 auto;
+  color: var(--theme-text-secondary);
+  font-size: .76rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cn-quality-part-track {
+  display: block;
+  width: 54px;
+  height: 5px;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--theme-text-primary) 12%, transparent);
+}
+
+.cn-quality-part-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--theme-primary);
+}
+
+.cn-quality-part.is-strong .cn-quality-part-track i { background: var(--theme-success); }
+.cn-quality-part.is-partial .cn-quality-part-track i { background: var(--theme-warning); }
+.cn-quality-part.is-weak .cn-quality-part-track i { background: var(--theme-error); }
+
+.cn-quality-part-points {
+  flex: 0 0 auto;
+  color: var(--theme-text-secondary);
+  font-size: .74rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── the four report lists ── */
+
+.cn-quality-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cn-quality-group-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  color: var(--theme-text-secondary);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.cn-quality-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cn-quality-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--theme-text-primary) 5%, transparent);
+}
+
+.cn-quality-item > i {
+  width: 15px;
+  flex: 0 0 auto;
+  margin-top: 2px;
+  font-size: .78rem;
+  text-align: center;
+}
+
+.cn-quality-item-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.cn-quality-item-label {
+  color: var(--theme-text-primary);
+  font-size: .82rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.cn-quality-item-note {
+  /* The row sits on a tinted card, where --theme-text-secondary lands at 4.49:1
+     in some palettes; pulling it toward the page ink keeps the hierarchy and
+     clears AA everywhere. */
+  color: color-mix(in srgb, var(--theme-text-secondary) 55%, var(--theme-text-primary));
+  font-size: .75rem;
+  line-height: 1.45;
+}
+
+.cn-quality-item.is-done > i { color: color-mix(in srgb, var(--theme-success) 55%, var(--theme-text-primary)); }
+.cn-quality-item.is-warning > i { color: color-mix(in srgb, var(--theme-warning) 55%, var(--theme-text-primary)); }
+.cn-quality-item.is-critical > i { color: color-mix(in srgb, var(--theme-error) 55%, var(--theme-text-primary)); }
+.cn-quality-item.is-info > i,
+.cn-quality-item.is-idea > i { color: color-mix(in srgb, var(--theme-primary) 55%, var(--theme-text-primary)); }
+
+.cn-quality-item.is-critical {
+  border-left: 3px solid color-mix(in srgb, var(--theme-error) 70%, var(--theme-text-primary));
+}
+
+.cn-quality-item.is-warning {
+  border-left: 3px solid color-mix(in srgb, var(--theme-warning) 70%, var(--theme-text-primary));
+}
+
+/* ── jump-to-field controls ── */
+
+.cn-quality-jump {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 3px 9px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  /* 11.5px text over a palette-tinted row cannot hold AA as a translucent tint,
+     so this uses the project's AA fill recipe like the listing badge. */
+  background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+  color: var(--theme-primary-contrast);
+  font-size: .72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+
+.cn-quality-jump:hover {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--theme-primary) 46%, var(--theme-text-primary));
+  color: var(--theme-primary-contrast);
+}
+
+.cn-quality-jump:focus-visible {
+  outline: 2px solid var(--theme-focus-outline, var(--theme-primary));
+  outline-offset: 2px;
+}
+
+.cn-quality-chip button {
+  padding: 4px 10px;
+  border: 1px dashed color-mix(in srgb, var(--theme-error) 45%, var(--theme-border));
+  border-radius: 999px;
+  background: transparent;
+  color: var(--theme-text-primary);
+  font-size: .74rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cn-quality-chip button:hover {
+  background: color-mix(in srgb, var(--theme-error) 14%, transparent);
+}
+
+.cn-quality-chip button:disabled {
+  border-style: solid;
+  border-color: var(--theme-border);
+  color: var(--theme-text-secondary);
+  cursor: default;
+}
+
+.cn-quality-chips {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ── status lines ── */
+
+.cn-quality-busy {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--theme-text-secondary);
+  font-size: .78rem;
+  font-weight: 500;
+}
+
+.cn-quality-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--theme-text-secondary);
+  font-size: .8rem;
+  line-height: 1.45;
+}
+
+.cn-quality.has-report .cn-quality-empty {
+  display: none;
+}
+
+.cn-quality-note {
+  border-top: 1px solid var(--theme-divider, var(--theme-border));
+  padding-top: 9px;
+  color: var(--theme-text-secondary);
+  font-size: .72rem;
+  line-height: 1.5;
+}
+
+.cn-quality.is-busy {
+  opacity: .88;
+}
+
+.cn-quality .cn-quality-busy[hidden] {
+  display: none;
+}
+
+/* A suggestion that points outside the form has nothing to focus. */
+.cn-quality-jump[data-cn-quality-focus=""] {
+  display: none;
+}
+
+/* ── the listing-table chip ── */
+
+.cn-quality-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.cn-quality-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+  color: var(--theme-primary-contrast, #fff);
+  font-size: .72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cn-quality-badge.is-excellent { background: color-mix(in srgb, var(--theme-success) 62%, var(--theme-text-primary)); }
+.cn-quality-badge.is-good { background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary)); }
+.cn-quality-badge.is-needs_improvement { background: color-mix(in srgb, var(--theme-warning) 62%, var(--theme-text-primary)); }
+.cn-quality-badge.is-incomplete { background: color-mix(in srgb, var(--theme-error) 62%, var(--theme-text-primary)); }
+
+.cn-quality-badge-word {
+  font-weight: 600;
+}
+
+.cn-quality-hint {
+  color: var(--theme-text-secondary);
+  font-size: .7rem;
+  line-height: 1.35;
+}
+
+/* ── feedback when a suggestion jumps the employer to a field ── */
+
+.form-group.cn-quality-flash .form-input,
+.form-group.cn-quality-flash .form-select,
+.form-group.cn-quality-flash .form-textarea,
+.form-group.cn-quality-flash .cn-req-picker {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-primary) 45%, transparent);
+}
+
+/* ── narrow screens and the edit modal ── */
+
+@media (max-width: 768px) {
+  .cn-quality-parts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cn-quality {
+    margin: 14px 0 2px;
+    padding: 13px 14px 12px;
+  }
+
+  .cn-quality-meter {
+    flex-wrap: wrap;
+  }
+
+  .cn-quality-band {
+    text-align: left;
+  }
+}
+
+@media (max-width: 520px) {
+  .cn-quality-head {
+    flex-wrap: wrap;
+  }
+
+  .cn-quality-readout {
+    margin-left: auto;
+  }
+
+  .cn-quality-jump {
+    margin-left: 0;
+  }
+
+  .cn-quality-item {
+    flex-wrap: wrap;
+  }
+}
+
+/* The modal is a scrolling column, so the panel must not widen it. */
+#editModal .cn-quality {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}

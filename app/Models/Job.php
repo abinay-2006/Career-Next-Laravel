@@ -46,6 +46,12 @@ class Job extends Model
 
     public const WORK_ARRANGEMENTS = ['On-site', 'Remote', 'Hybrid', 'Flexible'];
 
+    /**
+     * The one arrangement that makes a physical base unnecessary, so a reader
+     * that needs a location can treat it as an answer instead of a gap.
+     */
+    public const REMOTE_ARRANGEMENT = 'Remote';
+
     public const EMPLOYMENT_TYPES = [
         'Full-time', 'Part-time', 'Internship', 'Apprenticeship', 'Contract',
         'Temporary', 'Freelance', 'Permanent', 'Graduate trainee',
