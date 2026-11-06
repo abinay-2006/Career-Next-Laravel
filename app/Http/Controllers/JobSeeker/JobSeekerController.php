@@ -190,11 +190,6 @@ class JobSeekerController extends Controller
         return view('jobseeker.jobs.index');
     }
 
-    public function walkins()
-    {
-        return view('jobseeker.walkins.index');
-    }
-
     /**
      * Check if education records exist, handling missing tables gracefully.
      */

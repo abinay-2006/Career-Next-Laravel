@@ -12,8 +12,8 @@
         'employer' => [
             ['Dashboard', 'employer.dashboard', 'fas fa-house'],
             ['Manage Jobs', 'employer.jobs.index', 'fas fa-briefcase'],
-            ['Walk-in Interviews', 'employer.walkins.index', 'fas fa-calendar'],
             ['Applications', 'employer.applications.index', 'fas fa-user-check'],
+            ['Interviews', 'employer.interviews.index', 'fas fa-calendar-check'],
             ['Follow-up Messages', 'employer.followupmessages.index', 'fas fa-envelope-open-text'],
             ['Messages', 'employer.messages.index', 'fas fa-comments'],
             ['Company Profile', 'employer.profile.index', 'fas fa-building'],
@@ -24,13 +24,13 @@
             ['Dashboard', 'jobseeker.index', 'fas fa-house'],
             ['Browse Jobs', 'jobseeker.jobs', 'fas fa-briefcase'],
             ['Compare Jobs', 'jobseeker.compare.index', 'fas fa-scale-balanced'],
-            ['Walk-in Interviews', 'jobseeker.walkins', 'fas fa-calendar'],
             ['Profile', 'jobseeker.profile.index', 'fas fa-user'],
             ['Career Preferences', 'jobseeker.preferences.edit', 'fas fa-sliders'],
             ['Education & Documents', 'jobseeker.education', 'fas fa-graduation-cap'],
             ['Resume Builder', 'jobseeker.resumes.index', 'fas fa-file-lines'],
             ['My Resumes', 'jobseeker.my-resumes.index', 'fas fa-folder-open'],
             ['My Applications', 'jobseeker.applications.index', 'fas fa-clock-rotate-left'],
+            ['Interviews', 'jobseeker.interviews.index', 'fas fa-calendar-check'],
             ['Follow-up Coach', 'jobseeker.followup.index', 'fas fa-envelope-circle-check'],
             ['Messages', 'jobseeker.messages.index', 'fas fa-comments'],
             ['Feedback', 'jobseeker.feedback.create', 'fas fa-comment'],
@@ -45,10 +45,10 @@
                     'admin.dashboard' => ['admin.dashboard', 'admin.index'],
                     'employer.jobs.index' => 'employer.jobs.*',
                     'employer.applications.index' => 'employer.applications.*',
+                    'employer.interviews.index' => 'employer.interviews.*',
                     'employer.followupmessages.index' => 'employer.followupmessages.*',
                     'employer.messages.index' => 'employer.messages.*',
                     'employer.profile.index' => 'employer.profile.*',
-                    'employer.walkins.index' => 'employer.walkins.*',
                     'employer.feedback.create' => 'employer.feedback.*',
                     'jobseeker.jobs' => 'jobseeker.jobs*',
                     'jobseeker.compare.index' => 'jobseeker.compare.*',
@@ -58,6 +58,7 @@
                     'jobseeker.resumes.index' => 'jobseeker.resumes.*',
                     'jobseeker.my-resumes.index' => 'jobseeker.my-resumes.*',
                     'jobseeker.applications.index' => 'jobseeker.applications.*',
+                    'jobseeker.interviews.index' => 'jobseeker.interviews.*',
                     'jobseeker.messages.index' => 'jobseeker.messages.*',
                     'jobseeker.feedback.create' => 'jobseeker.feedback.*',
                     'news.index' => 'news.*',
@@ -80,6 +81,14 @@
                 @endif
                 @if ($role === 'jobseeker' && $routeName === 'jobseeker.messages.index' && ($chatUnread = \App\Models\ApplicationConversation::unreadTotalForRole('jobseeker', \App\Models\ApplicationConversation::currentJobSeekerId())) > 0)
                     <span class="cn-cmp-nav-count">{{ $chatUnread }}</span>
+                @endif
+                {{-- Interview attention counts only rounds that need an answer from this
+                     account, and answers zero before the table exists. --}}
+                @if ($role === 'employer' && $routeName === 'employer.interviews.index' && ($intAwaiting = \App\Models\ApplicationInterview::awaitingEmployerCount(\App\Models\ApplicationInterview::currentEmployerId())) > 0)
+                    <span class="cn-cmp-nav-count">{{ $intAwaiting }}</span>
+                @endif
+                @if ($role === 'jobseeker' && $routeName === 'jobseeker.interviews.index' && ($intAwaiting = \App\Models\ApplicationInterview::awaitingSeekerCount(\App\Models\ApplicationInterview::currentJobSeekerId())) > 0)
+                    <span class="cn-cmp-nav-count">{{ $intAwaiting }}</span>
                 @endif
             </a>
         @endforeach

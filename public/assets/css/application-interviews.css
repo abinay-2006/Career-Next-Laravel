@@ -1,0 +1,1272 @@
+/*
+ * Career Next interview scheduling: the round cards, the schedule and reschedule
+ * forms, the two list pages and the panels bolted onto the application detail pages.
+ *
+ * Every colour is a --theme-* token so all six palettes and dark mode keep working,
+ * and no blue is hardcoded. Text that sits on a filled chip or a tinted wash uses
+ * the project's AA recipe (a plain tint cannot hold 4.5:1 at these sizes), rules
+ * that have to out-specify theme-dark-mode.css are prefixed with html[data-color],
+ * and every anchor-styled control carries "btn-" in its class name so the dark
+ * sheet's generic link recolour cannot reach it.
+ */
+
+/* ── Page shell ────────────────────────────────────────────────────────────── */
+
+.cn-int-page {
+    display: grid;
+    gap: 1.1rem;
+}
+
+/* ── Filter bar ────────────────────────────────────────────────────────────── */
+
+.cn-int-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: .75rem;
+    padding: .9rem 1rem;
+    border: 1px solid var(--theme-border, #e3e0ef);
+    border-radius: 14px;
+    background: var(--theme-card-background, #fff);
+}
+
+html[data-color] .cn-int-filters {
+    background: var(--theme-card-background);
+    border-color: var(--theme-border);
+}
+
+.cn-int-filter {
+    display: grid;
+    gap: .3rem;
+    min-width: 11rem;
+}
+
+.cn-int-filter-grow {
+    flex: 1 1 14rem;
+    min-width: 0;
+}
+
+.cn-int-filter label {
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--theme-text-secondary, #67657a) 55%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-filter label {
+    color: color-mix(in srgb, var(--theme-text-secondary) 55%, var(--theme-text-primary));
+}
+
+/* ── Card list ─────────────────────────────────────────────────────────────── */
+
+.cn-int-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.cn-int-pagination {
+    display: flex;
+    justify-content: center;
+}
+
+/* ── The round card ────────────────────────────────────────────────────────── */
+
+.cn-int-card {
+    display: grid;
+    gap: .8rem;
+    min-width: 0;
+    padding: 1.05rem 1.15rem;
+    border: 1px solid var(--theme-border, #e3e0ef);
+    border-left: 4px solid color-mix(in srgb, var(--theme-primary, #667eea) 62%, var(--theme-text-primary, #29283b));
+    border-radius: 16px;
+    background: var(--theme-card-background, #fff);
+    box-shadow: var(--theme-shadow, 0 8px 24px rgba(24, 25, 45, .12));
+}
+
+html[data-color] .cn-int-card {
+    background: var(--theme-card-background);
+    border-color: var(--theme-border);
+    border-left-color: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+}
+
+/* A concluded round is a record, not a task: dim the accent so the open ones lead. */
+.cn-int-card.is-closed {
+    border-left-color: var(--theme-border, #e3e0ef);
+}
+
+html[data-color] .cn-int-card.is-closed {
+    border-left-color: var(--theme-border);
+}
+
+.cn-int-card.is-cancelled,
+.cn-int-card.is-declined {
+    border-left-color: color-mix(in srgb, var(--theme-error, #c53030) 55%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-card.is-cancelled,
+html[data-color] .cn-int-card.is-declined {
+    border-left-color: color-mix(in srgb, var(--theme-error) 55%, var(--theme-text-primary));
+}
+
+.cn-int-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem .7rem;
+}
+
+.cn-int-round {
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--theme-heading, #29283b);
+}
+
+html[data-color] .cn-int-round {
+    color: var(--theme-heading);
+}
+
+.cn-int-round i {
+    margin-right: .3rem;
+    font-size: .72rem;
+    color: var(--theme-text-muted, #777489);
+}
+
+.cn-int-type {
+    margin-left: auto;
+    font-size: .78rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--theme-text-secondary, #67657a) 45%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-type {
+    color: color-mix(in srgb, var(--theme-text-secondary) 45%, var(--theme-text-primary));
+}
+
+.cn-int-type i {
+    margin-right: .3rem;
+    color: color-mix(in srgb, var(--theme-primary, #667eea) 72%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-type i {
+    color: color-mix(in srgb, var(--theme-primary) 72%, var(--theme-text-primary));
+}
+
+/* ── Status badge ──────────────────────────────────────────────────────────── */
+
+.cn-int-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .2rem .6rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: capitalize;
+    white-space: nowrap;
+    /* A tinted chip cannot hold AA text, so the fill is pulled to the ink and the
+       palette's own contrast token carries the label. */
+    background: color-mix(in srgb, var(--theme-primary, #667eea) 62%, var(--theme-text-primary, #29283b));
+    color: var(--theme-primary-contrast, #fff);
+}
+
+html[data-color] .cn-int-badge {
+    background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+    color: var(--theme-primary-contrast);
+}
+
+.cn-int-dot {
+    width: .4rem;
+    height: .4rem;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: .85;
+}
+
+/* Concluded and pending states read as quieter chips: tinted wash, ink-pulled text. */
+.cn-int-badge.is-confirmed,
+.cn-int-badge.is-completed {
+    background: color-mix(in srgb, var(--theme-success, #16834a) 14%, var(--theme-card-background, #fff));
+    border-color: color-mix(in srgb, var(--theme-success, #16834a) 34%, var(--theme-border, #e3e0ef));
+    color: color-mix(in srgb, var(--theme-success, #16834a) 45%, var(--theme-text-primary, #29283b));
+}
+
+.cn-int-badge.is-reschedule-requested {
+    background: color-mix(in srgb, var(--theme-warning, #926300) 14%, var(--theme-card-background, #fff));
+    border-color: color-mix(in srgb, var(--theme-warning, #926300) 34%, var(--theme-border, #e3e0ef));
+    color: color-mix(in srgb, var(--theme-warning, #926300) 48%, var(--theme-text-primary, #29283b));
+}
+
+.cn-int-badge.is-declined,
+.cn-int-badge.is-cancelled {
+    background: color-mix(in srgb, var(--theme-error, #c53030) 12%, var(--theme-card-background, #fff));
+    border-color: color-mix(in srgb, var(--theme-error, #c53030) 32%, var(--theme-border, #e3e0ef));
+    color: color-mix(in srgb, var(--theme-error, #c53030) 45%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-badge.is-confirmed,
+html[data-color] .cn-int-badge.is-completed {
+    background: color-mix(in srgb, var(--theme-success) 14%, var(--theme-card-background));
+    border-color: color-mix(in srgb, var(--theme-success) 34%, var(--theme-border));
+    color: color-mix(in srgb, var(--theme-success) 45%, var(--theme-text-primary));
+}
+
+html[data-color] .cn-int-badge.is-reschedule-requested {
+    background: color-mix(in srgb, var(--theme-warning) 14%, var(--theme-card-background));
+    border-color: color-mix(in srgb, var(--theme-warning) 34%, var(--theme-border));
+    color: color-mix(in srgb, var(--theme-warning) 48%, var(--theme-text-primary));
+}
+
+html[data-color] .cn-int-badge.is-declined,
+html[data-color] .cn-int-badge.is-cancelled {
+    background: color-mix(in srgb, var(--theme-error) 12%, var(--theme-card-background));
+    border-color: color-mix(in srgb, var(--theme-error) 32%, var(--theme-border));
+    color: color-mix(in srgb, var(--theme-error) 45%, var(--theme-text-primary));
+}
+
+/* ── Job line (list pages only) ────────────────────────────────────────────── */
+
+.cn-int-job {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .45rem;
+    margin: 0;
+    font-size: .85rem;
+    color: var(--theme-text-secondary, #67657a);
+}
+
+html[data-color] .cn-int-job {
+    color: var(--theme-text-secondary);
+}
+
+.cn-int-job > i {
+    color: color-mix(in srgb, var(--theme-primary, #667eea) 72%, var(--theme-text-primary, #29283b));
+}
+
+.cn-int-job strong {
+    font-size: .93rem;
+    color: var(--theme-heading, #29283b);
+}
+
+html[data-color] .cn-int-job strong {
+    color: var(--theme-heading);
+}
+
+.cn-int-company::before {
+    content: "\00b7";
+    margin-right: .4rem;
+    color: var(--theme-text-muted, #777489);
+}
+
+.cn-int-partner {
+    padding: .12rem .5rem;
+    border-radius: 999px;
+    background: var(--theme-surface-secondary, #f0eef8);
+    font-size: .74rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--theme-text-secondary, #67657a) 40%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-partner {
+    background: var(--theme-surface-secondary);
+    color: color-mix(in srgb, var(--theme-text-secondary) 40%, var(--theme-text-primary));
+}
+
+.cn-int-partner i {
+    margin-right: .3rem;
+}
+
+/* ── When ──────────────────────────────────────────────────────────────────── */
+
+.cn-int-when {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+}
+
+.cn-int-when > i {
+    font-size: 1.15rem;
+    color: color-mix(in srgb, var(--theme-primary, #667eea) 72%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-when > i {
+    color: color-mix(in srgb, var(--theme-primary) 72%, var(--theme-text-primary));
+}
+
+.cn-int-when div {
+    display: grid;
+    gap: .1rem;
+    min-width: 0;
+}
+
+.cn-int-when strong {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--theme-heading, #29283b);
+    overflow-wrap: anywhere;
+}
+
+html[data-color] .cn-int-when strong {
+    color: var(--theme-heading);
+}
+
+.cn-int-when span {
+    font-size: .76rem;
+    /* --theme-text-muted is only 3.9-4.4:1 on the light cards, and this line carries
+       the zone the interview is actually in. */
+    color: var(--theme-text-secondary, #67657a);
+}
+
+html[data-color] .cn-int-when span {
+    color: var(--theme-text-secondary);
+}
+
+/* ── Facts ─────────────────────────────────────────────────────────────────── */
+
+.cn-int-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: .6rem 1rem;
+    margin: 0;
+}
+
+.cn-int-facts > div {
+    display: grid;
+    gap: .18rem;
+    min-width: 0;
+}
+
+.cn-int-facts dt {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--theme-text-secondary, #67657a) 55%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-facts dt {
+    color: color-mix(in srgb, var(--theme-text-secondary) 55%, var(--theme-text-primary));
+}
+
+.cn-int-facts dt i {
+    margin-right: .3rem;
+}
+
+.cn-int-facts dd {
+    margin: 0;
+    font-size: .85rem;
+    color: var(--theme-text-primary, #29283b);
+    overflow-wrap: anywhere;
+}
+
+html[data-color] .cn-int-facts dd {
+    color: var(--theme-text-primary);
+}
+
+.cn-int-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    max-width: 100%;
+    font-weight: 600;
+    color: var(--theme-link, #5143a5);
+    overflow-wrap: anywhere;
+}
+
+html[data-color] .cn-int-link {
+    color: var(--theme-link);
+}
+
+.cn-int-link i {
+    font-size: .68rem;
+}
+
+.cn-int-waiting {
+    display: inline-block;
+    margin-left: .35rem;
+    padding: .1rem .45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--theme-warning, #926300) 14%, var(--theme-card-background, #fff));
+    border: 1px solid color-mix(in srgb, var(--theme-warning, #926300) 34%, var(--theme-border, #e3e0ef));
+    font-size: .7rem;
+    font-weight: 700;
+    color: color-mix(in srgb, var(--theme-warning, #926300) 48%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-waiting {
+    background: color-mix(in srgb, var(--theme-warning) 14%, var(--theme-card-background));
+    border-color: color-mix(in srgb, var(--theme-warning) 34%, var(--theme-border));
+    color: color-mix(in srgb, var(--theme-warning) 48%, var(--theme-text-primary));
+}
+
+/* ── Instructions ──────────────────────────────────────────────────────────── */
+
+.cn-int-instructions {
+    display: grid;
+    gap: .3rem;
+    padding: .7rem .85rem;
+    border: 1px solid var(--theme-border, #e3e0ef);
+    border-radius: 12px;
+    background: var(--theme-surface-secondary, #f0eef8);
+}
+
+html[data-color] .cn-int-instructions {
+    background: var(--theme-surface-secondary);
+    border-color: var(--theme-border);
+}
+
+.cn-int-instructions-label {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--theme-text-secondary, #67657a) 55%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-instructions-label {
+    color: color-mix(in srgb, var(--theme-text-secondary) 55%, var(--theme-text-primary));
+}
+
+.cn-int-instructions-label i {
+    margin-right: .3rem;
+}
+
+.cn-int-instructions-body {
+    font-size: .85rem;
+    line-height: 1.55;
+    color: var(--theme-text-primary, #29283b);
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+html[data-color] .cn-int-instructions-body {
+    color: var(--theme-text-primary);
+}
+
+/* ── One-line status sentence ──────────────────────────────────────────────── */
+
+.cn-int-update {
+    margin: 0;
+    font-size: .84rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--theme-text-secondary, #67657a) 40%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-update {
+    color: color-mix(in srgb, var(--theme-text-secondary) 40%, var(--theme-text-primary));
+}
+
+/* ── Reschedule request block ──────────────────────────────────────────────── */
+
+.cn-int-request {
+    display: grid;
+    gap: .3rem;
+    padding: .7rem .85rem;
+    border: 1px solid color-mix(in srgb, var(--theme-warning, #926300) 34%, var(--theme-border, #e3e0ef));
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--theme-warning, #926300) 10%, var(--theme-card-background, #fff));
+}
+
+html[data-color] .cn-int-request {
+    border-color: color-mix(in srgb, var(--theme-warning) 34%, var(--theme-border));
+    background: color-mix(in srgb, var(--theme-warning) 10%, var(--theme-card-background));
+}
+
+.cn-int-request-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .35rem;
+    font-size: .78rem;
+    font-weight: 700;
+    color: color-mix(in srgb, var(--theme-warning, #926300) 48%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-request-head {
+    color: color-mix(in srgb, var(--theme-warning) 48%, var(--theme-text-primary));
+}
+
+.cn-int-request-head time {
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--theme-text-secondary, #67657a);
+}
+
+html[data-color] .cn-int-request-head time {
+    color: var(--theme-text-secondary);
+}
+
+.cn-int-request-reason {
+    margin: 0;
+    font-size: .85rem;
+    line-height: 1.5;
+    color: var(--theme-text-primary, #29283b);
+    overflow-wrap: anywhere;
+}
+
+html[data-color] .cn-int-request-reason {
+    color: var(--theme-text-primary);
+}
+
+.cn-int-request-preferred {
+    margin: 0;
+    font-size: .8rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--theme-warning, #926300) 48%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-request-preferred {
+    color: color-mix(in srgb, var(--theme-warning) 48%, var(--theme-text-primary));
+}
+
+/* ── Card footer ───────────────────────────────────────────────────────────── */
+
+.cn-int-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .35rem .8rem;
+    padding-top: .55rem;
+    border-top: 1px solid var(--theme-border, #e3e0ef);
+    font-size: .74rem;
+    color: var(--theme-text-secondary, #67657a);
+}
+
+html[data-color] .cn-int-foot {
+    border-top-color: var(--theme-border);
+    color: var(--theme-text-secondary);
+}
+
+.cn-int-revised i,
+.cn-int-updated i {
+    margin-right: .28rem;
+}
+
+/* ── Actions ───────────────────────────────────────────────────────────────── */
+
+.cn-int-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .6rem;
+}
+
+.cn-int-actions > form {
+    margin: 0;
+}
+
+.cn-int-hint {
+    margin: 0;
+    font-size: .8rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--theme-text-secondary, #67657a) 45%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-hint {
+    color: color-mix(in srgb, var(--theme-text-secondary) 45%, var(--theme-text-primary));
+}
+
+.cn-int-btn-primary,
+.cn-int-btn-danger,
+.cn-int-btn-quiet {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .55rem .9rem;
+    border-radius: 12px;
+    font: inherit;
+    font-size: .83rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: filter .18s ease, transform .18s ease;
+}
+
+html[data-color] .cn-int-btn-primary,
+html[data-color] .cn-int-btn-danger,
+html[data-color] .cn-int-btn-quiet {
+    font-size: .83rem;
+}
+
+.cn-int-btn-primary {
+    border: 0;
+    /* 62% of the primary pulled toward the page ink, labelled by the palette's own
+       contrast token: a plain tint here measures under 4.5:1 on every palette. */
+    background: color-mix(in srgb, var(--theme-primary, #667eea) 62%, var(--theme-text-primary, #29283b));
+    color: var(--theme-primary-contrast, #fff);
+}
+
+html[data-color] .cn-int-btn-primary {
+    background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+    color: var(--theme-primary-contrast);
+}
+
+.cn-int-btn-danger,
+.cn-int-btn-quiet {
+    border: 1px solid var(--theme-border, #e3e0ef);
+    background: var(--theme-surface-secondary, #f0eef8);
+    color: color-mix(in srgb, var(--theme-text-secondary, #67657a) 40%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-btn-danger,
+html[data-color] .cn-int-btn-quiet {
+    border-color: var(--theme-border);
+    background: var(--theme-surface-secondary);
+    color: color-mix(in srgb, var(--theme-text-secondary) 40%, var(--theme-text-primary));
+}
+
+.cn-int-btn-danger {
+    border-color: color-mix(in srgb, var(--theme-error, #c53030) 32%, var(--theme-border, #e3e0ef));
+    background: color-mix(in srgb, var(--theme-error, #c53030) 12%, var(--theme-card-background, #fff));
+    color: color-mix(in srgb, var(--theme-error, #c53030) 45%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-btn-danger {
+    border-color: color-mix(in srgb, var(--theme-error) 32%, var(--theme-border));
+    background: color-mix(in srgb, var(--theme-error) 12%, var(--theme-card-background));
+    color: color-mix(in srgb, var(--theme-error) 45%, var(--theme-text-primary));
+}
+
+.cn-int-btn-primary:hover:not(:disabled),
+.cn-int-btn-danger:hover:not(:disabled),
+.cn-int-btn-quiet:hover:not(:disabled) {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+}
+
+a.cn-int-btn-primary:hover,
+a.cn-int-btn-danger:hover,
+a.cn-int-btn-quiet:hover {
+    text-decoration: none;
+}
+
+html[data-color] a.cn-int-btn-primary:hover {
+    color: var(--theme-primary-contrast);
+}
+
+html[data-color] a.cn-int-btn-danger:hover {
+    color: color-mix(in srgb, var(--theme-error) 45%, var(--theme-text-primary));
+}
+
+html[data-color] a.cn-int-btn-quiet:hover {
+    color: color-mix(in srgb, var(--theme-text-secondary) 40%, var(--theme-text-primary));
+}
+
+.cn-int-btn-primary:focus-visible,
+.cn-int-btn-danger:focus-visible,
+.cn-int-btn-quiet:focus-visible,
+.cn-int-form summary:focus-visible,
+.cn-int-type-chip:has(input:focus-visible) {
+    outline: 2px solid var(--theme-focus-outline, var(--theme-accent, #818cf8));
+    outline-offset: 2px;
+}
+
+.cn-int-btn-primary:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Collapsible schedule / reschedule forms ───────────────────────────────── */
+
+.cn-int-form {
+    width: 100%;
+    border: 1px solid var(--theme-border, #e3e0ef);
+    border-radius: 14px;
+    background: var(--theme-surface-secondary, #f0eef8);
+}
+
+html[data-color] .cn-int-form {
+    border-color: var(--theme-border);
+    background: var(--theme-surface-secondary);
+}
+
+.cn-int-form > summary {
+    padding: .65rem .85rem;
+    border-radius: inherit;
+    font-size: .84rem;
+    font-weight: 700;
+    /* Text, not a fill: at 62% the yellow palette measures 2.73:1 on the pale surface this
+       form sits on, so the primary is pulled much closer to the page ink for the label. */
+    color: color-mix(in srgb, var(--theme-primary, #667eea) 35%, var(--theme-text-primary, #29283b));
+    cursor: pointer;
+    list-style: none;
+}
+
+html[data-color] .cn-int-form > summary {
+    color: color-mix(in srgb, var(--theme-primary) 35%, var(--theme-text-primary));
+}
+
+.cn-int-form > summary::-webkit-details-marker {
+    display: none;
+}
+
+.cn-int-form > summary i {
+    margin-right: .35rem;
+}
+
+.cn-int-form > summary::after {
+    content: "\025be";
+    float: right;
+    font-size: .75rem;
+}
+
+.cn-int-form[open] > summary::after {
+    content: "\025b4";
+}
+
+.cn-int-form > form {
+    display: grid;
+    gap: .8rem;
+    padding: .85rem;
+    border-top: 1px solid var(--theme-border, #e3e0ef);
+    margin: 0;
+}
+
+html[data-color] .cn-int-form > form {
+    border-top-color: var(--theme-border);
+}
+
+.cn-int-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+}
+
+/* ── Fields ────────────────────────────────────────────────────────────────── */
+
+.cn-int-field {
+    display: grid;
+    gap: .3rem;
+    min-width: 0;
+}
+
+.cn-int-field-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: .75rem;
+}
+
+.cn-int-field label,
+.cn-int-field-label {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--theme-form-label, #3d3a50);
+}
+
+html[data-color] .cn-int-field label,
+html[data-color] .cn-int-field-label {
+    color: var(--theme-form-label);
+}
+
+.cn-int-optional {
+    font-size: .7rem;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--theme-text-secondary, #67657a);
+}
+
+html[data-color] .cn-int-optional {
+    color: var(--theme-text-secondary);
+}
+
+.cn-int-field input,
+.cn-int-field select,
+.cn-int-field textarea,
+.cn-int-filter input,
+.cn-int-filter select {
+    width: 100%;
+    padding: .5rem .65rem;
+    border: 1px solid var(--theme-border, #e3e0ef);
+    border-radius: 10px;
+    background: var(--theme-input-background, #fff);
+    color: var(--theme-input-text, #29283b);
+    font: inherit;
+    font-size: .85rem;
+}
+
+html[data-color] .cn-int-field input,
+html[data-color] .cn-int-field select,
+html[data-color] .cn-int-field textarea,
+html[data-color] .cn-int-filter input,
+html[data-color] .cn-int-filter select {
+    border-color: var(--theme-border);
+    background: var(--theme-input-background);
+    color: var(--theme-input-text);
+}
+
+.cn-int-field textarea {
+    resize: vertical;
+    min-height: 4.5rem;
+}
+
+.cn-int-field input:focus-visible,
+.cn-int-field select:focus-visible,
+.cn-int-field textarea:focus-visible,
+.cn-int-filter input:focus-visible,
+.cn-int-filter select:focus-visible {
+    outline: 2px solid var(--theme-focus-outline, var(--theme-accent, #818cf8));
+    outline-offset: 1px;
+    border-color: color-mix(in srgb, var(--theme-primary, #667eea) 62%, var(--theme-text-primary, #29283b));
+}
+
+.cn-int-field input::placeholder,
+.cn-int-field textarea::placeholder,
+.cn-int-filter input::placeholder {
+    color: var(--theme-placeholder, #777489);
+    opacity: 1;
+}
+
+.cn-int-help {
+    font-size: .72rem;
+    line-height: 1.45;
+    color: var(--theme-text-secondary, #67657a);
+}
+
+html[data-color] .cn-int-help {
+    color: var(--theme-text-secondary);
+}
+
+/* The date control and its calendar button are one field: the button opens the same
+   calendar the browser's own glyph opens, and it stays hidden until
+   application-interviews.js proves the browser has showPicker(). */
+.cn-int-date {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .4rem;
+    min-width: 0;
+}
+
+.cn-int-date > input {
+    /* Not width:100% like the other fields: the basis is the width a date needs, so the
+       calendar sits beside it on one line and only drops below when the row is genuinely
+       too narrow for both. */
+    flex: 1 1 12rem;
+    width: auto;
+    min-width: 10.5rem;
+}
+
+.cn-int-cal {
+    flex: 0 0 auto;
+    padding: .42rem .62rem;
+    border-radius: 9px;
+    font-size: .76rem;
+}
+
+/* Two classes deep on purpose: the mobile block at the end of this sheet gives every
+   quiet button width:100% for stacked actions, and a full-width calendar would push the
+   date field down to its minimum instead of sitting beside it. */
+.cn-int-date > .cn-int-cal {
+    width: auto;
+}
+
+/* A native date control paints its glyph and its calendar popover from the colour
+   scheme it is told to use, not from these tokens. Naming the scheme matters here:
+   the bare employer.css rule that inverts the glyph for its dark theme otherwise
+   leaves an invisible icon on a light input. */
+.cn-int-date > :is(input[type="datetime-local"], input[type="date"]) {
+    color-scheme: light dark;
+}
+
+html[data-appearance="dark"] .cn-int-date > :is(input[type="datetime-local"], input[type="date"]) {
+    color-scheme: dark;
+}
+
+html[data-appearance="light"] .cn-int-date > :is(input[type="datetime-local"], input[type="date"]) {
+    color-scheme: light;
+}
+
+.cn-int-date > :is(input[type="datetime-local"], input[type="date"])::-webkit-calendar-picker-indicator {
+    filter: none;
+    opacity: .72;
+    cursor: pointer;
+}
+
+.cn-int-date > :is(input[type="datetime-local"], input[type="date"]):hover::-webkit-calendar-picker-indicator {
+    opacity: 1;
+}
+
+/* A field the last submission got wrong: the control is marked and the reason is read
+   out under it, because the flash message says "highlighted fields" and means it. */
+.cn-int-field-error {
+    font-size: .74rem;
+    font-weight: 600;
+    line-height: 1.45;
+    color: color-mix(in srgb, var(--theme-error, #c53030) 45%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-field-error {
+    color: color-mix(in srgb, var(--theme-error) 45%, var(--theme-text-primary));
+}
+
+.cn-int-field.is-invalid :is(input, select, textarea) {
+    border-color: color-mix(in srgb, var(--theme-error, #c53030) 45%, var(--theme-border, #e3e0ef));
+    background: color-mix(in srgb, var(--theme-error, #c53030) 6%, var(--theme-input-background, #fff));
+}
+
+html[data-color] .cn-int-field.is-invalid :is(input, select, textarea) {
+    border-color: color-mix(in srgb, var(--theme-error) 45%, var(--theme-border));
+    background: color-mix(in srgb, var(--theme-error) 6%, var(--theme-input-background));
+}
+
+.cn-int-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .4rem;
+    margin: 0;
+    padding: .55rem .7rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--theme-info, #2563eb) 10%, var(--theme-card-background, #fff));
+    border: 1px solid color-mix(in srgb, var(--theme-info, #2563eb) 28%, var(--theme-border, #e3e0ef));
+    font-size: .78rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--theme-info, #2563eb) 42%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-note {
+    background: color-mix(in srgb, var(--theme-info) 10%, var(--theme-card-background));
+    border-color: color-mix(in srgb, var(--theme-info) 28%, var(--theme-border));
+}
+
+/* The dark sheet paints every <p> inside a card with !important, so the coloured
+   sentence lives on a span instead - the project's own convention for tinted copy. */
+.cn-int-note > span {
+    color: color-mix(in srgb, var(--theme-info, #2563eb) 42%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-note > span {
+    color: color-mix(in srgb, var(--theme-info) 42%, var(--theme-text-primary));
+}
+
+/* ── Interview type chips ──────────────────────────────────────────────────── */
+
+.cn-int-types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.cn-int-type-chip {
+    position: relative;
+    cursor: pointer;
+}
+
+/* The real radio stays in the a11y tree but is hidden behind the chip. */
+.cn-int-type-chip input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.cn-int-type-chip > span {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .45rem .75rem;
+    border: 1px solid var(--theme-border, #e3e0ef);
+    border-radius: 999px;
+    background: var(--theme-input-background, #fff);
+    font-size: .8rem;
+    font-weight: 600;
+    color: color-mix(in srgb, var(--theme-text-secondary, #67657a) 45%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-type-chip > span {
+    border-color: var(--theme-border);
+    background: var(--theme-input-background);
+    color: color-mix(in srgb, var(--theme-text-secondary) 45%, var(--theme-text-primary));
+}
+
+.cn-int-type-chip.is-checked > span {
+    border-color: color-mix(in srgb, var(--theme-primary, #667eea) 62%, var(--theme-text-primary, #29283b));
+    background: color-mix(in srgb, var(--theme-primary, #667eea) 62%, var(--theme-text-primary, #29283b));
+    color: var(--theme-primary-contrast, #fff);
+}
+
+html[data-color] .cn-int-type-chip.is-checked > span {
+    border-color: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+    background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+    color: var(--theme-primary-contrast);
+}
+
+/* ── Hide rules the JS toggles ─────────────────────────────────────────────── */
+
+[data-cn-int-field].is-hidden,
+.cn-int-form.is-hidden,
+.cn-int-panel .cn-int-empty.is-hidden {
+    display: none;
+}
+
+/* ── Panels on the application detail pages ────────────────────────────────── */
+
+.cn-int-panel {
+    display: grid;
+    gap: .85rem;
+}
+
+.cn-int-panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .6rem;
+}
+
+.cn-int-panel-title {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--theme-heading, #29283b);
+}
+
+html[data-color] .cn-int-panel-title {
+    color: var(--theme-heading);
+}
+
+.cn-int-panel-title > i {
+    color: color-mix(in srgb, var(--theme-primary, #667eea) 62%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-panel-title > i {
+    color: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+}
+
+.cn-int-panel-count {
+    padding: .12rem .5rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    background: color-mix(in srgb, var(--theme-primary, #667eea) 62%, var(--theme-text-primary, #29283b));
+    color: var(--theme-primary-contrast, #fff);
+}
+
+html[data-color] .cn-int-panel-count {
+    background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+    color: var(--theme-primary-contrast);
+}
+
+.cn-int-panel-note {
+    margin: 0;
+    font-size: .8rem;
+    line-height: 1.55;
+    color: var(--theme-text-secondary, #67657a);
+}
+
+html[data-color] .cn-int-panel-note {
+    color: var(--theme-text-secondary);
+}
+
+.cn-int-blocked {
+    display: flex;
+    align-items: flex-start;
+    gap: .45rem;
+    margin: 0;
+    padding: .6rem .8rem;
+    border: 1px solid var(--theme-border, #e3e0ef);
+    border-radius: 12px;
+    background: var(--theme-surface-secondary, #f0eef8);
+    font-size: .8rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--theme-text-secondary, #67657a) 45%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-blocked {
+    border-color: var(--theme-border);
+    background: var(--theme-surface-secondary);
+    color: color-mix(in srgb, var(--theme-text-secondary) 45%, var(--theme-text-primary));
+}
+
+.cn-int-blocked > i {
+    margin-top: .15rem;
+    color: color-mix(in srgb, var(--theme-warning, #926300) 48%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-blocked > i {
+    color: color-mix(in srgb, var(--theme-warning) 48%, var(--theme-text-primary));
+}
+
+.cn-int-rounds {
+    display: grid;
+    gap: .85rem;
+}
+
+/* A round inside the application panel is already on a card, so it borrows depth
+     from its own border instead of stacking a second shadow on the panel. */
+.cn-int-panel .cn-int-card {
+    box-shadow: none;
+}
+
+/* ── Empty and unmigrated states ───────────────────────────────────────────── */
+
+.cn-int-empty {
+    display: grid;
+    justify-items: center;
+    gap: .5rem;
+    padding: 1.6rem 1.2rem;
+    text-align: center;
+}
+
+.cn-int-empty > i {
+    font-size: 1.7rem;
+    color: color-mix(in srgb, var(--theme-primary, #667eea) 62%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-empty > i {
+    color: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+}
+
+.cn-int-empty h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--theme-heading, #29283b);
+}
+
+html[data-color] .cn-int-empty h2 {
+    color: var(--theme-heading);
+}
+
+.cn-int-empty p {
+    margin: 0;
+    max-width: 42rem;
+    font-size: .85rem;
+    line-height: 1.6;
+    color: var(--theme-text-secondary, #67657a);
+}
+
+html[data-color] .cn-int-empty p {
+    color: var(--theme-text-secondary);
+}
+
+.cn-int-empty code {
+    padding: .12rem .4rem;
+    border-radius: 6px;
+    background: var(--theme-surface-secondary, #f0eef8);
+    font-size: .82rem;
+    color: var(--theme-text-primary, #29283b);
+}
+
+html[data-color] .cn-int-empty code {
+    background: var(--theme-surface-secondary);
+    color: var(--theme-text-primary);
+}
+
+.cn-int-empty.is-warn > i {
+    color: color-mix(in srgb, var(--theme-warning, #926300) 48%, var(--theme-text-primary, #29283b));
+}
+
+html[data-color] .cn-int-empty.is-warn > i {
+    color: color-mix(in srgb, var(--theme-warning) 48%, var(--theme-text-primary));
+}
+
+.cn-int-empty .cn-int-btn-primary,
+.cn-int-empty .cn-int-btn-quiet {
+    margin-top: .35rem;
+}
+
+/* ── Confirmation dialog ───────────────────────────────────────────────────── */
+
+.cn-int-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 1700;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(17, 15, 32, .62);
+}
+
+.cn-int-dialog[hidden] {
+    display: none;
+}
+
+html[data-color] .cn-int-dialog-box {
+    width: min(28rem, 100%);
+    max-height: min(80vh, 30rem);
+    overflow-y: auto;
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--theme-border);
+    border-radius: 16px;
+    background: var(--theme-card-background);
+    box-shadow: 0 22px 48px rgba(15, 12, 34, .34);
+}
+
+.cn-int-dialog-box h3 {
+    margin: 0 0 .45rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--theme-heading);
+}
+
+.cn-int-dialog-text {
+    margin: 0 0 1rem;
+    font-size: .85rem;
+    line-height: 1.6;
+    color: var(--theme-text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.cn-int-dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .6rem;
+}
+
+/* ── Mobile ────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 767.98px) {
+    .cn-int-card {
+        padding: .95rem .9rem;
+    }
+
+    .cn-int-type {
+        /* The type has nowhere to be pushed to, so it wraps under the round. */
+        margin-left: 0;
+    }
+
+    .cn-int-facts,
+    .cn-int-field-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* One action per row so nothing is a 44px-tall sliver on a phone. */
+    .cn-int-actions,
+    .cn-int-actions > form,
+    .cn-int-btn-primary,
+    .cn-int-btn-danger,
+    .cn-int-btn-quiet {
+        width: 100%;
+    }
+
+    .cn-int-actions {
+        gap: .5rem;
+    }
+
+    .cn-int-btn-primary,
+    .cn-int-btn-danger,
+    .cn-int-btn-quiet {
+        justify-content: center;
+    }
+
+    .cn-int-filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .cn-int-filter,
+    .cn-int-filter-grow {
+        min-width: 0;
+    }
+}

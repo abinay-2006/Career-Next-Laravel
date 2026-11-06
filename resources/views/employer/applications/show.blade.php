@@ -5,6 +5,7 @@
 @pushOnce('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/follow-up-messages.css') }}?v={{ @filemtime(public_path('assets/css/follow-up-messages.css')) ?: 1 }}">
 <link rel="stylesheet" href="{{ asset('assets/css/application-chat.css') }}?v={{ @filemtime(public_path('assets/css/application-chat.css')) ?: 1 }}">
+<link rel="stylesheet" href="{{ asset('assets/css/application-interviews.css') }}?v={{ @filemtime(public_path('assets/css/application-interviews.css')) ?: 1 }}">
 @endpushOnce
 
 @section('content')
@@ -334,6 +335,74 @@
 
     @endif
 
+    {{-- Interview scheduling. Read-only alongside the decision form below: nothing here
+         touches application_master.Status, and a round that is answered stays on this
+         page as the record it is. --}}
+    <section class="glass-card cn-int-panel" id="cn-interviews">
+
+        <div class="cn-int-panel-head">
+            <h2 class="cn-int-panel-title">
+                <i class="fas fa-calendar-check" aria-hidden="true"></i>Interview schedule
+            </h2>
+            @if($ready && $interviewRounds->isNotEmpty())
+            <span class="cn-int-panel-count">{{ $interviewRounds->count() }} round{{ $interviewRounds->count() === 1 ? '' : 's' }}</span>
+            @endif
+            <a href="{{ route('employer.interviews.index') }}" class="cn-int-btn-quiet">
+                <i class="fas fa-list" aria-hidden="true"></i>All interviews
+            </a>
+        </div>
+
+        @unless($ready)
+        <p class="cn-int-blocked">
+            <i class="fas fa-database" aria-hidden="true"></i>{{ $scheduleBlocked }}
+        </p>
+        @else
+
+            @if($canSchedule)
+            <details class="cn-int-form" data-cn-int-details="schedule" @if(old('cn_form') === 'new') open @endif>
+                <summary>
+                    <i class="fas fa-calendar-plus" aria-hidden="true"></i>Schedule round {{ $nextRound }} interview
+                </summary>
+
+                <form method="POST" action="{{ route('employer.interviews.store', $application->ApplicationId) }}" data-cn-int-form>
+                    @csrf
+                    @include('interview._fields', ['model' => null, 'goto' => 'application'])
+
+                    <div class="cn-int-form-actions">
+                        <button type="submit" class="cn-int-btn-primary">
+                            <i class="fas fa-paper-plane" aria-hidden="true"></i>Send invitation
+                        </button>
+                    </div>
+                </form>
+            </details>
+            @else
+            <p class="cn-int-blocked">
+                <i class="fas fa-circle-info" aria-hidden="true"></i>{{ $scheduleBlocked }}
+            </p>
+            @endif
+
+            @if($interviewRounds->isEmpty())
+            <p class="cn-int-panel-note">
+                No invitation has been sent for this applicant yet. A round can be proposed once
+                the application is accepted, and the applicant confirms, declines or asks for
+                another time.
+            </p>
+            @else
+            <div class="cn-int-rounds">
+                @foreach($interviewRounds as $interview)
+                <x-interview-card
+                    :interview="$interview"
+                    role="employer"
+                    goto="application"
+                    :busy="$interview->awaitsSeeker()" />
+                @endforeach
+            </div>
+            @endif
+
+        @endunless
+
+    </section>
+
     <!-- Status Update Card -->
     <div class="glass-card status-card">
 
@@ -414,4 +483,8 @@
     </div>
 </div>
 
+@endsection
+
+@section('scripts')
+<script src="{{ asset('assets/js/application-interviews.js') }}?v={{ @filemtime(public_path('assets/js/application-interviews.js')) ?: 1 }}"></script>
 @endsection

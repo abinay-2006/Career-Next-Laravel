@@ -13,7 +13,7 @@ return new class extends Migration
             return;
         }
 
-        foreach (['job_master', 'walkin_master'] as $tableName) {
+        foreach (['job_master'] as $tableName) {
             if (!Schema::hasTable($tableName) || !Schema::hasColumn($tableName, 'CompanyName')) {
                 continue;
             }

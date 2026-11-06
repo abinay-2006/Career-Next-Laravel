@@ -15,11 +15,6 @@ return new class extends Migration
                 $table->unsignedInteger('EmployerId')->nullable()->index();
             });
         }
-        if (Schema::hasTable('walkin_master') && !Schema::hasColumn('walkin_master', 'EmployerId')) {
-            Schema::table('walkin_master', function (Blueprint $table): void {
-                $table->unsignedInteger('EmployerId')->nullable()->index();
-            });
-        }
     }
 
     public function down(): void

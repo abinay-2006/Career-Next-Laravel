@@ -4,6 +4,7 @@ namespace App\Http\Controllers\JobSeeker;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
+use App\Models\ApplicationInterview;
 use App\Services\ApplicationChatService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,25 @@ class ApplicationHistoryController extends Controller
         $chatOpen = $chatThread !== null
             && $chat->stateFor($application->Status) === ApplicationChatService::STATE_OPEN;
 
-        return view('jobseeker.applications.show', compact('application', 'chatThread', 'chatOpen'));
+        $interviewReady = ApplicationInterview::tableIsReady();
+
+        // Every interview round raised on this application, newest first. Reading them
+        // and answering them is the seeker's whole power here: the date, link, location
+        // and instructions are written by the employer alone.
+        $interviewRounds = $interviewReady
+            ? ApplicationInterview::query()
+                ->where('ApplicationId', (int) $application->ApplicationId)
+                ->orderByDesc('round')
+                ->get()
+            : collect();
+
+        return view('jobseeker.applications.show', compact(
+            'application',
+            'chatThread',
+            'chatOpen',
+            'interviewRounds',
+            'interviewReady'
+        ));
     }
 
     public function index(Request $request)

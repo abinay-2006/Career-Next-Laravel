@@ -7,10 +7,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Application;
 use App\Models\ApplicationFollowUpMessage;
+use App\Models\ApplicationInterview;
 use App\Models\Job;
 use App\Support\PrivateUpload;
 use App\Services\ActivityLogger;
 use App\Services\ApplicationChatService;
+use App\Services\ApplicationInterviewService;
 
 class EmployerApplicationController extends Controller
 {
@@ -58,7 +60,7 @@ class EmployerApplicationController extends Controller
     /**
      * Display a single application.
      */
-    public function show(Application $application, ApplicationChatService $chat)
+    public function show(Application $application, ApplicationChatService $chat, ApplicationInterviewService $interviews)
     {
         $employer = Auth::guard('employer')->user();
 
@@ -100,13 +102,24 @@ class EmployerApplicationController extends Controller
         $chatOpen = $chatThread !== null
             && $chat->stateFor($application->Status) === ApplicationChatService::STATE_OPEN;
 
+        // Interview rounds already raised here, newest first. Reading them is separate
+        // from writing them: the schedule form only appears while the application is
+        // accepted, and no interview ever edits Status below.
+        $interviewRounds = ApplicationInterview::tableIsReady()
+            ? ApplicationInterview::query()
+                ->where('ApplicationId', (int) $application->ApplicationId)
+                ->orderByDesc('round')
+                ->get()
+            : collect();
+
         return view('employer.applications.show', compact(
             'application',
             'resumeDocument',
             'followUpMessages',
             'chatThread',
-            'chatOpen'
-        ));
+            'chatOpen',
+            'interviewRounds'
+        ) + $interviews->scheduleAccess($application));
     }
 
     public function viewResume(Application $application)

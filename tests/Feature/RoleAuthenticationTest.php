@@ -60,13 +60,6 @@ class RoleAuthenticationTest extends TestCase
             $table->string('MinQualification')->nullable();
             $table->string('Status')->nullable();
         });
-        Schema::create('walkin_master', function (Blueprint $table) {
-            $table->increments('WalkInId');
-            $table->string('CompanyName')->nullable();
-            $table->string('JobTitle')->nullable();
-            $table->integer('Vacancy')->nullable();
-            $table->string('MinQualification')->nullable();
-        });
         Schema::create('application_master', function (Blueprint $table) {
             $table->increments('ApplicationId');
             $table->integer('JobSeekId');

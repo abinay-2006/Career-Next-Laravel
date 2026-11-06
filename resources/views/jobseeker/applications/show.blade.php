@@ -4,6 +4,7 @@
 
 @pushOnce('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/application-chat.css') }}?v={{ @filemtime(public_path('assets/css/application-chat.css')) ?: 1 }}">
+<link rel="stylesheet" href="{{ asset('assets/css/application-interviews.css') }}?v={{ @filemtime(public_path('assets/css/application-interviews.css')) ?: 1 }}">
 @endpushOnce
 
 @section('content')
@@ -16,6 +17,35 @@
         </div>
         <a class="back-btn" href="{{ route('jobseeker.applications.index') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to applications</a>
     </div>
+
+    @if($interviewReady && $interviewRounds->isNotEmpty())
+        {{-- The employer's invitation, answered here and nowhere else. The date, the link
+             and the instructions belong to them; this page reads them and replies. --}}
+        <section class="glass-card cn-int-panel" id="cn-interviews">
+
+            <div class="cn-int-panel-head">
+                <h2 class="cn-int-panel-title">
+                    <i class="fas fa-calendar-check" aria-hidden="true"></i>Interview invitations
+                </h2>
+                <span class="cn-int-panel-count">{{ $interviewRounds->count() }} round{{ $interviewRounds->count() === 1 ? '' : 's' }}</span>
+                <a href="{{ route('jobseeker.interviews.index') }}" class="cn-int-btn-quiet">
+                    <i class="fas fa-list" aria-hidden="true"></i>All interviews
+                </a>
+            </div>
+
+            <div class="cn-int-rounds">
+                @foreach($interviewRounds as $interview)
+                <x-interview-card
+                    :interview="$interview"
+                    role="jobseeker"
+                    goto="application"
+                    :partner="$application->job?->CompanyName"
+                    :busy="$interview->awaitsSeeker()" />
+                @endforeach
+            </div>
+
+        </section>
+    @endif
 
     @if($chatOpen)
         {{-- Only an approved application has a thread; pending, rejected and withdrawn
@@ -137,3 +167,7 @@
     }
 </style>
 @endpush
+
+@section('scripts')
+<script src="{{ asset('assets/js/application-interviews.js') }}?v={{ @filemtime(public_path('assets/js/application-interviews.js')) ?: 1 }}"></script>
+@endsection

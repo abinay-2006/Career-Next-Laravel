@@ -18,7 +18,6 @@ class AdminController extends Controller
         $totalJobSeekers = DB::table('jobseeker_reg')->count();
         $totalEmployers  = DB::table('employer_reg')->count();
         $totalJobs       = DB::table('job_master')->count();
-        $totalWalkins    = DB::table('walkin_master')->count();
         $totalApplications = DB::table('application_master')->count();
 
         $pendingJobSeekers = DB::table('jobseeker_reg')
@@ -85,7 +84,6 @@ class AdminController extends Controller
             'totalJobSeekers',
             'totalEmployers',
             'totalJobs',
-            'totalWalkins',
             'totalApplications',
             'pendingJobSeekers',
             'pendingEmployers',

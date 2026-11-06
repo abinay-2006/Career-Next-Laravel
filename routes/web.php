@@ -13,13 +13,11 @@ use App\Http\Controllers\Admin\ManageUsersController;
 use App\Http\Controllers\Admin\ManageJobsController;
 use App\Http\Controllers\Admin\ManageDocumentsController;
 use App\Http\Controllers\Employer\EmployerJobController;
-use App\Http\Controllers\Employer\WalkinController;
 use App\Http\Controllers\Employer\EmployerApplicationController;
 use App\Http\Controllers\Employer\FollowUpMessageController;
 use App\Http\Controllers\JobSeeker\EducationController;
 use App\Http\Controllers\JobSeeker\JobSearchController;
 use App\Http\Controllers\Employer\JobQualityController;
-use App\Http\Controllers\JobSeeker\JobSeekerWalkinController;
 use App\Http\Controllers\JobSeeker\JobApplicationController;
 use App\Http\Controllers\Employer\EmployerProfileController;
 use App\Http\Controllers\JobSeeker\JobSeekerProfileController;
@@ -37,6 +35,8 @@ use App\Http\Controllers\JobSeeker\JobComparisonController;
 use App\Http\Controllers\JobSeeker\ApplicationFollowUpController;
 use App\Http\Controllers\Employer\ChatController as EmployerChatController;
 use App\Http\Controllers\JobSeeker\ChatController as JobSeekerChatController;
+use App\Http\Controllers\Employer\InterviewController as EmployerInterviewController;
+use App\Http\Controllers\JobSeeker\InterviewController as JobSeekerInterviewController;
 // Route
 
 // Home Page Route
@@ -211,19 +211,6 @@ Route::prefix('employer')
             ->middleware('throttle:120,1')
             ->name('jobs.qualityCheck');
 
-        //Walkin Routes
-        Route::get('/walkins', [WalkinController::class, 'index'])
-            ->name('walkins.index');
-
-        Route::post('/walkins', [WalkinController::class, 'store'])
-            ->name('walkins.store');
-
-        Route::put('/walkins/{walkin}', [WalkinController::class, 'update'])
-            ->name('walkins.update');
-
-        Route::delete('/walkins/{walkin}', [WalkinController::class, 'destroy'])
-            ->name('walkins.destroy');
-
         //Application Routes
         Route::get(
             '/applications',
@@ -263,6 +250,24 @@ Route::prefix('employer')
 
         Route::post('/messages/{conversation}/send', [EmployerChatController::class, 'send'])
             ->whereNumber('conversation')->middleware('throttle:20,1')->name('messages.send');
+
+        // Interview scheduling on an accepted application. An interview is an event on
+        // top of the decision, never a change to it: application_master.Status stays
+        // exactly where the employer left it, and only this employer's own jobs are
+        // reachable - see ApplicationInterviewService and InterviewController.
+        Route::get('/interviews', [EmployerInterviewController::class, 'index'])->name('interviews.index');
+
+        Route::post('/applications/{application}/interviews', [EmployerInterviewController::class, 'store'])
+            ->whereNumber('application')->middleware('throttle:20,1')->name('interviews.store');
+
+        Route::post('/interviews/{interview}/revise', [EmployerInterviewController::class, 'revise'])
+            ->whereNumber('interview')->middleware('throttle:20,1')->name('interviews.revise');
+
+        Route::post('/interviews/{interview}/cancel', [EmployerInterviewController::class, 'cancel'])
+            ->whereNumber('interview')->middleware('throttle:20,1')->name('interviews.cancel');
+
+        Route::post('/interviews/{interview}/complete', [EmployerInterviewController::class, 'complete'])
+            ->whereNumber('interview')->middleware('throttle:30,1')->name('interviews.complete');
 
         //Profile Routes
         Route::get('/profile', [EmployerProfileController::class, 'index'])
@@ -320,6 +325,21 @@ Route::prefix('jobseeker')
 
         Route::post('/messages/{conversation}/send', [JobSeekerChatController::class, 'send'])
             ->whereNumber('conversation')->middleware('throttle:20,1')->name('messages.send');
+
+        // The applicant's answers to an interview invitation. There is deliberately no
+        // route here that writes a date, a link, a location or an instruction, and none
+        // that cancels or completes: those powers exist only on the employer's side. A
+        // reschedule request records a preference and leaves the scheduled time alone.
+        Route::get('/interviews', [JobSeekerInterviewController::class, 'index'])->name('interviews.index');
+
+        Route::post('/interviews/{interview}/confirm', [JobSeekerInterviewController::class, 'confirm'])
+            ->whereNumber('interview')->middleware('throttle:20,1')->name('interviews.confirm');
+
+        Route::post('/interviews/{interview}/decline', [JobSeekerInterviewController::class, 'decline'])
+            ->whereNumber('interview')->middleware('throttle:20,1')->name('interviews.decline');
+
+        Route::post('/interviews/{interview}/reschedule', [JobSeekerInterviewController::class, 'requestReschedule'])
+            ->whereNumber('interview')->middleware('throttle:10,1')->name('interviews.reschedule');
         Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
         Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:5,10')->name('feedback.store');
 
@@ -369,11 +389,6 @@ Route::prefix('jobseeker')
         // Apply for Job
         Route::post('/jobs/{job}/apply', [JobApplicationController::class, 'apply'])
             ->name('jobs.apply');
-
-        // Walkin Jobs
-
-        Route::get('/walkins', [JobSeekerWalkinController::class, 'index'])
-            ->name('walkins');
 
         //Profile Routes
         Route::get(

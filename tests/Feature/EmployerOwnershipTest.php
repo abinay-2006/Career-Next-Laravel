@@ -39,12 +39,6 @@ class EmployerOwnershipTest extends TestCase
         Schema::create('jobseeker_reg', function (Blueprint $table): void {
             $table->increments('JobSeekId');
         });
-        Schema::create('walkin_master', function (Blueprint $table): void {
-            $table->increments('WalkInId');
-            $table->integer('EmployerId')->nullable();
-            $table->string('CompanyName');
-            $table->string('JobTitle');
-        });
     }
 
     public function test_duplicate_company_name_does_not_grant_access_to_another_employers_jobs(): void
@@ -86,18 +80,4 @@ class EmployerOwnershipTest extends TestCase
         $this->assertSame('Pending', DB::table('application_master')->where('ApplicationId', $application)->value('Status'));
     }
 
-    public function test_duplicate_company_name_does_not_grant_access_to_another_employers_walkins(): void
-    {
-        $first = DB::table('employer_reg')->insertGetId(['CompanyName' => 'Same Company']);
-        $second = DB::table('employer_reg')->insertGetId(['CompanyName' => 'Same Company']);
-        $walkin = DB::table('walkin_master')->insertGetId([
-            'EmployerId' => $first, 'CompanyName' => 'Same Company', 'JobTitle' => 'Private event',
-        ]);
-
-        $this->actingAs(Employer::query()->findOrFail($second), 'employer')
-            ->get(route('employer.walkins.index'))->assertOk()->assertDontSee('Private event');
-
-        $this->delete(route('employer.walkins.destroy', $walkin))->assertNotFound();
-        $this->assertDatabaseHas('walkin_master', ['WalkInId' => $walkin, 'JobTitle' => 'Private event']);
-    }
 }
