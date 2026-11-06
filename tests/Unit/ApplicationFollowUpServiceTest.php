@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\Application;
+use App\Models\ApplicationFollowUpMessage;
 use App\Models\Job;
 use App\Models\JobSeekerApplicationFollowUp;
 use App\Models\Log;
@@ -408,11 +409,60 @@ class ApplicationFollowUpServiceTest extends TestCase
         $this->assertSame(2, $statistics['attention']);
     }
 
+    // ─────────────────────── delivered messages ───────────────────────
+
+    public function test_delivered_messages_are_listed_newest_first_with_their_view_state(): void
+    {
+        $assessment = $this->assess(
+            $this->application(submittedDaysAgo: 20),
+            messages: [
+                $this->delivered(daysAgo: 3, readDaysAgo: 1, subject: 'Following up on my application'),
+                $this->delivered(daysAgo: 0, subject: 'One last follow-up'),
+            ],
+        );
+
+        $this->assertCount(2, $assessment['messages']);
+        $this->assertSame('One last follow-up', $assessment['messages'][0]['subject']);
+        $this->assertSame(0, $assessment['messages'][0]['days_ago']);
+        $this->assertFalse($assessment['messages'][0]['viewed']);
+        $this->assertTrue($assessment['messages'][1]['viewed']);
+        $this->assertSame('Viewed by the employer on Nov 5, 2026.', $assessment['messages'][1]['label']);
+    }
+
+    public function test_an_unopened_message_is_never_reported_as_read(): void
+    {
+        $assessment = $this->assess($this->application(submittedDaysAgo: 20), messages: [
+            $this->delivered(daysAgo: 2, subject: 'Any update?'),
+        ]);
+
+        $this->assertSame('Delivered. Not viewed yet.', $assessment['messages'][0]['label']);
+        $this->assertNull($assessment['messages'][0]['read_at']);
+    }
+
+    public function test_a_draft_that_was_never_delivered_leaves_no_trace(): void
+    {
+        $this->assertSame([], $this->assess($this->application(submittedDaysAgo: 20))['messages']);
+    }
+
+    public function test_a_delivered_message_is_not_mistaken_for_an_employer_reply(): void
+    {
+        // Reading a message is not answering it, so the waiting clock keeps running
+        // from the submission date and the recommendation stays where it was.
+        $without = $this->assess($this->application(submittedDaysAgo: 20));
+        $withDelivery = $this->assess($this->application(submittedDaysAgo: 20), messages: [
+            $this->delivered(daysAgo: 1, readDaysAgo: 0),
+        ]);
+
+        $this->assertSame($without['waiting_days'], $withDelivery['waiting_days']);
+        $this->assertSame('recommended', $withDelivery['recommendation']['key']);
+        $this->assertSame('submitted on Oct 17, 2026', $withDelivery['waiting_source']);
+    }
+
     // ─────────────────────── helpers ───────────────────────
 
-    private function assess(Application $application, array $events = [], array $activities = [], int $interval = 7): array
+    private function assess(Application $application, array $events = [], array $activities = [], int $interval = 7, array $messages = []): array
     {
-        return $this->coach->assess($application, $events, $activities, $interval, $this->now);
+        return $this->coach->assess($application, $events, $activities, $interval, $this->now, $messages);
     }
 
     private function application(?int $submittedDaysAgo, string $status = 'Pending', array $job = [], int $id = 101): Application
@@ -441,6 +491,18 @@ class ApplicationFollowUpServiceTest extends TestCase
             'activity_type' => $type,
             'activity_date' => $this->date(daysAgo: $daysAgo),
             'note' => $note,
+        ], true);
+    }
+
+    private function delivered(int $daysAgo, ?int $readDaysAgo = null, string $subject = 'Follow-up on my application'): ApplicationFollowUpMessage
+    {
+        return (new ApplicationFollowUpMessage())->setRawAttributes([
+            'id' => $daysAgo + 1,
+            'subject' => $subject,
+            'body' => 'Dear Northwind Technologies Hiring Team,',
+            'template' => 'status_inquiry',
+            'sent_at' => $this->date(daysAgo: $daysAgo),
+            'read_at' => $this->date(daysAgo: $readDaysAgo),
         ], true);
     }
 

@@ -1,0 +1,297 @@
+/*
+ * Employer side of the Application Follow-up Coach: the delivered-message list and
+ * the card on the applicant detail page.
+ *
+ * Every colour is a --theme-* token so the six palettes and dark mode keep working.
+ * Text that sits on a tinted wash uses the project's AA recipes because a translucent
+ * tint cannot hold 4.5:1 at these sizes, and the rules that have to out-specify
+ * theme-dark-mode.css are prefixed with html[data-color].
+ */
+
+.cn-fum-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    margin-top: .8rem;
+}
+
+/* The class carries "btn-" so the dark sheet's generic link recolour cannot reach a
+   tab; the active chip below has to win on its own terms. */
+.cn-fum-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .42rem .85rem;
+    border: 1px solid var(--theme-border, #e2e8f0);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--theme-text-secondary, #475569);
+    font-size: .82rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+html[data-color] .cn-fum-tab.cn-fum-btn-tab {
+    color: var(--theme-text-secondary);
+}
+
+.cn-fum-tab:hover {
+    border-color: var(--theme-primary, #7c3aed);
+    text-decoration: none;
+}
+
+.cn-fum-tab.is-active {
+    border-color: transparent;
+    background: color-mix(in srgb, var(--theme-primary, #7c3aed) 62%, var(--theme-text-primary, #0f172a));
+    color: var(--theme-primary-contrast, #fff);
+}
+
+/* The active chip is a filled surface, so it has to out-specify the secondary-text
+   rule above rather than sit under it. */
+html[data-color] .cn-fum-tab.cn-fum-btn-tab.is-active {
+    color: var(--theme-primary-contrast);
+}
+
+/* The applicant rows reuse the table's .applicant-* classes, which are written for a
+   dark header. On a light card the city line would be white on white. */
+html[data-color] .cn-fum-message .applicant-city {
+    color: color-mix(in srgb, var(--theme-text-secondary) 55%, var(--theme-text-primary));
+}
+
+.cn-fum-message .applicant-avatar {
+    background: color-mix(in srgb, var(--theme-primary) 18%, var(--theme-card-background, #fff));
+    color: var(--theme-text-primary, #0f172a);
+}
+
+/* The shared .stat-pill.pending tint is a warning colour and cannot hold 4.5:1 at this
+   size, so the count of unread messages gets its own darker text. The theme sheets pin
+   .pending in a later file, so this answers in kind. */
+html[data-color] .stat-pill.cn-fum-stat-new {
+    color: color-mix(in srgb, var(--theme-warning, #926300) 55%, var(--theme-text-primary)) !important;
+}
+
+/* ── One delivered message ─────────────────────────────────────────────────── */
+
+.cn-fum-message {
+    display: block;
+    margin-top: 1rem;
+}
+
+.cn-fum-message.is-new {
+    border-left: 4px solid var(--theme-primary, #7c3aed);
+}
+
+html[data-color] .cn-fum-message.is-new {
+    background: color-mix(in srgb, var(--theme-primary) 7%, var(--theme-card-background, #fff));
+}
+
+.cn-fum-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .6rem;
+}
+
+.cn-fum-subject {
+    margin: .9rem 0 .35rem;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--theme-heading, inherit);
+}
+
+html[data-color] .cn-fum-subject {
+    color: var(--theme-text-primary);
+}
+
+.cn-fum-body {
+    margin: 0;
+    font-size: .92rem;
+    line-height: 1.55;
+    /* The seeker's own line breaks, kept without touching the text. */
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+    color: var(--theme-text-primary, #0f172a);
+}
+
+html[data-color] .cn-fum-body {
+    color: var(--theme-text-primary);
+}
+
+.cn-fum-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .7rem;
+    margin-top: .9rem;
+}
+
+.cn-fum-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+}
+
+.cn-fum-actions form {
+    margin: 0;
+}
+
+/* .btn-view is full-width in the shared employer sheets, which makes it stretch when a
+   second action sits beside it. Its bare --theme-primary fill only reaches 3.66:1 with a
+   white label in light purple and 3.56:1 in light orange, so both actions share the
+   ink-pulled AA fill used by the tab chip. */
+.cn-fum-actions .btn-view {
+    width: auto;
+}
+
+/* The seen action is a second copy of the primary action, so it takes the shared .btn-view
+   box rather than the bare <button> default it inherited from .btn-accept. */
+.cn-fum-btn-seen {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-family: "Poppins", sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.22s;
+}
+
+html[data-color] .cn-fum-actions .btn-view,
+html[data-color] .cn-fum-btn-seen {
+    background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary)) !important;
+    border-color: transparent !important;
+    color: var(--theme-primary-contrast) !important;
+}
+
+html[data-color] .cn-fum-actions .btn-view:hover,
+html[data-color] .cn-fum-btn-seen:hover {
+    background: color-mix(in srgb, var(--theme-primary) 50%, var(--theme-text-primary)) !important;
+    color: var(--theme-primary-contrast) !important;
+}
+
+.cn-fum-btn-seen:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.cn-fum-sent {
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .01em;
+    color: color-mix(in srgb, var(--theme-text-secondary, #475569) 55%, var(--theme-text-primary, #0f172a));
+}
+
+html[data-color] .cn-fum-sent {
+    color: color-mix(in srgb, var(--theme-text-secondary) 55%, var(--theme-text-primary));
+}
+
+.cn-fum-state {
+    display: inline-block;
+    padding: .22rem .6rem;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    white-space: nowrap;
+}
+
+.cn-fum-state.is-unread {
+    background: color-mix(in srgb, var(--theme-primary, #7c3aed) 62%, var(--theme-text-primary, #0f172a));
+    color: var(--theme-primary-contrast, #fff);
+}
+
+.cn-fum-state.is-read {
+    background: var(--theme-hover, #f1f5f9);
+    color: color-mix(in srgb, var(--theme-text-secondary, #475569) 55%, var(--theme-text-primary, #0f172a));
+}
+
+.cn-fum-hint {
+    margin: .9rem 0 0;
+    font-size: .8rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--theme-text-secondary, #475569) 55%, var(--theme-text-primary, #0f172a));
+}
+
+html[data-color] .cn-fum-hint {
+    color: color-mix(in srgb, var(--theme-text-secondary) 55%, var(--theme-text-primary));
+}
+
+.cn-fum-card .cn-fum-message {
+    padding: .9rem 0;
+    border-top: 1px solid var(--theme-divider, #e2e8f0);
+    margin-top: 0;
+}
+
+.cn-fum-card .cn-fum-message:first-of-type {
+    border-top: 0;
+}
+
+.cn-fum-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    padding: 0 .4rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--theme-primary, #7c3aed) 62%, var(--theme-text-primary, #0f172a));
+    color: var(--theme-primary-contrast, #fff);
+    font-size: .74rem;
+    font-weight: 700;
+}
+
+.cn-fum-code {
+    padding: .1rem .35rem;
+    border-radius: 6px;
+    background: var(--theme-hover, #f1f5f9);
+    font-size: .78rem;
+}
+
+html[data-color] .cn-fum-code {
+    color: var(--theme-text-primary);
+}
+
+/* ── Pagination ───────────────────────────────────────────────────────────── */
+
+.cn-fum-note {
+    margin-top: 1rem;
+}
+
+.cn-fum-pagination {
+    padding-bottom: .7rem;
+    margin-bottom: .7rem;
+    border-bottom: 1px solid var(--theme-divider, #e2e8f0);
+}
+
+.cn-fum-pagination nav {
+    display: flex;
+    justify-content: center;
+}
+
+html[data-color] .cn-fum-pagination :is(p, small, .text-muted) {
+    color: var(--theme-text-secondary) !important;
+}
+
+html[data-color] .cn-fum-pagination .page-item.active > .page-link {
+    background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary)) !important;
+    border-color: transparent !important;
+    color: var(--theme-primary-contrast) !important;
+}
+
+html[data-color] .cn-fum-pagination .page-item.disabled > .page-link {
+    color: var(--theme-text-secondary) !important;
+}
+
+@media (max-width: 575.98px) {
+    .cn-fum-foot,
+    .cn-fum-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

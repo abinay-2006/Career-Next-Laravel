@@ -1021,3 +1021,77 @@ html[data-color] .cn-fu-pagination .page-item.disabled > .page-link {
     padding: .65rem .75rem;
   }
 }
+
+/* ── Messages the seeker delivered to an employer ─────────────────────────────
+   The wash behind these rows is a tint, and theme-dark-mode.css colours every <p>
+   with --theme-text-secondary, which measures about 4.49:1 on it. Every text
+   bearing element here therefore declares its own colour. */
+
+.cn-fu-sent-list {
+  display: grid;
+  gap: .6rem;
+  margin: 0 0 .8rem;
+  padding: 0;
+  list-style: none;
+}
+
+.cn-fu-sent {
+  padding: .7rem .8rem;
+  border: 1px solid var(--theme-border);
+  border-left: 4px solid var(--theme-primary);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--theme-hover) 45%, var(--theme-card-background));
+}
+
+.cn-fu-sent.is-viewed {
+  border-left-color: var(--theme-success);
+}
+
+.cn-fu-sent-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cn-fu-sent-subject {
+  font-size: .92rem;
+  font-weight: 700;
+}
+
+.cn-fu-sent-state {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.cn-fu-sent-body {
+  margin: .35rem 0 0;
+  font-size: .9rem;
+  line-height: 1.55;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.cn-fu-sent-meta {
+  margin: .4rem 0 0;
+  font-size: .76rem;
+}
+
+html[data-color] .cn-fu-sent :is(.cn-fu-sent-subject, .cn-fu-sent-body) {
+  color: var(--theme-text-primary);
+}
+
+html[data-color] .cn-fu-sent :is(.cn-fu-sent-state, .cn-fu-sent-meta) {
+  color: color-mix(in srgb, var(--theme-text-secondary) 55%, var(--theme-text-primary));
+}
+
+/* The label already says "Sending…", so the busy state is shown by washing the colour
+   out rather than by fading the text: opacity would drop the label under 4.5:1. */
+.cn-fu-btn.is-busy {
+  filter: saturate(.45);
+  cursor: progress;
+}

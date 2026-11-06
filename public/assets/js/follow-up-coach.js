@@ -85,12 +85,17 @@
         const card = cardOf(button);
         if (!form || !card) return;
 
+        // The button is a real submit button so the draft still works without JS;
+        // this handler only upgrades it.
+        event.preventDefault();
+
+        const endpoint = form.getAttribute('data-fu-message-endpoint') || form.action;
         const wasLabel = button.textContent.trim();
         button.disabled = true;
         button.textContent = 'Drafting…';
 
         try {
-            const draft = await post(form.action, { template: form.elements.template.value }, tokenOf(card));
+            const draft = await post(endpoint, { template: form.elements.template.value }, tokenOf(card));
 
             const subject = form.querySelector('[data-fu-subject]');
             const body = form.querySelector('[data-fu-body]');
@@ -155,6 +160,45 @@
         } catch {
             notify('error', 'Your browser blocked the copy. Select the text and copy it manually.');
         }
+    });
+
+    // ── Delivery ─────────────────────────────────────────────────────────────
+    // Sending is always a deliberate submit of the draft the seeker can see. The
+    // only jobs here are to refuse an empty box and to stop a double click from
+    // posting the same message twice.
+    document.addEventListener('submit', (event) => {
+        const form = event.target.closest('[data-fu-message]');
+        if (!form) return;
+
+        const trigger = event.submitter ? event.submitter.closest('[data-fu-send]') : null;
+        if (!trigger) return;
+
+        if (form.dataset.sending === '1') {
+            event.preventDefault();
+            return;
+        }
+
+        const subject = form.querySelector('[data-fu-subject]');
+        const body = form.querySelector('[data-fu-body]');
+
+        if (!String(subject ? subject.value : '').trim() || !String(body ? body.value : '').trim()) {
+            event.preventDefault();
+            notify('warning', 'Generate a draft or write your message before sending it.');
+            if (body) body.focus();
+
+            return;
+        }
+
+        form.dataset.sending = '1';
+        trigger.classList.add('is-busy');
+        trigger.textContent = 'Sending…';
+
+        // If the page never navigates away, hand the button back to the seeker.
+        window.setTimeout(() => {
+            form.dataset.sending = '';
+            trigger.classList.remove('is-busy');
+            trigger.textContent = 'Send to employer';
+        }, 15000);
     });
 
     // ── Interview checklist ──────────────────────────────────────────────────

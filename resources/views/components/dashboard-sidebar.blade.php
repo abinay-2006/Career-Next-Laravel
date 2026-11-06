@@ -14,6 +14,7 @@
             ['Manage Jobs', 'employer.jobs.index', 'fas fa-briefcase'],
             ['Walk-in Interviews', 'employer.walkins.index', 'fas fa-calendar'],
             ['Applications', 'employer.applications.index', 'fas fa-user-check'],
+            ['Follow-up Messages', 'employer.followupmessages.index', 'fas fa-envelope-open-text'],
             ['Company Profile', 'employer.profile.index', 'fas fa-building'],
             ['Feedback', 'employer.feedback.create', 'fas fa-comment'],
             ['Career News', 'news.index', 'fas fa-newspaper'],
@@ -42,6 +43,7 @@
                     'admin.dashboard' => ['admin.dashboard', 'admin.index'],
                     'employer.jobs.index' => 'employer.jobs.*',
                     'employer.applications.index' => 'employer.applications.*',
+                    'employer.followupmessages.index' => 'employer.followupmessages.*',
                     'employer.profile.index' => 'employer.profile.*',
                     'employer.walkins.index' => 'employer.walkins.*',
                     'employer.feedback.create' => 'employer.feedback.*',
@@ -63,6 +65,9 @@
                 <i class="{{ $icon }}" aria-hidden="true"></i><span>{{ $label }}</span>
                 @if ($role === 'jobseeker' && $routeName === 'jobseeker.compare.index' && ($compareCount = \App\Support\JobComparisonState::count()) > 0)
                     <span class="cn-cmp-nav-count">{{ $compareCount }}</span>
+                @endif
+                @if ($role === 'employer' && $routeName === 'employer.followupmessages.index' && ($fuUnread = \App\Models\ApplicationFollowUpMessage::unreadForEmployer(\App\Models\ApplicationFollowUpMessage::currentEmployerId())) > 0)
+                    <span class="cn-cmp-nav-count">{{ $fuUnread }}</span>
                 @endif
             </a>
         @endforeach

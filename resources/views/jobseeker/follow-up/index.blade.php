@@ -103,7 +103,7 @@
             @if($search !== '' || $filter !== 'all')
                 Clear the search or pick another group to see the rest of your applications.
             @else
-                Applications you submit appear here with a follow-up recommendation, a timeline of what was actually recorded and drafts you can copy.
+                Applications you submit appear here with a follow-up recommendation, a timeline of what was actually recorded and drafts you can copy or send to the employer.
             @endif
         </p>
         <div class="cn-fu-empty-actions">

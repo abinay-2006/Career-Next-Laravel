@@ -4,6 +4,7 @@ namespace App\Http\Controllers\JobSeeker;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
+use App\Models\ApplicationFollowUpMessage;
 use App\Models\JobSeeker;
 use App\Models\JobSeekerApplicationFollowUp;
 use App\Models\Log;
@@ -23,10 +24,12 @@ use Illuminate\View\View;
 /**
  * Application Follow-up Coach.
  *
- * Read-mostly: the only rows written here are the seeker's own follow-up entries.
- * Application statuses stay owned by the employer workflow, every lookup is scoped
- * to the authenticated seeker, and the reminders, drafts and timelines come from
- * ApplicationFollowUpService working off records that already exist.
+ * Read-mostly: the rows written here are the seeker's own follow-up entries and the
+ * messages they deliberately delivered to an employer. Application statuses stay
+ * owned by the employer workflow, every lookup is scoped to the authenticated
+ * seeker, and the reminders, drafts and timelines come from
+ * ApplicationFollowUpService working off records that already exist. Nothing is
+ * emailed anywhere by this controller.
  */
 class ApplicationFollowUpController extends Controller
 {
@@ -88,8 +91,9 @@ class ApplicationFollowUpController extends Controller
     }
 
     /**
-     * The §5 drafts. Nothing is sent anywhere - the page shows the text, the seeker
-     * edits it, and they copy it out themselves.
+     * The §5 drafts. This only produces text - delivery is the separate, deliberate
+     * action in send() below, so a seeker can never hand a draft to an employer by
+     * accident.
      */
     public function message(Request $request, int $application): JsonResponse|RedirectResponse
     {
@@ -112,6 +116,89 @@ class ApplicationFollowUpController extends Controller
         $request->session()->flash('followup_draft', $draft + ['application_id' => (int) $record->ApplicationId, 'template' => $data['template']]);
 
         return redirect()->route('jobseeker.followup.index', ['application' => (int) $record->ApplicationId]);
+    }
+
+    /**
+     * Hand the edited draft to the employer. This is the only place a seeker's text
+     * leaves their own account: it happens because they pressed the button, it goes
+     * to the employer's Career Next pages, and no email is composed or sent here.
+     */
+    public function send(Request $request, int $application): JsonResponse|RedirectResponse
+    {
+        $seeker = $this->seeker();
+        $record = $this->ownApplication($application);
+        $data = $this->validated($request, [
+            'subject' => ['required', 'string', 'max:'.ApplicationFollowUpMessage::MAX_SUBJECT],
+            'body' => ['required', 'string', 'max:'.ApplicationFollowUpMessage::MAX_BODY],
+            'template' => ['nullable', Rule::in(array_keys(ApplicationFollowUpService::TEMPLATES))],
+        ]);
+
+        if ($data instanceof JsonResponse || $data instanceof RedirectResponse) {
+            return $data;
+        }
+
+        if (!ApplicationFollowUpMessage::tableIsReady()) {
+            return $this->failed($request, 'Delivery to employers needs its database table. Run the migration for this feature; copying the draft still works.', 503);
+        }
+
+        $employerId = is_numeric($record->job?->EmployerId ?? null) ? (int) $record->job->EmployerId : 0;
+
+        if ($employerId <= 0) {
+            return $this->failed($request, 'This listing has no employer account that can receive a message, so Career Next cannot deliver it. Copy the draft and send it yourself.');
+        }
+
+        $subject = trim(preg_replace('/\s+/u', ' ', $data['subject']) ?? (string) $data['subject']);
+        $body = trim($data['body']);
+
+        if ($subject === '' || $body === '') {
+            return $this->invalid($request, 'body', 'There is nothing to send yet. Generate a draft or write your message first.');
+        }
+
+        $lastSent = ApplicationFollowUpMessage::lastSentAt((int) $record->ApplicationId);
+
+        if ($lastSent !== null && $lastSent->greaterThan(now()->subHours(ApplicationFollowUpMessage::REPEAT_WINDOW_HOURS))) {
+            return $this->failed($request, 'A message was already delivered to this employer on '.$lastSent->format('M j, Y').'. One follow-up a day keeps the thread useful - try again after that.');
+        }
+
+        $delivered = ApplicationFollowUpMessage::create([
+            'ApplicationId' => (int) $record->ApplicationId,
+            'JobSeekId' => (int) $seeker->JobSeekId,
+            'EmployerId' => $employerId,
+            'template' => $data['template'] ?? null,
+            'subject' => $subject,
+            'body' => $body,
+            'sent_at' => now(),
+        ]);
+
+        // The delivery counts as the follow-up the seeker sent today, which is what
+        // holds the coach back from suggesting another message right away.
+        if (JobSeekerApplicationFollowUp::tableIsReady()) {
+            JobSeekerApplicationFollowUp::create([
+                'ApplicationId' => (int) $record->ApplicationId,
+                'JobSeekId' => (int) $seeker->JobSeekId,
+                'activity_type' => JobSeekerApplicationFollowUp::TYPE_FOLLOW_UP_SENT,
+                'activity_date' => now(),
+                'note' => 'Delivered to the employer inside Career Next.',
+            ]);
+        }
+
+        app(ActivityLogger::class)->record(
+            'follow_up_message_sent',
+            'application',
+            (int) $record->ApplicationId,
+            $record->JobId ? (int) $record->JobId : null,
+            ['message_id' => (int) $delivered->id, 'employer_id' => $employerId],
+        );
+
+        $notice = 'Delivered to the employer. They see it on your application in Career Next - no email was sent.';
+
+        if ($request->expectsJson()) {
+            // The card repaints: the recommendation, the activity list and the
+            // delivered-message history all change with a delivery.
+            return response()->json(['success' => true, 'message' => $notice, 'refresh' => true]);
+        }
+
+        return back()->with('success', $notice);
     }
 
     /** Record the seeker's own follow-up activity (§8). */
@@ -220,8 +307,8 @@ class ApplicationFollowUpController extends Controller
 
     /**
      * Assess every application the seeker owns, in the order the page shows them.
-     * Three queries whatever the count: the applications, their logged status
-     * events and their recorded follow-up activity.
+     * Four queries whatever the count: the applications, their logged status events,
+     * their recorded follow-up activity and the messages already delivered.
      *
      * @return array<int, array>
      */
@@ -261,11 +348,22 @@ class ApplicationFollowUpController extends Controller
                 ->groupBy(fn (JobSeekerApplicationFollowUp $row): int => (int) $row->ApplicationId)
             : collect();
 
+        $messages = ApplicationFollowUpMessage::tableIsReady()
+            ? ApplicationFollowUpMessage::query()
+                ->where('JobSeekId', (int) $seeker->JobSeekId)
+                ->whereIn('ApplicationId', $ids)
+                ->orderBy('sent_at')
+                ->get()
+                ->groupBy(fn (ApplicationFollowUpMessage $row): int => (int) $row->ApplicationId)
+            : collect();
+
         return $this->coach->assessMany(
             $applications,
             $events->map(fn ($group): array => $group->all())->all(),
             $activities->map(fn ($group): array => $group->all())->all(),
             $interval,
+            null,
+            $messages->map(fn ($group): array => $group->all())->all(),
         );
     }
 

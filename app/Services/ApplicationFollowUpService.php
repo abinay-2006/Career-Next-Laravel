@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Application;
+use App\Models\ApplicationFollowUpMessage;
 use App\Models\JobSeekerApplicationFollowUp;
 use App\Models\Log;
 use Illuminate\Support\Carbon;
@@ -79,9 +80,10 @@ class ApplicationFollowUpService
      * @param  iterable<Application>  $applications
      * @param  array<int, array<int, Log>>  $statusEvents  keyed by ApplicationId
      * @param  array<int, array<int, JobSeekerApplicationFollowUp>>  $activities  keyed by ApplicationId
+     * @param  array<int, array<int, ApplicationFollowUpMessage>>  $messages  delivered drafts, keyed by ApplicationId
      * @return array<int, array>  assessments keyed by ApplicationId
      */
-    public function assessMany(iterable $applications, array $statusEvents = [], array $activities = [], ?int $intervalDays = null, ?Carbon $now = null): array
+    public function assessMany(iterable $applications, array $statusEvents = [], array $activities = [], ?int $intervalDays = null, ?Carbon $now = null, array $messages = []): array
     {
         $interval = $this->normaliseInterval($intervalDays);
         $now = $now ?? Carbon::now();
@@ -89,7 +91,7 @@ class ApplicationFollowUpService
 
         foreach ($applications as $application) {
             $id = (int) $application->ApplicationId;
-            $assessments[$id] = $this->assess($application, $statusEvents[$id] ?? [], $activities[$id] ?? [], $interval, $now);
+            $assessments[$id] = $this->assess($application, $statusEvents[$id] ?? [], $activities[$id] ?? [], $interval, $now, $messages[$id] ?? []);
         }
 
         return $assessments;
@@ -100,8 +102,9 @@ class ApplicationFollowUpService
      *
      * @param  array<int, Log>  $statusEvents
      * @param  array<int, JobSeekerApplicationFollowUp>  $activities
+     * @param  array<int, ApplicationFollowUpMessage>  $messages
      */
-    public function assess(Application $application, array $statusEvents, array $activities, ?int $intervalDays = null, ?Carbon $now = null): array
+    public function assess(Application $application, array $statusEvents, array $activities, ?int $intervalDays = null, ?Carbon $now = null, array $messages = []): array
     {
         $interval = $this->normaliseInterval($intervalDays);
         $now = $now ?? Carbon::now();
@@ -141,6 +144,7 @@ class ApplicationFollowUpService
             ] : null,
             'events' => $events,
             'activity' => $recorded['rows'],
+            'messages' => $this->delivered($messages, $now),
             'last_follow_up_days_ago' => $recorded['last_follow_up_days_ago'],
             'expected_response_on' => $recorded['expected_response_on'],
             'recommendation' => $this->recommendation($statusKey, $submittedAt, $clock['days'], $recorded, $lastStatusChange, $interval, $now),
@@ -720,6 +724,41 @@ class ApplicationFollowUpService
             'last_response_at' => $lastResponseAt,
             'expected_response_on' => $expectedOn,
         ];
+    }
+
+    /**
+     * The drafts this seeker actually pressed send on, newest first, with whether the
+     * employer has opened them. Nothing here is inferred: a message that was only
+     * generated and never sent does not appear, and an unopened one is reported as
+     * unopened rather than as a reply.
+     *
+     * @param  array<int, ApplicationFollowUpMessage>  $messages
+     * @return array<int, array{id: int, subject: string, body: string, template: string|null, sent_at: Carbon|null, read_at: Carbon|null, days_ago: int|null, viewed: bool, label: string}>
+     */
+    private function delivered(array $messages, Carbon $now): array
+    {
+        $rows = [];
+
+        foreach ($messages as $message) {
+            $sentAt = $this->toCarbon($message->sent_at ?? null);
+            $readAt = $this->toCarbon($message->read_at ?? null);
+
+            $rows[] = [
+                'id' => (int) ($message->id ?? 0),
+                'subject' => (string) ($message->subject ?? ''),
+                'body' => (string) ($message->body ?? ''),
+                'template' => isset($message->template) && $message->template !== '' ? (string) $message->template : null,
+                'sent_at' => $sentAt,
+                'read_at' => $readAt,
+                'days_ago' => $sentAt === null ? null : $this->daysSince($sentAt, $now),
+                'viewed' => $readAt !== null,
+                'label' => ApplicationFollowUpMessage::deliveryLabel($readAt),
+            ];
+        }
+
+        usort($rows, fn (array $a, array $b): int => ($b['sent_at']?->getTimestamp() ?? PHP_INT_MIN) <=> ($a['sent_at']?->getTimestamp() ?? PHP_INT_MIN));
+
+        return array_values($rows);
     }
 
     /**

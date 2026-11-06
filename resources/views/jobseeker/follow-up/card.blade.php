@@ -9,6 +9,7 @@
 
 <article class="cn-fu-card cn-fu-app" data-fu-app="{{ $id }}"
     data-fu-prep-endpoint="{{ route('jobseeker.followup.prep', $id) }}"
+    data-fu-send-endpoint="{{ route('jobseeker.followup.send', $id) }}"
     data-fu-token="{{ csrf_token() }}">
 
     <header class="cn-fu-app-head">
@@ -139,7 +140,8 @@
         <details class="cn-fu-fold" data-fu-fold="generator">
             <summary><i class="fas fa-pen-to-square" aria-hidden="true"></i> Write a message</summary>
 
-            <form class="cn-fu-generator" method="POST" action="{{ route('jobseeker.followup.message', $id) }}" data-fu-message>
+            <form class="cn-fu-generator" method="POST" action="{{ route('jobseeker.followup.send', $id) }}"
+                data-fu-message data-fu-message-endpoint="{{ route('jobseeker.followup.message', $id) }}">
                 @csrf
                 <div class="cn-fu-field">
                     <label for="cnFuTpl_{{ $id }}">Scenario</label>
@@ -150,7 +152,8 @@
                     </select>
                 </div>
 
-                <button type="button" class="cn-fu-btn cn-fu-btn-primary" data-fu-generate>
+                <button type="submit" class="cn-fu-btn cn-fu-btn-primary" data-fu-generate
+                    formaction="{{ route('jobseeker.followup.message', $id) }}">
                     <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Generate draft
                 </button>
 
@@ -159,8 +162,8 @@
                 <div class="cn-fu-field">
                     <label for="cnFuSubject_{{ $id }}">Subject</label>
                     <div class="cn-fu-copy-row">
-                        <input type="text" id="cnFuSubject_{{ $id }}" data-fu-subject maxlength="200"
-                            value="{{ $draftHere ? ($draft['subject'] ?? '') : '' }}"
+                        <input type="text" id="cnFuSubject_{{ $id }}" name="subject" data-fu-subject maxlength="200"
+                            value="{{ $draftHere ? ($draft['subject'] ?? '') : old('subject', '') }}"
                             placeholder="Generated when you choose a scenario">
                         <button type="button" class="cn-fu-btn cn-fu-btn-quiet" data-fu-copy="cnFuSubject_{{ $id }}">
                             <i class="far fa-copy" aria-hidden="true"></i> Copy
@@ -170,17 +173,66 @@
 
                 <div class="cn-fu-field">
                     <label for="cnFuBody_{{ $id }}">Message</label>
-                    <textarea id="cnFuBody_{{ $id }}" rows="12" data-fu-body
-                        placeholder="The draft appears here, ready for you to edit.">{{ $draftHere ? ($draft['body'] ?? '') : '' }}</textarea>
+                    <textarea id="cnFuBody_{{ $id }}" name="body" rows="12" data-fu-body
+                        maxlength="4000"
+                        placeholder="The draft appears here, ready for you to edit.">{{ $draftHere ? ($draft['body'] ?? '') : old('body', '') }}</textarea>
                 </div>
 
                 <div class="cn-fu-generator-foot">
+                    <button type="submit" class="cn-fu-btn cn-fu-btn-primary" data-fu-send
+                        formaction="{{ route('jobseeker.followup.send', $id) }}">
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i> Send to employer
+                    </button>
                     <button type="button" class="cn-fu-btn cn-fu-btn-quiet" data-fu-copy="cnFuBody_{{ $id }}">
                         <i class="far fa-copy" aria-hidden="true"></i> Copy message
                     </button>
-                    <span class="cn-fu-hint">Career Next never sends this. Edit it, copy it, and send it yourself.</span>
+                    <span class="cn-fu-hint">
+                        Send hands this exact text to the employer's Career Next pages - nothing is emailed, and your
+                        private notes stay private. Edit it first, and one message a day is enough.
+                    </span>
                 </div>
             </form>
+        </details>
+
+        <details class="cn-fu-fold" data-fu-fold="messages">
+            <summary>
+                <i class="fas fa-paper-plane" aria-hidden="true"></i> Messages sent to this employer
+                <span class="cn-fu-fold-count">{{ count($row['messages']) }}</span>
+            </summary>
+
+            @if($row['messages'] === [])
+            <p class="cn-fu-quiet">
+                Nothing has been delivered for this application. Use Send to employer above and it will appear here
+                with the date the employer read it.
+            </p>
+            @else
+            <ul class="cn-fu-sent-list">
+                @foreach($row['messages'] as $message)
+                <li class="cn-fu-sent{{ $message['viewed'] ? ' is-viewed' : '' }}">
+                    <div class="cn-fu-sent-head">
+                        <span class="cn-fu-sent-subject">{{ $message['subject'] }}</span>
+                        <span class="cn-fu-sent-state">{{ $message['label'] }}</span>
+                    </div>
+                    <p class="cn-fu-sent-body">{{ $message['body'] }}</p>
+                    <p class="cn-fu-sent-meta">
+                        Delivered
+                        @if($message['sent_at'])
+                        <time datetime="{{ $message['sent_at']->toAtomString() }}">{{ $message['sent_at']->format('M j, Y') }}</time>
+                        @else
+                        (date unavailable)
+                        @endif
+                        @if($message['template'])
+                        &middot; from the {{ $templates[$message['template']] ?? 'draft' }} template
+                        @endif
+                    </p>
+                </li>
+                @endforeach
+            </ul>
+            <p class="cn-fu-quiet">
+                Marking a message as seen is the employer's own action, so this list only changes when they do it.
+                Career Next never sends anything on your behalf, and an unviewed message is never reported as read.
+            </p>
+            @endif
         </details>
 
         @if($prep['available'])

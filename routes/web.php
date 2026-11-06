@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\ManageDocumentsController;
 use App\Http\Controllers\Employer\EmployerJobController;
 use App\Http\Controllers\Employer\WalkinController;
 use App\Http\Controllers\Employer\EmployerApplicationController;
+use App\Http\Controllers\Employer\FollowUpMessageController;
 use App\Http\Controllers\JobSeeker\EducationController;
 use App\Http\Controllers\JobSeeker\JobSearchController;
 use App\Http\Controllers\Employer\JobQualityController;
@@ -236,6 +237,14 @@ Route::prefix('employer')
         Route::put('applications/{application}', [EmployerApplicationController::class, 'update'])
             ->name('applications.update');
 
+        // Follow-up messages an applicant chose to deliver from the Follow-up Coach.
+        // Read-only here: the employer may only record that they looked.
+        Route::get('/follow-up-messages', [FollowUpMessageController::class, 'index'])
+            ->name('followupmessages.index');
+
+        Route::post('follow-up-messages/{message}/seen', [FollowUpMessageController::class, 'seen'])
+            ->whereNumber('message')->middleware('throttle:60,1')->name('followupmessages.seen');
+
         //Profile Routes
         Route::get('/profile', [EmployerProfileController::class, 'index'])
             ->name('profile.index');
@@ -269,6 +278,9 @@ Route::prefix('jobseeker')
         Route::post('/follow-up-coach/preferences', [ApplicationFollowUpController::class, 'intervalSave'])->name('followup.preferences');
         Route::post('/follow-up-coach/{application}/message', [ApplicationFollowUpController::class, 'message'])
             ->whereNumber('application')->middleware('throttle:60,1')->name('followup.message');
+        // Deliberate delivery of the edited draft to the employer's own pages. Nothing is emailed.
+        Route::post('/follow-up-coach/{application}/send', [ApplicationFollowUpController::class, 'send'])
+            ->whereNumber('application')->middleware('throttle:10,1')->name('followup.send');
         Route::post('/follow-up-coach/{application}/activity', [ApplicationFollowUpController::class, 'activity'])
             ->whereNumber('application')->middleware('throttle:30,1')->name('followup.activity');
         Route::post('/follow-up-coach/{application}/prep', [ApplicationFollowUpController::class, 'prep'])

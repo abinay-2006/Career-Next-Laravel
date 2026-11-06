@@ -2,6 +2,10 @@
 
 @section('title', 'Applicant Details')
 
+@pushOnce('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/follow-up-messages.css') }}?v={{ @filemtime(public_path('assets/css/follow-up-messages.css')) ?: 1 }}">
+@endpushOnce
+
 @section('content')
 
 <div class="main-content">
@@ -247,6 +251,65 @@
         @endif
 
     </div>
+
+    @if($followUpMessages->isNotEmpty())
+
+    <!-- Applicant Follow-up Messages -->
+    <div class="glass-card cn-fum-card">
+
+        <div class="card-title">
+            <i class="fas fa-envelope-open-text"></i>
+            Follow-up messages from this applicant
+            <span class="cn-fum-count">{{ $followUpMessages->count() }}</span>
+        </div>
+
+        @foreach($followUpMessages as $message)
+        @php($isNew = $message->read_at === null)
+
+        <article class="cn-fum-message{{ $isNew ? ' is-new' : '' }}">
+
+            <div class="cn-fum-head">
+                <h3 class="cn-fum-subject">{{ $message->subject }}</h3>
+                <span class="cn-fum-state {{ $isNew ? 'is-unread' : 'is-read' }}">
+                    {{ $isNew ? 'New' : 'Viewed '.$message->read_at->format('M j, Y') }}
+                </span>
+            </div>
+
+            <p class="cn-fum-body">{{ $message->body }}</p>
+
+            <div class="cn-fum-foot">
+                <span class="cn-fum-sent">
+                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                    Delivered
+                    @if($message->sent_at)
+                    <time datetime="{{ $message->sent_at->toAtomString() }}">{{ $message->sent_at->format('M j, Y') }}</time>
+                    @else
+                    (date unavailable)
+                    @endif
+                </span>
+
+                @if($isNew)
+                <form method="POST" action="{{ route('employer.followupmessages.seen', $message->id) }}">
+                    @csrf
+                    <button type="submit" class="btn-accept cn-fum-btn-seen">
+                        <i class="fas fa-check"></i> Mark as seen
+                    </button>
+                </form>
+                @endif
+            </div>
+
+        </article>
+
+        @endforeach
+
+        <p class="cn-fum-hint">
+            These messages were sent by the applicant from their Follow-up Coach. Marking one as seen only
+            tells the applicant you read it - it never changes the application status below.
+        </p>
+
+    </div>
+
+    @endif
 
     <!-- Status Update Card -->
     <div class="glass-card status-card">

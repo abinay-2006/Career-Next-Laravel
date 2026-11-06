@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Application;
+use App\Models\ApplicationFollowUpMessage;
 use App\Models\Job;
 use App\Support\PrivateUpload;
 use App\Services\ActivityLogger;
@@ -81,7 +82,17 @@ class EmployerApplicationController extends Controller
             ->whereRaw('LOWER(DocumentType) = ?', ['resume'])
             ->first();
 
-        return view('employer.applications.show', compact('application', 'resumeDocument'));
+        // Follow-up messages the applicant delivered for this application. Filtered on
+        // both the application and this employer, so only what was sent here is shown.
+        $followUpMessages = ApplicationFollowUpMessage::tableIsReady()
+            ? ApplicationFollowUpMessage::query()
+                ->where('ApplicationId', (int) $application->ApplicationId)
+                ->where('EmployerId', (int) $employer->EmployerId)
+                ->orderByDesc('sent_at')
+                ->get()
+            : collect();
+
+        return view('employer.applications.show', compact('application', 'resumeDocument', 'followUpMessages'));
     }
 
     public function viewResume(Application $application)
