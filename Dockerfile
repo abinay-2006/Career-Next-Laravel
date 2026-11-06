@@ -55,11 +55,24 @@ FROM php-runtime-base AS app-assembly
 WORKDIR /var/www/html
 COPY . .
 
-RUN composer install \
-    --no-dev \
-    --prefer-dist \
-    --no-interaction \
-    --optimize-autoloader
+RUN set -eu; \
+    export COMPOSER_MAX_PARALLEL_HTTP=4; \
+    for attempt in 1 2 3; do \
+        if composer install \
+            --no-dev \
+            --prefer-dist \
+            --no-interaction \
+            --no-progress \
+            --optimize-autoloader; then \
+            break; \
+        fi; \
+        if [ "$attempt" -eq 3 ]; then \
+            echo "Composer install failed after 3 attempts." >&2; \
+            exit 1; \
+        fi; \
+        echo "Composer install failed; retrying in $((attempt * 10)) seconds..." >&2; \
+        sleep $((attempt * 10)); \
+    done
 
 COPY --from=frontend /app/public/build ./public/build
 
