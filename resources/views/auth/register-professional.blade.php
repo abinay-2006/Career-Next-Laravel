@@ -318,6 +318,7 @@
                             type="file"
                             id="photo"
                             name="photo"
+                            data-avatar-crop
                             accept=".jpg,.jpeg,.png,.webp">
 
 
@@ -610,6 +611,8 @@
 
 
 @section('scripts')
+
+<script src="{{ asset('assets/js/avatar-crop.js') }}?v={{ @filemtime(public_path('assets/js/avatar-crop.js')) ?: 1 }}"></script>
 
 <script>
     const professionalForm =

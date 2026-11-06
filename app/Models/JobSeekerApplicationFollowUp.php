@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use App\Services\ApplicationFollowUpService;
+use App\Support\SchemaReady;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * One thing the job seeker recorded about their own application: a follow-up they
@@ -63,7 +63,7 @@ class JobSeekerApplicationFollowUp extends Model
      */
     public static function tableIsReady(): bool
     {
-        return Schema::hasTable('jobseeker_application_follow_ups');
+        return SchemaReady::hasTable('jobseeker_application_follow_ups');
     }
 
     /** What one entry looks like in the seeker's own history list. */

@@ -4,16 +4,24 @@ namespace App\Http\Controllers\JobSeeker;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
+use App\Services\ApplicationChatService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ApplicationHistoryController extends Controller
 {
-    public function show(Application $application)
+    public function show(Application $application, ApplicationChatService $chat)
     {
         abort_unless((int) $application->JobSeekId === (int) Auth::guard('jobseeker')->id(), 404);
         $application->load('job');
-        return view('jobseeker.applications.show', compact('application'));
+
+        // The employer opening this application is what starts a chat. Until then there
+        // is no thread and no button, and nothing here can move the application status.
+        $chatThread = $chat->openFor($application);
+        $chatOpen = $chatThread !== null
+            && $chat->stateFor($application->Status) === ApplicationChatService::STATE_OPEN;
+
+        return view('jobseeker.applications.show', compact('application', 'chatThread', 'chatOpen'));
     }
 
     public function index(Request $request)

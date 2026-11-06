@@ -15,6 +15,7 @@
             ['Walk-in Interviews', 'employer.walkins.index', 'fas fa-calendar'],
             ['Applications', 'employer.applications.index', 'fas fa-user-check'],
             ['Follow-up Messages', 'employer.followupmessages.index', 'fas fa-envelope-open-text'],
+            ['Messages', 'employer.messages.index', 'fas fa-comments'],
             ['Company Profile', 'employer.profile.index', 'fas fa-building'],
             ['Feedback', 'employer.feedback.create', 'fas fa-comment'],
             ['Career News', 'news.index', 'fas fa-newspaper'],
@@ -31,6 +32,7 @@
             ['My Resumes', 'jobseeker.my-resumes.index', 'fas fa-folder-open'],
             ['My Applications', 'jobseeker.applications.index', 'fas fa-clock-rotate-left'],
             ['Follow-up Coach', 'jobseeker.followup.index', 'fas fa-envelope-circle-check'],
+            ['Messages', 'jobseeker.messages.index', 'fas fa-comments'],
             ['Feedback', 'jobseeker.feedback.create', 'fas fa-comment'],
             ['Career News', 'news.index', 'fas fa-newspaper'],
         ],
@@ -44,6 +46,7 @@
                     'employer.jobs.index' => 'employer.jobs.*',
                     'employer.applications.index' => 'employer.applications.*',
                     'employer.followupmessages.index' => 'employer.followupmessages.*',
+                    'employer.messages.index' => 'employer.messages.*',
                     'employer.profile.index' => 'employer.profile.*',
                     'employer.walkins.index' => 'employer.walkins.*',
                     'employer.feedback.create' => 'employer.feedback.*',
@@ -55,6 +58,7 @@
                     'jobseeker.resumes.index' => 'jobseeker.resumes.*',
                     'jobseeker.my-resumes.index' => 'jobseeker.my-resumes.*',
                     'jobseeker.applications.index' => 'jobseeker.applications.*',
+                    'jobseeker.messages.index' => 'jobseeker.messages.*',
                     'jobseeker.feedback.create' => 'jobseeker.feedback.*',
                     'news.index' => 'news.*',
                     default => $routeName,
@@ -68,6 +72,14 @@
                 @endif
                 @if ($role === 'employer' && $routeName === 'employer.followupmessages.index' && ($fuUnread = \App\Models\ApplicationFollowUpMessage::unreadForEmployer(\App\Models\ApplicationFollowUpMessage::currentEmployerId())) > 0)
                     <span class="cn-cmp-nav-count">{{ $fuUnread }}</span>
+                @endif
+                {{-- Chat unread is counted per participant, so a badge can never borrow
+                     another account's totals, and it answers zero before the tables exist. --}}
+                @if ($role === 'employer' && $routeName === 'employer.messages.index' && ($chatUnread = \App\Models\ApplicationConversation::unreadTotalForRole('employer', \App\Models\ApplicationConversation::currentEmployerId())) > 0)
+                    <span class="cn-cmp-nav-count">{{ $chatUnread }}</span>
+                @endif
+                @if ($role === 'jobseeker' && $routeName === 'jobseeker.messages.index' && ($chatUnread = \App\Models\ApplicationConversation::unreadTotalForRole('jobseeker', \App\Models\ApplicationConversation::currentJobSeekerId())) > 0)
+                    <span class="cn-cmp-nav-count">{{ $chatUnread }}</span>
                 @endif
             </a>
         @endforeach

@@ -691,6 +691,7 @@
                                 name="Photo"
                                 id="Photo"
                                 accept="image/jpeg,image/png,image/jpg"
+                                data-avatar-crop
                                 onchange="previewProfilePhoto(this)">
 
                             <small style="color: var(--theme-text-secondary); font-size: 0.8rem;">
@@ -1189,6 +1190,7 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script src="{{ asset('assets/js/job-requirements.js') }}?v={{ @filemtime(public_path('assets/js/job-requirements.js')) ?: 1 }}"></script>
+<script src="{{ asset('assets/js/avatar-crop.js') }}?v={{ @filemtime(public_path('assets/js/avatar-crop.js')) ?: 1 }}"></script>
 <script>
     /* ── Profile Photo Preview ── */
     function previewProfilePhoto(input) {

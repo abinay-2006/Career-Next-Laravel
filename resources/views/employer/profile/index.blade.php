@@ -561,6 +561,7 @@
                                 name="Photo"
                                 id="Photo"
                                 accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                data-avatar-crop
                                 hidden>
 
                             <div
@@ -830,6 +831,8 @@
 
 
 @section('scripts')
+
+<script src="{{ asset('assets/js/avatar-crop.js') }}?v={{ @filemtime(public_path('assets/js/avatar-crop.js')) ?: 1 }}"></script>
 
 <script>
     /* ==========================================================

@@ -10,6 +10,7 @@ use App\Models\ApplicationFollowUpMessage;
 use App\Models\Job;
 use App\Support\PrivateUpload;
 use App\Services\ActivityLogger;
+use App\Services\ApplicationChatService;
 
 class EmployerApplicationController extends Controller
 {
@@ -57,7 +58,7 @@ class EmployerApplicationController extends Controller
     /**
      * Display a single application.
      */
-    public function show(Application $application)
+    public function show(Application $application, ApplicationChatService $chat)
     {
         $employer = Auth::guard('employer')->user();
 
@@ -92,7 +93,20 @@ class EmployerApplicationController extends Controller
                 ->get()
             : collect();
 
-        return view('employer.applications.show', compact('application', 'resumeDocument', 'followUpMessages'));
+        // The chat thread this application owns. Approval opens it; any other status
+        // leaves it unstarted, so the button below only ever appears on an approved
+        // applicant and the decision buttons keep being the only way to change Status.
+        $chatThread = $chat->openFor($application);
+        $chatOpen = $chatThread !== null
+            && $chat->stateFor($application->Status) === ApplicationChatService::STATE_OPEN;
+
+        return view('employer.applications.show', compact(
+            'application',
+            'resumeDocument',
+            'followUpMessages',
+            'chatThread',
+            'chatOpen'
+        ));
     }
 
     public function viewResume(Application $application)
@@ -118,7 +132,7 @@ class EmployerApplicationController extends Controller
     /**
      * Update an application status.
      */
-    public function update(Request $request, Application $application)
+    public function update(Request $request, Application $application, ApplicationChatService $chat)
     {
         $request->validate([
             'Status' => 'required|in:Pending,Accepted,Rejected',
@@ -147,6 +161,10 @@ class EmployerApplicationController extends Controller
             'Description' => $request->Description,
         ]);
         app(ActivityLogger::class)->record('application_status_changed', 'application', $application->ApplicationId, $application->JobId, ['from' => $previousStatus, 'to' => $application->Status]);
+
+        // Approval opens the thread straight away, so the employer does not have to
+        // visit the Messages page first. Only Status itself was changed above.
+        $chat->openFor($application);
 
         if ($request->expectsJson()) {
             return response()->json([

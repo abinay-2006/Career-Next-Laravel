@@ -2,6 +2,10 @@
 
 @section('title', 'Application Details')
 
+@pushOnce('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/application-chat.css') }}?v={{ @filemtime(public_path('assets/css/application-chat.css')) ?: 1 }}">
+@endpushOnce
+
 @section('content')
 <div class="main-content application-detail-page">
     <div class="page-header">
@@ -12,6 +16,25 @@
         </div>
         <a class="back-btn" href="{{ route('jobseeker.applications.index') }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> Back to applications</a>
     </div>
+
+    @if($chatOpen)
+        {{-- Only an approved application has a thread; pending, rejected and withdrawn
+             ones never show this button. --}}
+        <section class="glass-card cn-chat-cta">
+            <div class="cn-chat-cta-text">
+                <span class="cn-chat-cta-title">Chat with the employer</span>
+                <span class="cn-chat-cta-note">
+                    This application was approved, so you and {{ $application->job?->CompanyName ?? 'the employer' }}
+                    can now message here. It does not change your application status.
+                </span>
+            </div>
+
+            <a href="{{ route('jobseeker.messages.show', $chatThread->id) }}" class="cn-chat-btn-thread">
+                <i class="fas fa-comments" aria-hidden="true"></i>
+                Chat with Employer
+            </a>
+        </section>
+    @endif
 
     @if($application->job)
         @php($job = $application->job)

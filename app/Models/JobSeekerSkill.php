@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\SchemaReady;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * The skills and software a job seeker says they know (one row per seeker).
@@ -38,7 +38,7 @@ class JobSeekerSkill extends Model
      */
     public static function findFor(int $jobSeekerId): ?self
     {
-        if ($jobSeekerId <= 0 || !Schema::hasTable('jobseeker_skills')) {
+        if ($jobSeekerId <= 0 || !SchemaReady::hasTable('jobseeker_skills')) {
             return null;
         }
 

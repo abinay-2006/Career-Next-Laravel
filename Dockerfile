@@ -25,6 +25,11 @@ RUN apt-get update \
 
 COPY docker/apache-private-uploads.conf /etc/apache2/conf-available/private-uploads.conf
 RUN a2enconf private-uploads
+COPY docker/apache-static-cache.conf /etc/apache2/conf-available/static-cache.conf
+RUN a2enconf static-cache
+
+# Read after docker-php-ext-opcache.ini, which only loads the extension.
+COPY docker/php-opcache.ini /usr/local/etc/php/conf.d/zz-opcache.ini
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html

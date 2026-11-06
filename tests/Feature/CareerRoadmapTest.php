@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\JobSeeker;
+use App\Support\SchemaReady;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -489,6 +490,9 @@ class CareerRoadmapTest extends TestCase
 
         $this->job(['JobTitle' => 'One']);
 
+        // Both requests are measured cold, or the cached existence guards would
+        // make the second one cheaper for a reason unrelated to the listings.
+        SchemaReady::invalidate();
         DB::enableQueryLog();
         $this->actingAs($seeker, 'jobseeker')->get(route('jobseeker.jobs'))->assertOk();
         $oneListing = count(DB::getQueryLog());
@@ -498,6 +502,7 @@ class CareerRoadmapTest extends TestCase
         $this->job(['JobTitle' => 'Three']);
         DB::flushQueryLog();
 
+        SchemaReady::invalidate();
         $page = $this->actingAs($seeker, 'jobseeker')->get(route('jobseeker.jobs'))->assertOk()->getContent();
         $threeListings = count(DB::getQueryLog());
 

@@ -2,10 +2,13 @@
 
 namespace App\Providers;
 
+use App\Support\SchemaReady;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Http\Request;
 
 class AppServiceProvider extends ServiceProvider
@@ -42,5 +45,14 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // Existence guards are cached because each one is a database round trip;
+        // an un-anchored match would invalidate on any query that merely mentions
+        // a table, so only statements that begin with DDL close the window.
+        DB::listen(function (QueryExecuted $query): void {
+            if (preg_match('/^(?:create|drop|alter|rename|truncate)\b/i', trim($query->sql))) {
+                SchemaReady::invalidate();
+            }
+        });
     }
 }

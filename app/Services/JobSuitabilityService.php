@@ -8,7 +8,7 @@ use App\Models\JobSeekerCareerPreference;
 use App\Models\JobSeekerEducation;
 use App\Models\JobSeekerResume;
 use App\Models\JobSeekerSchoolEducation;
-use Illuminate\Support\Facades\Schema;
+use App\Support\SchemaReady;
 
 /**
  * Job Suitability Assessment.
@@ -1033,7 +1033,7 @@ class JobSuitabilityService
     {
         // Older databases have no preferences table at all; that is "no saved
         // preferences", not an error, and every preference criterion reads it.
-        if (!Schema::hasTable('jobseeker_career_preferences')) {
+        if (!SchemaReady::hasTable('jobseeker_career_preferences')) {
             return null;
         }
 
@@ -1058,17 +1058,17 @@ class JobSuitabilityService
 
         if ($seeker instanceof JobSeeker) {
             $names[] = $this->text($seeker->Qualification ?? null);
-        } elseif (Schema::hasTable('jobseeker_reg') && Schema::hasColumn('jobseeker_reg', 'Qualification')) {
+        } elseif (SchemaReady::hasTable('jobseeker_reg') && SchemaReady::hasColumn('jobseeker_reg', 'Qualification')) {
             $names[] = $this->text((string) JobSeeker::query()->where('JobSeekId', $jobSeekerId)->value('Qualification'));
         }
 
-        if (Schema::hasTable('jobseeker_education')) {
+        if (SchemaReady::hasTable('jobseeker_education')) {
             foreach (JobSeekerEducation::query()->where('JobSeekId', $jobSeekerId)->pluck('Degree') as $degree) {
                 $names[] = $this->text((string) $degree);
             }
         }
 
-        if (Schema::hasTable('jobseeker_school_education')) {
+        if (SchemaReady::hasTable('jobseeker_school_education')) {
             foreach (JobSeekerSchoolEducation::query()->where('JobSeekId', $jobSeekerId)->pluck('Qualification') as $qualification) {
                 $names[] = $this->text((string) $qualification);
             }
@@ -1098,7 +1098,7 @@ class JobSuitabilityService
      */
     private function resumeContent(int $jobSeekerId): array
     {
-        if (!Schema::hasTable('jobseeker_resumes')) {
+        if (!SchemaReady::hasTable('jobseeker_resumes')) {
             return [];
         }
 

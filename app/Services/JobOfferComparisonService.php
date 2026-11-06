@@ -4,9 +4,9 @@ namespace App\Services;
 
 use App\Models\Job;
 use App\Support\JobComparisonState;
+use App\Support\SchemaReady;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Job Offer Comparison Lab.
@@ -308,8 +308,8 @@ class JobOfferComparisonService
         $ids = $jobs->pluck('EmployerId')->filter()->map(static fn ($id) => (int) $id)->values();
 
         if ($ids->isEmpty()
-            || !Schema::hasTable('employer_reg')
-            || !Schema::hasColumn('employer_reg', 'City')
+            || !SchemaReady::hasTable('employer_reg')
+            || !SchemaReady::hasColumn('employer_reg', 'City')
         ) {
             return collect();
         }
@@ -333,9 +333,9 @@ class JobOfferComparisonService
         $ids = $jobs->pluck('JobId')->map(static fn ($id) => (int) $id)->values();
 
         if ($ids->isEmpty()
-            || !Schema::hasTable('logs')
-            || !Schema::hasColumn('logs', 'cdate')
-            || !Schema::hasColumn('logs', 'action')
+            || !SchemaReady::hasTable('logs')
+            || !SchemaReady::hasColumn('logs', 'cdate')
+            || !SchemaReady::hasColumn('logs', 'action')
         ) {
             return collect();
         }

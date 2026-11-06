@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Support\SchemaReady;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * One follow-up message a job seeker delivered to an employer from the
@@ -65,7 +65,7 @@ class ApplicationFollowUpMessage extends Model
      */
     public static function tableIsReady(): bool
     {
-        return Schema::hasTable('application_follow_up_messages');
+        return SchemaReady::hasTable('application_follow_up_messages');
     }
 
     /**

@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Job;
 use App\Models\JobSeekerResume;
 use App\Models\JobSeekerSkill;
-use Illuminate\Support\Facades\Schema;
+use App\Support\SchemaReady;
 
 /**
  * Indicates how well a Job Seeker's recorded skills overlap with an approved job.
@@ -106,7 +106,7 @@ class JobMatchService
      */
     public function resumeSkillNames(int|string $jobSeekerId): array
     {
-        if (!Schema::hasTable('jobseeker_resumes')) {
+        if (!SchemaReady::hasTable('jobseeker_resumes')) {
             return [];
         }
 

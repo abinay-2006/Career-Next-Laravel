@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Job;
+use App\Support\SchemaReady;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Job Quality Checker.
@@ -303,7 +303,7 @@ class JobQualityService
 
         $table = method_exists($employer, 'getTable') ? $employer->getTable() : null;
 
-        if ($table !== null && !Schema::hasColumn($table, $column)) {
+        if ($table !== null && !SchemaReady::hasColumn($table, $column)) {
             return '';
         }
 

@@ -4,6 +4,7 @@
 
 @pushOnce('styles')
 <link rel="stylesheet" href="{{ asset('assets/css/follow-up-messages.css') }}?v={{ @filemtime(public_path('assets/css/follow-up-messages.css')) ?: 1 }}">
+<link rel="stylesheet" href="{{ asset('assets/css/application-chat.css') }}?v={{ @filemtime(public_path('assets/css/application-chat.css')) ?: 1 }}">
 @endpushOnce
 
 @section('content')
@@ -306,6 +307,28 @@
             These messages were sent by the applicant from their Follow-up Coach. Marking one as seen only
             tells the applicant you read it - it never changes the application status below.
         </p>
+
+    </div>
+
+    @endif
+
+    @if($chatOpen)
+
+    <!-- Approved: the applicant can now write here, and only here, about this role. -->
+    <div class="glass-card cn-chat-cta">
+
+        <div class="cn-chat-cta-text">
+            <span class="cn-chat-cta-title">Chat with this applicant</span>
+            <span class="cn-chat-cta-note">
+                Messaging opened when you accepted this application. It is separate from the follow-up
+                messages above and never changes the decision below.
+            </span>
+        </div>
+
+        <a href="{{ route('employer.messages.show', $chatThread->id) }}" class="cn-chat-btn-thread">
+            <i class="fas fa-comments" aria-hidden="true"></i>
+            Chat with Applicant
+        </a>
 
     </div>
 

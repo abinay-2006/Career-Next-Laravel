@@ -10,12 +10,12 @@ use App\Services\JobMatchService;
 use App\Services\JobOfferComparisonService;
 use App\Services\JobSuitabilityService;
 use App\Support\JobComparisonState;
+use App\Support\SchemaReady;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class JobComparisonController extends Controller
@@ -238,7 +238,7 @@ class JobComparisonController extends Controller
      */
     private function savedExtras(array $compared): Collection
     {
-        if (!Schema::hasTable('saved_jobs')) {
+        if (!SchemaReady::hasTable('saved_jobs')) {
             return collect();
         }
 

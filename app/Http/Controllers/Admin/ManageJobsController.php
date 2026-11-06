@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActivityLogger;
+use App\Support\SchemaReady;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use App\Services\ActivityLogger;
 
 class ManageJobsController extends Controller
 {
@@ -24,7 +24,7 @@ class ManageJobsController extends Controller
         // EmployerId was added after the original job table. Keep the admin
         // review page compatible with older installations while showing the
         // employer registration details whenever that relationship exists.
-        if (Schema::hasColumn('job_master', 'EmployerId') && Schema::hasTable('employer_reg')) {
+        if (SchemaReady::hasColumn('job_master', 'EmployerId') && SchemaReady::hasTable('employer_reg')) {
             $jobsQuery->leftJoin('employer_reg', 'job_master.EmployerId', '=', 'employer_reg.EmployerId')
                 ->select('job_master.*',
                     'employer_reg.ContactPerson as EmployerContactPerson',

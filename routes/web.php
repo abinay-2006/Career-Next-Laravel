@@ -35,6 +35,8 @@ use App\Http\Controllers\JobSeeker\SavedJobController;
 use App\Http\Controllers\JobSeeker\CareerPreferencesController;
 use App\Http\Controllers\JobSeeker\JobComparisonController;
 use App\Http\Controllers\JobSeeker\ApplicationFollowUpController;
+use App\Http\Controllers\Employer\ChatController as EmployerChatController;
+use App\Http\Controllers\JobSeeker\ChatController as JobSeekerChatController;
 // Route
 
 // Home Page Route
@@ -245,6 +247,23 @@ Route::prefix('employer')
         Route::post('follow-up-messages/{message}/seen', [FollowUpMessageController::class, 'seen'])
             ->whereNumber('message')->middleware('throttle:60,1')->name('followupmessages.seen');
 
+        // Two-way chat on an approved application. The thread opens when this employer
+        // accepts an applicant and suspends or closes again if that decision changes;
+        // it never writes to the application row - see ApplicationChatService.
+        Route::get('/messages', [EmployerChatController::class, 'index'])->name('messages.index');
+
+        Route::get('/messages/{conversation}', [EmployerChatController::class, 'show'])
+            ->whereNumber('conversation')->name('messages.show');
+
+        Route::get('/messages/{conversation}/poll', [EmployerChatController::class, 'poll'])
+            ->whereNumber('conversation')->middleware('throttle:60,1')->name('messages.poll');
+
+        Route::get('/messages/{conversation}/history', [EmployerChatController::class, 'history'])
+            ->whereNumber('conversation')->middleware('throttle:60,1')->name('messages.history');
+
+        Route::post('/messages/{conversation}/send', [EmployerChatController::class, 'send'])
+            ->whereNumber('conversation')->middleware('throttle:20,1')->name('messages.send');
+
         //Profile Routes
         Route::get('/profile', [EmployerProfileController::class, 'index'])
             ->name('profile.index');
@@ -285,6 +304,22 @@ Route::prefix('jobseeker')
             ->whereNumber('application')->middleware('throttle:30,1')->name('followup.activity');
         Route::post('/follow-up-coach/{application}/prep', [ApplicationFollowUpController::class, 'prep'])
             ->whereNumber('application')->middleware('throttle:60,1')->name('followup.prep');
+
+        // Two-way chat with the employer of an approved application. Separate from the
+        // coach above: the seeker never edits an official status from here.
+        Route::get('/messages', [JobSeekerChatController::class, 'index'])->name('messages.index');
+
+        Route::get('/messages/{conversation}', [JobSeekerChatController::class, 'show'])
+            ->whereNumber('conversation')->name('messages.show');
+
+        Route::get('/messages/{conversation}/poll', [JobSeekerChatController::class, 'poll'])
+            ->whereNumber('conversation')->middleware('throttle:60,1')->name('messages.poll');
+
+        Route::get('/messages/{conversation}/history', [JobSeekerChatController::class, 'history'])
+            ->whereNumber('conversation')->middleware('throttle:60,1')->name('messages.history');
+
+        Route::post('/messages/{conversation}/send', [JobSeekerChatController::class, 'send'])
+            ->whereNumber('conversation')->middleware('throttle:20,1')->name('messages.send');
         Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
         Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:5,10')->name('feedback.store');
 

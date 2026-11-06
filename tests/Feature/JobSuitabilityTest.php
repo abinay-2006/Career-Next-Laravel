@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Job;
 use App\Models\JobSeeker;
 use App\Services\JobSuitabilityService;
+use App\Support\SchemaReady;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -482,6 +483,9 @@ class JobSuitabilityTest extends TestCase
 
         $this->job(['JobTitle' => 'One']);
 
+        // Both requests are measured cold, or the cached existence guards would
+        // make the second one cheaper for a reason unrelated to the listings.
+        SchemaReady::invalidate();
         DB::enableQueryLog();
         $this->actingAs($seeker, 'jobseeker')->get(route('jobseeker.jobs'))->assertOk();
         $oneListing = count(DB::getQueryLog());
@@ -491,6 +495,7 @@ class JobSuitabilityTest extends TestCase
         $this->job(['JobTitle' => 'Three']);
         DB::flushQueryLog();
 
+        SchemaReady::invalidate();
         $this->actingAs($seeker, 'jobseeker')->get(route('jobseeker.jobs'))->assertOk();
         $threeListings = count(DB::getQueryLog());
 

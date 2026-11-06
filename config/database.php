@@ -59,8 +59,16 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+            // Reaching a database outside the app's own region costs about a
+            // second of connect and TLS handshake before the first query, which
+            // every click would otherwise pay again. Setting DB_PERSISTENT=true
+            // reuses each Apache worker's connection instead. If the database
+            // closes idle connections first, requests start failing with
+            // "MySQL server has gone away"; unset it and raise the server's
+            // wait_timeout, or keep the connections on one short-lived pool.
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_PERSISTENT => (bool) env('DB_PERSISTENT', false),
             ]) : [],
         ],
 

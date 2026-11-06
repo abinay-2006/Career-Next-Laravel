@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\Job;
 use App\Models\JobSeekerCareerPreference;
+use App\Support\SchemaReady;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * Deterministic "Preference Match". When the seeker has named target job
@@ -430,7 +430,7 @@ class CareerPreferenceMatchService
         $columns = ['JobId', 'CompanyName', 'JobTitle', 'Vacancy', 'MinQualification', 'Description', 'SalaryFrom', 'SalaryTo', 'Status'];
 
         foreach (['ExperienceLevel', 'WorkArrangement', 'EmploymentType'] as $column) {
-            if (Schema::hasColumn('job_master', $column)) {
+            if (SchemaReady::hasColumn('job_master', $column)) {
                 $columns[] = $column;
             }
         }

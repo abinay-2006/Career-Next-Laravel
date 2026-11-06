@@ -93,7 +93,13 @@
 .cn-admin-header-account { display: flex; min-width: 0; align-items: center; gap: 1rem; }
 .cn-admin-header-account form, .cn-admin-drawer-account form { margin: 0; }
 .cn-admin-user-summary { display: flex; min-width: 0; align-items: center; gap: .7rem; }
-.cn-admin-user-avatar { display: inline-flex; width: 2.4rem; height: 2.4rem; flex: 0 0 2.4rem; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255, 255, 255, .2); color: inherit; }
+.cn-admin-user-avatar { display: inline-flex; width: 2.4rem; height: 2.4rem; flex: 0 0 2.4rem; align-items: center; justify-content: center; overflow: hidden; border-radius: 50%; background: rgba(255, 255, 255, .2); color: inherit; }
+.cn-admin-user-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+/* The role sheets repeat .user-avatar with a 32px height and a 42px min-width, which draws an oval.
+   Height follows the used width instead, so every circular avatar stays a true circle that clips. */
+.user-avatar { height: auto; aspect-ratio: 1; overflow: hidden; }
+.user-avatar > img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .cn-admin-user-copy { display: grid; min-width: 0; line-height: 1.25; }
 .cn-admin-user-copy strong, .cn-admin-user-copy small { overflow: hidden; max-width: 14rem; color: inherit; text-overflow: ellipsis; white-space: nowrap; }
 .cn-admin-user-copy strong { font-size: .82rem; font-weight: 600; }
