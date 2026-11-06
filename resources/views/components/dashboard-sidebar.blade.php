@@ -29,6 +29,7 @@
             ['Resume Builder', 'jobseeker.resumes.index', 'fas fa-file-lines'],
             ['My Resumes', 'jobseeker.my-resumes.index', 'fas fa-folder-open'],
             ['My Applications', 'jobseeker.applications.index', 'fas fa-clock-rotate-left'],
+            ['Follow-up Coach', 'jobseeker.followup.index', 'fas fa-envelope-circle-check'],
             ['Feedback', 'jobseeker.feedback.create', 'fas fa-comment'],
             ['Career News', 'news.index', 'fas fa-newspaper'],
         ],

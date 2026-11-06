@@ -29,4 +29,13 @@ class Application extends Model
     {
         return $this->belongsTo(JobSeeker::class, 'JobSeekId', 'JobSeekId');
     }
+
+    /**
+     * Follow-up activity the seeker recorded themselves. Employer-managed status
+     * changes are not stored here.
+     */
+    public function followUps()
+    {
+        return $this->hasMany(JobSeekerApplicationFollowUp::class, 'ApplicationId', 'ApplicationId');
+    }
 }

@@ -33,6 +33,7 @@ use App\Http\Controllers\JobSeeker\ResumeBuilderController;
 use App\Http\Controllers\JobSeeker\SavedJobController;
 use App\Http\Controllers\JobSeeker\CareerPreferencesController;
 use App\Http\Controllers\JobSeeker\JobComparisonController;
+use App\Http\Controllers\JobSeeker\ApplicationFollowUpController;
 // Route
 
 // Home Page Route
@@ -262,6 +263,16 @@ Route::prefix('jobseeker')
         Route::delete('/resume-builder/{resume}', [ResumeBuilderController::class, 'destroy'])->name('resumes.destroy');
         Route::get('/applications', [ApplicationHistoryController::class, 'index'])->name('applications.index');
         Route::get('/applications/{application}', [ApplicationHistoryController::class, 'show'])->name('applications.show');
+
+        // Application Follow-up Coach: advice and drafts only, nothing is sent for the seeker.
+        Route::get('/follow-up-coach', [ApplicationFollowUpController::class, 'index'])->name('followup.index');
+        Route::post('/follow-up-coach/preferences', [ApplicationFollowUpController::class, 'intervalSave'])->name('followup.preferences');
+        Route::post('/follow-up-coach/{application}/message', [ApplicationFollowUpController::class, 'message'])
+            ->whereNumber('application')->middleware('throttle:60,1')->name('followup.message');
+        Route::post('/follow-up-coach/{application}/activity', [ApplicationFollowUpController::class, 'activity'])
+            ->whereNumber('application')->middleware('throttle:30,1')->name('followup.activity');
+        Route::post('/follow-up-coach/{application}/prep', [ApplicationFollowUpController::class, 'prep'])
+            ->whereNumber('application')->middleware('throttle:60,1')->name('followup.prep');
         Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
         Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:5,10')->name('feedback.store');
 

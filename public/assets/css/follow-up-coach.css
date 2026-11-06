@@ -1,0 +1,1023 @@
+/*
+ * Application Follow-up Coach.
+ *
+ * Theme-aware only: every colour comes from the tokens in theme.css, so the six
+ * palettes and both appearances work without page-specific dark rules. Status and
+ * recommendation text is pulled toward --theme-text-primary because the raw
+ * success/warning/error tokens do not hold AA at chip size on a light card.
+ */
+.cn-fu-page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-bottom: 2.5rem;
+}
+
+/* ─────────────────────────── HERO ─────────────────────────── */
+.cn-fu-hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.4rem 1.5rem;
+  margin-bottom: 1.1rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 16px;
+  background: var(--theme-card-background);
+  box-shadow: var(--theme-shadow);
+}
+
+.cn-fu-hero-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 52px;
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  /* The AA fill recipe: a plain --theme-primary is too light for white text in
+     the lighter palettes. */
+  background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+  color: var(--theme-primary-contrast);
+  font-size: 1.3rem;
+}
+
+html[data-color] .cn-fu-hero-copy :is(h1, p) {
+  color: var(--theme-heading);
+}
+
+html[data-color] .cn-fu-hero-copy p {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-hero-copy h1 {
+  margin: 0 0 .25rem;
+  font-size: clamp(1.35rem, 2.3vw, 1.7rem);
+  font-weight: 750;
+}
+
+.cn-fu-hero-copy p {
+  margin: 0;
+  font-size: .92rem;
+  line-height: 1.5;
+}
+
+/* ─────────────────────────── STATISTICS ─────────────────────────── */
+.cn-fu-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: .75rem;
+  margin-bottom: 1.1rem;
+}
+
+.cn-fu-stat {
+  display: grid;
+  gap: .15rem;
+  padding: .95rem 1.05rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 14px;
+  background: var(--theme-card-background);
+}
+
+html[data-color] .cn-fu-stat :is(.cn-fu-stat-label, .cn-fu-stat-detail) {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-stat-label {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.cn-fu-stat-value {
+  color: var(--theme-heading);
+  font-size: 1.6rem;
+  font-weight: 750;
+  line-height: 1.1;
+}
+
+.cn-fu-stat-detail {
+  font-size: .78rem;
+  line-height: 1.35;
+}
+
+/* ─────────────────────────── SHARED CARD ─────────────────────────── */
+.cn-fu-card {
+  padding: 1.15rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 16px;
+  background: var(--theme-card-background);
+}
+
+.cn-fu-controls {
+  display: grid;
+  gap: 1rem;
+}
+
+.cn-fu-search {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: .8rem;
+}
+
+.cn-fu-field {
+  display: grid;
+  gap: .3rem;
+  min-width: 0;
+}
+
+html[data-color] .cn-fu-field > label {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-field > label {
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+.cn-fu-field > label span {
+  color: var(--theme-text-secondary);
+  font-weight: 500;
+}
+
+.cn-fu-field :is(input, select, textarea) {
+  width: 100%;
+  padding: .55rem .7rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  background: var(--theme-input-background);
+  color: var(--theme-input-text);
+  font-size: .88rem;
+  font-family: inherit;
+}
+
+.cn-fu-field textarea {
+  min-height: 12rem;
+  line-height: 1.6;
+  resize: vertical;
+  white-space: pre-wrap;
+}
+
+.cn-fu-field :is(input, select, textarea):focus-visible {
+  outline: 2px solid var(--theme-focus-outline);
+  outline-offset: 2px;
+  border-color: var(--theme-primary);
+}
+
+/* ─────────────────────────── TABS ─────────────────────────── */
+.cn-fu-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+/* The class carries "btn-" so the dark sheet's generic link recolour cannot
+   reach a tab; the active chip below has to win on its own terms. */
+html[data-color] .cn-fu-tab.cn-fu-btn-tab {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-tab {
+  padding: .4rem .8rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 999px;
+  background: transparent;
+  font-size: .8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.cn-fu-tab:hover {
+  border-color: var(--theme-primary);
+  text-decoration: none;
+}
+
+html[data-color] .cn-fu-tab.is-active {
+  background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+  border-color: transparent;
+  color: var(--theme-primary-contrast);
+}
+
+.cn-fu-interval {
+  display: grid;
+  gap: .4rem;
+  padding-top: .9rem;
+  border-top: 1px solid var(--theme-border);
+}
+
+html[data-color] .cn-fu-interval > label,
+html[data-color] .cn-fu-interval-note {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-interval > label {
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.cn-fu-interval-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: center;
+}
+
+.cn-fu-interval-row select {
+  padding: .5rem .7rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  background: var(--theme-input-background);
+  color: var(--theme-input-text);
+  font-size: .86rem;
+  font-family: inherit;
+}
+
+.cn-fu-interval-note {
+  font-size: .76rem;
+  line-height: 1.4;
+}
+
+/* ─────────────────────────── BUTTONS ─────────────────────────── */
+html[data-color] .cn-fu-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .55rem .95rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-size: .84rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter .18s ease, background-color .18s ease, border-color .18s ease;
+}
+
+html[data-color] .cn-fu-btn:focus-visible {
+  outline: 2px solid var(--theme-focus-outline);
+  outline-offset: 2px;
+}
+
+html[data-color] .cn-fu-btn-primary {
+  background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary));
+  color: var(--theme-primary-contrast);
+}
+
+html[data-color] .cn-fu-btn-primary:hover {
+  background: color-mix(in srgb, var(--theme-primary) 74%, var(--theme-text-primary));
+}
+
+html[data-color] .cn-fu-btn-quiet {
+  background: var(--theme-hover);
+  border-color: var(--theme-border);
+  color: var(--theme-text-secondary);
+}
+
+html[data-color] .cn-fu-btn-quiet:hover {
+  border-color: var(--theme-primary);
+  color: var(--theme-heading);
+}
+
+.cn-fu-btn[disabled] {
+  opacity: .6;
+  cursor: progress;
+}
+
+/* ─────────────────────────── APPLICATION CARD ─────────────────────────── */
+.cn-fu-app {
+  display: grid;
+  gap: 1rem;
+}
+
+.cn-fu-app-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+html[data-color] .cn-fu-app-heading :is(h2, p) {
+  color: var(--theme-heading);
+}
+
+.cn-fu-app-heading h2 {
+  margin: 0 0 .2rem;
+  font-size: 1.05rem;
+  font-weight: 720;
+}
+
+html[data-color] .cn-fu-app-company {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-app-company {
+  margin: 0;
+  font-size: .84rem;
+  font-weight: 600;
+}
+
+.cn-fu-app-company i {
+  margin-right: .3rem;
+  color: var(--theme-primary);
+}
+
+.cn-fu-app-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  align-items: center;
+}
+
+/* Status chips: the raw --theme-* status tokens measure 2.5-4.4:1 at chip size,
+   so the text is pulled toward the page ink and stays palette-aware. */
+.cn-fu-badge,
+.cn-fu-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .3rem .62rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+html[data-color] .cn-fu-badge--awaiting,
+html[data-color] .cn-fu-badge--interview {
+  color: color-mix(in srgb, var(--theme-warning) 45%, var(--theme-text-primary));
+  background: color-mix(in srgb, var(--theme-warning) 14%, var(--theme-card-background));
+  border-color: color-mix(in srgb, var(--theme-warning) 32%, var(--theme-border));
+}
+
+html[data-color] .cn-fu-badge--accepted {
+  color: color-mix(in srgb, var(--theme-success) 45%, var(--theme-text-primary));
+  background: color-mix(in srgb, var(--theme-success) 14%, var(--theme-card-background));
+  border-color: color-mix(in srgb, var(--theme-success) 32%, var(--theme-border));
+}
+
+html[data-color] .cn-fu-badge--rejected,
+html[data-color] .cn-fu-badge--withdrawn {
+  color: color-mix(in srgb, var(--theme-error) 42%, var(--theme-text-primary));
+  background: color-mix(in srgb, var(--theme-error) 12%, var(--theme-card-background));
+  border-color: color-mix(in srgb, var(--theme-error) 30%, var(--theme-border));
+}
+
+html[data-color] .cn-fu-chip {
+  color: var(--theme-text-secondary);
+  background: var(--theme-hover);
+  border-color: var(--theme-border);
+  font-weight: 600;
+}
+
+html[data-color] .cn-fu-chip--inactive {
+  color: color-mix(in srgb, var(--theme-error) 42%, var(--theme-text-primary));
+  background: color-mix(in srgb, var(--theme-error) 10%, var(--theme-card-background));
+  border-color: color-mix(in srgb, var(--theme-error) 26%, var(--theme-border));
+}
+
+html[data-color] .cn-fu-chip--follow_up {
+  color: color-mix(in srgb, var(--theme-warning) 45%, var(--theme-text-primary));
+  background: color-mix(in srgb, var(--theme-warning) 12%, var(--theme-card-background));
+  border-color: color-mix(in srgb, var(--theme-warning) 30%, var(--theme-border));
+}
+
+.cn-fu-app-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .8rem;
+  margin: 0;
+  padding-top: .2rem;
+}
+
+.cn-fu-app-meta > div {
+  display: grid;
+  gap: .2rem;
+  min-width: 0;
+}
+
+html[data-color] .cn-fu-app-meta dt {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-app-meta dt {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.cn-fu-app-meta dt i {
+  margin-right: .25rem;
+  color: var(--theme-primary);
+}
+
+html[data-color] .cn-fu-app-meta dd {
+  color: var(--theme-text-primary);
+}
+
+.cn-fu-app-meta dd {
+  margin: 0;
+  font-size: .86rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* ─────────────────────────── RECOMMENDATION ─────────────────────────── */
+.cn-fu-callout {
+  display: grid;
+  gap: .45rem;
+  padding: .95rem 1.05rem;
+  border: 1px solid var(--theme-border);
+  border-left: 4px solid var(--theme-primary);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--theme-hover) 60%, var(--theme-card-background));
+}
+
+html[data-color] .cn-fu-callout :is(p) {
+  color: var(--theme-text-primary);
+}
+
+.cn-fu-callout-head {
+  margin: 0;
+  font-size: .95rem;
+  font-weight: 720;
+}
+
+.cn-fu-callout-head i {
+  margin-right: .35rem;
+  color: var(--theme-primary);
+}
+
+.cn-fu-callout-reason,
+.cn-fu-callout-next {
+  margin: 0;
+  font-size: .85rem;
+  line-height: 1.55;
+}
+
+.cn-fu-callout-next strong {
+  color: var(--theme-heading);
+  font-weight: 700;
+}
+
+html[data-color] .cn-fu-callout-clock {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-callout-clock {
+  margin: 0;
+  font-size: .76rem;
+  font-style: italic;
+}
+
+.cn-fu-callout .cn-fu-btn {
+  justify-self: start;
+  margin-top: .2rem;
+}
+
+.cn-fu-callout--info {
+  border-left-color: var(--theme-primary);
+}
+
+.cn-fu-callout--warning {
+  border-left-color: var(--theme-warning);
+}
+
+.cn-fu-callout--warning .cn-fu-callout-head i {
+  color: color-mix(in srgb, var(--theme-warning) 45%, var(--theme-text-primary));
+}
+
+.cn-fu-callout--danger {
+  border-left-color: var(--theme-error);
+}
+
+.cn-fu-callout--danger .cn-fu-callout-head i {
+  color: color-mix(in srgb, var(--theme-error) 42%, var(--theme-text-primary));
+}
+
+.cn-fu-callout--positive {
+  border-left-color: var(--theme-success);
+}
+
+.cn-fu-callout--positive .cn-fu-callout-head i {
+  color: color-mix(in srgb, var(--theme-success) 45%, var(--theme-text-primary));
+}
+
+/* ─────────────────────────── FOLDS ─────────────────────────── */
+.cn-fu-folds {
+  display: grid;
+  gap: .55rem;
+}
+
+.cn-fu-fold {
+  border: 1px solid var(--theme-border);
+  border-radius: 12px;
+  background: var(--theme-card-background);
+}
+
+html[data-color] .cn-fu-fold > summary {
+  color: var(--theme-heading);
+}
+
+.cn-fu-fold > summary {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .7rem .9rem;
+  font-size: .85rem;
+  font-weight: 680;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cn-fu-fold > summary::-webkit-details-marker {
+  display: none;
+}
+
+.cn-fu-fold > summary i {
+  color: var(--theme-primary);
+}
+
+.cn-fu-fold > summary::after {
+  content: "\f054";
+  margin-left: auto;
+  font-family: "Font Awesome 6 Free", "FontAwesome";
+  font-weight: 900;
+  font-size: .7rem;
+  color: var(--theme-text-secondary);
+  transition: transform .18s ease;
+}
+
+.cn-fu-fold[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.cn-fu-fold > *:not(summary) {
+  padding: 0 .9rem .9rem;
+  margin: 0;
+}
+
+.cn-fu-fold > ul + form,
+.cn-fu-fold > ol + p {
+  padding-top: .2rem;
+}
+
+.cn-fu-fold-count {
+  padding: .1rem .45rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 999px;
+  background: var(--theme-hover);
+  color: var(--theme-text-secondary);
+  font-size: .7rem;
+  font-weight: 700;
+}
+
+.cn-fu-subfold {
+  padding: .5rem .7rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--theme-hover) 45%, var(--theme-card-background));
+}
+
+html[data-color] .cn-fu-subfold > summary {
+  color: var(--theme-heading);
+}
+
+.cn-fu-subfold > summary {
+  font-size: .82rem;
+  font-weight: 660;
+  cursor: pointer;
+}
+
+.cn-fu-subfold > summary i {
+  margin-right: .35rem;
+  color: var(--theme-primary);
+}
+
+html[data-color] .cn-fu-description,
+html[data-color] .cn-fu-description p {
+  color: var(--theme-text-primary);
+}
+
+.cn-fu-description {
+  padding-top: .5rem;
+  font-size: .85rem;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+/* ─────────────────────────── TIMELINE ─────────────────────────── */
+.cn-fu-timeline {
+  display: grid;
+  gap: .7rem;
+  margin: 0;
+  padding: .2rem 0 0 1.1rem;
+  list-style: none;
+  border-left: 2px solid var(--theme-border);
+}
+
+.cn-fu-timeline > li {
+  position: relative;
+  display: grid;
+  gap: .1rem;
+}
+
+.cn-fu-timeline-dot {
+  position: absolute;
+  top: .35rem;
+  left: -1.6rem;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--theme-primary);
+  border-radius: 50%;
+  background: var(--theme-card-background);
+}
+
+html[data-color] .cn-fu-timeline :is(time, span) {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-timeline-label {
+  color: var(--theme-heading) !important;
+  font-size: .85rem;
+  font-weight: 680;
+}
+
+.cn-fu-timeline time {
+  display: block;
+  font-size: .78rem;
+}
+
+.cn-fu-timeline-source {
+  display: block;
+  font-size: .72rem;
+  font-style: italic;
+}
+
+/* ─────────────────────────── ACTIVITY ─────────────────────────── */
+.cn-fu-history {
+  display: grid;
+  gap: .55rem;
+  margin: 0 0 .8rem;
+  padding: 0;
+  list-style: none;
+}
+
+.cn-fu-history > li {
+  display: grid;
+  gap: .15rem;
+  padding: .6rem .75rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--theme-hover) 45%, var(--theme-card-background));
+}
+
+html[data-color] .cn-fu-history > li.cn-fu-quiet {
+  color: var(--theme-text-secondary);
+}
+
+html[data-color] .cn-fu-history :is(time, .cn-fu-history-note) {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-history-label {
+  color: var(--theme-heading);
+  font-size: .84rem;
+  font-weight: 680;
+}
+
+.cn-fu-history time {
+  font-size: .76rem;
+}
+
+.cn-fu-history-note {
+  margin: 0;
+  font-size: .8rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.cn-fu-activity {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: .7rem;
+  align-items: end;
+  padding-top: .2rem;
+  border-top: 1px solid var(--theme-border);
+}
+
+.cn-fu-field-note {
+  grid-column: 1 / -1;
+}
+
+.cn-fu-activity .cn-fu-btn {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+/* ─────────────────────────── GENERATOR ─────────────────────────── */
+.cn-fu-generator {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .7rem;
+  align-items: end;
+}
+
+.cn-fu-generator .cn-fu-field-note,
+.cn-fu-generator .cn-fu-field {
+  grid-column: 1 / -1;
+}
+
+.cn-fu-generator [data-fu-generate] {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.cn-fu-copy-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .5rem;
+  align-items: center;
+}
+
+.cn-fu-generator-foot {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  align-items: center;
+  padding-top: .3rem;
+}
+
+html[data-color] .cn-fu-hint {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-hint {
+  font-size: .78rem;
+  line-height: 1.4;
+}
+
+/* ─────────────────────────── PREPARATION ─────────────────────────── */
+.cn-fu-progress {
+  margin: 0 0 .5rem;
+  font-size: .78rem;
+  font-weight: 650;
+}
+
+html[data-color] .cn-fu-progress {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-checklist {
+  display: grid;
+  gap: .4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cn-fu-check {
+  display: flex;
+  align-items: flex-start;
+  gap: .55rem;
+  width: 100%;
+  padding: .55rem .7rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 10px;
+  background: var(--theme-card-background);
+  font-size: .84rem;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .18s ease, background-color .18s ease;
+}
+
+html[data-color] .cn-fu-check {
+  color: var(--theme-text-primary);
+}
+
+html[data-color] .cn-fu-check:hover {
+  border-color: var(--theme-primary);
+}
+
+html[data-color] .cn-fu-check.is-done {
+  background: color-mix(in srgb, var(--theme-success) 12%, var(--theme-card-background));
+  border-color: color-mix(in srgb, var(--theme-success) 30%, var(--theme-border));
+}
+
+.cn-fu-check i {
+  margin-top: .1rem;
+  color: var(--theme-primary);
+}
+
+html[data-color] .cn-fu-check.is-done i {
+  color: color-mix(in srgb, var(--theme-success) 45%, var(--theme-text-primary));
+}
+
+.cn-fu-check[disabled] {
+  opacity: .6;
+  cursor: progress;
+}
+
+.cn-fu-skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: .8rem;
+  margin-top: .9rem;
+  padding-top: .9rem;
+  border-top: 1px solid var(--theme-border);
+}
+
+html[data-color] .cn-fu-skills :is(h3, li) {
+  color: var(--theme-text-primary);
+}
+
+.cn-fu-skills h3 {
+  margin: 0 0 .35rem;
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-skills ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cn-fu-skills li {
+  padding: .28rem .6rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  background: var(--theme-hover);
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+/* ─────────────────────────── SHARED TEXT ─────────────────────────── */
+html[data-color] .cn-fu-page :is(.cn-fu-quiet, .cn-fu-count) {
+  color: var(--theme-text-secondary);
+}
+
+.cn-fu-quiet {
+  margin: 0;
+  font-size: .8rem;
+  line-height: 1.55;
+}
+
+.cn-fu-count {
+  margin: 0 0 .7rem;
+  font-size: .8rem;
+  font-weight: 600;
+}
+
+.cn-fu-code {
+  padding: .1rem .35rem;
+  border-radius: 6px;
+  background: var(--theme-hover);
+  font-size: .78rem;
+}
+
+html[data-color] .cn-fu-code {
+  color: var(--theme-text-primary);
+}
+
+/* ─────────────────────────── EMPTY / PAGINATION ─────────────────────────── */
+.cn-fu-empty {
+  display: grid;
+  justify-items: center;
+  gap: .5rem;
+  padding: 2.4rem 1.25rem;
+  text-align: center;
+}
+
+.cn-fu-empty-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: var(--theme-hover);
+  color: var(--theme-primary);
+  font-size: 1.4rem;
+}
+
+.cn-fu-empty h2 {
+  margin: .3rem 0 0;
+  color: var(--theme-heading);
+  font-size: 1.05rem;
+  font-weight: 720;
+}
+
+html[data-color] .cn-fu-empty p {
+  color: var(--theme-text-secondary);
+  max-width: 46rem;
+}
+
+.cn-fu-empty p {
+  margin: 0;
+  font-size: .88rem;
+  line-height: 1.6;
+}
+
+.cn-fu-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  justify-content: center;
+  margin-top: .5rem;
+}
+
+.cn-fu-pagination {
+  display: flex;
+  justify-content: center;
+  padding: .8rem;
+}
+
+/* The framework's own pagination view keeps Bootstrap's light-grey results line
+   and a primary-filled active page, neither of which survives the themed cards or
+   the orange/light contrast. !important because theme-dark-mode.css sets the same
+   colour through a four-class :is() block that no plain rule can out-specify. */
+html[data-color] .cn-fu-pagination :is(p, small, .text-muted) {
+  color: var(--theme-text-secondary) !important;
+}
+
+html[data-color] .cn-fu-pagination .page-item.active > .page-link {
+  background: color-mix(in srgb, var(--theme-primary) 62%, var(--theme-text-primary)) !important;
+  border-color: transparent !important;
+  color: var(--theme-primary-contrast) !important;
+}
+
+html[data-color] .cn-fu-pagination .page-item.disabled > .page-link {
+  color: var(--theme-text-secondary) !important;
+}
+
+/* ─────────────────────────── RESPONSIVE ─────────────────────────── */
+@media (max-width: 860px) {
+  .cn-fu-search {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .cn-fu-app-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .cn-fu-hero {
+    align-items: flex-start;
+    padding: 1.1rem;
+  }
+
+  .cn-fu-hero-icon {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    font-size: 1.15rem;
+  }
+
+  .cn-fu-search,
+  .cn-fu-activity,
+  .cn-fu-generator {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cn-fu-app-meta {
+    grid-template-columns: minmax(0, 1fr);
+    gap: .6rem;
+  }
+
+  .cn-fu-card {
+    padding: 1rem .9rem;
+  }
+
+  /* Long generated drafts must not push the page sideways on a phone. */
+  .cn-fu-copy-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cn-fu-copy-row .cn-fu-btn {
+    justify-self: start;
+  }
+
+  .cn-fu-field textarea {
+    min-height: 10rem;
+    font-size: .84rem;
+  }
+
+  .cn-fu-fold > summary {
+    font-size: .82rem;
+    padding: .65rem .75rem;
+  }
+}
