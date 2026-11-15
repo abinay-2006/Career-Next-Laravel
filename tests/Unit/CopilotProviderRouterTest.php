@@ -3,157 +3,589 @@
 namespace Tests\Unit;
 
 use App\Services\CopilotCapabilityRegistry;
+use App\Services\CopilotProviderModelResolver;
 use App\Services\CopilotProviderRouter;
 use App\Services\CopilotToolDispatcher;
 use App\Services\FreeLlmApiCopilotException;
 use App\Services\FreeLlmApiCopilotService;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
+/**
+ * Provider routing (OpenRouter -> NavyAI in production, FreeLLMAPI locally) and dynamic model
+ * discovery from the providers' catalogues. All provider traffic is faked; nothing leaves the process.
+ */
 class CopilotProviderRouterTest extends TestCase
 {
+    private const OR_MODELS = 'https://openrouter.ai/api/v1/models*';
+    private const OR_CHAT = 'https://openrouter.ai/api/v1/chat/completions';
+    private const NAVY_MODELS = 'https://api.navy/v1/models*';
+    private const NAVY_CHAT = 'https://api.navy/v1/chat/completions';
+    private const LOCAL_CHAT = 'http://127.0.0.1:31415/v1/chat/completions';
+
     protected function setUp(): void
     {
         parent::setUp();
         config([
             'services.ai.provider' => 'openrouter', 'services.ai.fallback_provider' => 'navyai',
             'services.ai.provider_fallback_enabled' => true, 'services.ai.total_timeout_seconds' => 24,
-            'services.ai.providers.openrouter' => ['base_url' => 'https://openrouter.ai/api/v1', 'key' => 'or-test', 'enabled' => true],
-            'services.ai.providers.navyai' => ['base_url' => 'https://api.navy/v1', 'key' => 'navy-test', 'enabled' => true],
+            'services.ai.model_catalog_cache_seconds' => 600, 'services.ai.model_catalog_stale_seconds' => 86400,
+            'services.ai.providers.openrouter' => [
+                'base_url' => 'https://openrouter.ai/api/v1', 'key' => 'or-test', 'enabled' => true,
+                'max_prompt_price_per_million' => 1, 'max_completion_price_per_million' => 5,
+            ],
+            'services.ai.providers.navyai' => ['base_url' => 'https://api.navy/v1', 'key' => 'navy-test', 'enabled' => true, 'allowed_plans' => ''],
         ]);
         Http::preventStrayRequests();
     }
 
-    public function test_switches_provider_only_for_eligible_pre_action_failure(): void
-    {
-        Http::fake(['https://api.navy/v1/models' => Http::response(['data' => [self::navyModel('navy-small', 32), self::navyModel('navy-strong', 128)]])]);
-        $completion = $this->mock(FreeLlmApiCopilotService::class);
-        $completion->shouldReceive('reply')->twice()->andReturnUsing(function () {
-            static $attempt = 0;
-            if (++$attempt === 1) {
-                $this->assertSame('https://openrouter.ai/api/v1', config('services.freellmapi.base_url'));
-                throw new FreeLlmApiCopilotException('unavailable', FreeLlmApiCopilotException::CONNECTION);
-            }
-            $this->assertSame('https://api.navy/v1', config('services.freellmapi.base_url'));
-            $this->assertSame('navy-strong', config('services.freellmapi.models.primary'));
-            return 'NavyAI answer';
-        });
-        $this->app->instance(FreeLlmApiCopilotService::class, $completion);
-        $reply = app(CopilotProviderRouter::class)->reply('jobseeker', 'hello', null, app(CopilotCapabilityRegistry::class), app(CopilotToolDispatcher::class));
-        $this->assertSame('NavyAI answer', $reply);
-    }
+    // ---------------------------------------------------------------- OpenRouter discovery
 
-    public function test_openrouter_uses_its_auto_router_and_max_cost_tier(): void
-    {
-        $completion = $this->mock(FreeLlmApiCopilotService::class);
-        $completion->shouldReceive('reply')->once()->andReturnUsing(function () {
-            $this->assertSame('openrouter/auto', config('services.freellmapi.models.primary'));
-            $this->assertSame('max', config('services.freellmapi.auto_router_cost_tier'));
-            return 'Auto answer';
-        });
-        $this->app->instance(FreeLlmApiCopilotService::class, $completion);
-        $this->assertSame('Auto answer', app(CopilotProviderRouter::class)->reply('jobseeker', 'hello', null, app(CopilotCapabilityRegistry::class), app(CopilotToolDispatcher::class)));
-    }
-
-    public function test_navy_catalog_resolution_rejects_invalid_or_ineligible_catalogs(): void
-    {
-        Http::fake(['https://api.navy/v1/models' => Http::response(['data' => [self::navyModel('no-tools', 256, false)]])]);
-        try {
-            app(\App\Services\CopilotProviderModelResolver::class)->resolveNavyAi(config('services.ai.providers.navyai'), microtime(true) + 5);
-            $this->fail('Expected no eligible model error');
-        } catch (FreeLlmApiCopilotException $e) {
-            $this->assertSame(FreeLlmApiCopilotException::UNAVAILABLE, $e->reason);
-            $this->assertSame(FreeLlmApiCopilotService::MODEL_UNAVAILABLE_MESSAGE, $e->getMessage());
-        }
-    }
-
-    public function test_navy_catalog_resolution_rejects_malformed_catalogs(): void
-    {
-        Http::fake(['https://api.navy/v1/models' => Http::response(['models' => 'malformed'])]);
-        try {
-            app(\App\Services\CopilotProviderModelResolver::class)->resolveNavyAi(config('services.ai.providers.navyai'), microtime(true) + 5);
-            $this->fail('Expected invalid catalog error');
-        } catch (FreeLlmApiCopilotException $e) {
-            $this->assertSame(FreeLlmApiCopilotException::INVALID_RESPONSE, $e->reason);
-        }
-    }
-
-    public function test_openrouter_404_is_model_specific_and_falls_back_before_tool_execution(): void
+    public function test_openrouter_catalogue_is_fetched_with_its_key_and_cached(): void
     {
         Http::fake([
-            'https://openrouter.ai/api/v1/chat/completions' => Http::response(['error' => ['code' => 'model_not_found']], 404),
-            'https://api.navy/v1/models' => Http::response(['data' => [self::navyModel('navy-strong', 128)]]),
-            'https://api.navy/v1/chat/completions' => Http::response(['choices' => [['message' => ['role' => 'assistant', 'content' => 'Navy success']]]]),
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/agent-pro', 50)]]),
+            self::OR_CHAT => Http::response(self::answer('ok')),
         ]);
-        $reply = app(CopilotProviderRouter::class)->reply('jobseeker', 'hello', null, app(CopilotCapabilityRegistry::class), app(CopilotToolDispatcher::class));
-        $this->assertSame('Navy success', $reply);
-        Http::assertSent(fn(Request $request) => str_contains($request->url(), 'openrouter.ai') && $request['model'] === 'openrouter/auto');
-        Http::assertSent(fn(Request $request) => str_contains($request->url(), 'api.navy/v1/chat/completions') && $request['model'] === 'navy-strong');
+
+        $this->reply();
+        $this->reply();
+
+        $catalogue = $this->requestsTo('openrouter.ai/api/v1/models');
+        $this->assertCount(1, $catalogue, 'the catalogue is cached between requests');
+        $this->assertSame('Bearer or-test', $catalogue[0]->header('Authorization')[0]);
+        $this->assertStringContainsString('supported_parameters=tools', $catalogue[0]->url());
     }
 
-    public function test_openrouter_tool_call_and_tool_result_continue_on_same_provider(): void
+    public function test_openrouter_selects_eligible_models_dynamically_by_published_scores(): void
     {
-        config(['services.ai.provider_fallback_enabled' => false]);
-        Http::fake(['https://openrouter.ai/api/v1/chat/completions' => Http::sequence()
-            ->push(['choices' => [['message' => ['role' => 'assistant', 'content' => null, 'tool_calls' => [[
-                'id' => 'call-1', 'type' => 'function', 'function' => ['name' => 'get_my_profile', 'arguments' => '{}'],
-            ]]], 'finish_reason' => 'tool_calls']]])
-            ->push(['choices' => [['message' => ['role' => 'assistant', 'content' => 'Finished']]]])]);
-        $reply = app(CopilotProviderRouter::class)->reply('jobseeker', 'show my profile', null, app(CopilotCapabilityRegistry::class), app(CopilotToolDispatcher::class));
-        $this->assertSame('Finished', $reply);
-        $requests = Http::recorded()->pluck(0)->values();
-        $this->assertCount(2, $requests);
-        $this->assertSame('openrouter/auto', $requests[0]->data()['model']);
-        $this->assertSame('max', $requests[0]->data()['plugins'][0]['cost_tier']);
-        $followup = $requests[1]->data()['messages'];
-        $this->assertSame('call-1', collect($followup)->firstWhere('role', 'assistant')['tool_calls'][0]['id']);
-        $this->assertSame('call-1', collect($followup)->firstWhere('role', 'tool')['tool_call_id']);
-        $this->assertSame('openrouter/auto', $requests[1]->data()['model']);
+        Http::fake([self::OR_MODELS => Http::response(['data' => [
+            self::orModel('vendor/mid', 30),
+            self::orModel('vendor/best', 55),
+            self::orModel('vendor/unscored', null),
+            self::orModel('vendor/good', 45),
+        ]])]);
+
+        $chain = app(CopilotProviderModelResolver::class)->resolve('openrouter', config('services.ai.providers.openrouter'), microtime(true) + 10);
+
+        $this->assertSame(['vendor/best', 'vendor/good', 'vendor/mid'], $chain);
+        $this->assertNotContains('openrouter/auto', $chain);
     }
 
-    public function test_navyai_tool_call_and_tool_result_continue_on_resolved_model(): void
+    public function test_openrouter_rejects_models_without_tool_support_and_other_ineligible_entries(): void
+    {
+        Http::fake([self::OR_MODELS => Http::response(['data' => [
+            self::orModel('vendor/no-tools', 90, ['supported_parameters' => ['max_tokens', 'temperature']]),
+            self::orModel('vendor/no-tool-choice', 90, ['supported_parameters' => ['tools', 'max_tokens']]),
+            self::orModel('vendor/image-out', 90, ['architecture' => ['input_modalities' => ['text'], 'output_modalities' => ['image', 'text']]]),
+            self::orModel('openrouter/auto', 90, ['pricing' => ['prompt' => '-1', 'completion' => '-1']]),
+            self::orModel('vendor/too-expensive', 90, ['pricing' => ['prompt' => '0.000015', 'completion' => '0.000075']]),
+            self::orModel('vendor/expired', 90, ['expiration_date' => '2020-01-01']),
+            self::orModel('vendor/tiny-context', 90, ['context_length' => 4096]),
+            self::orModel('vendor/no-chat-endpoint', 90, ['endpoints' => ['/api/v1/images']]),
+            self::orModel('vendor/alias', 90, ['alias_target' => ['slug' => 'vendor/x']]),
+            self::orModel('bad id with spaces', 90),
+            'not-an-object',
+            self::orModel('vendor/eligible', 10),
+        ]])]);
+
+        $chain = app(CopilotProviderModelResolver::class)->resolve('openrouter', config('services.ai.providers.openrouter'), microtime(true) + 10);
+
+        $this->assertSame(['vendor/eligible'], $chain);
+    }
+
+    // ---------------------------------------------------------------- NavyAI discovery
+
+    public function test_navyai_accepts_non_premium_tool_capable_models(): void
+    {
+        Http::fake([self::NAVY_MODELS => Http::response(['data' => [self::navyModel('navy-free-tools', 65536, premium: false)]])]);
+
+        $chain = app(CopilotProviderModelResolver::class)->resolve('navyai', config('services.ai.providers.navyai'), microtime(true) + 10);
+
+        $this->assertSame(['navy-free-tools'], $chain);
+    }
+
+    public function test_navyai_rejects_unknown_metadata_non_chat_image_and_plan_gated_models(): void
+    {
+        $catalogue = ['data' => [
+            self::navyModel('unknown-meta', 900000, overrides: ['metadata_status' => 'unknown']),
+            self::navyModel('no-tools', 900000, overrides: ['supports_tools' => false, 'supports_function_calling' => false]),
+            self::navyModel('embeddings', 900000, overrides: ['endpoint' => '/v1/embeddings']),
+            self::navyModel('image-out', 900000, overrides: ['output_modalities' => ['text', 'image'], 'supports_image_output' => true]),
+            self::navyModel('plus-only', 900000, overrides: ['required_plan' => 'Plus']),
+            self::navyModel('function-calling-only', 1000, overrides: ['supports_tools' => false, 'supports_function_calling' => true]),
+        ]];
+        Http::fake([self::NAVY_MODELS => Http::response($catalogue)]);
+
+        $resolver = app(CopilotProviderModelResolver::class);
+        $this->assertSame(['function-calling-only'], $resolver->resolve('navyai', config('services.ai.providers.navyai'), microtime(true) + 10));
+
+        CopilotProviderModelResolver::forgetCatalog('navyai');
+        $withPlan = array_merge(config('services.ai.providers.navyai'), ['allowed_plans' => 'plus']);
+        $this->assertSame(['plus-only', 'function-calling-only'], $resolver->resolve('navyai', $withPlan, microtime(true) + 10));
+    }
+
+    public function test_navyai_chain_hedges_a_premium_first_choice_with_a_non_premium_model(): void
+    {
+        Http::fake([self::NAVY_MODELS => Http::response(['data' => [
+            self::navyModel('premium-a', 128000, premium: true),
+            self::navyModel('premium-b', 120000, premium: true),
+            self::navyModel('premium-c', 110000, premium: true),
+            self::navyModel('standard', 65536, premium: false),
+        ]])]);
+
+        $chain = app(CopilotProviderModelResolver::class)->resolve('navyai', config('services.ai.providers.navyai'), microtime(true) + 10);
+
+        $this->assertSame(['premium-a', 'standard', 'premium-b'], $chain);
+    }
+
+    // ---------------------------------------------------------------- catalogue failures
+
+    public function test_malformed_and_non_json_catalogues_are_invalid_responses(): void
+    {
+        Http::fake([self::NAVY_MODELS => Http::sequence()
+            ->push(['models' => 'malformed'])
+            ->push('<html>not json</html>', 200, ['Content-Type' => 'text/html'])
+            ->push(['data' => ['id' => 'not-a-list']])]);
+
+        foreach (range(1, 3) as $_) {
+            $e = $this->resolveFailure('navyai');
+            $this->assertSame(FreeLlmApiCopilotException::INVALID_RESPONSE, $e->reason);
+            $this->assertSame(FreeLlmApiCopilotService::MODEL_CATALOG_MESSAGE, $e->getMessage());
+        }
+    }
+
+    public function test_empty_catalogue_reports_no_available_model(): void
+    {
+        Http::fake([self::OR_MODELS => Http::response(['data' => []])]);
+
+        $e = $this->resolveFailure('openrouter');
+
+        $this->assertSame(FreeLlmApiCopilotException::UNAVAILABLE, $e->reason);
+        $this->assertSame(FreeLlmApiCopilotService::MODEL_UNAVAILABLE_MESSAGE, $e->getMessage());
+    }
+
+    public function test_catalogue_authentication_permission_and_edge_block_are_classified(): void
+    {
+        Http::fake([self::NAVY_MODELS => Http::sequence()
+            ->push(['error' => ['code' => 'invalid_api_key']], 401)
+            ->push(['error' => ['code' => 'forbidden']], 403)
+            ->push('<!DOCTYPE html><title>Attention Required! | Cloudflare</title>', 403, ['Content-Type' => 'text/html; charset=UTF-8', 'Server' => 'cloudflare', 'CF-RAY' => 'abc'])]);
+        Log::spy();
+
+        $this->assertSame(FreeLlmApiCopilotException::AUTHENTICATION, $this->resolveFailure('navyai')->reason);
+        $this->assertSame(FreeLlmApiCopilotException::PERMISSION, $this->resolveFailure('navyai')->reason);
+        $edge = $this->resolveFailure('navyai');
+        $this->assertSame(FreeLlmApiCopilotException::UPSTREAM, $edge->reason, 'a CDN block is not a credential problem');
+        $this->assertSame(403, $edge->providerStatus);
+
+        Log::shouldHaveReceived('warning')->withArgs(fn(string $m, array $c) => $m === 'Copilot provider catalogue returned an unsuccessful response.'
+            && $c['provider'] === 'navyai' && $c['operation'] === 'model_discovery' && $c['failure_type'] === 'edge_blocked' && $c['edge'] === 'cloudflare');
+    }
+
+    public function test_catalogue_connection_timeout_and_refusal_are_classified(): void
+    {
+        Http::fake([self::OR_MODELS => Http::sequence()
+            ->pushFailedConnection('cURL error 28: Operation timed out after 6001 milliseconds')
+            ->pushFailedConnection('cURL error 7: Failed to connect to openrouter.ai port 443')]);
+
+        $this->assertSame(FreeLlmApiCopilotException::TIMEOUT, $this->resolveFailure('openrouter')->reason);
+        $this->assertSame(FreeLlmApiCopilotException::CONNECTION, $this->resolveFailure('openrouter')->reason);
+    }
+
+    public function test_last_known_good_catalogue_is_used_when_a_refresh_fails(): void
+    {
+        config(['services.ai.model_catalog_cache_seconds' => 0]);
+        Http::fake([self::NAVY_MODELS => Http::sequence()
+            ->push(['data' => [self::navyModel('navy-strong', 128000)]])
+            ->push('blocked', 403, ['Content-Type' => 'text/html'])]);
+        $resolver = app(CopilotProviderModelResolver::class);
+
+        $this->assertSame(['navy-strong'], $resolver->resolve('navyai', config('services.ai.providers.navyai'), microtime(true) + 10));
+        $this->assertSame(['navy-strong'], $resolver->resolve('navyai', config('services.ai.providers.navyai'), microtime(true) + 10));
+        $this->assertCount(2, $this->requestsTo('api.navy/v1/models'));
+    }
+
+    // ---------------------------------------------------------------- provider fallback
+
+    public function test_openrouter_catalogue_failure_falls_back_to_navyai(): void
+    {
+        Http::fake([
+            self::OR_MODELS => Http::response('<html>Just a moment...</html>', 403, ['Content-Type' => 'text/html', 'cf-mitigated' => 'challenge']),
+            self::NAVY_MODELS => Http::response(['data' => [self::navyModel('navy-strong', 128000)]]),
+            self::NAVY_CHAT => Http::response(self::answer('Navy success')),
+        ]);
+        Log::spy();
+
+        $this->assertSame('Navy success', $this->reply());
+
+        $this->assertSame([], $this->requestsTo('openrouter.ai/api/v1/chat/completions'));
+        $this->assertSame('navy-strong', $this->requestsTo('api.navy/v1/chat/completions')[0]['model']);
+        Log::shouldHaveReceived('warning')->withArgs(fn(string $m, array $c) => $m === 'Copilot provider attempt failed.'
+            && $c['provider'] === 'openrouter' && $c['operation'] === 'model_discovery' && $c['fallback_provider'] === 'navyai');
+        Log::shouldHaveReceived('info')->withArgs(fn(string $m, array $c) => $m === 'Copilot provider fallback succeeded.'
+            && $c['provider'] === 'navyai' && array_keys($c['failed_providers']) === ['openrouter']);
+    }
+
+    public function test_openrouter_completion_timeouts_fall_back_to_navyai(): void
+    {
+        $attempted = [];
+        Http::fake([
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/a', 50), self::orModel('vendor/b', 40)]]),
+            self::OR_CHAT => function (Request $request) use (&$attempted) {
+                $attempted[] = $request['model'];
+                throw new ConnectionException('cURL error 28: Operation timed out after 9001 milliseconds');
+            },
+            self::NAVY_MODELS => Http::response(['data' => [self::navyModel('navy-strong', 128000)]]),
+            self::NAVY_CHAT => Http::response(self::answer('Navy after timeout')),
+        ]);
+
+        $this->assertSame('Navy after timeout', $this->reply());
+        $this->assertSame(['vendor/a', 'vendor/b'], $attempted);
+    }
+
+    public function test_openrouter_refused_model_tries_next_discovered_model_and_is_skipped_afterwards(): void
+    {
+        Http::fake([
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/gated', 60), self::orModel('vendor/open', 40)]]),
+            self::OR_CHAT => function (Request $request) {
+                return $request['model'] === 'vendor/gated'
+                    ? Http::response(['error' => ['code' => 403, 'message' => 'not allowed']], 403)
+                    : Http::response(self::answer('Open model answer'));
+            },
+        ]);
+
+        $this->assertSame('Open model answer', $this->reply());
+        $this->assertSame('Open model answer', $this->reply());
+
+        $models = array_map(fn(Request $r) => $r['model'], $this->requestsTo('openrouter.ai/api/v1/chat/completions'));
+        $this->assertSame(['vendor/gated', 'vendor/open', 'vendor/open'], $models, 'a refused model is not retried on the next request');
+        $this->assertSame([], $this->requestsTo('api.navy'));
+    }
+
+    public function test_openrouter_insufficient_credits_falls_back_and_pauses_openrouter(): void
+    {
+        Http::fake([
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/a', 50), self::orModel('vendor/b', 40)]]),
+            self::OR_CHAT => Http::response(['error' => ['code' => 402, 'message' => 'Insufficient credits']], 402),
+            self::NAVY_MODELS => Http::response(['data' => [self::navyModel('navy-strong', 128000)]]),
+            self::NAVY_CHAT => Http::response(self::answer('Navy answer')),
+        ]);
+
+        $this->assertSame('Navy answer', $this->reply());
+        $this->assertSame('Navy answer', $this->reply());
+
+        $this->assertCount(1, $this->requestsTo('openrouter.ai/api/v1/chat/completions'), 'credits are account-wide: no second model, no request during the pause');
+    }
+
+    public function test_navyai_edge_block_on_completion_is_not_retried_per_model(): void
     {
         config(['services.ai.provider' => 'navyai', 'services.ai.provider_fallback_enabled' => false]);
         Http::fake([
-            'https://api.navy/v1/models' => Http::response(['data' => [self::navyModel('navy-strong', 128)]]),
-            'https://api.navy/v1/chat/completions' => Http::sequence()
-                ->push(['choices' => [['message' => ['role' => 'assistant', 'content' => null, 'tool_calls' => [[
-                    'id' => 'navy-call-1', 'type' => 'function', 'function' => ['name' => 'get_my_profile', 'arguments' => '{}'],
-                ]]], 'finish_reason' => 'tool_calls']]])
-                ->push(['choices' => [['message' => ['role' => 'assistant', 'content' => 'Navy finished']]]]),
+            self::NAVY_MODELS => Http::response(['data' => [self::navyModel('a', 128000), self::navyModel('b', 64000)]]),
+            self::NAVY_CHAT => Http::response('<html>blocked</html>', 403, ['Content-Type' => 'text/html', 'Server' => 'cloudflare']),
         ]);
-        $reply = app(CopilotProviderRouter::class)->reply('jobseeker', 'show my profile', null, app(CopilotCapabilityRegistry::class), app(CopilotToolDispatcher::class));
-        $this->assertSame('Navy finished', $reply);
-        $requests = Http::recorded()->pluck(0)->filter(fn(Request $request) => str_contains($request->url(), '/chat/completions'))->values();
-        $this->assertCount(2, $requests);
-        $this->assertSame('navy-strong', $requests[0]->data()['model']);
-        $followup = $requests[1]->data()['messages'];
-        $this->assertSame('navy-call-1', collect($followup)->firstWhere('role', 'assistant')['tool_calls'][0]['id']);
-        $this->assertSame('navy-call-1', collect($followup)->firstWhere('role', 'tool')['tool_call_id']);
-        $this->assertSame('navy-strong', $requests[1]->data()['model']);
+
+        $e = $this->replyFailure();
+
+        $this->assertSame(FreeLlmApiCopilotException::UPSTREAM, $e->reason);
+        $this->assertCount(1, $this->requestsTo('api.navy/v1/chat/completions'));
     }
 
-    public function test_never_switches_provider_after_tool_execution(): void
+    public function test_both_providers_unavailable_returns_a_classified_safe_error(): void
     {
+        Http::fake([
+            self::OR_MODELS => Http::response(['error' => ['code' => 'server_error']], 503),
+            self::NAVY_MODELS => Http::response('<html>Attention Required</html>', 403, ['Content-Type' => 'text/html', 'Server' => 'cloudflare']),
+        ]);
+        Log::spy();
+
+        $e = $this->replyFailure();
+
+        $this->assertSame(FreeLlmApiCopilotException::UPSTREAM, $e->reason);
+        $this->assertSame(FreeLlmApiCopilotService::MODEL_CATALOG_MESSAGE, $e->getMessage());
+        Log::shouldHaveReceived('warning')->withArgs(fn(string $m, array $c) => $m === 'Copilot all AI providers failed.'
+            && $c['failed_providers'] === ['openrouter' => 'model_discovery:upstream', 'navyai' => 'model_discovery:upstream']);
+    }
+
+    public function test_openrouter_gets_a_bounded_share_of_the_budget_when_a_fallback_exists(): void
+    {
+        Http::fake([
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/a', 50)]]),
+            self::NAVY_MODELS => Http::response(['data' => [self::navyModel('navy-strong', 128000)]]),
+        ]);
+        $budgets = [];
         $completion = $this->mock(FreeLlmApiCopilotService::class);
-        $completion->shouldReceive('reply')->once()->andThrow(new FreeLlmApiCopilotException('failed after action', FreeLlmApiCopilotException::UPSTREAM, null, null, 503, true, false));
-        $this->app->instance(FreeLlmApiCopilotService::class, $completion);
-        try {
-            app(CopilotProviderRouter::class)->reply('jobseeker', 'do it', null, app(CopilotCapabilityRegistry::class), app(CopilotToolDispatcher::class));
-            $this->fail('Expected provider failure');
-        } catch (FreeLlmApiCopilotException $e) {
-            $this->assertFalse($e->fallbackSafe);
-        }
+        $completion->shouldReceive('reply')->twice()->andReturnUsing(function () use (&$budgets) {
+            $budgets[config('services.freellmapi.provider_name')] = config('services.freellmapi.total_timeout_seconds');
+            if (count($budgets) === 1) throw new FreeLlmApiCopilotException('slow', FreeLlmApiCopilotException::TIMEOUT);
+            return 'ok';
+        });
+
+        $this->reply();
+
+        $this->assertLessThanOrEqual(14.5, $budgets['openrouter'], 'about ten seconds are reserved for NavyAI');
+        $this->assertGreaterThanOrEqual(13.0, $budgets['navyai']);
     }
 
-    private static function navyModel(string $id, int $maxOutput, bool $supportsTools = true): array
+    // ---------------------------------------------------------------- environment rules
+
+    public function test_freellmapi_remains_the_local_development_provider(): void
     {
-        return [
-            'id' => $id, 'endpoint' => '/v1/chat/completions', 'premium' => true,
-            'supports_tools' => $supportsTools, 'supports_function_calling' => false,
-            'supports_reasoning' => true, 'metadata_status' => 'known',
-            'max_output_tokens' => $maxOutput, 'context_window' => 100000, 'token_multiplier' => 5,
-        ];
+        config([
+            'services.ai.provider' => 'freellmapi', 'services.ai.provider_fallback_enabled' => false,
+            'services.freellmapi' => array_merge(config('services.freellmapi'), [
+                'enabled' => true, 'base_url' => 'http://127.0.0.1:31415/v1', 'key' => 'local-key',
+                'models' => ['primary' => 'local-primary', 'secondary' => 'local-secondary', 'tertiary' => ''],
+            ]),
+        ]);
+        Http::fake([self::LOCAL_CHAT => Http::response(self::answer('Local answer'))]);
+
+        $this->assertSame('Local answer', $this->reply());
+
+        $requests = Http::recorded()->pluck(0)->values();
+        $this->assertCount(1, $requests, 'no catalogue lookup for the curated local chain');
+        $this->assertSame('local-primary', $requests[0]['model']);
+        $this->assertArrayNotHasKey('reasoning', $requests[0]->data());
+    }
+
+    public function test_production_never_selects_freellmapi_or_a_local_gateway(): void
+    {
+        $this->app['env'] = 'production';
+        config([
+            'services.ai.provider' => 'freellmapi', 'services.ai.fallback_provider' => 'freellmapi',
+            'services.freellmapi' => array_merge(config('services.freellmapi'), ['enabled' => true, 'base_url' => 'http://127.0.0.1:31415/v1', 'key' => 'local-key']),
+        ]);
+        $this->assertSame(['openrouter'], app(CopilotProviderRouter::class)->providers());
+
+        config(['services.ai.provider' => 'openrouter', 'services.ai.fallback_provider' => 'navyai']);
+        $this->assertSame(['openrouter', 'navyai'], app(CopilotProviderRouter::class)->providers());
+
+        config(['services.ai.providers.navyai.base_url' => 'http://127.0.0.1:31415/v1']);
+        $this->assertSame(['openrouter'], app(CopilotProviderRouter::class)->providers(), 'hosted providers must use public HTTPS hosts');
+
+        config(['services.ai.providers.openrouter.enabled' => false, 'services.ai.providers.navyai.base_url' => 'https://api.navy/v1', 'services.ai.providers.navyai.key' => '']);
+        $this->assertSame([], app(CopilotProviderRouter::class)->providers());
+        $this->assertSame(FreeLlmApiCopilotException::UNAVAILABLE, $this->replyFailure()->reason);
+        Http::assertNothingSent();
+    }
+
+    // ---------------------------------------------------------------- tool calling
+
+    public function test_openrouter_tool_call_continues_on_the_same_discovered_model(): void
+    {
+        config(['services.ai.provider_fallback_enabled' => false]);
+        Http::fake([
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/agent', 50)]]),
+            self::OR_CHAT => Http::sequence()->push(self::toolCalls([['call-1', 'get_my_profile']]))->push(self::answer('Finished')),
+        ]);
+
+        $this->assertSame('Finished', $this->reply('show my profile'));
+
+        $requests = $this->requestsTo('openrouter.ai/api/v1/chat/completions');
+        $this->assertCount(2, $requests);
+        foreach ($requests as $request) {
+            $this->assertSame('vendor/agent', $request['model']);
+            $this->assertArrayNotHasKey('plugins', $request->data());
+            $this->assertFalse($request['parallel_tool_calls']);
+            $this->assertSame(['effort' => 'low'], $request['reasoning']);
+            $this->assertSame('auto', $request['tool_choice']);
+            $this->assertSame('function', $request['tools'][0]['type']);
+        }
+        $followup = $requests[1]['messages'];
+        $this->assertSame('call-1', collect($followup)->firstWhere('role', 'assistant')['tool_calls'][0]['id']);
+        $this->assertSame('call-1', collect($followup)->firstWhere('role', 'tool')['tool_call_id']);
+    }
+
+    public function test_navyai_tool_call_continues_on_the_resolved_model(): void
+    {
+        config(['services.ai.provider' => 'navyai', 'services.ai.provider_fallback_enabled' => false]);
+        Http::fake([
+            self::NAVY_MODELS => Http::response(['data' => [self::navyModel('navy-strong', 128000)]]),
+            self::NAVY_CHAT => Http::sequence()->push(self::toolCalls([['navy-call-1', 'get_my_profile']]))->push(self::answer('Navy finished')),
+        ]);
+
+        $this->assertSame('Navy finished', $this->reply('show my profile'));
+
+        $requests = $this->requestsTo('api.navy/v1/chat/completions');
+        $this->assertSame(['navy-strong', 'navy-strong'], [$requests[0]['model'], $requests[1]['model']]);
+        $this->assertArrayNotHasKey('parallel_tool_calls', $requests[0]->data());
+        $this->assertSame('navy-call-1', collect($requests[1]['messages'])->firstWhere('role', 'tool')['tool_call_id']);
+    }
+
+    public function test_multiple_tool_calls_each_execute_once_and_each_get_a_result(): void
+    {
+        config(['services.ai.provider_fallback_enabled' => false]);
+        $spy = $this->spyDispatcher();
+        Http::fake([
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/agent', 50)]]),
+            self::OR_CHAT => Http::sequence()
+                ->push(self::toolCalls([['call-a', 'get_my_profile'], ['call-b', 'get_my_applications']]))
+                ->push(self::answer('Both done')),
+        ]);
+
+        $this->assertSame('Both done', $this->reply());
+
+        $this->assertSame(['get_my_profile', 'get_my_applications'], $spy->calls);
+        $toolMessages = collect($this->requestsTo('openrouter.ai/api/v1/chat/completions')[1]['messages'])->where('role', 'tool')->values();
+        $this->assertSame(['call-a', 'call-b'], $toolMessages->pluck('tool_call_id')->all());
+    }
+
+    public function test_only_one_change_is_staged_per_round_and_duplicate_ids_are_rejected(): void
+    {
+        config(['services.ai.provider_fallback_enabled' => false]);
+        $spy = $this->spyDispatcher();
+        Http::fake([
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/agent', 50), self::orModel('vendor/second', 40)]]),
+            self::OR_CHAT => Http::sequence()
+                // Duplicate tool-call IDs: rejected before anything executes; the next model is asked.
+                ->push(self::toolCalls([['dup', 'get_my_profile'], ['dup', 'get_my_saved_jobs']]))
+                ->push(self::toolCalls([['s1', 'request_profile_update', '{"changes":{"City":"Pune"}}'], ['s2', 'request_profile_update', '{"changes":{"City":"Goa"}}']]))
+                ->push(self::answer('Staged')),
+        ]);
+
+        $this->reply();
+
+        $this->assertSame(['request_profile_update'], $spy->calls, 'the second staging call is answered with an error, not executed');
+        $requests = $this->requestsTo('openrouter.ai/api/v1/chat/completions');
+        $this->assertSame(['vendor/agent', 'vendor/second', 'vendor/second'], array_map(fn(Request $r) => $r['model'], $requests));
+        $results = collect($requests[2]['messages'])->where('role', 'tool')->values();
+        $this->assertSame(['s1', 's2'], $results->pluck('tool_call_id')->all());
+        $this->assertStringContainsString('Only one change', $results[1]['content']);
+    }
+
+    public function test_failure_after_tool_execution_never_fails_over_or_repeats_the_tool(): void
+    {
+        $spy = $this->spyDispatcher();
+        Http::fake([
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/agent', 50), self::orModel('vendor/second', 40)]]),
+            self::OR_CHAT => Http::sequence()
+                ->push(self::toolCalls([['call-1', 'get_my_profile']]))
+                ->push(['error' => ['code' => 'server_error']], 503),
+            self::NAVY_MODELS => Http::response(['data' => [self::navyModel('navy-strong', 128000)]]),
+        ]);
+
+        $e = $this->replyFailure();
+
+        $this->assertFalse($e->fallbackSafe);
+        $this->assertSame(['get_my_profile'], $spy->calls);
+        $this->assertSame([], $this->requestsTo('api.navy'));
+        $this->assertSame(['vendor/agent', 'vendor/agent'], array_map(fn(Request $r) => $r['model'], $this->requestsTo('openrouter.ai/api/v1/chat/completions')));
+    }
+
+    public function test_reasoning_only_reply_without_content_or_tool_call_is_not_an_answer(): void
+    {
+        config(['services.ai.provider_fallback_enabled' => false]);
+        Http::fake([
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/thinker', 50), self::orModel('vendor/plain', 40)]]),
+            self::OR_CHAT => Http::sequence()
+                ->push(['choices' => [['message' => ['role' => 'assistant', 'content' => null, 'reasoning' => 'thinking...'], 'finish_reason' => 'length']]])
+                ->push(['choices' => [['message' => ['role' => 'assistant', 'content' => [['type' => 'text', 'text' => 'Part answer']]]]]]),
+        ]);
+
+        $this->assertSame('Part answer', $this->reply());
+    }
+
+    public function test_runtime_configuration_is_restored_after_every_provider_attempt(): void
+    {
+        $original = config('services.freellmapi');
+        Http::fake([
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/a', 50)]]),
+            self::OR_CHAT => Http::response(['error' => ['code' => 'bad']], 500),
+            self::NAVY_MODELS => Http::response(['data' => [self::navyModel('navy-strong', 128000)]]),
+            self::NAVY_CHAT => Http::response(['error' => ['code' => 'bad']], 500),
+        ]);
+
+        $this->replyFailure();
+
+        $this->assertSame($original, config('services.freellmapi'));
+    }
+
+    // ---------------------------------------------------------------- helpers
+
+    private function reply(string $message = 'hello'): string
+    {
+        return app(CopilotProviderRouter::class)->reply('jobseeker', $message, null, app(CopilotCapabilityRegistry::class), app(CopilotToolDispatcher::class));
+    }
+
+    private function replyFailure(): FreeLlmApiCopilotException
+    {
+        try {
+            $this->reply();
+        } catch (FreeLlmApiCopilotException $e) {
+            return $e;
+        }
+        $this->fail('Expected a provider failure.');
+    }
+
+    private function resolveFailure(string $provider): FreeLlmApiCopilotException
+    {
+        try {
+            app(CopilotProviderModelResolver::class)->resolve($provider, config('services.ai.providers.' . $provider), microtime(true) + 10);
+        } catch (FreeLlmApiCopilotException $e) {
+            return $e;
+        }
+        $this->fail('Expected a model resolution failure.');
+    }
+
+    /** @return list<Request> */
+    private function requestsTo(string $fragment): array
+    {
+        return Http::recorded()->pluck(0)->filter(fn(Request $r) => str_contains($r->url(), $fragment))->values()->all();
+    }
+
+    private function spyDispatcher(): object
+    {
+        $spy = new class(app(CopilotCapabilityRegistry::class), request()) extends CopilotToolDispatcher {
+            public array $calls = [];
+            public function dispatch(string $role, mixed $actor, string $name, array $args): array
+            {
+                $this->calls[] = $name;
+                return ['ok' => true];
+            }
+        };
+        $this->app->instance(CopilotToolDispatcher::class, $spy);
+        return $spy;
+    }
+
+    private static function answer(string $text): array
+    {
+        return ['choices' => [['message' => ['role' => 'assistant', 'content' => $text], 'finish_reason' => 'stop']]];
+    }
+
+    /** @param list<array{0: string, 1: string, 2?: string}> $calls [id, name, arguments] */
+    private static function toolCalls(array $calls): array
+    {
+        return ['choices' => [['message' => ['role' => 'assistant', 'content' => null, 'tool_calls' => array_map(
+            fn(array $c) => ['id' => $c[0], 'type' => 'function', 'function' => ['name' => $c[1], 'arguments' => $c[2] ?? '{}']],
+            $calls
+        )], 'finish_reason' => 'tool_calls']]];
+    }
+
+    private static function orModel(string $id, ?float $agentic, array $overrides = []): array
+    {
+        return array_merge([
+            'id' => $id,
+            'context_length' => 200000,
+            'architecture' => ['input_modalities' => ['text'], 'output_modalities' => ['text']],
+            'pricing' => ['prompt' => '0.0000005', 'completion' => '0.000002'],
+            'supported_parameters' => ['max_tokens', 'temperature', 'tool_choice', 'tools'],
+            'endpoints' => ['/api/v1/chat/completions'],
+            'expiration_date' => null,
+            'benchmarks' => $agentic === null ? null : ['artificial_analysis' => ['agentic_index' => $agentic, 'intelligence_index' => $agentic / 2]],
+        ], $overrides);
+    }
+
+    private static function navyModel(string $id, int $maxOutput, bool $premium = true, array $overrides = []): array
+    {
+        return array_merge([
+            'id' => $id, 'endpoint' => '/v1/chat/completions', 'premium' => $premium,
+            'supports_tools' => true, 'supports_function_calling' => true,
+            'supports_reasoning' => true, 'metadata_status' => 'known', 'output_modalities' => ['text'],
+            'max_output_tokens' => $maxOutput, 'context_window' => 1000000, 'token_multiplier' => 2,
+        ], $overrides);
     }
 }

@@ -58,20 +58,31 @@ return [
         'model_cooldown_max_seconds' => env('FREELLMAPI_MODEL_COOLDOWN_MAX_SECONDS', 300),
     ],
     'ai' => [
+        // Production: OpenRouter, then NavyAI. Local development: the FreeLLMAPI gateway.
+        // FreeLLMAPI (a local gateway) is never used when APP_ENV=production, whatever is set here.
         'provider' => env('AI_PROVIDER', env('APP_ENV') === 'production' ? 'openrouter' : 'freellmapi'),
         'fallback_provider' => env('AI_FALLBACK_PROVIDER', 'navyai'),
         'provider_fallback_enabled' => env('AI_PROVIDER_FALLBACK_ENABLED', env('APP_ENV') === 'production'),
         'total_timeout_seconds' => env('AI_TOTAL_TIMEOUT_SECONDS', 24),
+        // Hosted providers have no configured model: tool-capable models are discovered from each
+        // provider's live catalogue, cached briefly, with a last-known-good copy for catalogue outages.
+        'model_catalog_cache_seconds' => env('AI_MODEL_CATALOG_CACHE_SECONDS', 600),
+        'model_catalog_stale_seconds' => env('AI_MODEL_CATALOG_STALE_SECONDS', 86400),
         'providers' => [
             'openrouter' => [
                 'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'), 'key' => env('OPENROUTER_API_KEY'),
                 'enabled' => env('OPENROUTER_ENABLED', false),
-                'auto_router_cost_tier' => env('OPENROUTER_AUTO_ROUTER_COST_TIER', 'max'),
+                // Price ceilings (USD per million tokens) for dynamically selected models.
+                'max_prompt_price_per_million' => env('OPENROUTER_MAX_PROMPT_PRICE_PER_MILLION', 1),
+                'max_completion_price_per_million' => env('OPENROUTER_MAX_COMPLETION_PRICE_PER_MILLION', 5),
                 'request_timeout_seconds' => env('OPENROUTER_TIMEOUT_SECONDS', 9), 'cooldown_default_seconds' => env('OPENROUTER_COOLDOWN_DEFAULT_SECONDS', 60), 'cooldown_max_seconds' => env('OPENROUTER_COOLDOWN_MAX_SECONDS', 300),
             ],
             'navyai' => [
                 'base_url' => env('NAVYAI_BASE_URL', 'https://api.navy/v1'), 'key' => env('NAVYAI_API_KEY'),
                 'enabled' => env('NAVYAI_ENABLED', false),
+                // Comma-separated NavyAI plans this account holds (e.g. "Plus"); models whose catalogue
+                // entry has a `required_plan` outside this list are never selected.
+                'allowed_plans' => env('NAVYAI_ALLOWED_PLANS', ''),
                 'request_timeout_seconds' => env('NAVYAI_TIMEOUT_SECONDS', 9), 'cooldown_default_seconds' => env('NAVYAI_COOLDOWN_DEFAULT_SECONDS', 60), 'cooldown_max_seconds' => env('NAVYAI_COOLDOWN_MAX_SECONDS', 300),
             ],
             'freellmapi' => [

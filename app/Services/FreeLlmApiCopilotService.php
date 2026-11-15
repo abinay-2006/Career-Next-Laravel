@@ -9,12 +9,15 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Career Next Copilot over the FreeLLMAPI gateway (the only provider).
+ * OpenAI-compatible Copilot completion client with tool calling.
  *
- * Requests go to a short, curated chain of at most three configured models
- * (services.freellmapi.models). A later model is tried only when the failure is
- * specific to the model that was asked AND no Copilot tool has been executed in
- * the current request, so an operation can never be replayed by a fallback.
+ * Serves the local FreeLLMAPI gateway directly, and the hosted providers (OpenRouter, NavyAI)
+ * through CopilotProviderRouter, which temporarily points services.freellmapi at the provider and
+ * sets provider_name. Requests go to a short chain of at most three models
+ * (services.freellmapi.models: curated for FreeLLMAPI, discovered from the live catalogue for hosted
+ * providers). A later model is tried only when the failure is specific to the model that was asked
+ * AND no Copilot tool has been executed in the current request, so an operation can never be
+ * replayed by a fallback.
  */
 class FreeLlmApiCopilotService
 {
@@ -83,7 +86,12 @@ class FreeLlmApiCopilotService
      */
     private const PINNED_REQUEST_TIMEOUT_SECONDS = 15;
     private const TOTAL_BUDGET_SECONDS = 24.0;
+    /** Maximum model rounds that request tools in one user turn. */
     private const MAX_FUNCTION_CALLS = 3;
+    /** Maximum tool calls executed from one assistant message; extra calls receive an error result. */
+    private const MAX_TOOL_CALLS_PER_ROUND = 4;
+    /** Tools that stage a change for explicit user confirmation; only one may be staged per round. */
+    private const STAGING_TOOLS = ['suspend_user', 'request_profile_update'];
 
     /** Retry intervals outside this range are treated as untrustworthy and ignored. */
     private const MAX_RETRY_AFTER_SECONDS = 86400;
@@ -160,7 +168,10 @@ class FreeLlmApiCopilotService
         $messages[] = ['role' => 'user', 'content' => $message];
 
         $calls = 0;
-        $deadline = microtime(true) + max(1, (int) config('services.freellmapi.total_timeout_seconds', self::TOTAL_BUDGET_SECONDS));
+        $deadline = microtime(true) + max(1.0, (float) config('services.freellmapi.total_timeout_seconds', self::TOTAL_BUDGET_SECONDS));
+        // Set by the provider router: the overall request deadline, usable once a tool has executed
+        // (fallback is impossible then, so the provider's reserve for a fallback is no longer needed).
+        $hardDeadline = (float) config('services.freellmapi.hard_deadline', 0);
         $canonicalSensitiveReply = null;
         $active = 0;              // index of the model currently serving this conversation
         $toolExecuted = false;    // once true, the model is pinned and fallback is disabled
@@ -196,7 +207,7 @@ class FreeLlmApiCopilotService
             $toolCalls = $assistantMessage['tool_calls'] ?? [];
 
             if (!is_array($toolCalls) || $toolCalls === []) {
-                Log::info('FreeLLMAPI Copilot reply completed.', [
+                $this->log('info', 'reply completed.', [
                     'model' => $chain[$active],
                     'fallback_used' => $active > 0,
                     'failed_attempts' => count($failures),
@@ -206,7 +217,7 @@ class FreeLlmApiCopilotService
                 return $canonicalSensitiveReply ?? trim((string) $assistantMessage['content']);
             }
 
-            // One validated function per round (structure checked in validatedAssistantMessage()).
+            // Validated tool-call rounds (structure checked in validatedAssistantMessage()).
             if (++$calls > self::MAX_FUNCTION_CALLS) {
                 throw new FreeLlmApiCopilotException(
                     self::INVALID_RESPONSE_MESSAGE,
@@ -214,50 +225,62 @@ class FreeLlmApiCopilotService
                 );
             }
 
-            $toolCall = $toolCalls[0];
-            $callId = $toolCall['id'];
-            $function = $toolCall['function'];
-            $name = $function['name'] ?? null;
-            $rawArguments = $function['arguments'] ?? null;
-
-            try {
-                $arguments = is_string($rawArguments)
-                    ? json_decode($rawArguments, true, 32, JSON_THROW_ON_ERROR)
-                    : null;
-            } catch (\JsonException) {
-                $arguments = null;
-            }
-
             // From here on the conversation is pinned to this model: an operation may have run, so a
             // later failure must surface to the user instead of restarting on another model.
             $toolExecuted = true;
-
-            $result = is_string($name)
-                && is_array($arguments)
-                && in_array($name, $registry->names($role), true)
-                ? $dispatcher->dispatch($role, $actor, $name, $arguments)
-                : ['error' => 'This requested operation is not available.'];
-
-            // Write-staging tools answer with Laravel's own wording (change summary, confirmation
-            // phrase, validation errors) so the model cannot misstate what will or did change.
-            if (
-                in_array($name, ['suspend_user', 'request_profile_update'], true)
-                && is_string($result['message'] ?? null)
-            ) {
-                $canonicalSensitiveReply = $result['message'];
+            if ($hardDeadline > $deadline) {
+                $deadline = $hardDeadline;
             }
 
             // Preserve the complete assistant message, including tool-call IDs and provider metadata.
             $messages[] = $assistantMessage;
 
-            $messages[] = [
-                'role' => 'tool',
-                'tool_call_id' => $callId,
-                'content' => json_encode(
-                    ['result' => $result],
-                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
-                ),
-            ];
+            // Every tool call in the message receives exactly one tool result (the OpenAI-compatible
+            // protocol requires it). Each call is dispatched at most once, in order, through the
+            // dispatcher's own authorization checks; calls beyond the per-round limit and a second
+            // change-staging call are answered with an error instead of being executed.
+            $stagedChange = false;
+            foreach (array_values($toolCalls) as $position => $toolCall) {
+                $function = $toolCall['function'];
+                $name = $function['name'] ?? null;
+                $rawArguments = $function['arguments'] ?? null;
+
+                try {
+                    $arguments = is_string($rawArguments)
+                        ? json_decode($rawArguments, true, 32, JSON_THROW_ON_ERROR)
+                        : null;
+                } catch (\JsonException) {
+                    $arguments = null;
+                }
+
+                $staging = in_array($name, self::STAGING_TOOLS, true);
+
+                if ($position >= self::MAX_TOOL_CALLS_PER_ROUND) {
+                    $result = ['error' => 'Too many operations were requested at once. Request fewer operations at a time.'];
+                } elseif ($staging && $stagedChange) {
+                    $result = ['error' => 'Only one change can be prepared at a time. Finish or cancel the pending change first.'];
+                } elseif (is_string($name) && is_array($arguments) && in_array($name, $registry->names($role), true)) {
+                    $result = $dispatcher->dispatch($role, $actor, $name, $arguments);
+                    $stagedChange = $stagedChange || $staging;
+
+                    // Write-staging tools answer with Laravel's own wording (change summary, confirmation
+                    // phrase, validation errors) so the model cannot misstate what will or did change.
+                    if ($staging && is_string($result['message'] ?? null)) {
+                        $canonicalSensitiveReply = $result['message'];
+                    }
+                } else {
+                    $result = ['error' => 'This requested operation is not available.'];
+                }
+
+                $messages[] = [
+                    'role' => 'tool',
+                    'tool_call_id' => $toolCall['id'],
+                    'content' => json_encode(
+                        ['result' => $result],
+                        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+                    ),
+                ];
+            }
         }
     }
 
@@ -312,11 +335,14 @@ class FreeLlmApiCopilotService
                     $payload['tool_choice'] = 'auto';
                 }
 
-                if (config('services.freellmapi.provider_name') === 'openrouter') {
-                    $payload['plugins'] = [[
-                        'id' => 'auto-router',
-                        'cost_tier' => config('services.freellmapi.auto_router_cost_tier', 'high'),
-                    ]];
+                if ($this->providerName() === 'openrouter') {
+                    // OpenRouter ignores parameters a model does not support. One call per round keeps
+                    // tool execution sequential; low reasoning effort keeps reasoning models within
+                    // max_tokens and the per-request timeout instead of returning an empty answer.
+                    if ($tools !== []) {
+                        $payload['parallel_tool_calls'] = false;
+                    }
+                    $payload['reasoning'] = ['effort' => 'low'];
                 }
 
                 if ($deadline - microtime(true) < 1) {
@@ -331,7 +357,7 @@ class FreeLlmApiCopilotService
                 $assistantMessage = $this->validatedAssistantMessage($response, $model);
 
                 if ($index !== $active) {
-                    Log::info('FreeLLMAPI Copilot fallback model succeeded.', [
+                    $this->log('info', 'fallback model succeeded.', [
                         'model' => $model,
                         'attempt' => $index + 1,
                         'served_model' => $this->safeIdentifier($response->json('model')),
@@ -348,7 +374,7 @@ class FreeLlmApiCopilotService
                     && $exception->modelSpecific
                     && $deadline - microtime(true) >= 1;
 
-                Log::warning('FreeLLMAPI Copilot model attempt failed.', [
+                $this->log('warning', 'model attempt failed.', [
                     'model' => $model,
                     'attempt' => $index + 1,
                     'failure_type' => $exception->reason,
@@ -407,7 +433,7 @@ class FreeLlmApiCopilotService
             $allQuota = array_reduce($exceptions, fn(bool $carry, $e) => $carry && $e->reason === FreeLlmApiCopilotException::QUOTA, true);
             $reason = $allQuota ? FreeLlmApiCopilotException::QUOTA : FreeLlmApiCopilotException::RATE_LIMITED;
 
-            Log::warning('FreeLLMAPI Copilot all configured models are rate limited.', [
+            $this->log('warning', 'all configured models are rate limited.', [
                 'models_attempted' => $models,
                 'retry_after_seconds' => $retryAfter,
             ]);
@@ -426,7 +452,7 @@ class FreeLlmApiCopilotService
             return $last;
         }
 
-        Log::warning('FreeLLMAPI Copilot all configured models failed.', [
+        $this->log('warning', 'all configured models failed.', [
             'models_attempted' => $models,
             'failure_types' => array_values($reasons),
         ]);
@@ -473,11 +499,11 @@ class FreeLlmApiCopilotService
         }
 
         if ($invalid > 0) {
-            Log::warning('FreeLLMAPI Copilot ignored invalid model configuration entries.', ['invalid_entries' => $invalid]);
+            $this->log('warning', 'ignored invalid model configuration entries.', ['invalid_entries' => $invalid]);
         }
 
         if ($chain === []) {
-            Log::warning('FreeLLMAPI Copilot has no valid model configured.', ['failure_type' => 'invalid_model_configuration']);
+            $this->log('warning', 'has no valid model configured.', ['failure_type' => 'invalid_model_configuration']);
 
             throw new FreeLlmApiCopilotException(
                 self::UNAVAILABLE_MESSAGE,
@@ -499,8 +525,10 @@ class FreeLlmApiCopilotService
     }
 
     /**
-     * Rejects responses a model cannot be trusted with: no message, empty text, several tool calls,
-     * missing tool-call ID or function. Failed tool calls are never turned into a text answer.
+     * Rejects responses a model cannot be trusted with: no message, empty text (including a reply that
+     * holds only reasoning), a malformed tool-call list, or any tool call without a unique ID or
+     * function name. Nothing from a rejected message is executed, and failed tool calls are never
+     * turned into a text answer.
      */
     private function validatedAssistantMessage(Response $response, string $model): array
     {
@@ -511,9 +539,20 @@ class FreeLlmApiCopilotService
             $this->invalid($response->status(), $json, $model);
         }
 
+        // Some OpenAI-compatible providers return content as a list of typed parts.
+        if (is_array($assistantMessage['content'] ?? null) && array_is_list($assistantMessage['content'])) {
+            $text = '';
+            foreach ($assistantMessage['content'] as $part) {
+                if (is_array($part) && ($part['type'] ?? null) === 'text' && is_string($part['text'] ?? null)) {
+                    $text .= $part['text'];
+                }
+            }
+            $assistantMessage['content'] = $text;
+        }
+
         $toolCalls = $assistantMessage['tool_calls'] ?? [];
 
-        if (!is_array($toolCalls) || $toolCalls === []) {
+        if ($toolCalls === null || $toolCalls === []) {
             $content = $assistantMessage['content'] ?? null;
 
             if (!is_string($content) || trim($content) === '') {
@@ -523,16 +562,23 @@ class FreeLlmApiCopilotService
             return $assistantMessage;
         }
 
-        $toolCall = $toolCalls[0] ?? null;
-
-        if (
-            count($toolCalls) !== 1
-            || !is_array($toolCall)
-            || !is_string($toolCall['id'] ?? null)
-            || $toolCall['id'] === ''
-            || !is_array($toolCall['function'] ?? null)
-        ) {
+        if (!is_array($toolCalls) || !array_is_list($toolCalls)) {
             $this->invalid($response->status(), $json, $model);
+        }
+
+        $ids = [];
+        foreach ($toolCalls as $toolCall) {
+            if (
+                !is_array($toolCall)
+                || !is_string($toolCall['id'] ?? null)
+                || $toolCall['id'] === ''
+                || in_array($toolCall['id'], $ids, true)
+                || !is_array($toolCall['function'] ?? null)
+                || !is_string($toolCall['function']['name'] ?? null)
+            ) {
+                $this->invalid($response->status(), $json, $model);
+            }
+            $ids[] = $toolCall['id'];
         }
 
         return $assistantMessage;
@@ -606,10 +652,16 @@ class FreeLlmApiCopilotService
 
             // A timeout means the gateway accepted the connection but the model was slow: another
             // model may answer. A refused/unreachable gateway blocks every model equally.
-            Log::warning('FreeLLMAPI Copilot connection failure.', [
+            $this->log('warning', 'connection failure.', [
                 'model' => $model,
                 'exception' => $exception::class,
                 'failure_type' => $isTimeout ? 'timeout' : 'connection',
+                'failure_detail' => match (true) {
+                    $isTimeout => null,
+                    str_contains($text, 'curl error 60') || str_contains($text, 'ssl') || str_contains($text, 'certificate') => 'tls',
+                    str_contains($text, 'curl error 6:') || str_contains($text, 'could not resolve') => 'dns',
+                    default => null,
+                },
                 'origin' => $isTimeout ? 'upstream_or_gateway' : 'gateway_unreachable',
                 'timeout_seconds' => round($timeout, 1),
                 'elapsed_ms' => $this->elapsedMs($startedAt),
@@ -631,14 +683,42 @@ class FreeLlmApiCopilotService
 
         $status = $response->status();
         [$reason, $message] = $this->classifyStatus($status);
-        $modelSpecificNotFound = $status === 404
-            && in_array(config('services.freellmapi.provider_name'), ['openrouter', 'navyai'], true);
-        if ($modelSpecificNotFound) {
-            $reason = FreeLlmApiCopilotException::UNAVAILABLE;
-            $message = self::MODEL_UNAVAILABLE_MESSAGE;
-        }
+        $hosted = $this->isHostedProvider();
         $retryAfter = null;
         $scope = null;
+
+        // A CDN / bot-protection refusal (HTML instead of the provider's JSON error) blocks every model
+        // of this provider equally: never try another model or blame the credentials for it.
+        if ($hosted && CopilotProviderModelResolver::isEdgeBlock($response)) {
+            $this->log('warning', 'unsuccessful response.', [
+                'model' => $model,
+                'http_status' => $status,
+                'failure_type' => 'edge_blocked',
+                'edge' => CopilotProviderModelResolver::edgeName($response),
+                'elapsed_ms' => $this->elapsedMs($startedAt),
+            ]);
+
+            throw new FreeLlmApiCopilotException(self::UPSTREAM_MESSAGE, FreeLlmApiCopilotException::UPSTREAM, null, null, $status, false);
+        }
+
+        // Hosted catalogues list models the account may still be refused (unknown model, plan-gated
+        // model): another discovered model may work, and the refused one is skipped for a while.
+        $modelRefused = $hosted && in_array($status, [403, 404], true);
+        if ($modelRefused) {
+            if ($status === 404) {
+                $reason = FreeLlmApiCopilotException::UNAVAILABLE;
+                $message = self::MODEL_UNAVAILABLE_MESSAGE;
+            }
+            CopilotProviderModelResolver::markDenied($this->providerName(), $model, $this->cooldownMaxSeconds());
+        }
+
+        // Insufficient credits concern the whole account: stop asking this provider for a while.
+        if ($hosted && $status === 402) {
+            $reason = FreeLlmApiCopilotException::QUOTA;
+            $message = sprintf(self::QUOTA_MESSAGE, $this->waitPhrase(null));
+            $scope = 'gateway';
+            $this->startCooldown($reason, null);
+        }
 
         if ($status === 429) {
             $retryAfter = $this->retryAfterSeconds($response);
@@ -658,11 +738,11 @@ class FreeLlmApiCopilotService
                 : $this->startModelCooldown($model, $reason, $retryAfter);
         }
 
-        $modelSpecific = $modelSpecificNotFound
+        $modelSpecific = $modelRefused
             || ($status === 429 && $scope === 'model')
             || in_array($reason, [FreeLlmApiCopilotException::UPSTREAM, FreeLlmApiCopilotException::TIMEOUT], true);
 
-        Log::warning('FreeLLMAPI Copilot unsuccessful response.', [
+        $this->log('warning', 'unsuccessful response.', [
             'model' => $model,
             'http_status' => $status,
             'failure_type' => $reason,
@@ -796,13 +876,13 @@ class FreeLlmApiCopilotService
     private function startCooldown(string $reason, ?int $retryAfter): void
     {
         $ttl = $this->storeCooldown($this->gatewayCooldownKey(), $reason, $retryAfter);
-        Log::warning('FreeLLMAPI Copilot gateway cooldown started.', ['failure_type' => $reason, 'cooldown_seconds' => $ttl]);
+        $this->log('warning', 'gateway cooldown started.', ['failure_type' => $reason, 'cooldown_seconds' => $ttl]);
     }
 
     private function startModelCooldown(string $model, string $reason, ?int $retryAfter): void
     {
         $ttl = $this->storeCooldown($this->modelCooldownKey($model), $reason, $retryAfter);
-        Log::warning('FreeLLMAPI Copilot model cooldown started.', ['model' => $model, 'failure_type' => $reason, 'cooldown_seconds' => $ttl]);
+        $this->log('warning', 'model cooldown started.', ['model' => $model, 'failure_type' => $reason, 'cooldown_seconds' => $ttl]);
     }
 
     private function modelCooldownKey(string $model): string
@@ -824,7 +904,7 @@ class FreeLlmApiCopilotService
         $exception = $this->cooldownException($this->gatewayCooldownKey(), false);
 
         if ($exception !== null) {
-            Log::info('FreeLLMAPI Copilot request skipped during gateway cooldown.', [
+            $this->log('info', 'request skipped during gateway cooldown.', [
                 'failure_type' => $exception->reason,
                 'retry_after_seconds' => $exception->retryAfterSeconds,
             ]);
@@ -838,7 +918,7 @@ class FreeLlmApiCopilotService
         $exception = $this->cooldownException($this->modelCooldownKey($model), true);
 
         if ($exception !== null) {
-            Log::info('FreeLLMAPI Copilot model skipped during cooldown.', [
+            $this->log('info', 'model skipped during cooldown.', [
                 'model' => $model,
                 'failure_type' => $exception->reason,
                 'retry_after_seconds' => $exception->retryAfterSeconds,
@@ -903,6 +983,33 @@ class FreeLlmApiCopilotService
         return is_string($value) && preg_match('/^[A-Za-z0-9_.:\/@+-]{1,128}$/', $value) === 1 ? $value : null;
     }
 
+    private function providerName(): string
+    {
+        $name = (string) config('services.freellmapi.provider_name', 'freellmapi');
+        return in_array($name, CopilotProviderRouter::PROVIDERS, true) ? $name : 'freellmapi';
+    }
+
+    private function isHostedProvider(): bool
+    {
+        return in_array($this->providerName(), CopilotProviderModelResolver::HOSTED_PROVIDERS, true);
+    }
+
+    /**
+     * Logs under the label of the provider actually serving the request (FreeLLMAPI, OpenRouter or
+     * NavyAI). Contexts carry identifiers, statuses and timings only, never keys, prompts or bodies.
+     */
+    private function log(string $level, string $event, array $context = []): void
+    {
+        $provider = $this->providerName();
+        $label = match ($provider) {
+            'openrouter' => 'OpenRouter',
+            'navyai' => 'NavyAI',
+            default => 'FreeLLMAPI',
+        };
+
+        Log::{$level}($label . ' Copilot ' . $event, ['provider' => $provider, 'operation' => 'completion'] + $context);
+    }
+
     private function elapsedMs(float $startedAt): int
     {
         return (int) round((microtime(true) - $startedAt) * 1000);
@@ -910,7 +1017,7 @@ class FreeLlmApiCopilotService
 
     private function invalid(int $status, mixed $payload, string $model, bool $empty = false): never
     {
-        Log::warning('FreeLLMAPI Copilot malformed response.', [
+        $this->log('warning', 'malformed response.', [
             'model' => $model,
             'http_status' => $status,
             'payload_is_array' => is_array($payload),
