@@ -36,7 +36,8 @@ class FreeLlmApiCopilotException extends RuntimeException
         ?\Throwable $previous = null,
         public readonly ?int $retryAfterSeconds = null,
         public readonly ?int $providerStatus = null,
-        public readonly bool $modelSpecific = false
+        public readonly bool $modelSpecific = false,
+        public readonly bool $fallbackSafe = true
     ) {
         parent::__construct($message, 0, $previous);
     }

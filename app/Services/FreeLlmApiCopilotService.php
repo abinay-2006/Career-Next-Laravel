@@ -154,7 +154,7 @@ class FreeLlmApiCopilotService
         $messages[] = ['role' => 'user', 'content' => $message];
 
         $calls = 0;
-        $deadline = microtime(true) + self::TOTAL_BUDGET_SECONDS;
+        $deadline = microtime(true) + max(1, (int) config('services.freellmapi.total_timeout_seconds', self::TOTAL_BUDGET_SECONDS));
         $canonicalSensitiveReply = null;
         $active = 0;              // index of the model currently serving this conversation
         $toolExecuted = false;    // once true, the model is pinned and fallback is disabled
@@ -168,17 +168,24 @@ class FreeLlmApiCopilotService
                 );
             }
 
-            [$assistantMessage, $active] = $this->completeWithFallback(
-                $chain,
-                $active,
-                $endpoint,
-                $key,
-                $messages,
-                $tools,
-                $deadline,
-                $toolExecuted,
-                $failures
-            );
+            try {
+                [$assistantMessage, $active] = $this->completeWithFallback(
+                    $chain,
+                    $active,
+                    $endpoint,
+                    $key,
+                    $messages,
+                    $tools,
+                    $deadline,
+                    $toolExecuted,
+                    $failures
+                );
+            } catch (FreeLlmApiCopilotException $e) {
+                if ($toolExecuted) {
+                    throw new FreeLlmApiCopilotException($e->getMessage(), $e->reason, $e, $e->retryAfterSeconds, $e->providerStatus, $e->modelSpecific, false);
+                }
+                throw $e;
+            }
 
             $toolCalls = $assistantMessage['tool_calls'] ?? [];
 
@@ -272,7 +279,8 @@ class FreeLlmApiCopilotService
         // Failures recorded in earlier rounds were already resolved (e.g. a cooldown skip followed by a
         // successful fallback) and must not change the classification of this round's outcome.
         $roundStart = count($failures);
-        $timeoutCap = $toolExecuted ? self::PINNED_REQUEST_TIMEOUT_SECONDS : self::REQUEST_TIMEOUT_SECONDS;
+        $configuredCap = max(1, (int) config('services.freellmapi.request_timeout_seconds', self::REQUEST_TIMEOUT_SECONDS));
+        $timeoutCap = $toolExecuted ? self::PINNED_REQUEST_TIMEOUT_SECONDS : min(self::REQUEST_TIMEOUT_SECONDS, $configuredCap);
 
         for ($index = $active; $index < $count; $index++) {
             $model = $chain[$index];
@@ -767,7 +775,7 @@ class FreeLlmApiCopilotService
 
     private function startCooldown(string $reason, ?int $retryAfter): void
     {
-        $ttl = $this->storeCooldown(self::COOLDOWN_CACHE_KEY, $reason, $retryAfter);
+        $ttl = $this->storeCooldown($this->gatewayCooldownKey(), $reason, $retryAfter);
         Log::warning('FreeLLMAPI Copilot gateway cooldown started.', ['failure_type' => $reason, 'cooldown_seconds' => $ttl]);
     }
 
@@ -779,12 +787,21 @@ class FreeLlmApiCopilotService
 
     private function modelCooldownKey(string $model): string
     {
-        return self::MODEL_COOLDOWN_CACHE_PREFIX . hash('sha256', $model);
+        $provider = (string) config('services.freellmapi.cooldown_namespace', 'freellmapi');
+        if ($provider === 'freellmapi') return self::MODEL_COOLDOWN_CACHE_PREFIX . hash('sha256', $model);
+        return 'copilot_provider_' . preg_replace('/[^a-z0-9_]+/i', '_', $provider) . '_model_cooldown:' . hash('sha256', $model);
+    }
+
+    private function gatewayCooldownKey(): string
+    {
+        $provider = (string) config('services.freellmapi.cooldown_namespace', 'freellmapi');
+        if ($provider === 'freellmapi') return self::COOLDOWN_CACHE_KEY;
+        return 'copilot_provider_' . preg_replace('/[^a-z0-9_]+/i', '_', $provider) . '_rate_limit_cooldown';
     }
 
     private function throwIfCoolingDown(): void
     {
-        $exception = $this->cooldownException(self::COOLDOWN_CACHE_KEY, false);
+        $exception = $this->cooldownException($this->gatewayCooldownKey(), false);
 
         if ($exception !== null) {
             Log::info('FreeLLMAPI Copilot request skipped during gateway cooldown.', [
