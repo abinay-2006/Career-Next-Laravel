@@ -9,18 +9,32 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Discovers tool-capable chat models from a hosted provider's live catalogue (OpenRouter, NavyAI).
+ * Discovers tool-capable chat models from a hosted provider's live catalogue (NaraRouter,
+ * OpenRouter, NavyAI).
  *
  * No model ID is configured or hard-coded: every request resolves a short ranked chain (at most
- * three IDs) from the provider's published capability metadata. Catalogues are cached briefly; a
- * longer-lived "last known good" copy is used only when a fresh catalogue cannot be fetched.
- * Cache entries hold model IDs and ranking flags only, never keys or raw provider bodies.
+ * three IDs) from the provider's catalogue. OpenRouter and NavyAI publish explicit tool-capability
+ * metadata, which is required. NaraRouter's authenticated catalogue lists the models the key's plan
+ * entitles but documents no capability metadata, so each NaraRouter model must additionally pass
+ * an active tool-calling probe (CopilotToolCallingVerifier) before it can be selected.
+ * Catalogues are cached briefly; a longer-lived "last known good" copy is used only when a fresh
+ * catalogue cannot be fetched. Cache entries hold model IDs and flags only, never keys or bodies.
  */
 class CopilotProviderModelResolver
 {
     public const MAX_CANDIDATES = FreeLlmApiCopilotService::MAX_CONFIGURED_MODELS;
 
-    public const HOSTED_PROVIDERS = ['openrouter', 'navyai'];
+    public const HOSTED_PROVIDERS = ['nararouter', 'openrouter', 'navyai'];
+
+    /** Providers whose models must pass an active tool-calling probe before selection. */
+    public const VERIFIED_PROVIDERS = ['nararouter'];
+
+    /** Cold-cache probes per resolution; probing stops as soon as one model is verified. */
+    public const MAX_PROBES_PER_RESOLUTION = 3;
+
+    /** Catalogue type/mode values that are definitely not chat-completion models. */
+    private const NON_CHAT_TYPES = ['embedding', 'embeddings', 'image', 'images', 'image_generation', 'image-generation', 'audio', 'speech', 'tts', 'stt', 'transcription', 'video', 'rerank', 'reranker', 'moderation'];
+    private const UNAVAILABLE_STATUSES = ['disabled', 'unavailable', 'deprecated', 'offline', 'inactive', 'retired'];
 
     /** Same allowlist the completion service enforces, so every resolved ID is also accepted there. */
     private const MODEL_ID_PATTERN = '/^[A-Za-z0-9][A-Za-z0-9._:\/@+-]{0,127}$/';
@@ -31,8 +45,21 @@ class CopilotProviderModelResolver
     private const MIN_CONTEXT_TOKENS = 16384;
     private const DEFAULT_DENIAL_SECONDS = 300;
 
+    public function __construct(private readonly CopilotToolCallingVerifier $verifier) {}
+
     /** @return list<string> ranked model IDs, best first */
     public function resolve(string $provider, array $block, float $deadline): array
+    {
+        return array_column($this->resolveDetailed($provider, $block, $deadline), 'id');
+    }
+
+    /**
+     * Like resolve(), keeping per-model flags the completion needs (NaraRouter's documented
+     * `reasoning` flag decides whether a low reasoning effort is requested).
+     *
+     * @return list<array{id: string, reasoning?: bool}>
+     */
+    public function resolveDetailed(string $provider, array $block, float $deadline): array
     {
         if (!in_array($provider, self::HOSTED_PROVIDERS, true)) {
             throw new FreeLlmApiCopilotException(FreeLlmApiCopilotService::UNAVAILABLE_MESSAGE, FreeLlmApiCopilotException::UNAVAILABLE);
@@ -50,6 +77,10 @@ class CopilotProviderModelResolver
         }
         $available = array_values(array_filter($candidates, fn(array $c): bool => !$this->isDenied($provider, $c['id'])));
 
+        if ($available !== [] && in_array($provider, self::VERIFIED_PROVIDERS, true)) {
+            $available = $this->verifiedCandidates($provider, $baseUrl, (string) ($block['key'] ?? ''), $block, $available, $deadline);
+        }
+
         if ($available === []) {
             Log::warning('Copilot provider catalogue contains no eligible tool-capable model.', [
                 'provider' => $provider, 'operation' => 'model_discovery', 'failure_type' => 'no_eligible_model',
@@ -60,10 +91,73 @@ class CopilotProviderModelResolver
 
         // Catalogues cannot prove that an API account can invoke every listed model. Keep this
         // ordered chain capability-based; runtime authorization failures prune a model separately.
-        $chain = array_slice(array_column($available, 'id'), 0, self::MAX_CANDIDATES);
-        Log::info('Copilot provider models resolved.', ['provider' => $provider, 'operation' => 'model_discovery', 'models' => $chain, 'eligible_models' => count($available)]);
+        $chain = array_slice($available, 0, self::MAX_CANDIDATES);
+        Log::info('Copilot provider models resolved.', ['provider' => $provider, 'operation' => 'model_discovery', 'models' => array_column($chain, 'id'), 'eligible_models' => count($available)]);
 
         return $chain;
+    }
+
+    /**
+     * Keeps only models whose tool calling has been proven by a probe. Cached verdicts are used first;
+     * unknown models are probed in rank order (at most MAX_PROBES_PER_RESOLUTION, stopping at the first
+     * success) so a cold cache costs one user request a few seconds at most.
+     *
+     * @param list<array{id: string, reasoning?: bool}> $candidates
+     * @return list<array{id: string, reasoning?: bool}>
+     */
+    private function verifiedCandidates(string $provider, string $baseUrl, string $key, array $block, array $candidates, float $deadline): array
+    {
+        $verified = [];
+        $unknown = [];
+        foreach ($candidates as $candidate) {
+            $state = $this->cacheGet($this->probeKey($provider, $baseUrl, $key, $candidate));
+            if ($state === CopilotToolCallingVerifier::VERIFIED) $verified[] = $candidate;
+            elseif ($state === null) $unknown[] = $candidate;
+        }
+        if ($verified !== []) return $verified;
+
+        $outcomes = [];
+        foreach (array_slice($unknown, 0, self::MAX_PROBES_PER_RESOLUTION) as $candidate) {
+            if ($deadline - microtime(true) < 2 * CopilotToolCallingVerifier::MIN_STEP_SECONDS) {
+                $outcomes[] = CopilotToolCallingVerifier::TRANSIENT;
+                break;
+            }
+            // Provider-wide failures (401, 402, 429, unreachable, edge block) propagate from here.
+            $outcome = $this->verifier->verify($provider, $baseUrl, $key, $candidate['id'], self::extraPayload($provider, $candidate), $deadline);
+            $outcomes[] = $outcome;
+
+            if ($outcome === CopilotToolCallingVerifier::VERIFIED) {
+                $this->cachePutValue($this->probeKey($provider, $baseUrl, $key, $candidate), $outcome, (int) ($block['tool_verification_cache_seconds'] ?? 21600));
+                return [$candidate];
+            }
+            if ($outcome !== CopilotToolCallingVerifier::TRANSIENT) {
+                $this->cachePutValue($this->probeKey($provider, $baseUrl, $key, $candidate), $outcome, (int) ($block['tool_verification_failure_cache_seconds'] ?? 3600));
+            }
+        }
+
+        Log::warning('Copilot provider has no model with verified tool calling.', [
+            'provider' => $provider, 'operation' => 'tool_verification', 'eligible_models' => count($candidates),
+            'probed_models' => count($outcomes), 'outcomes' => array_count_values($outcomes),
+        ]);
+
+        // Every probe refused by the provider: an account/plan restriction, not a credential problem.
+        if ($outcomes !== [] && array_unique($outcomes) === [CopilotToolCallingVerifier::FORBIDDEN]) {
+            throw new FreeLlmApiCopilotException(FreeLlmApiCopilotService::ACCOUNT_PERMISSION_MESSAGE, FreeLlmApiCopilotException::ACCOUNT_PERMISSION_DENIED, null, null, 403);
+        }
+        if (in_array(CopilotToolCallingVerifier::TRANSIENT, $outcomes, true)) {
+            throw new FreeLlmApiCopilotException(FreeLlmApiCopilotService::UPSTREAM_MESSAGE, FreeLlmApiCopilotException::UPSTREAM);
+        }
+
+        return [];
+    }
+
+    /**
+     * Provider parameters sent with every completion (and every probe) for a model, so the probe
+     * verifies exactly the request shape the Copilot later uses.
+     */
+    public static function extraPayload(string $provider, array $candidate): array
+    {
+        return $provider === 'nararouter' && ($candidate['reasoning'] ?? false) === true ? ['reasoning_effort' => 'low'] : [];
     }
 
     /** Backwards-compatible single-model resolution for NavyAI. */
@@ -85,11 +179,13 @@ class CopilotProviderModelResolver
         }
     }
 
+    /** Drops the cached catalogue and every cached tool-calling verdict for the provider. */
     public static function forgetCatalog(string $provider): void
     {
         try {
             Cache::forget(self::catalogKey($provider, 'fresh'));
             Cache::forget(self::catalogKey($provider, 'stale'));
+            Cache::forever(self::probeGenerationKey($provider), bin2hex(random_bytes(8)));
         } catch (\Throwable) {
         }
     }
@@ -164,7 +260,8 @@ class CopilotProviderModelResolver
         try {
             $request = Http::acceptJson()->timeout(min(self::CATALOG_TIMEOUT_SECONDS, $remaining))->connectTimeout(min(self::CONNECT_TIMEOUT_SECONDS, $remaining));
             // NavyAI documents /models as public. OpenRouter accepts Bearer auth for its catalogue.
-            if ($provider === 'openrouter' && $key !== '') $request = $request->withToken($key);
+            // NaraRouter requires it: its authenticated /models lists only the aliases the key's plan entitles.
+            if (in_array($provider, ['openrouter', 'nararouter'], true) && $key !== '') $request = $request->withToken($key);
             $response = $request->get($baseUrl . $catalogPath, $query);
         } catch (ConnectionException $e) {
             $text = strtolower($e->getMessage());
@@ -207,7 +304,7 @@ class CopilotProviderModelResolver
             throw new FreeLlmApiCopilotException($message, $reason, null, null, $status);
         }
 
-        $items = $response->json('data');
+        $items = $provider === 'nararouter' ? self::naraRouterItems($response) : $response->json('data');
         if (!is_array($items) || !array_is_list($items)) {
             Log::warning('Copilot provider catalogue had an invalid structure.', [
                 'provider' => $provider, 'operation' => 'model_discovery', 'http_status' => $response->status(),
@@ -217,7 +314,11 @@ class CopilotProviderModelResolver
             throw new FreeLlmApiCopilotException(FreeLlmApiCopilotService::MODEL_CATALOG_MESSAGE, FreeLlmApiCopilotException::INVALID_RESPONSE, null, null, $response->status());
         }
 
-        $candidates = $provider === 'openrouter' ? $this->rankOpenRouter($items, $block) : $this->rankNavyAi($items, $block);
+        $candidates = match ($provider) {
+            'openrouter' => $this->rankOpenRouter($items, $block),
+            'nararouter' => $this->rankNaraRouter($items),
+            default => $this->rankNavyAi($items, $block),
+        };
 
         Log::info('Copilot provider catalogue fetched.', [
             'provider' => $provider, 'operation' => 'model_discovery', 'listed_models' => count($items),
@@ -352,11 +453,90 @@ class CopilotProviderModelResolver
         return self::sorted($eligible);
     }
 
+    /**
+     * NaraRouter's /models response body is not documented: accept the OpenAI `data` list, a `models`
+     * list or a bare list. Anything else is an invalid catalogue (null).
+     */
+    private static function naraRouterItems(Response $response): ?array
+    {
+        $json = $response->json();
+        if (!is_array($json)) return null;
+        foreach ([$json['data'] ?? null, $json['models'] ?? null] as $items) {
+            if (is_array($items) && array_is_list($items)) return $items;
+        }
+        return array_is_list($json) && $json !== [] ? $json : null;
+    }
+
+    /**
+     * NaraRouter: the catalogue proves plan entitlement only. Exclude whatever the entry explicitly
+     * marks as non-chat, non-text, unavailable or tool-incapable; every remaining model still has to
+     * pass the tool-calling probe. Model names are never interpreted.
+     *
+     * @return list<array{id: string, reasoning: bool}>
+     */
+    private function rankNaraRouter(array $items): array
+    {
+        $eligible = [];
+
+        foreach ($items as $model) {
+            if (is_string($model)) $model = ['id' => $model];
+            if (!is_array($model) || !self::validId($model['id'] ?? null)) continue;
+            $id = $model['id'];
+            $lower = strtolower($id);
+
+            // Routing aliases ("auto", "auto/...") pick a different upstream per request, so a probe
+            // cannot vouch for them; ":online" variants add the web-search plugin to every request.
+            if ($lower === 'auto' || str_starts_with($lower, 'auto/') || str_ends_with($lower, ':online')) continue;
+
+            foreach (['type', 'mode', 'model_type', 'category', 'task'] as $field) {
+                $type = $model[$field] ?? null;
+                if (is_string($type) && in_array(strtolower($type), self::NON_CHAT_TYPES, true)) continue 2;
+            }
+
+            $endpoints = $model['endpoints'] ?? ($model['endpoint'] ?? null);
+            if (is_string($endpoints)) $endpoints = [$endpoints];
+            if (is_array($endpoints) && $endpoints !== [] && array_filter($endpoints, fn($e) => is_string($e) && str_ends_with($e, 'chat/completions')) === []) continue;
+
+            $input = $model['input_modalities'] ?? ($model['architecture']['input_modalities'] ?? null);
+            $output = $model['output_modalities'] ?? ($model['architecture']['output_modalities'] ?? null);
+            if (is_array($input) && !in_array('text', $input, true)) continue;
+            if (is_array($output) && $output !== ['text']) continue;
+
+            $capabilities = is_array($model['capabilities'] ?? null) ? $model['capabilities'] : [];
+            if (self::explicitlyFalse($model, ['supports_tools', 'supports_function_calling', 'tool_calling', 'function_calling'])
+                || self::explicitlyFalse($capabilities, ['tools', 'tool_calling', 'function_calling', 'supports_tools', 'supports_function_calling'])) continue;
+            $parameters = $model['supported_parameters'] ?? null;
+            if (is_array($parameters) && !in_array('tools', $parameters, true)) continue;
+
+            if (self::explicitlyFalse($model, ['available', 'is_active', 'enabled', 'active'])) continue;
+            $status = $model['status'] ?? null;
+            if (is_string($status) && in_array(strtolower($status), self::UNAVAILABLE_STATUSES, true)) continue;
+
+            $context = $model['context_length'] ?? ($model['context_window'] ?? null);
+            if (is_int($context) && $context < self::MIN_CONTEXT_TOKENS) continue;
+
+            $eligible[] = ['id' => $id, 'reasoning' => ($model['reasoning'] ?? null) === true, 'rank' => [is_int($context) ? $context : 0]];
+        }
+
+        return self::sorted($eligible);
+    }
+
+    private static function explicitlyFalse(array $entry, array $fields): bool
+    {
+        foreach ($fields as $field) {
+            if (($entry[$field] ?? null) === false) return true;
+        }
+        return false;
+    }
+
     /** @return list<array{id: string}> */
     private static function sorted(array $eligible): array
     {
         usort($eligible, fn(array $a, array $b): int => ($b['rank'] <=> $a['rank']) ?: strcmp($a['id'], $b['id']));
-        return array_map(fn(array $c): array => ['id' => $c['id']], $eligible);
+        return array_map(function (array $c): array {
+            unset($c['rank']);
+            return $c;
+        }, $eligible);
     }
 
     private static function eligibilitySettings(string $provider, array $block): array
@@ -412,12 +592,35 @@ class CopilotProviderModelResolver
         return 'copilot_provider_' . $provider . '_catalogue_' . $kind;
     }
 
+    private static function probeGenerationKey(string $provider): string
+    {
+        return 'copilot_provider_' . $provider . '_tool_probe_generation';
+    }
+
+    /** Verdicts are bound to the base URL, a hash of the key and the request shape, never the key itself. */
+    private function probeKey(string $provider, string $baseUrl, string $key, array $candidate): string
+    {
+        $generation = $this->cacheGet(self::probeGenerationKey($provider));
+        return 'copilot_provider_' . $provider . '_tool_probe:' . hash('sha256', json_encode([
+            is_string($generation) ? $generation : '0', $baseUrl, hash('sha256', $key), $candidate['id'], self::extraPayload($provider, $candidate),
+        ]));
+    }
+
     private function cacheGet(string $key): mixed
     {
         try {
             return Cache::get($key);
         } catch (\Throwable) {
             return null;
+        }
+    }
+
+    private function cachePutValue(string $key, string $value, int $seconds): void
+    {
+        if ($seconds < 1) return;
+        try {
+            Cache::put($key, $value, min($seconds, 86400));
+        } catch (\Throwable) {
         }
     }
 

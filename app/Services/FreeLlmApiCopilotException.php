@@ -20,6 +20,8 @@ class FreeLlmApiCopilotException extends RuntimeException
     public const UNSUPPORTED_TOOL_CALLING = 'unsupported_tool_calling';
     public const PROVIDER_OUTAGE = 'provider_outage';
     public const PROVIDERS_REJECTED_ACCESS = 'providers_rejected_access';
+    /** The provider rejected the request itself (HTTP 400/413/415/422): never retried or failed over. */
+    public const INVALID_REQUEST = 'invalid_request';
     // Compatibility aliases used by existing callers/tests.
     public const AUTHENTICATION = self::INVALID_CREDENTIALS;
     public const PERMISSION = self::ACCOUNT_PERMISSION_DENIED;

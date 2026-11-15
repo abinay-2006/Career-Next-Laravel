@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * OpenAI-compatible Copilot completion client with tool calling.
  *
- * Serves the local FreeLLMAPI gateway directly, and the hosted providers (OpenRouter, NavyAI)
+ * Serves the local FreeLLMAPI gateway directly, and the hosted providers (NaraRouter, OpenRouter, NavyAI)
  * through CopilotProviderRouter, which temporarily points services.freellmapi at the provider and
  * sets provider_name. Requests go to a short chain of at most three models
  * (services.freellmapi.models: curated for FreeLLMAPI, discovered from the live catalogue for hosted
@@ -70,6 +70,9 @@ class FreeLlmApiCopilotService
 
     public const UPSTREAM_MESSAGE =
     'The AI service is temporarily unavailable. Please try again shortly.';
+
+    public const INVALID_REQUEST_MESSAGE =
+    'The AI service could not process this request. Please rephrase your message and try again.';
 
     /**
      * Gateway-wide cooldown (the gateway's own client limiter is exhausted, so every model is blocked).
@@ -338,6 +341,15 @@ class FreeLlmApiCopilotService
                 if ($tools !== []) {
                     $payload['tools'] = $tools;
                     $payload['tool_choice'] = 'auto';
+                }
+
+                // NaraRouter: the same parameters its tool-calling probe verified for this model
+                // (a low reasoning effort for models the catalogue flags as reasoning models).
+                if ($this->providerName() === 'nararouter') {
+                    $reasoningModels = config('services.freellmapi.reasoning_models', []);
+                    $payload += CopilotProviderModelResolver::extraPayload('nararouter', [
+                        'reasoning' => is_array($reasoningModels) && in_array($model, $reasoningModels, true),
+                    ]);
                 }
 
                 if ($this->providerName() === 'openrouter') {
@@ -711,6 +723,13 @@ class FreeLlmApiCopilotService
         $providerMessage = is_string($errorMessage) ? strtolower($errorMessage) : '';
         $mentionsSelectedModel = $model !== '' && str_contains($providerMessage, strtolower($model));
         $modelPermissionDenied = $hosted && $status === 403 && $mentionsSelectedModel && preg_match('/\\b(access|permission|authori[sz]|allow|entitle)/', $providerMessage) === 1;
+        // NaraRouter documents 403 `forbidden` for "plan does not include the model" as well as for a
+        // suspended account. Only an explicit plan/entitlement refusal is scoped to the model.
+        if ($this->providerName() === 'nararouter' && $status === 403 && !$modelPermissionDenied
+            && preg_match('/\\b(plan|tier|entitle\\w*|not included|does not include|upgrade)\\b/', $providerMessage) === 1
+            && preg_match('/\\b(suspend\\w*|banned|blocked|disabled|deactivated)\\b/', $providerMessage) !== 1) {
+            $modelPermissionDenied = true;
+        }
         $modelUnavailable = $hosted && $status === 404;
         $unsupportedTools = $hosted && in_array($status, [400, 404, 422], true)
             && str_contains($providerMessage, 'tool')
@@ -735,6 +754,11 @@ class FreeLlmApiCopilotService
         } elseif ($hosted && $status === 401) {
             $reason = FreeLlmApiCopilotException::INVALID_CREDENTIALS;
             $message = self::AUTHENTICATION_MESSAGE;
+        } elseif ($hosted && in_array($status, [400, 413, 415, 422], true)) {
+            // The provider rejected this request itself (validation, size, safety screen). Repeating it
+            // on another model or provider would not help, so it is neither rotated nor failed over.
+            $reason = FreeLlmApiCopilotException::INVALID_REQUEST;
+            $message = self::INVALID_REQUEST_MESSAGE;
         }
 
         if ($modelRefused || $unsupportedTools) {
@@ -761,7 +785,9 @@ class FreeLlmApiCopilotService
 
             // X-RateLimit-Remaining: 0 means the gateway's own per-client limiter is exhausted, which
             // blocks every model. Otherwise the 429 concerns the requested model's upstream/cooldown.
-            $scope = trim($response->header('X-RateLimit-Remaining')) === '0' ? 'gateway' : 'model';
+            // NaraRouter's documented 429 limits (per-minute rate, concurrency, daily token quota) apply
+            // to the key, so another model of the same provider would be refused too.
+            $scope = trim($response->header('X-RateLimit-Remaining')) === '0' || $this->providerName() === 'nararouter' ? 'gateway' : 'model';
             $scope === 'gateway'
                 ? $this->startCooldown($reason, $retryAfter)
                 : $this->startModelCooldown($model, $reason, $retryAfter);
@@ -777,6 +803,7 @@ class FreeLlmApiCopilotService
             'http_status' => $status,
             'failure_type' => $reason,
             'provider_error_code' => $providerErrorCode,
+            'provider_request_id' => CopilotToolCallingVerifier::requestId($response),
             'limit_scope' => $scope,
             'retry_after_seconds' => $retryAfter,
             'elapsed_ms' => $this->elapsedMs($startedAt),
@@ -1043,6 +1070,7 @@ class FreeLlmApiCopilotService
     {
         $provider = $this->providerName();
         $label = match ($provider) {
+            'nararouter' => 'NaraRouter',
             'openrouter' => 'OpenRouter',
             'navyai' => 'NavyAI',
             default => 'FreeLLMAPI',

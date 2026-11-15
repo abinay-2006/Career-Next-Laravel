@@ -56,9 +56,9 @@ return [
         'model_cooldown_max_seconds' => env('FREELLMAPI_MODEL_COOLDOWN_MAX_SECONDS', 300),
     ],
     'ai' => [
-        // Production: NavyAI, then OpenRouter. Local development: the FreeLLMAPI gateway.
+        // Production: NaraRouter, then OpenRouter. Local development: the FreeLLMAPI gateway.
         // FreeLLMAPI (a local gateway) is never used when APP_ENV=production, whatever is set here.
-        'provider' => env('AI_PROVIDER', env('APP_ENV') === 'production' ? 'navyai' : 'freellmapi'),
+        'provider' => env('AI_PROVIDER', env('APP_ENV') === 'production' ? 'nararouter' : 'freellmapi'),
         'fallback_provider' => env('AI_FALLBACK_PROVIDER', 'openrouter'),
         'provider_fallback_enabled' => env('AI_PROVIDER_FALLBACK_ENABLED', env('APP_ENV') === 'production'),
         'total_timeout_seconds' => env('AI_TOTAL_TIMEOUT_SECONDS', 24),
@@ -67,6 +67,16 @@ return [
         'model_catalog_cache_seconds' => env('AI_MODEL_CATALOG_CACHE_SECONDS', 600),
         'model_catalog_stale_seconds' => env('AI_MODEL_CATALOG_STALE_SECONDS', 86400),
         'providers' => [
+            'nararouter' => [
+                'base_url' => env('NARAROUTER_BASE_URL', 'https://router.bynara.id/v1'), 'key' => env('NARAROUTER_API_KEY'),
+                'enabled' => env('NARAROUTER_ENABLED', false),
+                'request_timeout_seconds' => env('NARAROUTER_REQUEST_TIMEOUT_SECONDS', 9),
+                'cooldown_default_seconds' => env('NARAROUTER_COOLDOWN_DEFAULT_SECONDS', 60), 'cooldown_max_seconds' => env('NARAROUTER_COOLDOWN_MAX_SECONDS', 300),
+                // NaraRouter publishes no tool-capability metadata: each model must pass a two-step
+                // tool-calling probe. Verdicts are cached (successes longer than failures).
+                'tool_verification_cache_seconds' => env('NARAROUTER_TOOL_VERIFICATION_CACHE_SECONDS', 21600),
+                'tool_verification_failure_cache_seconds' => env('NARAROUTER_TOOL_VERIFICATION_FAILURE_CACHE_SECONDS', 3600),
+            ],
             'openrouter' => [
                 'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'), 'key' => env('OPENROUTER_API_KEY'),
                 'enabled' => env('OPENROUTER_ENABLED', false),

@@ -59,36 +59,37 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 ## Copilot AI providers
 
-Local development uses the FreeLLMAPI desktop gateway (`http://127.0.0.1:31415/v1`) with its curated `FREELLMAPI_*_MODEL` chain. Production uses NavyAI, with OpenRouter as the fallback provider. FreeLLMAPI is never contacted when `APP_ENV=production`, and hosted providers must use public HTTPS base URLs. Set these environment variables in Render and enter keys through Render's secret fields; do not commit credentials:
+Local development uses the FreeLLMAPI desktop gateway (`http://127.0.0.1:31415/v1`) with its curated `FREELLMAPI_*_MODEL` chain. Production uses NaraRouter, with OpenRouter as the fallback provider. FreeLLMAPI is never contacted when `APP_ENV=production` (even if its variables are present), and hosted providers must use public HTTPS base URLs. Set these environment variables in Render and enter keys through Render's secret fields; do not commit credentials:
 
 ```dotenv
 APP_ENV=production
 APP_DEBUG=false
 LOG_CHANNEL=stderr
-AI_PROVIDER=navyai
+AI_PROVIDER=nararouter
 AI_FALLBACK_PROVIDER=openrouter
 AI_PROVIDER_FALLBACK_ENABLED=true
 AI_TOTAL_TIMEOUT_SECONDS=24
 AI_MODEL_CATALOG_CACHE_SECONDS=600
 AI_MODEL_CATALOG_STALE_SECONDS=86400
-OPENROUTER_API_KEY=
+NARAROUTER_ENABLED=true
+NARAROUTER_BASE_URL=https://router.bynara.id/v1
+NARAROUTER_API_KEY=
+NARAROUTER_REQUEST_TIMEOUT_SECONDS=9
 OPENROUTER_ENABLED=true
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_API_KEY=
 OPENROUTER_TIMEOUT_SECONDS=9
-NAVYAI_API_KEY=
-NAVYAI_ENABLED=true
-NAVYAI_BASE_URL=https://api.navy/v1
-NAVYAI_ALLOWED_PLANS=
-NAVYAI_CHECK_MODEL_AVAILABILITY=true
-NAVYAI_TIMEOUT_SECONDS=9
 FREELLMAPI_COPILOT_ENABLED=false
 ```
 
+Optional NaraRouter tuning: `NARAROUTER_COOLDOWN_DEFAULT_SECONDS` (60), `NARAROUTER_COOLDOWN_MAX_SECONDS` (300), `NARAROUTER_TOOL_VERIFICATION_CACHE_SECONDS` (21600), `NARAROUTER_TOOL_VERIFICATION_FAILURE_CACHE_SECONDS` (3600). The `NAVYAI_*` variables are no longer needed in production; NavyAI remains selectable with `AI_PROVIDER=navyai`.
+
 No model ID is hardcoded. For every request the app resolves a chain of up to three models from current provider metadata, cached for `AI_MODEL_CATALOG_CACHE_SECONDS` (a last-known-good copy is kept for `AI_MODEL_CATALOG_STALE_SECONDS` and used only when a refresh fails):
 
+- **NaraRouter**: calls the authenticated `GET /v1/models` with `NARAROUTER_API_KEY`, which lists only the models the key's plan entitles. NaraRouter documents no tool-capability metadata, so entries explicitly marked as non-chat, non-text, unavailable or tool-incapable are dropped, routing aliases (`auto`, `auto/...`) and `:online` variants are skipped, and every remaining model must pass a two-step tool-calling probe before it is used: a synthetic no-op function (never part of the Copilot registry, never dispatched) must come back as a well-formed `tool_call`, and the model must then answer after receiving the tool result. Verdicts are cached; on a cold cache at most three models are probed per request, stopping at the first success. Models flagged `reasoning: true` are sent `reasoning_effort: "low"` (the probe uses the same request shape).
 - **OpenRouter**: uses `GET /models?supported_parameters=tools` to honor available account preferences and guardrails, then checks explicit tool, text modality, chat endpoint and expiry metadata. The filtered catalog still cannot prove that a completion will be authorized.
 - **NavyAI**: checks `/v1/chat/completions` support, explicit tool capability metadata, text output, `required_plan` against `NAVYAI_ALLOWED_PLANS`, and the public `/v1/models/status` health data when available. Premium flags and pricing do not determine selection.
 
-The first completion is the definitive account-access check. Invalid credentials and generic account permission denials are not retried against more models; the configured NavyAI to OpenRouter provider fallback is used when safe. Explicit model-scoped permission/availability or tool incompatibility errors temporarily exclude that model and try another discovered candidate within the overall timeout. If both providers reject authentication or account access, the user receives an aggregate safe access error and the logs retain each provider's individual classification. Provider failover only happens before any Copilot tool has executed, so an operation is never replayed. FreeLLMAPI is local-development-only and requires explicitly configured model IDs.
+The first completion is the definitive account-access check. Invalid credentials and generic account permission denials are not retried against more models; the configured NaraRouter to OpenRouter provider fallback is used when safe. A NaraRouter 403 is treated as a model entitlement refusal only when its message names a plan/entitlement restriction (never as an invalid key); NaraRouter 429s apply to the whole key, so they fail over to OpenRouter instead of rotating models. A request the provider rejects as invalid (HTTP 400/413/415/422, including safety-screen rejections) is not re-sent to another model or provider. Explicit model-scoped permission/availability or tool incompatibility errors temporarily exclude that model and try another discovered candidate within the overall timeout. If both providers reject authentication or account access, the user receives an aggregate safe access error and the logs retain each provider's individual classification. Provider failover only happens before any Copilot tool has executed, so an operation is never replayed. FreeLLMAPI is local-development-only and requires explicitly configured model IDs.
 
-Logs are written per provider (`OpenRouter Copilot ...`, `NavyAI Copilot ...`, `Copilot provider ...`) with provider, operation (`model_discovery` / `model_availability` / `completion`), HTTP status, selected model ID, sanitized provider error code, failure type and timing. Keys, authorization headers, prompts and response bodies are never logged. Failure types distinguish invalid credentials, account permission denial, model permission denial, model unavailability, unsupported tool calling and provider outage. A failure type of `edge_blocked` means a CDN or bot-protection layer in front of the provider refused traffic from the hosting network.
+Logs are written per provider (`NaraRouter Copilot ...`, `OpenRouter Copilot ...`, `NavyAI Copilot ...`, `Copilot provider ...`) with provider, operation (`model_discovery` / `tool_verification` / `model_availability` / `completion`), HTTP status, selected model ID, sanitized provider error code, provider request ID, failure type and timing. Keys, authorization headers, prompts and response bodies are never logged. Failure types distinguish invalid credentials, account permission denial, model permission denial, model unavailability, unsupported tool calling and provider outage. A failure type of `edge_blocked` means a CDN or bot-protection layer in front of the provider refused traffic from the hosting network.

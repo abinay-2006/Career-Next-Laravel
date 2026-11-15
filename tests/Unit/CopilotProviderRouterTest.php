@@ -580,8 +580,10 @@ class CopilotProviderRouterTest extends TestCase
         config([
             'services.ai.provider' => 'freellmapi', 'services.ai.fallback_provider' => 'freellmapi',
             'services.freellmapi' => array_merge(config('services.freellmapi'), ['enabled' => true, 'base_url' => 'http://127.0.0.1:31415/v1', 'key' => 'local-key']),
+            'services.ai.providers.nararouter' => ['base_url' => 'https://router.bynara.id/v1', 'key' => 'nara-test', 'enabled' => true],
         ]);
-        $this->assertSame(['navyai'], app(CopilotProviderRouter::class)->providers());
+        $this->assertSame(['nararouter'], app(CopilotProviderRouter::class)->providers(), 'FreeLLMAPI is replaced by the production primary');
+        config(['services.ai.providers.nararouter.enabled' => false]);
 
         config(['services.ai.provider' => 'navyai', 'services.ai.fallback_provider' => 'openrouter']);
         $this->assertSame(['navyai', 'openrouter'], app(CopilotProviderRouter::class)->providers());
@@ -595,7 +597,7 @@ class CopilotProviderRouterTest extends TestCase
         Http::assertNothingSent();
     }
 
-    public function test_navyai_is_the_production_primary_and_openrouter_is_the_fallback(): void
+    public function test_navyai_remains_selectable_as_an_explicit_production_primary(): void
     {
         $this->app['env'] = 'production';
         config([

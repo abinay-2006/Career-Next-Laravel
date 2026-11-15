@@ -7,13 +7,16 @@ use Illuminate\Support\Facades\Log;
 /**
  * Selects the Copilot AI provider and permits cross-provider failover only before any tool ran.
  *
- * Production: NavyAI -> OpenRouter (both with models discovered from their live catalogues).
+ * Production: NaraRouter -> OpenRouter (both with models discovered from their live catalogues;
+ * NaraRouter models must also pass a tool-calling probe). NavyAI remains a selectable hosted provider.
  * Local development: the FreeLLMAPI gateway with its curated model chain. FreeLLMAPI is a local
  * gateway and is never contacted when APP_ENV=production.
  */
 class CopilotProviderRouter
 {
-    public const PROVIDERS = ['openrouter', 'navyai', 'freellmapi'];
+    public const PROVIDERS = ['nararouter', 'openrouter', 'navyai', 'freellmapi'];
+
+    public const PRODUCTION_DEFAULT_PROVIDER = 'nararouter';
 
     /** Seconds kept back for the next provider while an earlier provider is still being tried. */
     private const FALLBACK_RESERVE_SECONDS = 10.0;
@@ -54,9 +57,11 @@ class CopilotProviderRouter
             $attemptStarted = microtime(true);
 
             try {
-                $models = $provider === 'freellmapi'
+                $resolved = $provider === 'freellmapi'
                     ? null
-                    : $this->modelResolver->resolve($provider, $block, $softDeadline);
+                    : $this->modelResolver->resolveDetailed($provider, $block, $softDeadline);
+                $models = $resolved === null ? null : array_column($resolved, 'id');
+                $reasoningModels = $resolved === null ? [] : array_column(array_filter($resolved, fn(array $m): bool => ($m['reasoning'] ?? false) === true), 'id');
 
                 $stage = 'completion';
                 config(['services.freellmapi' => array_merge(is_array($old) ? $old : [], [
@@ -76,6 +81,7 @@ class CopilotProviderRouter
                     'hard_deadline' => $hardDeadline,
                     'request_timeout_seconds' => $block['request_timeout_seconds'] ?? 9,
                     'cooldown_namespace' => $provider,
+                    'reasoning_models' => $reasoningModels,
                 ])]);
 
                 $reply = $this->completion->reply($role, $message, $actor, $registry, $dispatcher, $history);
@@ -96,11 +102,13 @@ class CopilotProviderRouter
                 $last = $e;
                 $failures[$provider] = $stage . ':' . $e->reason;
 
-                // Every failure before a tool executed is safe to retry elsewhere: nothing has changed
-                // and the next provider is a different service. After a tool executed the exception is
-                // marked fallback-unsafe, so the operation is never replayed on another provider.
+                // Every provider-side failure before a tool executed is safe to retry elsewhere: nothing
+                // has changed and the next provider is a different service. After a tool executed the
+                // exception is marked fallback-unsafe, so the operation is never replayed on another
+                // provider. A request the provider rejected as invalid is not re-sent anywhere.
                 $blockedReason = match (true) {
                     !$e->fallbackSafe => 'tool_already_executed',
+                    $e->reason === FreeLlmApiCopilotException::INVALID_REQUEST => 'request_rejected',
                     $next === null => 'no_more_providers',
                     $hardDeadline - microtime(true) < 1 => 'time_budget_exhausted',
                     default => null,
@@ -160,12 +168,12 @@ class CopilotProviderRouter
     public function providers(): array
     {
         $production = app()->environment('production');
-        $selected = strtolower(trim((string) config('services.ai.provider', $production ? 'navyai' : 'freellmapi')));
+        $selected = strtolower(trim((string) config('services.ai.provider', $production ? self::PRODUCTION_DEFAULT_PROVIDER : 'freellmapi')));
         $fallback = strtolower(trim((string) config('services.ai.fallback_provider', 'openrouter')));
 
-        if ($production && $selected === 'freellmapi') {
-            Log::warning('Copilot ignored FreeLLMAPI as the primary provider in production.', ['provider' => 'freellmapi', 'replacement' => 'navyai']);
-            $selected = 'navyai';
+        if ($production && ($selected === 'freellmapi' || $selected === '')) {
+            Log::warning('Copilot ignored FreeLLMAPI as the primary provider in production.', ['provider' => 'freellmapi', 'replacement' => self::PRODUCTION_DEFAULT_PROVIDER]);
+            $selected = self::PRODUCTION_DEFAULT_PROVIDER;
         }
 
         $order = [$selected];

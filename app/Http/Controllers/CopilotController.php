@@ -66,6 +66,7 @@ class CopilotController extends Controller
                 FreeLlmApiCopilotException::AUTHENTICATION,
                 FreeLlmApiCopilotException::PERMISSION,
                 FreeLlmApiCopilotException::INVALID_RESPONSE,
+                FreeLlmApiCopilotException::INVALID_REQUEST,
                 FreeLlmApiCopilotException::EMPTY_COMPLETION => 502,
                 default => 503,
             };
