@@ -225,22 +225,9 @@ class JobSeekerProfileController extends Controller
     {
         $jobSeeker = Auth::guard('jobseeker')->user();
 
-        $validated = $request->validate([
-            'JobSeekerName' => 'required|string|max:255',
-
-            'Address' => 'nullable|string',
-
-            'City' => 'nullable|string|max:100',
-
+        // Plain profile fields share their rules with the Copilot profile-update flow.
+        $validated = $request->validate(\App\Support\ProfileFieldRules::jobSeeker() + [
             'Email' => 'required|email|max:255',
-
-            'Mobile' => 'nullable|string|max:20',
-
-            'Qualification' => 'nullable|string|max:255',
-
-            'Gender' => 'nullable|string|max:20',
-
-            'BirthDate' => 'nullable|date',
 
             'UserName' => [
                 'required', 'string', 'max:100',

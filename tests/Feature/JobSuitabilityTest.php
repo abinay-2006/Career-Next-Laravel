@@ -20,6 +20,17 @@ use Tests\TestCase;
  */
 class JobSuitabilityTest extends TestCase
 {
+    /** @return list<string> */
+    private function renderedJobTitles(string $html): array
+    {
+        preg_match_all('/<div class="job-title">\s*(.*?)\s*<\/div>/s', $html, $matches);
+
+        return array_map(
+            static fn (string $title): string => html_entity_decode(trim(strip_tags($title))),
+            $matches[1]
+        );
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -221,7 +232,7 @@ class JobSuitabilityTest extends TestCase
         $seeker = $this->seeker('Under-Qualified Seeker', ['Qualification' => 'Diploma']);
         $this->profileSkills($seeker->JobSeekId, ['Laravel']);
 
-        $jobId = $this->job([
+        $this->job([
             'MinQualification' => 'B.C.A',
             'RequiredSkills' => json_encode($this->requirements(['Laravel'])),
         ]);
@@ -231,7 +242,6 @@ class JobSuitabilityTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString('ID: '.$jobId, $page);
         $this->assertStringContainsString('job-fit-danger', $page);
         $this->assertStringContainsString('Not Suitable', $page);
         $this->assertStringContainsString('above the Diploma on your profile', $page);
@@ -435,13 +445,13 @@ class JobSuitabilityTest extends TestCase
         $seeker = $this->seeker('Filter Seeker', ['Qualification' => 'BCA']);
         $this->profileSkills($seeker->JobSeekId, ['Laravel', 'MySQL']);
 
-        $support = $this->job([
+        $this->job([
             'JobTitle' => 'Support Executive',
             'MinQualification' => 'HSC',
             'Description' => 'Answer inbound calls.',
             'RequiredSkills' => json_encode($this->requirements(['Zend', 'Freshdesk'])),
         ]);
-        $laravel = $this->job([
+        $this->job([
             'JobTitle' => 'Laravel Developer',
             'MinQualification' => 'B.C.A',
             'Description' => 'Build APIs with Laravel and MySQL.',
@@ -453,25 +463,23 @@ class JobSuitabilityTest extends TestCase
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString('ID: '.$laravel, $qualified);
-        $this->assertStringNotContainsString('ID: '.$support, $qualified);
+        $this->assertSame(['Laravel Developer'], $this->renderedJobTitles($qualified));
 
         $above60 = $this->actingAs($seeker, 'jobseeker')
             ->get(route('jobseeker.jobs', ['cmbMatch' => 80]))
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString('ID: '.$laravel, $above60);
-        $this->assertStringNotContainsString('ID: '.$support, $above60);
+        $this->assertSame(['Laravel Developer'], $this->renderedJobTitles($above60));
 
         $sorted = $this->actingAs($seeker, 'jobseeker')
             ->get(route('jobseeker.jobs', ['sort' => 'best_match']))
             ->assertOk()
             ->getContent();
 
-        $this->assertLessThan(
-            strpos($sorted, 'ID: '.$support),
-            strpos($sorted, 'ID: '.$laravel),
+        $this->assertSame(
+            ['Laravel Developer', 'Support Executive'],
+            $this->renderedJobTitles($sorted),
             'Best Match should rank the fully covered listing first.'
         );
     }

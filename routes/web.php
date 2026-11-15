@@ -37,6 +37,7 @@ use App\Http\Controllers\Employer\ChatController as EmployerChatController;
 use App\Http\Controllers\JobSeeker\ChatController as JobSeekerChatController;
 use App\Http\Controllers\Employer\InterviewController as EmployerInterviewController;
 use App\Http\Controllers\JobSeeker\InterviewController as JobSeekerInterviewController;
+use App\Http\Controllers\CopilotController;
 // Route
 
 // Home Page Route
@@ -124,6 +125,9 @@ Route::prefix('register')
 
 Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
 
+    Route::post('/copilot/message', [CopilotController::class, 'message'])->middleware('throttle:copilot')->defaults('role', 'admin')->name('copilot.message');
+    Route::post('/copilot/reset', [CopilotController::class, 'reset'])->defaults('role', 'admin')->name('copilot.reset');
+
     Route::get('/', [AdminController::class, 'dashboard'])
         ->name('index');
 
@@ -184,6 +188,9 @@ Route::prefix('employer')
     ->name('employer.')
     ->middleware('role:employer')
     ->group(function () {
+
+        Route::post('/copilot/message', [CopilotController::class, 'message'])->middleware('throttle:copilot')->defaults('role', 'employer')->name('copilot.message');
+        Route::post('/copilot/reset', [CopilotController::class, 'reset'])->defaults('role', 'employer')->name('copilot.reset');
 
         Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');
         Route::post('/feedback', [FeedbackController::class, 'store'])->middleware('throttle:5,10')->name('feedback.store');
@@ -281,6 +288,9 @@ Route::prefix('jobseeker')
     ->name('jobseeker.')
     ->middleware('role:jobseeker')
     ->group(function () {
+
+        Route::post('/copilot/message', [CopilotController::class, 'message'])->middleware('throttle:copilot')->defaults('role', 'jobseeker')->name('copilot.message');
+        Route::post('/copilot/reset', [CopilotController::class, 'reset'])->defaults('role', 'jobseeker')->name('copilot.reset');
 
         Route::get('/', [JobSeekerController::class, 'index'])
             ->name('index');

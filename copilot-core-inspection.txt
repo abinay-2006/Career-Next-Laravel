@@ -1,0 +1,601 @@
+
+========== .\app\Services\CopilotCapabilityRegistry.php ==========
+
+<?php
+
+namespace App\Services;
+
+/** Role-scoped, reviewed allowlist of Gemini functions. */
+class CopilotCapabilityRegistry
+{
+    /** @return array<string, list<string>> */
+    public function categories(): array
+    {
+        return [
+            'read_only' => ['get_dashboard_statistics', 'get_registration_statistics', 'get_recent_login_activity', 'get_application_statistics', 'get_recent_jobs', 'get_pending_document_reviews', 'get_user_details'],
+            'self_service' => ['get_employer_dashboard_statistics', 'get_my_jobs', 'get_employer_job_applicants', 'get_my_interviews', 'get_my_employer_profile', 'get_my_profile', 'get_my_applications', 'get_my_saved_jobs', 'get_my_resume_summary'],
+            'sensitive_write' => ['suspend_user'],
+        ];
+    }
+
+    public function declarations(string $role): array
+    {
+        $common = ['type' => 'OBJECT'];
+        return match ($role) {
+            'admin' => [
+                $this->fn('get_dashboard_statistics', 'Read aggregate Career Next totals and status counts.', $common),
+                $this->fn('get_registration_statistics', 'Read new Job Seeker and Employer registrations for a bounded period.', $this->object(['days' => ['type' => 'INTEGER', 'description' => 'Number of days to inspect, from 1 to 90.']], ['days'])),
+                $this->fn('get_recent_login_activity', 'Read successful login events recorded in the existing activity log.', $this->object(['days' => ['type' => 'INTEGER', 'description' => 'Number of past days, up to 30.'], 'limit' => ['type' => 'INTEGER', 'description' => 'Maximum event count, up to 50.']], [])),
+                $this->fn('get_application_statistics', 'Read aggregate application totals and status counts.', $common),
+                $this->fn('get_recent_jobs', 'Read recent job postings with safe summary fields.', $this->object(['limit' => ['type' => 'INTEGER', 'description' => 'Maximum result count, up to 20.']], [])),
+                $this->fn('get_pending_document_reviews', 'Read pending document review summaries without document contents.', $this->object(['limit' => ['type' => 'INTEGER', 'description' => 'Maximum result count, up to 30.']], [])),
+                $this->fn('get_user_details', 'Find an exact Job Seeker or Employer by numeric account ID and return safe account fields.', $this->object(['account_type' => ['type' => 'STRING', 'enum' => ['jobseeker', 'employer']], 'account_id' => ['type' => 'INTEGER', 'description' => 'The positive numeric account ID.']], ['account_type', 'account_id'])),
+                $this->fn('suspend_user', 'Request suspension of one Job Seeker or Employer account. Laravel will ask the Admin to confirm before any change.', $this->object(['account_type' => ['type' => 'STRING', 'enum' => ['jobseeker', 'employer']], 'account_id' => ['type' => 'INTEGER', 'description' => 'The positive numeric account ID.']], ['account_type', 'account_id'])),
+            ],
+            'employer' => [
+                $this->fn('get_employer_dashboard_statistics', 'Read the existing recruitment dashboard statistics for the authenticated employer only.', $this->object(['range' => ['type' => 'STRING', 'enum' => ['7', '30', '90', 'all'], 'description' => 'Analytics window in days, or all.']], [])),
+                $this->fn('get_my_jobs', 'Read only the authenticated employer own job postings.', $this->object(['limit' => ['type' => 'INTEGER', 'description' => 'Maximum result count, up to 30.']], [])),
+                $this->fn('get_employer_job_applicants', 'Read safe application summaries only for a job owned by the authenticated employer.', $this->object(['job_id' => ['type' => 'INTEGER', 'description' => 'The positive ID of your job posting.'], 'limit' => ['type' => 'INTEGER', 'description' => 'Maximum result count, up to 30.']], ['job_id'])),
+                $this->fn('get_my_interviews', 'Read interview schedule summaries for applications to the authenticated employer own jobs.', $this->object(['limit' => ['type' => 'INTEGER', 'description' => 'Maximum result count, up to 30.']], [])),
+                $this->fn('get_my_employer_profile', 'Read safe business profile fields for the authenticated employer.', $common),
+            ],
+            'jobseeker' => [
+                $this->fn('get_my_profile', 'Read a small safe summary of the authenticated Job Seeker own profile.', $common),
+                $this->fn('get_my_applications', 'Read the authenticated Job Seeker own application statuses and job summaries.', $this->object(['limit' => ['type' => 'INTEGER', 'description' => 'Maximum result count, up to 30.']], [])),
+                $this->fn('get_my_saved_jobs', 'Read jobs saved by the authenticated Job Seeker.', $this->object(['limit' => ['type' => 'INTEGER', 'description' => 'Maximum result count, up to 30.']], [])),
+                $this->fn('get_my_interviews', 'Read interview schedule summaries attached only to the authenticated Job Seeker own applications.', $this->object(['limit' => ['type' => 'INTEGER', 'description' => 'Maximum result count, up to 30.']], [])),
+                $this->fn('get_my_resume_summary', 'Read only the title, template, and updated time of the authenticated Job Seeker own saved resume. Resume contents are not sent.', $common),
+            ],
+            default => [],
+        };
+    }
+
+    public function names(string $role): array
+    {
+        return array_column($this->declarations($role), 'name');
+    }
+
+    public function instructions(string $role): string
+    {
+        return match ($role) {
+            'admin' => 'You assist an authenticated Admin. Use functions for live data; do not infer platform facts. Account registration dates are not stored, so weekly or monthly registration counts cannot be provided. Sensitive operations are only proposed by a function and require explicit Laravel confirmation. Never claim an operation completed unless a tool result confirms it.',
+            'employer' => 'You assist an authenticated Employer. Use functions for live data; they return only records owned by this employer. Never screen, approve, or reject applicants or claim a change was made.',
+            'jobseeker' => 'You assist an authenticated Job Seeker. Use functions for live personal data; they return only this user records. Never apply for jobs, alter statuses, or invent qualifications.',
+            default => 'Use only available functions and do not claim access to application data.',
+        };
+    }
+
+    private function fn(string $name, string $description, array $parameters): array
+    {
+        return ['name' => $name, 'description' => $description, 'parameters' => $parameters];
+    }
+
+    private function object(array $properties, array $required): array
+    {
+        return ['type' => 'OBJECT', 'properties' => $properties, 'required' => $required];
+    }
+}
+
+========== .\app\Services\CopilotCapabilityCatalog.php ==========
+
+<?php
+
+namespace App\Services;
+
+/** Role-scoped descriptions of verified application behavior and Copilot boundaries. */
+class CopilotCapabilityCatalog
+{
+    public function instructions(string $role): string
+    {
+        return match ($role) {
+            'admin' => 'Admin application capabilities: review dashboard totals; search and review Job Seeker and Employer accounts; approve, suspend, or delete those accounts; approve or reject jobs; approve or reject uploaded documents; manage news; review feedback; and inspect activity logs, including the recent successful login records supplied in Career Next data. Copilot can execute only account suspension through its Laravel confirmation flow. Account lookup and authorization are performed by Laravel; ask for an exact match and explicit confirmation. For every other change, explain the relevant Admin page and do not claim the change was performed. Never suspend, approve, reject, or delete from model-generated text.',
+            'employer' => 'Employer application capabilities: manage only the employer account’s own job postings; use job quality checks; review applicants to those own jobs and set application status to Pending, Accepted, or Rejected; schedule, revise, cancel, and complete interviews for eligible own applications; use application chat; review delivered follow-up messages; view analytics; and update the employer profile. Copilot has no write operation for employers. Explain the relevant page and rules, and never claim to have applied a change or access another employer’s data.',
+            'jobseeker' => 'Job Seeker application capabilities: browse approved jobs, apply, review own application history, save jobs, compare jobs, and use job matching and suitability guidance; manage own profile, education, schools, documents, resume, skills, and career preferences; confirm, decline, or request a reschedule for own interviews; use the follow-up coach, record own follow-up activity, deliberately send an edited follow-up message, and use application chat. Copilot has no write operation for Job Seekers. Explain the relevant page and rules, and never claim to have applied a change or access another seeker’s data.',
+            default => 'No application capabilities are available for this role. Do not suggest that an operation is supported.',
+        };
+    }
+}
+
+========== .\app\Services\CopilotToolDispatcher.php ==========
+
+<?php
+
+namespace App\Services;
+
+use App\Models\Admin;
+use App\Models\Employer;
+use App\Models\Job;
+use App\Models\JobSeeker;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+
+/** Strictly validates and dispatches only the functions advertised to this authenticated role. */
+class CopilotToolDispatcher
+{
+    public function __construct(private readonly CopilotCapabilityRegistry $registry, private readonly Request $request) {}
+
+    public function dispatch(string $role, mixed $actor, string $name, array $args): array
+    {
+        if (!in_array($name, $this->registry->names($role), true)) return ['error' => 'This function is not available for your account.'];
+        if (!$this->validArguments($name, $args)) return ['error' => 'The requested function arguments were invalid.'];
+        if ($role === 'admin' && !$actor instanceof Admin) return ['error' => 'This function is not available for your account.'];
+        if ($role === 'employer' && !$actor instanceof Employer) return ['error' => 'This function is not available for your account.'];
+        if ($role === 'jobseeker' && !$actor instanceof JobSeeker) return ['error' => 'This function is not available for your account.'];
+        $authenticated = Auth::guard($role)->user();
+        if (!$authenticated || (int) $authenticated->getAuthIdentifier() !== (int) $actor->getAuthIdentifier()) return ['error' => 'This function is not available for your account.'];
+
+        return match ($name) {
+            'get_dashboard_statistics' => $this->adminStats(),
+            'get_registration_statistics' => ['available' => false, 'reason' => 'Registration dates are not stored in the current account tables.'],
+            'get_recent_login_activity' => $this->loginActivity($args),
+            'get_application_statistics' => $this->applicationStats(),
+            'get_recent_jobs' => $this->recentJobs($args),
+            'get_pending_document_reviews' => $this->pendingDocuments($args),
+            'get_user_details' => $this->userDetails($args),
+            'suspend_user' => $this->suspendUser($actor, $args),
+            'get_employer_dashboard_statistics' => $this->employerDashboard($actor, $args),
+            'get_my_jobs' => $this->employerJobs($actor, $args),
+            'get_employer_job_applicants' => $this->employerApplicants($actor, $args),
+            'get_my_interviews' => $this->interviews($role, $actor, $args),
+            'get_my_employer_profile' => ['profile' => ['company_name' => $actor->CompanyName, 'city' => $actor->City, 'business_area' => $actor->Area_Work]],
+            'get_my_profile' => $this->seekerProfile($actor),
+            'get_my_applications' => $this->seekerApplications($actor, $args),
+            'get_my_saved_jobs' => $this->savedJobs($actor, $args),
+            'get_my_resume_summary' => $this->resumeSummary($actor),
+            default => ['error' => 'This function is not available.'],
+        };
+    }
+
+    private function validArguments(string $name, array $args): bool
+    {
+        $allowed = match ($name) {
+            'get_dashboard_statistics', 'get_application_statistics', 'get_my_profile', 'get_my_employer_profile', 'get_my_resume_summary' => [],
+            'get_employer_dashboard_statistics' => ['range'],
+            'get_registration_statistics' => ['days'],
+            'get_recent_login_activity' => ['days', 'limit'],
+            'get_recent_jobs', 'get_pending_document_reviews', 'get_my_jobs', 'get_my_applications', 'get_my_saved_jobs', 'get_my_interviews' => ['limit'],
+            'get_user_details', 'suspend_user' => ['account_type', 'account_id'],
+            'get_employer_job_applicants' => ['job_id', 'limit'],
+            default => null,
+        };
+        if ($allowed === null || array_diff(array_keys($args), $allowed) !== []) return false;
+        $required = match ($name) {
+            'get_registration_statistics' => ['days'],
+            'get_user_details', 'suspend_user' => ['account_type', 'account_id'],
+            'get_employer_job_applicants' => ['job_id'],
+            default => [],
+        };
+        if (array_diff($required, array_keys($args)) !== []) return false;
+        foreach (['days' => [1, 90], 'limit' => [1, 50], 'account_id' => [1, PHP_INT_MAX], 'job_id' => [1, PHP_INT_MAX]] as $key => [$min, $max]) {
+            if (array_key_exists($key, $args) && (!is_int($args[$key]) || $args[$key] < $min || $args[$key] > $max)) return false;
+        }
+        if (isset($args['days']) && $args['days'] > ($name === 'get_registration_statistics' ? 90 : 30)) return false;
+        $maxLimit = match ($name) {
+            'get_recent_jobs' => 20,
+            'get_pending_document_reviews', 'get_my_jobs', 'get_employer_job_applicants', 'get_my_applications', 'get_my_saved_jobs', 'get_my_interviews' => 30,
+            default => 50,
+        };
+        if (isset($args['limit']) && $args['limit'] > $maxLimit) return false;
+        if (in_array($name, ['get_user_details', 'suspend_user'], true) && !in_array($args['account_type'] ?? null, ['jobseeker', 'employer'], true)) return false;
+        if (in_array($name, ['get_user_details', 'suspend_user'], true) && !is_int($args['account_id'] ?? null)) return false;
+        if ($name === 'get_employer_job_applicants' && !is_int($args['job_id'] ?? null)) return false;
+        if (isset($args['range']) && !in_array($args['range'], ['7', '30', '90', 'all'], true)) return false;
+        return true;
+    }
+
+    private function adminStats(): array
+    {
+        $totals = [];
+        foreach (['jobseeker_reg' => 'job_seekers', 'employer_reg' => 'employers', 'job_master' => 'jobs', 'application_master' => 'applications'] as $table => $label) {
+            if (Schema::hasTable($table)) $totals[$label] = DB::table($table)->count();
+        }
+        if (Schema::hasTable('job_master') && Schema::hasColumn('job_master', 'Status')) $totals['jobs_by_status'] = DB::table('job_master')->select('Status')->selectRaw('COUNT(*) as total')->groupBy('Status')->get()->toArray();
+        return ['available' => true, 'totals' => $totals];
+    }
+
+    private function applicationStats(): array
+    {
+        if (!Schema::hasTable('application_master')) return ['available' => false, 'reason' => 'Application records are unavailable.'];
+        $query = DB::table('application_master');
+        return ['available' => true, 'total' => $query->count(), 'by_status' => Schema::hasColumn('application_master', 'Status') ? DB::table('application_master')->select('Status')->selectRaw('COUNT(*) as total')->groupBy('Status')->get()->toArray() : []];
+    }
+
+    private function loginActivity(array $args): array
+    {
+        $required = ['action', 'cdate', 'actor_type', 'actor_id'];
+        if (!Schema::hasTable('logs') || collect($required)->contains(fn ($column) => !Schema::hasColumn('logs', $column))) return ['available' => false, 'reason' => 'The existing activity log does not contain trusted login identity fields.'];
+        $days = $args['days'] ?? 1;
+        $rows = DB::table('logs')->where('action', 'login_succeeded')->whereIn('actor_type', ['admin', 'employer', 'jobseeker'])->whereNotNull('actor_id')->where('cdate', '>=', now()->subDays($days))->where('cdate', '<=', now())->orderByDesc('cdate')->limit($args['limit'] ?? 20)->get(['cdate', 'actor_type', 'actor_id']);
+        return ['available' => true, 'events' => $rows->map(fn ($row) => ['timestamp' => Carbon::parse($row->cdate)->toIso8601String(), 'role' => $row->actor_type, 'account_id' => (int) $row->actor_id])->all()];
+    }
+
+    private function recentJobs(array $args): array
+    {
+        if (!Schema::hasTable('job_master')) return ['available' => false, 'reason' => 'Job records are unavailable.'];
+        return ['available' => true, 'jobs' => Job::query()->latest('JobId')->limit($args['limit'] ?? 10)->get(['JobId', 'CompanyName', 'JobTitle', 'Status'])->map(fn (Job $job) => ['id' => $job->JobId, 'company' => $job->CompanyName, 'title' => $job->JobTitle, 'status' => $job->Status])->all()];
+    }
+
+    private function pendingDocuments(array $args): array
+    {
+        if (!Schema::hasTable('jobseeker_documents') || !Schema::hasTable('jobseeker_reg')) return ['available' => false, 'reason' => 'Document review records are unavailable.'];
+        $rows = DB::table('jobseeker_documents as d')->join('jobseeker_reg as s', 's.JobSeekId', '=', 'd.JobSeekId')->where('d.VerificationStatus', 'pending')->orderBy('d.UploadDate')->limit($args['limit'] ?? 20)->get(['d.DocId', 'd.DocumentType', 'd.UploadDate', 's.JobSeekId']);
+        return ['available' => true, 'reviews' => $rows->map(fn ($row) => ['document_id' => (int) $row->DocId, 'document_type' => $row->DocumentType, 'uploaded_at' => $row->UploadDate, 'job_seeker_id' => (int) $row->JobSeekId])->all()];
+    }
+
+    private function userDetails(array $args): array
+    {
+        $definition = $args['account_type'] === 'jobseeker' ? ['table' => 'jobseeker_reg', 'id' => 'JobSeekId', 'name' => 'JobSeekerName'] : ['table' => 'employer_reg', 'id' => 'EmployerId', 'name' => 'CompanyName'];
+        if (!Schema::hasTable($definition['table'])) return ['available' => false, 'reason' => 'Account records are unavailable.'];
+        $row = DB::table($definition['table'])->where($definition['id'], $args['account_id'])->first([$definition['id'], $definition['name'], 'Status']);
+        return $row ? ['found' => true, 'account_type' => $args['account_type'], 'id' => (int) $row->{$definition['id']}, 'name' => $row->{$definition['name']}, 'status' => $row->Status] : ['found' => false];
+    }
+
+    private function suspendUser(Admin $actor, array $args): array
+    {
+        $message = 'suspend '.$args['account_type'].' id '.$args['account_id'];
+        $reply = app(CopilotActionService::class)->handleAdminMessage($this->request, $actor, $message);
+        return ['confirmation_required' => str_contains($reply, 'reply exactly: CONFIRM SUSPENSION'), 'message' => $reply, 'changed' => false];
+    }
+
+    private function employerJobs(Employer $actor, array $args): array
+    {
+        if (!Schema::hasTable('job_master')) return ['available' => false, 'reason' => 'Job records are unavailable.'];
+        $jobs = Job::query()->where('EmployerId', $actor->EmployerId)->latest('JobId')->limit($args['limit'] ?? 20)->get(['JobId', 'JobTitle', 'Status', 'Vacancy']);
+        return ['available' => true, 'jobs' => $jobs->map(fn (Job $job) => ['id' => (int) $job->JobId, 'title' => $job->JobTitle, 'status' => $job->Status, 'vacancies' => $job->Vacancy])->all()];
+    }
+
+    private function employerDashboard(Employer $actor, array $args): array
+    {
+        $report = app(DashboardAnalyticsService::class)->employer((int) $actor->EmployerId, $args['range'] ?? '30');
+        return [
+            'range' => $report['range'],
+            'cards' => $report['cards'],
+            'job_statuses' => $report['jobStatuses'],
+            'application_statuses' => $report['applicationStatuses'],
+            'recent_jobs' => $report['recentJobs'],
+            'recent_applications' => $report['recentApplications'],
+        ];
+    }
+
+    private function employerApplicants(Employer $actor, array $args): array
+    {
+        if (!Schema::hasTable('application_master') || !Schema::hasTable('job_master')) return ['available' => false, 'reason' => 'Application records are unavailable.'];
+        $job = Job::query()->where('JobId', $args['job_id'])->where('EmployerId', $actor->EmployerId)->first(['JobId', 'JobTitle']);
+        if (!$job) return ['found' => false, 'message' => 'That job was not found among your own postings.'];
+        $rows = DB::table('application_master as a')->where('a.JobId', $job->JobId)->orderByDesc('a.ApplicationId')->limit($args['limit'] ?? 20)->get(['a.ApplicationId', 'a.Status', 'a.ApplicationDate']);
+        return ['found' => true, 'job' => ['id' => (int) $job->JobId, 'title' => $job->JobTitle], 'applicants' => $rows->map(fn ($row) => ['application_reference' => (int) $row->ApplicationId, 'status' => $row->Status, 'applied_at' => $row->ApplicationDate])->all()];
+    }
+
+    private function seekerProfile(JobSeeker $actor): array
+    {
+        return ['profile' => ['name' => $actor->JobSeekerName, 'qualification' => $actor->Qualification, 'city' => $actor->City]];
+    }
+
+    private function seekerApplications(JobSeeker $actor, array $args): array
+    {
+        if (!Schema::hasTable('application_master') || !Schema::hasTable('job_master')) return ['available' => false, 'reason' => 'Application records are unavailable.'];
+        $rows = DB::table('application_master as a')->leftJoin('job_master as j', 'j.JobId', '=', 'a.JobId')->where('a.JobSeekId', $actor->JobSeekId)->orderByDesc('a.ApplicationId')->limit($args['limit'] ?? 20)->get(['a.ApplicationId', 'a.Status', 'a.ApplicationDate', 'j.JobTitle', 'j.CompanyName']);
+        return ['available' => true, 'applications' => $rows->map(fn ($row) => ['application_reference' => (int) $row->ApplicationId, 'job' => $row->JobTitle, 'company' => $row->CompanyName, 'status' => $row->Status, 'applied_at' => $row->ApplicationDate])->all()];
+    }
+
+    private function savedJobs(JobSeeker $actor, array $args): array
+    {
+        if (!Schema::hasTable('saved_jobs') || !Schema::hasTable('job_master')) return ['available' => false, 'reason' => 'Saved job records are unavailable.'];
+        $rows = DB::table('saved_jobs as s')->join('job_master as j', 'j.JobId', '=', 's.JobId')->where('s.JobSeekId', $actor->JobSeekId)->orderByDesc('s.SavedJobId')->limit($args['limit'] ?? 20)->get(['j.JobId', 'j.JobTitle', 'j.CompanyName', 'j.Status']);
+        return ['available' => true, 'jobs' => $rows->map(fn ($row) => ['id' => (int) $row->JobId, 'title' => $row->JobTitle, 'company' => $row->CompanyName, 'status' => $row->Status])->all()];
+    }
+
+    private function interviews(string $role, Admin|Employer|JobSeeker $actor, array $args): array
+    {
+        if (!Schema::hasTable('application_interviews') || !Schema::hasTable('application_master') || !Schema::hasTable('job_master')) return ['available' => false, 'reason' => 'Interview records are unavailable.'];
+        $query = DB::table('application_interviews as i')
+            ->join('application_master as a', 'a.ApplicationId', '=', 'i.ApplicationId')
+            ->join('job_master as j', 'j.JobId', '=', 'a.JobId');
+        if ($role === 'employer' && $actor instanceof Employer) $query->where('j.EmployerId', $actor->EmployerId)->where('i.created_by_employer_id', $actor->EmployerId);
+        elseif ($role === 'jobseeker' && $actor instanceof JobSeeker) $query->where('a.JobSeekId', $actor->JobSeekId);
+        else return ['available' => false, 'reason' => 'Interview records are not available for this role.'];
+        $rows = $query->orderBy('i.scheduled_at')->limit($args['limit'] ?? 20)->get(['i.id', 'i.ApplicationId', 'i.round', 'i.scheduled_at', 'i.timezone', 'i.interview_type', 'i.status', 'j.JobTitle']);
+        return ['available' => true, 'interviews' => $rows->map(fn ($row) => ['interview_reference' => (int) $row->id, 'application_reference' => (int) $row->ApplicationId, 'job' => $row->JobTitle, 'round' => (int) $row->round, 'scheduled_at' => $row->scheduled_at, 'timezone' => $row->timezone, 'type' => $row->interview_type, 'status' => $row->status])->all()];
+    }
+
+    private function resumeSummary(JobSeeker $actor): array
+    {
+        if (!Schema::hasTable('jobseeker_resumes')) return ['available' => false, 'reason' => 'Saved resume records are unavailable.'];
+        $resumes = DB::table('jobseeker_resumes')->where('JobSeekId', $actor->JobSeekId)->orderByDesc('updated_at')->limit(10)->get(['id', 'title', 'template', 'updated_at']);
+        return ['available' => true, 'resumes' => $resumes->map(fn ($resume) => ['id' => (int) $resume->id, 'title' => $resume->title, 'template' => $resume->template, 'updated_at' => $resume->updated_at])->all()];
+    }
+}
+
+========== .\app\Services\CopilotActionService.php ==========
+
+<?php
+
+namespace App\Services;
+
+use App\Models\Admin;
+use Illuminate\Http\Request;
+use Throwable;
+
+/** Deterministic, Laravel-owned Copilot operations. Groq never chooses or executes tools. */
+class CopilotActionService
+{
+    private const PENDING_TTL_SECONDS = 300;
+
+    public function hasPendingConfirmation(Request $request, Admin $admin): bool
+    {
+        return is_array($request->session()->get('career_next_copilot_admin_pending_suspend_'.$admin->getAuthIdentifier()));
+    }
+
+    public function handleAdminMessage(Request $request, Admin $admin, string $message): ?string
+    {
+        $key = 'career_next_copilot_admin_pending_suspend_'.$admin->getAuthIdentifier();
+        $pending = $request->session()->get($key);
+
+        if (is_array($pending)) {
+            if ((int) ($pending['expires_at'] ?? 0) <= now()->getTimestamp()
+                || (int) ($pending['admin_id'] ?? 0) !== (int) $admin->getAuthIdentifier()) {
+                $request->session()->forget($key);
+                if ($this->isConfirmation($message)) {
+                    return 'That suspension confirmation has expired. No change was made. Please ask again to start a new request.';
+                }
+            } elseif (preg_match('/^\s*(?:cancel|no|never mind)\s*[.!]?\s*$/i', $message)) {
+                $request->session()->forget($key);
+
+                return 'Suspension cancelled. No account was changed.';
+            } elseif ($this->isConfirmation($message)) {
+                $request->session()->forget($key);
+
+                return $this->confirmSuspension($admin, $pending);
+            } else {
+                // Any other message ends the pending confirmation; it cannot be reused later.
+                $request->session()->forget($key);
+            }
+        }
+
+        if (preg_match('/\b(?:suspend|suspending)\b/i', $message)) {
+            return $this->requestSuspension($request, $admin, $key, $message);
+        }
+
+        return $this->unsupportedAdminWrite($message);
+    }
+
+    private function requestSuspension(Request $request, Admin $admin, string $key, string $message): string
+    {
+        $tail = preg_replace('/^.*?\b(?:suspend|suspending)\b/isu', '', $message) ?? '';
+        $type = null;
+        if (preg_match('/\b(job\s*seeker|jobseeker|candidate|employer)\b/i', $tail, $match)) {
+            $type = match (mb_strtolower(preg_replace('/\s+/', '', $match[1]))) {
+                'jobseeker', 'candidate' => 'jobseeker',
+                'employer' => 'employer',
+            };
+            $tail = preg_replace('/\b(?:job\s*seeker|jobseeker|candidate|employer)\b/i', ' ', $tail, 1) ?? $tail;
+        }
+
+        $identifier = trim($tail);
+        $identifier = preg_replace('/^(?:(?:the|a|an)\s+)?(?:user|account)\s+(?:named|called)\s+/i', '', $identifier) ?? $identifier;
+        $identifier = preg_replace('/^(?:(?:the|a|an)\s+)?(?:user|account)\s+(?:of\s+)?/i', '', $identifier) ?? $identifier;
+        $identifier = preg_replace('/^(?:named|called)\s+/i', '', $identifier) ?? $identifier;
+        $identifier = preg_replace('/(?:^|\s+)(?:with\s+)?(?:id|number)\s*#?(\d+)\s*$/i', ' $1', $identifier) ?? $identifier;
+        $identifier = trim($identifier, " \t\n\r\0\x0B.,!?;:#");
+
+        if ($identifier === '') {
+            return 'I can request an account suspension. Please provide the exact account name, username, email, or numeric ID, and specify job seeker or employer if the ID could match both.';
+        }
+
+        $targets = app(AdminAccountManagementService::class)->findExactTargets($admin, $identifier, $type);
+        if ($targets === []) {
+            return 'I could not find an exact matching account. No change was made. Please check the account name, username, email, or ID and try again.';
+        }
+        if (count($targets) > 1) {
+            $choices = collect($targets)->take(4)->map(fn (array $target): string => $this->label($target))->implode('; ');
+
+            return 'That identifier matches more than one account. No change was made. Specify one of these exact accounts: '.$choices.'.';
+        }
+
+        $target = $targets[0];
+        if (strtolower(trim($target['status'])) === 'suspended') {
+            return 'No change was needed: '.$this->label($target).' is already suspended.';
+        }
+
+        $request->session()->put($key, [
+            'admin_id' => (int) $admin->getAuthIdentifier(),
+            'account_type' => $target['account_type'],
+            'account_id' => $target['id'],
+            'expires_at' => now()->getTimestamp() + self::PENDING_TTL_SECONDS,
+        ]);
+
+        return 'I found '.$this->label($target).' (current status: '.($target['status'] ?: 'unknown').'). No change has been made. To proceed within five minutes, reply exactly: CONFIRM SUSPENSION.';
+    }
+
+    /** @param array{admin_id: int, account_type: string, account_id: int, expires_at: int} $pending */
+    private function confirmSuspension(Admin $admin, array $pending): string
+    {
+        try {
+            $result = app(AdminAccountManagementService::class)->suspend(
+                $admin,
+                (string) ($pending['account_type'] ?? ''),
+                (int) ($pending['account_id'] ?? 0),
+            );
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return 'I could not verify that the suspension completed. Please check Admin → Manage Users before retrying.';
+        }
+
+        if (!$result['success']) {
+            return 'Suspension was not completed: '.$result['message'].' No change was confirmed.';
+        }
+
+        $target = app(AdminAccountManagementService::class)->findExactTargets(
+            $admin,
+            (string) ($pending['account_id'] ?? ''),
+            (string) ($pending['account_type'] ?? ''),
+        )[0] ?? null;
+        $label = $target === null
+            ? ucfirst((string) $pending['account_type']).' account (ID '.(int) $pending['account_id'].')'
+            : $this->label($target);
+
+        return ($result['changed'] ?? false)
+            ? 'Suspension completed. '.$label.' is now suspended.'
+            : 'No change was needed. '.$label.' was already suspended.';
+    }
+
+    private function isConfirmation(string $message): bool
+    {
+        return preg_match('/^\s*confirm\s+suspension\s*[.!]?\s*$/i', $message) === 1;
+    }
+
+    /** @param array{account_type: string, id: int, name: string, status: string} $target */
+    private function label(array $target): string
+    {
+        $role = $target['account_type'] === 'jobseeker' ? 'Job Seeker' : 'Employer';
+        $name = mb_substr(trim(strip_tags($target['name'])), 0, 100);
+
+        return $role.' '.$name.' (ID '.$target['id'].')';
+    }
+
+    private function unsupportedAdminWrite(string $message): ?string
+    {
+        if (preg_match('/\b(?:delete|remove)\b.*\b(?:user|account)\b/i', $message)) {
+            return 'Account deletion is available in Admin → Manage Users, but Copilot does not execute deletions. No change was made.';
+        }
+        if (preg_match('/\b(?:approve|reject)\b.*\bjob\b|\bjob\b.*\b(?:approve|reject)\b/i', $message)) {
+            return 'Job approval and rejection are available in Admin → Manage Jobs, but Copilot does not execute those changes. No change was made.';
+        }
+        if (preg_match('/\b(?:approve|reject)\b.*\bdocument\b|\bdocument\b.*\b(?:approve|reject)\b/i', $message)) {
+            return 'Document approval and rejection are available in Admin → Manage Documents, but Copilot does not execute those changes. No change was made.';
+        }
+
+        return null;
+    }
+}
+
+========== .\app\Services\CopilotContextBuilder.php ==========
+
+<?php
+
+namespace App\Services;
+
+use App\Models\Application;
+use App\Models\Job;
+use App\Models\JobSeekerResume;
+use App\Models\JobSeekerSkill;
+use App\Models\Log;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+class CopilotContextBuilder
+{
+    /** Groq receives no live account, job, application, or profile data. */
+    public function generalContext(string $role): string
+    {
+        return match ($role) {
+            'admin' => 'Career Next is a recruitment platform with separate Admin, Employer, and Job Seeker areas. For live platform information, use the application data assistant.',
+            'employer' => 'Career Next helps employers manage recruitment. For current jobs or applicants, use the application data assistant.',
+            'jobseeker' => 'Career Next helps job seekers manage applications and career materials. For current applications or saved jobs, use the application data assistant.',
+            default => '',
+        };
+    }
+
+    public function build(string $role, mixed $account, string $message): string
+    {
+        return match ($role) {
+            'jobseeker' => $this->forJobSeeker($account, $message),
+            'employer' => $this->forEmployer($account, $message),
+            'admin' => $this->forAdmin(),
+            default => '',
+        };
+    }
+
+    private function forJobSeeker(mixed $seeker, string $message): string
+    {
+        $id = (int) $seeker->JobSeekId;
+        $facts = ['Profile: '.json_encode(['qualification' => $seeker->Qualification, 'city' => $seeker->City], JSON_UNESCAPED_UNICODE)];
+        $skills = JobSeekerSkill::findFor($id);
+        if ($skills) $facts[] = 'Self-reported skills: '.implode(', ', array_merge($skills->names('skills'), $skills->names('software')));
+        if (Schema::hasTable('jobseeker_resumes')) {
+            $resume = JobSeekerResume::query()->where('JobSeekId', $id)->latest('updated_at')->first();
+            if ($resume) $facts[] = 'Resume Builder content: '.mb_substr(json_encode($resume->content, JSON_UNESCAPED_UNICODE) ?: '', 0, 5000);
+        }
+        if (Schema::hasTable('application_master')) {
+            $apps = Application::query()->with('job:JobId,JobTitle,CompanyName,Status')->where('JobSeekId', $id)->latest('ApplicationId')->limit(10)->get();
+            $facts[] = 'Own applications: '.json_encode($apps->map(fn ($app) => ['job' => $app->job?->JobTitle, 'company' => $app->job?->CompanyName, 'status' => $app->Status, 'date' => $app->ApplicationDate])->values(), JSON_UNESCAPED_UNICODE);
+        }
+        if (Schema::hasTable('job_master')) {
+            $terms = collect(preg_split('/\W+/u', mb_strtolower($message)))->filter(fn ($term) => mb_strlen($term) > 3)->take(5);
+            $jobs = Job::query()->whereRaw('LOWER(Status) = ?', ['approved'])
+                ->when($terms->isNotEmpty(), fn ($q) => $q->where(function ($sub) use ($terms) {
+                    foreach ($terms as $term) $sub->orWhere('JobTitle', 'like', '%'.$term.'%')->orWhere('Description', 'like', '%'.$term.'%')->orWhere('MinQualification', 'like', '%'.$term.'%');
+                }))->latest('JobId')->limit(8)->get(['JobId', 'JobTitle', 'CompanyName', 'MinQualification', 'Description', 'SalaryFrom', 'SalaryTo']);
+            $facts[] = 'Approved jobs possibly relevant to the request (only these may be recommended): '.json_encode($jobs->map(fn ($job) => ['title' => $job->JobTitle, 'company' => $job->CompanyName, 'qualification' => $job->MinQualification, 'description' => $job->Description, 'salary_range' => [$job->SalaryFrom, $job->SalaryTo], 'url' => route('jobseeker.jobs.show', $job->JobId)])->values(), JSON_UNESCAPED_UNICODE);
+        }
+
+        return implode("\n", $facts);
+    }
+
+    private function forEmployer(mixed $employer, string $message): string
+    {
+        $jobs = Job::query()->where('EmployerId', $employer->EmployerId)->latest('JobId')->limit(30)->get();
+        $facts = ['Own job postings: '.json_encode($jobs->map(fn ($job) => ['id' => $job->JobId, 'title' => $job->JobTitle, 'status' => $job->Status, 'vacancies' => $job->Vacancy, 'requirements' => $job->MinQualification, 'description' => $job->Description])->values(), JSON_UNESCAPED_UNICODE)];
+        if (Schema::hasTable('application_master') && Schema::hasTable('jobseeker_reg')) {
+            $applications = DB::table('application_master as a')->join('job_master as j', 'j.JobId', '=', 'a.JobId')
+                ->join('jobseeker_reg as s', 's.JobSeekId', '=', 'a.JobSeekId')
+                ->where('j.EmployerId', $employer->EmployerId)->latest('a.ApplicationId')->limit(30)
+                ->get(['a.ApplicationId', 'a.Status', 'j.JobTitle', 's.Qualification', 's.City']);
+            $facts[] = 'Application summaries for own jobs only; application IDs are temporary reference labels, qualifications and city are candidate-provided, and no contact or document data is included: '.json_encode($applications, JSON_UNESCAPED_UNICODE);
+            $facts[] = 'Own application counts by status: '.json_encode(DB::table('application_master as a')->join('job_master as j', 'j.JobId', '=', 'a.JobId')->where('j.EmployerId', $employer->EmployerId)->select('a.Status', DB::raw('COUNT(*) as total'))->groupBy('a.Status')->get(), JSON_UNESCAPED_UNICODE);
+        }
+
+        return implode("\n", $facts);
+    }
+
+    private function forAdmin(): string
+    {
+        $facts = [];
+        foreach (['jobseeker_reg' => 'job seekers', 'employer_reg' => 'employers', 'job_master' => 'job postings', 'application_master' => 'applications', 'jobseeker_documents' => 'uploaded documents'] as $table => $label) {
+            if (!Schema::hasTable($table)) continue;
+            $total = DB::table($table)->count();
+            $facts[] = "{$label}: {$total} total";
+            if ($table === 'job_master' && Schema::hasColumn($table, 'Status')) $facts[] = 'Jobs by status: '.json_encode(DB::table($table)->select('Status', DB::raw('COUNT(*) as total'))->groupBy('Status')->get());
+            if ($table === 'jobseeker_documents' && Schema::hasColumn($table, 'VerificationStatus')) $facts[] = 'Pending document verifications: '.DB::table($table)->whereRaw('LOWER(VerificationStatus) = ?', ['pending'])->count();
+            if ($table === 'application_master' && Schema::hasColumn($table, 'Status')) $facts[] = 'Applications by status: '.json_encode(DB::table($table)->select('Status', DB::raw('COUNT(*) as total'))->groupBy('Status')->get());
+        }
+
+        $loginActivity = $this->recentSuccessfulLogins();
+        $facts[] = 'Successful login activity from the last 30 days (up to 50 newest records). Each identifier is the account role and internal numeric ID; timestamps use the application timezone. Summarize only these recorded events and state when no records are present: '.json_encode($loginActivity, JSON_UNESCAPED_UNICODE);
+
+        return implode("\n", $facts);
+    }
+
+    /** @return list<array{timestamp: string, account_role: string, account_id: int}> */
+    private function recentSuccessfulLogins(): array
+    {
+        if (!Schema::hasTable('logs') || !Schema::hasColumn('logs', 'action')
+            || !Schema::hasColumn('logs', 'cdate') || !Schema::hasColumn('logs', 'actor_type')
+            || !Schema::hasColumn('logs', 'actor_id')) {
+            return [];
+        }
+
+        return Log::query()
+            ->where('action', 'login_succeeded')
+            ->whereIn('actor_type', ['admin', 'employer', 'jobseeker'])
+            ->whereNotNull('actor_id')
+            ->where('cdate', '>=', now()->subDays(30))
+            ->where('cdate', '<=', now())
+            ->orderByDesc('cdate')
+            ->orderByDesc('Id')
+            ->limit(50)
+            ->get(['cdate', 'actor_type', 'actor_id'])
+            ->map(fn (Log $log): array => [
+                'timestamp' => Carbon::parse($log->cdate)->toIso8601String(),
+                'account_role' => (string) $log->actor_type,
+                'account_id' => (int) $log->actor_id,
+            ])
+            ->values()
+            ->all();
+    }
+}

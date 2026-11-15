@@ -1,0 +1,231 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Admin;
+use App\Models\Employer;
+use App\Models\JobSeeker;
+use App\Services\CopilotCapabilityRegistry;
+use App\Services\CopilotProviderRouter;
+use App\Services\CopilotToolDispatcher;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
+use Tests\TestCase;
+
+class CopilotHybridTest extends TestCase
+{
+    private string $geminiEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+    private string $groqEndpoint = 'https://api.groq.com/openai/v1/chat/completions';
+    private string $freeLlmApiEndpoint = 'http://127.0.0.1:31415/v1/chat/completions';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Existing Gemini/Groq tests must not be redirected by the local .env flag.
+        pCopilotHybridTestconfig(['services.freellmapi.enabled' => false]);
+        Http::preventStrayRequests();
+        Schema::create('jobseeker_reg', function (Blueprint $table): void { $table->increments('JobSeekId'); $table->string('JobSeekerName'); $table->string('Status'); $table->string('Qualification')->nullable(); $table->string('City')->nullable(); $table->string('Password')->nullable(); });
+        Schema::create('employer_reg', function (Blueprint $table): void { $table->increments('EmployerId'); $table->string('CompanyName'); $table->string('Status'); $table->string('Password')->nullable(); });
+        Schema::create('user_master', function (Blueprint $table): void { $table->increments('UserId'); $table->string('UserName'); $table->string('Password'); });
+        Schema::create('job_master', function (Blueprint $table): void { $table->increments('JobId'); $table->integer('EmployerId'); $table->string('CompanyName'); $table->string('JobTitle'); $table->string('Status')->nullable(); $table->integer('Vacancy')->nullable(); });
+        Schema::create('application_master', function (Blueprint $table): void { $table->increments('ApplicationId'); $table->integer('JobSeekId'); $table->integer('JobId'); $table->string('Status'); $table->dateTime('ApplicationDate')->nullable(); });
+        Schema::create('saved_jobs', function (Blueprint $table): void { $table->increments('SavedJobId'); $table->integer('JobSeekId'); $table->integer('JobId'); });
+    }
+
+    public function test_server_router_sends_coaching_to_groq_and_live_or_ambiguous_requests_to_gemini(): void
+    {
+        $router = app(CopilotProviderRouter::class);
+        $this->assertSame('groq', $router->providerFor('How can I improve my resume?', 'jobseeker'));
+        $this->assertSame('groq', $router->providerFor('Give me interview tips.', 'jobseeker'));
+        $this->assertSame('gemini', $router->providerFor('How many users registered this week?', 'admin'));
+        $this->assertSame('gemini', $router->providerFor('Who logged in today?', 'admin'));
+        $this->assertSame('gemini', $router->providerFor('Show my recent applications.', 'jobseeker'));
+        $this->assertSame('gemini', $router->providerFor('Please review the current account.', 'admin'));
+    }
+
+    public function test_groq_career_advice_receives_no_private_profile_data(): void
+    {
+        $id = DB::table('jobseeker_reg')->insertGetId(['JobSeekerName' => 'Private Name', 'Status' => 'Approved', 'Qualification' => 'Private Degree', 'City' => 'Private City']);
+        $seeker = JobSeeker::findOrFail($id);
+        config(['services.groq.key' => 'groq-test-key']);
+        Http::fake([$this->groqEndpoint => Http::response(['choices' => [['message' => ['content' => 'Try a focused summary.']]]], 200)]);
+
+        $this->actingAs($seeker, 'jobseeker')->postJson(route('jobseeker.copilot.message'), ['message' => 'How can I improve my resume?'])->assertOk();
+        Http::assertSent(fn ($request) => $request->url() === $this->groqEndpoint
+            && !str_contains($request->body(), 'Private Name')
+            && !str_contains($request->body(), 'Private Degree')
+            && !str_contains($request->body(), 'Private City'));
+    }
+
+    public function test_gemini_function_call_is_executed_by_laravel_then_summarized(): void
+    {
+        $seekerId = DB::table('jobseeker_reg')->insertGetId(['JobSeekerName' => 'Private Name', 'Status' => 'Approved']);
+        $employerId = DB::table('employer_reg')->insertGetId(['CompanyName' => 'Example Co', 'Status' => 'Approved']);
+        $jobId = DB::table('job_master')->insertGetId(['EmployerId' => $employerId, 'CompanyName' => 'Example Co', 'JobTitle' => 'Analyst', 'Status' => 'approved']);
+        DB::table('application_master')->insert(['JobSeekId' => $seekerId, 'JobId' => $jobId, 'Status' => 'Pending', 'ApplicationDate' => now()]);
+        config(['services.gemini.key' => 'gemini-test-key', 'services.groq.key' => 'groq-test-key']);
+        $functionCall = ['candidates' => [['content' => [
+            'role' => 'model',
+            'parts' => [['functionCall' => ['name' => 'get_my_applications', 'args' => ['limit' => 10]]]],
+        ]]]];
+        $finalAnswer = ['candidates' => [['content' => [
+            'role' => 'model',
+            'parts' => [['text' => 'Your Analyst application is pending.']],
+        ]]]];
+        Http::fake([$this->geminiEndpoint => Http::sequence()->push($functionCall, 200)->push($finalAnswer, 200)]);
+
+        $this->actingAs(JobSeeker::findOrFail($seekerId), 'jobseeker')
+            ->postJson(route('jobseeker.copilot.message'), ['message' => 'Show my recent applications.'])
+            ->assertOk()->assertJsonPath('reply', 'Your Analyst application is pending.');
+
+        Http::assertSentCount(2);
+        $requests = Http::recorded()->pluck(0);
+        $this->assertSame('get_my_applications', $requests[0]->data()['tools'][0]['functionDeclarations'][1]['name']);
+        $toolResponse = $requests[1]->data()['contents'][2]['parts'][0]['functionResponse']['response']['result'];
+        $this->assertSame('Pending', $toolResponse['applications'][0]['status']);
+        $this->assertSame('Analyst', $toolResponse['applications'][0]['job']);
+    }
+
+    public function test_employer_function_cannot_read_another_employers_job_applicants(): void
+    {
+        $owner = DB::table('employer_reg')->insertGetId(['CompanyName' => 'Owner', 'Status' => 'Approved']);
+        $other = DB::table('employer_reg')->insertGetId(['CompanyName' => 'Other', 'Status' => 'Approved']);
+        $ownedJob = DB::table('job_master')->insertGetId(['EmployerId' => $owner, 'CompanyName' => 'Owner', 'JobTitle' => 'Owned', 'Status' => 'approved']);
+        $privateJob = DB::table('job_master')->insertGetId(['EmployerId' => $other, 'CompanyName' => 'Other', 'JobTitle' => 'Private', 'Status' => 'approved']);
+        $employer = Employer::findOrFail($owner);
+        $this->actingAs($employer, 'employer');
+
+        $result = app(CopilotToolDispatcher::class)->dispatch('employer', $employer, 'get_employer_job_applicants', ['job_id' => $privateJob]);
+        $this->assertFalse($result['found']);
+        $this->assertNotSame($ownedJob, $privateJob);
+        $dashboard = app(CopilotToolDispatcher::class)->dispatch('employer', $employer, 'get_employer_dashboard_statistics', []);
+        $this->assertSame(1, $dashboard['cards'][0]['value']);
+    }
+
+    public function test_gemini_quota_failure_is_controlled_and_never_falls_back_to_groq(): void
+    {
+        $id = DB::table('jobseeker_reg')->insertGetId(['JobSeekerName' => 'Seeker', 'Status' => 'Approved']);
+        config(['services.gemini.key' => 'gemini-test-key', 'services.groq.key' => 'groq-test-key']);
+        Http::fake([$this->geminiEndpoint => Http::response(['error' => ['status' => 'RESOURCE_EXHAUSTED']], 429)]);
+
+        $this->actingAs(JobSeeker::findOrFail($id), 'jobseeker')
+            ->postJson(route('jobseeker.copilot.message'), ['message' => 'Show my recent applications.'])
+            ->assertStatus(503)->assertJsonPath('message', \App\Services\GeminiCopilotService::QUOTA_MESSAGE);
+        Http::assertSentCount(1);
+    }
+
+    public function test_gemini_missing_registration_dates_are_reported_as_unavailable_data(): void
+    {
+        $id = DB::table('user_master')->insertGetId(['UserName' => 'admin', 'Password' => 'hashed']);
+        $admin = Admin::findOrFail($id);
+        $this->actingAs($admin, 'admin');
+        $result = app(CopilotToolDispatcher::class)->dispatch('admin', $admin, 'get_registration_statistics', ['days' => 7]);
+        $this->assertFalse($result['available']);
+        $this->assertStringContainsString('not stored', $result['reason']);
+    }
+
+    public function test_tool_dispatch_rejects_unknown_functions_missing_arguments_and_tampered_ids(): void
+    {
+        $ownerId = DB::table('employer_reg')->insertGetId(['CompanyName' => 'Owner', 'Status' => 'Approved']);
+        $employerId = DB::table('employer_reg')->insertGetId(['CompanyName' => 'Other', 'Status' => 'Approved']);
+        $privateJob = DB::table('job_master')->insertGetId(['EmployerId' => $employerId, 'CompanyName' => 'Other', 'JobTitle' => 'Private', 'Status' => 'approved']);
+        $owner = Employer::findOrFail($ownerId);
+        $this->actingAs($owner, 'employer');
+        $dispatcher = app(CopilotToolDispatcher::class);
+
+        $this->assertArrayHasKey('error', $dispatcher->dispatch('employer', $owner, 'delete_everything', []));
+        $this->assertArrayHasKey('error', $dispatcher->dispatch('employer', $owner, 'get_employer_job_applicants', []));
+        $this->assertArrayHasKey('error', $dispatcher->dispatch('employer', $owner, 'get_employer_job_applicants', ['job_id' => (string) $privateJob]));
+        $this->assertArrayHasKey('error', $dispatcher->dispatch('jobseeker', $owner, 'get_my_applications', ['jobseeker_id' => 99]));
+        $this->assertNotContains('suspend_user', app(CopilotCapabilityRegistry::class)->names('employer'));
+        $this->assertNotContains('get_my_applications', app(CopilotCapabilityRegistry::class)->names('admin'));
+        $this->assertContains('suspend_user', app(CopilotCapabilityRegistry::class)->categories()['sensitive_write']);
+        $this->assertContains('get_my_applications', app(CopilotCapabilityRegistry::class)->categories()['self_service']);
+    }
+
+    public function test_gemini_function_call_loop_stops_after_three_calls(): void
+    {
+        $id = DB::table('jobseeker_reg')->insertGetId(['JobSeekerName' => 'Seeker', 'Status' => 'Approved']);
+        config(['services.gemini.key' => 'gemini-test-key', 'services.groq.key' => 'groq-test-key']);
+        $calls = array_fill(0, 4, ['candidates' => [['content' => ['role' => 'model', 'parts' => [['functionCall' => ['name' => 'get_my_profile', 'args' => []]]]]]]]);
+        Http::fake([$this->geminiEndpoint => Http::sequence()
+            ->push($calls[0], 200)->push($calls[1], 200)->push($calls[2], 200)->push($calls[3], 200)]);
+
+        $this->actingAs(JobSeeker::findOrFail($id), 'jobseeker')
+            ->postJson(route('jobseeker.copilot.message'), ['message' => 'Show my profile.'])
+            ->assertStatus(502);
+        Http::assertSentCount(4);
+    }
+
+    public function test_gemini_missing_key_returns_a_controlled_json_error_without_requests(): void
+    {
+        $id = DB::table('jobseeker_reg')->insertGetId(['JobSeekerName' => 'Seeker', 'Status' => 'Approved']);
+        config(['services.gemini.key' => '']);
+        Http::fake();
+        $this->actingAs(JobSeeker::findOrFail($id), 'jobseeker')
+            ->postJson(route('jobseeker.copilot.message'), ['message' => 'Show my recent applications.'])
+            ->assertStatus(503)->assertExactJson(['message' => \App\Services\GeminiCopilotService::UNAVAILABLE_MESSAGE]);
+        Http::assertNothingSent();
+    }
+
+    public function test_role_scoped_interviews_and_resume_summary_omit_private_contents(): void
+    {
+        Schema::create('application_interviews', function (Blueprint $table): void {
+            $table->increments('id'); $table->integer('ApplicationId'); $table->integer('round'); $table->dateTime('scheduled_at');
+            $table->string('timezone'); $table->string('interview_type'); $table->string('meeting_link')->nullable();
+            $table->text('instructions')->nullable(); $table->string('status'); $table->integer('created_by_employer_id');
+        });
+        Schema::create('jobseeker_resumes', function (Blueprint $table): void {
+            $table->increments('id'); $table->integer('JobSeekId'); $table->string('title'); $table->string('template');
+            $table->text('content'); $table->dateTime('updated_at')->nullable();
+        });
+        $ownerId = DB::table('employer_reg')->insertGetId(['CompanyName' => 'Owner', 'Status' => 'Approved']);
+        $otherId = DB::table('employer_reg')->insertGetId(['CompanyName' => 'Other', 'Status' => 'Approved']);
+        $seekerId = DB::table('jobseeker_reg')->insertGetId(['JobSeekerName' => 'Seeker', 'Status' => 'Approved']);
+        $ownedJob = DB::table('job_master')->insertGetId(['EmployerId' => $ownerId, 'CompanyName' => 'Owner', 'JobTitle' => 'Owned', 'Status' => 'approved']);
+        $privateJob = DB::table('job_master')->insertGetId(['EmployerId' => $otherId, 'CompanyName' => 'Other', 'JobTitle' => 'Private', 'Status' => 'approved']);
+        $ownApp = DB::table('application_master')->insertGetId(['JobSeekId' => $seekerId, 'JobId' => $ownedJob, 'Status' => 'Accepted']);
+        $privateApp = DB::table('application_master')->insertGetId(['JobSeekId' => $seekerId, 'JobId' => $privateJob, 'Status' => 'Accepted']);
+        $safe = ['round' => 1, 'scheduled_at' => now(), 'timezone' => 'Asia/Kolkata', 'interview_type' => 'online', 'status' => 'proposed'];
+        DB::table('application_interviews')->insert([
+            $safe + ['ApplicationId' => $ownApp, 'created_by_employer_id' => $ownerId, 'meeting_link' => 'https://private.test/secret'],
+            $safe + ['ApplicationId' => $privateApp, 'created_by_employer_id' => $otherId, 'meeting_link' => 'https://other.test/secret'],
+        ]);
+        DB::table('jobseeker_resumes')->insert(['JobSeekId' => $seekerId, 'title' => 'My Resume', 'template' => 'classic', 'content' => '{"private":"resume content"}', 'updated_at' => now()]);
+
+        $owner = Employer::findOrFail($ownerId);
+        $this->actingAs($owner, 'employer');
+        $employerInterviews = app(CopilotToolDispatcher::class)->dispatch('employer', $owner, 'get_my_interviews', []);
+        $this->assertCount(1, $employerInterviews['interviews']);
+        $this->assertSame('Owned', $employerInterviews['interviews'][0]['job']);
+        $this->assertStringNotContainsString('private.test', json_encode($employerInterviews));
+
+        $seeker = JobSeeker::findOrFail($seekerId);
+        $this->app['auth']->forgetGuards();
+        $this->actingAs($seeker, 'jobseeker');
+        $resume = app(CopilotToolDispatcher::class)->dispatch('jobseeker', $seeker, 'get_my_resume_summary', []);
+        $this->assertSame('My Resume', $resume['resumes'][0]['title']);
+        $this->assertStringNotContainsString('resume content', json_encode($resume));
+    }
+
+    public function test_groq_and_gemini_conversation_histories_are_separated(): void
+    {
+        $id = DB::table('jobseeker_reg')->insertGetId(['JobSeekerName' => 'Seeker', 'Status' => 'Approved']);
+        config(['services.gemini.key' => 'gemini-test-key', 'services.groq.key' => 'groq-test-key']);
+        Http::fake([
+            $this->groqEndpoint => Http::response(['choices' => [['message' => ['content' => 'General reply']]]], 200),
+            $this->geminiEndpoint => Http::response(['candidates' => [['content' => ['role' => 'model', 'parts' => [['text' => 'Application reply']]]]]], 200),
+        ]);
+        $this->actingAs(JobSeeker::findOrFail($id), 'jobseeker');
+        $this->postJson(route('jobseeker.copilot.message'), ['message' => 'How can I improve my career?'])->assertOk();
+        $this->postJson(route('jobseeker.copilot.message'), ['message' => 'Show my recent applications.'])->assertOk();
+
+        $sent = Http::recorded()->pluck(0);
+        $geminiInput = json_encode($sent[1]->data()['contents']);
+        $this->assertStringNotContainsString('General reply', $geminiInput);
+        $this->assertStringNotContainsString('How can I improve my career?', $geminiInput);
+    }
+}
+

@@ -97,12 +97,23 @@ class JobMatchScoreTest extends TestCase
         ];
     }
 
+    /** @return list<string> */
+    private function renderedJobTitles(string $html): array
+    {
+        preg_match_all('/<div class="job-title">\s*(.*?)\s*<\/div>/s', $html, $matches);
+
+        return array_map(
+            static fn (string $title): string => html_entity_decode(trim(strip_tags($title))),
+            $matches[1]
+        );
+    }
+
     public function test_job_card_shows_score_label_and_matched_skills_from_the_latest_resume(): void
     {
         $seeker = $this->seeker('Skillful Seeker');
         $this->resume($seeker->JobSeekId, 'PHP, Laravel', '2026-01-01 10:00:00');
         $this->resume($seeker->JobSeekId, 'Laravel, MySQL', '2026-02-01 10:00:00');
-        $ids = $this->seedListings();
+        $this->seedListings();
 
         $page = $this->actingAs($seeker, 'jobseeker')
             ->get(route('jobseeker.jobs'))
@@ -113,7 +124,7 @@ class JobMatchScoreTest extends TestCase
 
         // The score comes from the newest resume only, so PHP is no longer listed.
         $this->assertStringNotContainsString('Not in this job: PHP', $page->getContent());
-        $this->assertStringContainsString('ID: '.$ids['laravel'], $page->getContent());
+        $this->assertContains('Laravel Developer', $this->renderedJobTitles($page->getContent()));
     }
 
     public function test_match_is_skipped_until_the_seeker_has_resume_skills(): void
@@ -132,22 +143,24 @@ class JobMatchScoreTest extends TestCase
     {
         $seeker = $this->seeker('Filtered Seeker');
         $this->resume($seeker->JobSeekId, 'Laravel, MySQL', '2026-03-01 10:00:00');
-        $ids = $this->seedListings();
+        $this->seedListings();
 
         $filtered = $this->actingAs($seeker, 'jobseeker')
             ->get(route('jobseeker.jobs', ['cmbMatch' => 80]))
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString('ID: '.$ids['laravel'], $filtered);
-        $this->assertStringNotContainsString('ID: '.$ids['support'], $filtered);
+        $this->assertSame(['Laravel Developer'], $this->renderedJobTitles($filtered));
 
         $unfiltered = $this->actingAs($seeker, 'jobseeker')
             ->get(route('jobseeker.jobs'))
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString('ID: '.$ids['support'], $unfiltered);
+        $this->assertEqualsCanonicalizing(
+            ['Laravel Developer', 'Support Executive'],
+            $this->renderedJobTitles($unfiltered)
+        );
     }
 
     public function test_the_match_filter_combines_with_the_existing_qualification_filter(): void
@@ -155,34 +168,32 @@ class JobMatchScoreTest extends TestCase
         $seeker = $this->seeker('Combined Seeker');
         $this->resume($seeker->JobSeekId, 'Laravel, MySQL', '2026-03-01 10:00:00');
 
-        $support = $this->job('Support Executive', 'HSC', 'Answer inbound calls and update customer records.');
-        $laravel = $this->job('Laravel Developer', 'BCA', 'Build APIs with Laravel and MySQL for our team.');
-        $specialist = $this->job('Laravel Specialist', 'HSC', 'Own Laravel packages and MySQL schemas end to end.');
+        $this->job('Support Executive', 'HSC', 'Answer inbound calls and update customer records.');
+        $this->job('Laravel Developer', 'BCA', 'Build APIs with Laravel and MySQL for our team.');
+        $this->job('Laravel Specialist', 'HSC', 'Own Laravel packages and MySQL schemas end to end.');
 
         $page = $this->actingAs($seeker, 'jobseeker')
             ->get(route('jobseeker.jobs', ['cmbQual' => 'HSC', 'cmbMatch' => 80]))
             ->assertOk()
             ->getContent();
 
-        $this->assertStringContainsString('ID: '.$specialist, $page);
-        $this->assertStringNotContainsString('ID: '.$laravel, $page);
-        $this->assertStringNotContainsString('ID: '.$support, $page);
+        $this->assertSame(['Laravel Specialist'], $this->renderedJobTitles($page));
     }
 
     public function test_best_match_sorting_comes_first_and_latest_order_stays_the_default(): void
     {
         $seeker = $this->seeker('Sorted Seeker');
         $this->resume($seeker->JobSeekId, 'Laravel, MySQL', '2026-03-01 10:00:00');
-        $ids = $this->seedListings();
+        $this->seedListings();
 
         $default = $this->actingAs($seeker, 'jobseeker')
             ->get(route('jobseeker.jobs'))
             ->getContent();
 
         // The weaker listing is the newer one, so the default order keeps it first.
-        $this->assertLessThan(
-            strpos($default, 'ID: '.$ids['laravel']),
-            strpos($default, 'ID: '.$ids['support']),
+        $this->assertSame(
+            ['Support Executive', 'Laravel Developer'],
+            $this->renderedJobTitles($default),
             'Newest listings must stay first without the sort control.'
         );
 
@@ -190,9 +201,9 @@ class JobMatchScoreTest extends TestCase
             ->get(route('jobseeker.jobs', ['sort' => 'best_match']))
             ->getContent();
 
-        $this->assertLessThan(
-            strpos($bestMatch, 'ID: '.$ids['support']),
-            strpos($bestMatch, 'ID: '.$ids['laravel'])
+        $this->assertSame(
+            ['Laravel Developer', 'Support Executive'],
+            $this->renderedJobTitles($bestMatch)
         );
     }
 

@@ -39,9 +39,9 @@ class EmployerProfileController extends Controller
             return redirect()->route('login');
         }
 
-        $validated = $request->validate([
+        // Plain profile fields share their rules with the Copilot profile-update flow.
+        $validated = $request->validate(\App\Support\ProfileFieldRules::employer() + [
             // Required fields
-            'CompanyName' => ['required', 'string', 'max:255'],
             'Email' => ['required', 'email', 'max:255'],
             'UserName' => [
                 'required', 'string', 'max:100',
@@ -51,13 +51,6 @@ class EmployerProfileController extends Controller
                     }
                 },
             ],
-
-            // Optional fields
-            'ContactPerson' => ['nullable', 'string', 'max:255'],
-            'Address' => ['nullable', 'string', 'max:1000'],
-            'City' => ['nullable', 'string', 'max:100'],
-            'Mobile' => ['nullable', 'string', 'max:20'],
-            'Area_Work' => ['nullable', 'string', 'max:255'],
 
             // Optional password
             'Password' => ['nullable', 'string', 'min:6'],

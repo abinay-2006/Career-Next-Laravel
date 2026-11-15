@@ -20,6 +20,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        RateLimiter::for('copilot', function (Request $request) {
+            $role = (string) $request->route('role');
+            $id = in_array($role, ['admin', 'employer', 'jobseeker'], true) ? auth($role)->id() : null;
+
+            return Limit::perMinute(8)->by(($role ?: 'unknown').':'.($id ?: $request->ip()));
+        });
         $normalizedEmail = static fn ($email): string => mb_strtolower(trim((string) $email));
         $ipKey = static fn (Request $request): string => hash('sha256', (string) ($request->ip() ?? 'unknown'));
 

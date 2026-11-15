@@ -417,7 +417,7 @@ class JobRequirementsTest extends TestCase
 
     public function test_job_cards_summarise_required_skills_without_listing_everything(): void
     {
-        $jobId = $this->job([
+        $this->job([
             ['name' => 'Laravel', 'type' => 'mandatory', 'proficiency' => null],
             ['name' => 'MySQL', 'type' => 'mandatory', 'proficiency' => null],
             ['name' => 'Redis', 'type' => 'mandatory', 'proficiency' => null],
@@ -433,7 +433,6 @@ class JobRequirementsTest extends TestCase
         $this->assertStringContainsString('<div class="job-req-card-summary">', $page);
         $this->assertStringContainsString('+1 more', $page);
         $this->assertStringNotContainsString('job-req-badge">Teamwork', $page);
-        $this->assertStringContainsString('ID: '.$jobId, $page);
     }
 
     public function test_the_admin_details_modal_is_given_the_saved_requirements(): void
