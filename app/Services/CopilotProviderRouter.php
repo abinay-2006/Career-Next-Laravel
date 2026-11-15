@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 /**
  * Selects the Copilot AI provider and permits cross-provider failover only before any tool ran.
  *
- * Production: OpenRouter -> NavyAI (both with models discovered from their live catalogues).
+ * Production: NavyAI -> OpenRouter (both with models discovered from their live catalogues).
  * Local development: the FreeLLMAPI gateway with its curated model chain. FreeLLMAPI is a local
  * gateway and is never contacted when APP_ENV=production.
  */
@@ -84,6 +84,9 @@ class CopilotProviderRouter
                     Log::info('Copilot provider fallback succeeded.', [
                         'provider' => $provider,
                         'failed_providers' => $failures,
+                        'fallback_attempted' => true,
+                        'fallback_succeeded' => true,
+                        'tool_already_executed' => false,
                         'elapsed_ms' => self::elapsedMs($attemptStarted),
                     ]);
                 }
@@ -110,6 +113,9 @@ class CopilotProviderRouter
                     'http_status' => $e->providerStatus,
                     'elapsed_ms' => self::elapsedMs($attemptStarted),
                     'fallback_provider' => $blockedReason === null ? $next : null,
+                    'fallback_attempted' => $blockedReason === null && $next !== null,
+                    'fallback_succeeded' => false,
+                    'tool_already_executed' => !$e->fallbackSafe,
                     'fallback_blocked_reason' => $blockedReason,
                 ]);
 
@@ -154,12 +160,12 @@ class CopilotProviderRouter
     public function providers(): array
     {
         $production = app()->environment('production');
-        $selected = strtolower(trim((string) config('services.ai.provider', $production ? 'openrouter' : 'freellmapi')));
-        $fallback = strtolower(trim((string) config('services.ai.fallback_provider', '')));
+        $selected = strtolower(trim((string) config('services.ai.provider', $production ? 'navyai' : 'freellmapi')));
+        $fallback = strtolower(trim((string) config('services.ai.fallback_provider', 'openrouter')));
 
         if ($production && $selected === 'freellmapi') {
-            Log::warning('Copilot ignored FreeLLMAPI as the primary provider in production.', ['provider' => 'freellmapi', 'replacement' => 'openrouter']);
-            $selected = 'openrouter';
+            Log::warning('Copilot ignored FreeLLMAPI as the primary provider in production.', ['provider' => 'freellmapi', 'replacement' => 'navyai']);
+            $selected = 'navyai';
         }
 
         $order = [$selected];

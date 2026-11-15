@@ -707,30 +707,28 @@ class FreeLlmApiCopilotService
         }
 
         $providerErrorCode = $this->safeErrorCode($response);
-        $code = strtolower((string) $providerErrorCode);
-        $modelPermissionDenied = $hosted && $status === 403 && in_array($code, [
-            'model_access_denied', 'model_permission_denied', 'model_not_authorized', 'model_not_allowed',
-            'model_not_available', 'model_unavailable', 'model_not_found', 'model_not_supported',
-        ], true);
+        $errorMessage = $this->errorObject($response)['message'] ?? null;
+        $providerMessage = is_string($errorMessage) ? strtolower($errorMessage) : '';
+        $mentionsSelectedModel = $model !== '' && str_contains($providerMessage, strtolower($model));
+        $modelPermissionDenied = $hosted && $status === 403 && $mentionsSelectedModel && preg_match('/\\b(access|permission|authori[sz]|allow|entitle)/', $providerMessage) === 1;
         $modelUnavailable = $hosted && $status === 404;
-        $unsupportedTools = $hosted && in_array($status, [400, 422], true) && in_array($code, [
-            'tool_calling_not_supported', 'unsupported_tool_calling', 'tools_not_supported',
-            'tool_choice_not_supported', 'tool_use_not_supported',
-        ], true);
+        $unsupportedTools = $hosted && in_array($status, [400, 404, 422], true)
+            && str_contains($providerMessage, 'tool')
+            && preg_match('/(not supported|does not support|unsupported|no endpoints support)/', $providerMessage) === 1;
 
-        // A catalog entry does not establish account access. Retry a 403 only when its structured,
-        // sanitized code explicitly scopes the refusal to the selected model. Generic 403 and every
-        // 401 remain provider/account-wide and are handled by the router's different-provider fallback.
+        // A catalogue entry does not establish account access. Treat a 403 as model-scoped only when
+        // the provider's structured message names this exact model and describes an access refusal.
+        // Generic 403 and every 401 remain provider/account-wide. Never infer scope from guessed codes.
         $modelRefused = $modelPermissionDenied || $modelUnavailable;
         if ($modelPermissionDenied) {
             $reason = FreeLlmApiCopilotException::MODEL_PERMISSION_DENIED;
             $message = self::MODEL_PERMISSION_MESSAGE;
-        } elseif ($modelUnavailable) {
-            $reason = FreeLlmApiCopilotException::MODEL_UNAVAILABLE;
-            $message = self::MODEL_UNAVAILABLE_MESSAGE;
         } elseif ($unsupportedTools) {
             $reason = FreeLlmApiCopilotException::UNSUPPORTED_TOOL_CALLING;
             $message = self::UNAVAILABLE_MESSAGE;
+        } elseif ($modelUnavailable) {
+            $reason = FreeLlmApiCopilotException::MODEL_UNAVAILABLE;
+            $message = self::MODEL_UNAVAILABLE_MESSAGE;
         } elseif ($hosted && $status === 403) {
             $reason = FreeLlmApiCopilotException::ACCOUNT_PERMISSION_DENIED;
             $message = self::ACCOUNT_PERMISSION_MESSAGE;

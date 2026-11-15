@@ -157,16 +157,14 @@ class CopilotProviderModelResolver
         }
 
         $startedAt = microtime(true);
-        // OpenRouter filters its catalogue server side; eligibility is still verified below.
+        // OpenRouter's public catalogue accepts server-side capability filtering; eligibility is still verified below.
         $query = $provider === 'openrouter' ? ['supported_parameters' => 'tools'] : [];
-        // OpenRouter's user catalog applies account-level provider preferences and guardrails.
-        // It still cannot guarantee upstream model access, which is handled on completion errors.
-        $catalogPath = $provider === 'openrouter' ? '/models/user' : '/models';
+        $catalogPath = '/models';
 
         try {
             $request = Http::acceptJson()->timeout(min(self::CATALOG_TIMEOUT_SECONDS, $remaining))->connectTimeout(min(self::CONNECT_TIMEOUT_SECONDS, $remaining));
-            // The key only ever goes to the provider's own HTTPS host (checked in isSafeHostedBaseUrl).
-            if ($key !== '') $request = $request->withToken($key);
+            // NavyAI documents /models as public. OpenRouter accepts Bearer auth for its catalogue.
+            if ($provider === 'openrouter' && $key !== '') $request = $request->withToken($key);
             $response = $request->get($baseUrl . $catalogPath, $query);
         } catch (ConnectionException $e) {
             $text = strtolower($e->getMessage());
@@ -336,8 +334,8 @@ class CopilotProviderModelResolver
             if (!is_array($model) || !self::validId($model['id'] ?? null)) continue;
             if (!in_array($model['endpoint'] ?? null, ['/v1/chat/completions', '/chat/completions', 'chat/completions'], true)) continue;
             if (($model['supports_tools'] ?? null) !== true && ($model['supports_function_calling'] ?? null) !== true) continue;
-            // Unknown metadata is treated conservatively: its capability flags are not trusted.
-            if (($model['metadata_status'] ?? null) !== 'known') continue;
+            // Trust only the explicit capability booleans above; metadata_status is not part of
+            // the documented public catalogue contract and must not exclude otherwise eligible models.
 
             $output = $model['output_modalities'] ?? null;
             if ((is_array($output) && $output !== ['text']) || ($model['supports_image_output'] ?? false) === true) continue;
@@ -346,7 +344,7 @@ class CopilotProviderModelResolver
             if ($plan !== null && (!is_string($plan) || !in_array(strtolower($plan), $settings['allowed_plans'], true))) continue;
 
             $context = $model['context_window'] ?? null;
-            if (is_int($context) && $context < self::MIN_CONTEXT_TOKENS) continue;
+            if (!is_int($context) || $context < self::MIN_CONTEXT_TOKENS) continue;
 
             $eligible[] = ['id' => $model['id'], 'rank' => [$context ?? 0]];
         }

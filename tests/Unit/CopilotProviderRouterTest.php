@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 /**
- * Provider routing (OpenRouter -> NavyAI in production, FreeLLMAPI locally) and dynamic model
+ * Provider routing (NavyAI -> OpenRouter in production, FreeLLMAPI locally) and dynamic model
  * discovery from the providers' catalogues. All provider traffic is faked; nothing leaves the process.
  */
 class CopilotProviderRouterTest extends TestCase
@@ -57,7 +57,7 @@ class CopilotProviderRouterTest extends TestCase
         $catalogue = $this->requestsTo('openrouter.ai/api/v1/models');
         $this->assertCount(1, $catalogue, 'the catalogue is cached between requests');
         $this->assertSame('Bearer or-test', $catalogue[0]->header('Authorization')[0]);
-        $this->assertStringContainsString('/api/v1/models/user', $catalogue[0]->url());
+        $this->assertSame('https://openrouter.ai/api/v1/models?supported_parameters=tools', $catalogue[0]->url());
         $this->assertStringContainsString('supported_parameters=tools', $catalogue[0]->url());
     }
 
@@ -109,7 +109,7 @@ class CopilotProviderRouterTest extends TestCase
         $this->assertSame(['navy-free-tools'], $chain);
     }
 
-    public function test_navyai_rejects_unknown_metadata_non_chat_image_and_plan_gated_models(): void
+    public function test_navyai_handles_unknown_optional_metadata_and_rejects_ineligible_models(): void
     {
         $catalogue = ['data' => [
             self::navyModel('unknown-meta', 900000, overrides: ['metadata_status' => 'unknown']),
@@ -122,11 +122,11 @@ class CopilotProviderRouterTest extends TestCase
         Http::fake([self::NAVY_MODELS => Http::response($catalogue)]);
 
         $resolver = app(CopilotProviderModelResolver::class);
-        $this->assertSame(['function-calling-only'], $resolver->resolve('navyai', config('services.ai.providers.navyai'), microtime(true) + 10));
+        $this->assertSame(['function-calling-only', 'unknown-meta'], $resolver->resolve('navyai', config('services.ai.providers.navyai'), microtime(true) + 10));
 
         CopilotProviderModelResolver::forgetCatalog('navyai');
         $withPlan = array_merge(config('services.ai.providers.navyai'), ['allowed_plans' => 'plus']);
-        $this->assertSame(['function-calling-only', 'plus-only'], $resolver->resolve('navyai', $withPlan, microtime(true) + 10));
+        $this->assertSame(['function-calling-only', 'plus-only', 'unknown-meta'], $resolver->resolve('navyai', $withPlan, microtime(true) + 10));
     }
 
     public function test_navyai_chain_does_not_use_premium_flags_as_an_access_or_ranking_assumption(): void
@@ -250,7 +250,7 @@ class CopilotProviderRouterTest extends TestCase
         app(CopilotProviderModelResolver::class)->resolve('openrouter', config('services.ai.providers.openrouter'), microtime(true) + 10);
         $this->assertSame('Navy after catalog key failure', $this->reply());
 
-        $this->assertCount(2, $this->requestsTo('openrouter.ai/api/v1/models/user'));
+        $this->assertCount(2, $this->requestsTo('openrouter.ai/api/v1/models'));
         $this->assertSame([], $this->requestsTo('openrouter.ai/api/v1/chat/completions'));
         $this->assertSame(['navy/available'], array_map(fn(Request $request) => $request['model'], $this->requestsTo('api.navy/v1/chat/completions')));
     }
@@ -299,7 +299,7 @@ class CopilotProviderRouterTest extends TestCase
             self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/gated', 60), self::orModel('vendor/open', 40)]]),
             self::OR_CHAT => function (Request $request) {
                 return $request['model'] === 'vendor/gated'
-                    ? Http::response(['error' => ['code' => 'model_access_denied']], 403)
+                    ? Http::response(['error' => ['code' => 403, 'message' => 'Account cannot access model vendor/gated']], 403)
                     : Http::response(self::answer('Open model answer'));
             },
         ]);
@@ -336,6 +336,26 @@ class CopilotProviderRouterTest extends TestCase
             && $context['provider_error_code'] === 'invalid_api_key'
             && $context['failure_type'] === FreeLlmApiCopilotException::INVALID_CREDENTIALS
         );
+    }
+
+    public function test_navyai_account_permission_failure_falls_back_to_openrouter_once(): void
+    {
+        config(['services.ai.provider' => 'navyai', 'services.ai.fallback_provider' => 'openrouter']);
+        Http::fake([
+            self::NAVY_MODELS => Http::response(['data' => [self::navyModel('navy/a', 128000), self::navyModel('navy/b', 64000)]]),
+            self::NAVY_CHAT => Http::response(['error' => ['code' => 403, 'message' => 'The AI account does not have permission to use this service.']], 403),
+            self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/backup', 50)]]),
+            self::OR_CHAT => Http::response(self::answer('OpenRouter backup answer')),
+        ]);
+
+        $this->assertSame('OpenRouter backup answer', $this->reply());
+        $navyRequests = $this->requestsTo('api.navy/v1/chat/completions');
+        $openRouterRequests = $this->requestsTo('openrouter.ai/api/v1/chat/completions');
+        $this->assertCount(1, $navyRequests, 'account-wide denial must not rotate NavyAI models');
+        $this->assertSame(['Bearer navy-test'], $navyRequests[0]->header('Authorization'));
+        $this->assertCount(1, $openRouterRequests);
+        $this->assertSame(['Bearer or-test'], $openRouterRequests[0]->header('Authorization'));
+        $this->assertSame('vendor/backup', $openRouterRequests[0]['model']);
     }
 
     public function test_generic_http_403_is_account_level_and_falls_back_without_model_rotation(): void
@@ -406,7 +426,7 @@ class CopilotProviderRouterTest extends TestCase
             self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/a-denied', 60), self::orModel('vendor/z-allowed', 40)]]),
             self::OR_CHAT => function (Request $request) {
                 return $request['model'] === 'vendor/a-denied'
-                    ? Http::response(['error' => ['code' => 'model_permission_denied']], 403)
+                    ? Http::response(['error' => ['code' => 403, 'message' => 'Access denied for model vendor/a-denied']], 403)
                     : Http::response(self::answer('Alternate model answer'));
             },
         ]);
@@ -420,7 +440,7 @@ class CopilotProviderRouterTest extends TestCase
             $message === 'OpenRouter Copilot unsuccessful response.'
             && $context['selected_model_id'] === 'vendor/a-denied'
             && $context['failure_type'] === FreeLlmApiCopilotException::MODEL_PERMISSION_DENIED
-            && $context['provider_error_code'] === 'model_permission_denied'
+            && $context['provider_error_code'] === '403'
         );
     }
 
@@ -450,7 +470,7 @@ class CopilotProviderRouterTest extends TestCase
             self::OR_MODELS => Http::response(['data' => [self::orModel('vendor/no-tools', 60), self::orModel('vendor/tools', 40)]]),
             self::OR_CHAT => function (Request $request) {
                 return $request['model'] === 'vendor/no-tools'
-                    ? Http::response(['error' => ['code' => 'tool_choice_not_supported']], 400)
+                    ? Http::response(['error' => ['code' => 400, 'message' => 'Tool calling is not supported for this model']], 400)
                     : Http::response(self::answer('Tool-compatible answer'));
             },
         ]);
@@ -561,10 +581,10 @@ class CopilotProviderRouterTest extends TestCase
             'services.ai.provider' => 'freellmapi', 'services.ai.fallback_provider' => 'freellmapi',
             'services.freellmapi' => array_merge(config('services.freellmapi'), ['enabled' => true, 'base_url' => 'http://127.0.0.1:31415/v1', 'key' => 'local-key']),
         ]);
-        $this->assertSame(['openrouter'], app(CopilotProviderRouter::class)->providers());
+        $this->assertSame(['navyai'], app(CopilotProviderRouter::class)->providers());
 
-        config(['services.ai.provider' => 'openrouter', 'services.ai.fallback_provider' => 'navyai']);
-        $this->assertSame(['openrouter', 'navyai'], app(CopilotProviderRouter::class)->providers());
+        config(['services.ai.provider' => 'navyai', 'services.ai.fallback_provider' => 'openrouter']);
+        $this->assertSame(['navyai', 'openrouter'], app(CopilotProviderRouter::class)->providers());
 
         config(['services.ai.providers.navyai.base_url' => 'http://127.0.0.1:31415/v1']);
         $this->assertSame(['openrouter'], app(CopilotProviderRouter::class)->providers(), 'hosted providers must use public HTTPS hosts');
@@ -573,6 +593,17 @@ class CopilotProviderRouterTest extends TestCase
         $this->assertSame([], app(CopilotProviderRouter::class)->providers());
         $this->assertSame(FreeLlmApiCopilotException::UNAVAILABLE, $this->replyFailure()->reason);
         Http::assertNothingSent();
+    }
+
+    public function test_navyai_is_the_production_primary_and_openrouter_is_the_fallback(): void
+    {
+        $this->app['env'] = 'production';
+        config([
+            'services.ai.provider' => 'navyai', 'services.ai.fallback_provider' => 'openrouter',
+            'services.ai.provider_fallback_enabled' => true,
+        ]);
+
+        $this->assertSame(['navyai', 'openrouter'], app(CopilotProviderRouter::class)->providers());
     }
 
     // ---------------------------------------------------------------- tool calling
@@ -617,8 +648,8 @@ class CopilotProviderRouterTest extends TestCase
         $requests = $this->requestsTo('api.navy/v1/chat/completions');
         $this->assertSame(['navy-strong', 'navy-strong'], [$requests[0]['model'], $requests[1]['model']]);
         $catalogue = $this->requestsTo('api.navy/v1/models');
-        $this->assertSame(['Bearer navy-test'], $catalogue[0]->header('Authorization'));
         $this->assertSame('https://api.navy/v1/models', $catalogue[0]->url());
+        $this->assertSame([], $catalogue[0]->header('Authorization'), 'NavyAI documents its model catalogue as public');
         foreach ($requests as $request) {
             $this->assertSame(['Bearer navy-test'], $request->header('Authorization'));
             $this->assertSame(self::NAVY_CHAT, $request->url());

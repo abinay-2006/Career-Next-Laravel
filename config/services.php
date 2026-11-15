@@ -56,10 +56,10 @@ return [
         'model_cooldown_max_seconds' => env('FREELLMAPI_MODEL_COOLDOWN_MAX_SECONDS', 300),
     ],
     'ai' => [
-        // Production: OpenRouter, then NavyAI. Local development: the FreeLLMAPI gateway.
+        // Production: NavyAI, then OpenRouter. Local development: the FreeLLMAPI gateway.
         // FreeLLMAPI (a local gateway) is never used when APP_ENV=production, whatever is set here.
-        'provider' => env('AI_PROVIDER', env('APP_ENV') === 'production' ? 'openrouter' : 'freellmapi'),
-        'fallback_provider' => env('AI_FALLBACK_PROVIDER', 'navyai'),
+        'provider' => env('AI_PROVIDER', env('APP_ENV') === 'production' ? 'navyai' : 'freellmapi'),
+        'fallback_provider' => env('AI_FALLBACK_PROVIDER', 'openrouter'),
         'provider_fallback_enabled' => env('AI_PROVIDER_FALLBACK_ENABLED', env('APP_ENV') === 'production'),
         'total_timeout_seconds' => env('AI_TOTAL_TIMEOUT_SECONDS', 24),
         // Hosted providers have no configured model: tool-capable models are discovered from each

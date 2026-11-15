@@ -59,14 +59,14 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 ## Copilot AI providers
 
-Local development uses the FreeLLMAPI desktop gateway (`http://127.0.0.1:31415/v1`) with its curated `FREELLMAPI_*_MODEL` chain. Production uses OpenRouter, with NavyAI as the fallback provider. FreeLLMAPI is never contacted when `APP_ENV=production`, and hosted providers must use public HTTPS base URLs. Set these environment variables in Render and enter keys through Render's secret fields; do not commit credentials:
+Local development uses the FreeLLMAPI desktop gateway (`http://127.0.0.1:31415/v1`) with its curated `FREELLMAPI_*_MODEL` chain. Production uses NavyAI, with OpenRouter as the fallback provider. FreeLLMAPI is never contacted when `APP_ENV=production`, and hosted providers must use public HTTPS base URLs. Set these environment variables in Render and enter keys through Render's secret fields; do not commit credentials:
 
 ```dotenv
 APP_ENV=production
 APP_DEBUG=false
 LOG_CHANNEL=stderr
-AI_PROVIDER=openrouter
-AI_FALLBACK_PROVIDER=navyai
+AI_PROVIDER=navyai
+AI_FALLBACK_PROVIDER=openrouter
 AI_PROVIDER_FALLBACK_ENABLED=true
 AI_TOTAL_TIMEOUT_SECONDS=24
 AI_MODEL_CATALOG_CACHE_SECONDS=600
@@ -86,9 +86,9 @@ FREELLMAPI_COPILOT_ENABLED=false
 
 No model ID is hardcoded. For every request the app resolves a chain of up to three models from current provider metadata, cached for `AI_MODEL_CATALOG_CACHE_SECONDS` (a last-known-good copy is kept for `AI_MODEL_CATALOG_STALE_SECONDS` and used only when a refresh fails):
 
-- **OpenRouter**: uses `GET /models/user` to honor available account preferences and guardrails, then checks explicit tool, text modality, chat endpoint and expiry metadata. The filtered catalog still cannot prove that a completion will be authorized.
-- **NavyAI**: checks `/v1/chat/completions` support, known tool capability metadata, text output, `required_plan` against `NAVYAI_ALLOWED_PLANS`, and the public `/v1/models/status` health data when available. Premium flags and pricing do not determine selection.
+- **OpenRouter**: uses `GET /models?supported_parameters=tools` to honor available account preferences and guardrails, then checks explicit tool, text modality, chat endpoint and expiry metadata. The filtered catalog still cannot prove that a completion will be authorized.
+- **NavyAI**: checks `/v1/chat/completions` support, explicit tool capability metadata, text output, `required_plan` against `NAVYAI_ALLOWED_PLANS`, and the public `/v1/models/status` health data when available. Premium flags and pricing do not determine selection.
 
-The first completion is the definitive account-access check. Invalid credentials and generic account permission denials are not retried against more models; the configured OpenRouter → NavyAI provider fallback is used when safe. Explicit model-scoped permission/availability or tool incompatibility errors temporarily exclude that model and try another discovered candidate within the overall timeout. If both providers reject authentication or account access, the user receives an aggregate safe access error and the logs retain each provider's individual classification. Provider failover only happens before any Copilot tool has executed, so an operation is never replayed. FreeLLMAPI is local-development-only and requires explicitly configured model IDs.
+The first completion is the definitive account-access check. Invalid credentials and generic account permission denials are not retried against more models; the configured NavyAI to OpenRouter provider fallback is used when safe. Explicit model-scoped permission/availability or tool incompatibility errors temporarily exclude that model and try another discovered candidate within the overall timeout. If both providers reject authentication or account access, the user receives an aggregate safe access error and the logs retain each provider's individual classification. Provider failover only happens before any Copilot tool has executed, so an operation is never replayed. FreeLLMAPI is local-development-only and requires explicitly configured model IDs.
 
 Logs are written per provider (`OpenRouter Copilot ...`, `NavyAI Copilot ...`, `Copilot provider ...`) with provider, operation (`model_discovery` / `model_availability` / `completion`), HTTP status, selected model ID, sanitized provider error code, failure type and timing. Keys, authorization headers, prompts and response bodies are never logged. Failure types distinguish invalid credentials, account permission denial, model permission denial, model unavailability, unsupported tool calling and provider outage. A failure type of `edge_blocked` means a CDN or bot-protection layer in front of the provider refused traffic from the hosting network.
