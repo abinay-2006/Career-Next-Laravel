@@ -57,4 +57,27 @@ return [
         'model_cooldown_default_seconds' => env('FREELLMAPI_MODEL_COOLDOWN_DEFAULT_SECONDS', 60),
         'model_cooldown_max_seconds' => env('FREELLMAPI_MODEL_COOLDOWN_MAX_SECONDS', 300),
     ],
+    'ai' => [
+        'provider' => env('AI_PROVIDER', env('APP_ENV') === 'production' ? 'openrouter' : 'freellmapi'),
+        'fallback_provider' => env('AI_FALLBACK_PROVIDER', 'navyai'),
+        'provider_fallback_enabled' => env('AI_PROVIDER_FALLBACK_ENABLED', env('APP_ENV') === 'production'),
+        'total_timeout_seconds' => env('AI_TOTAL_TIMEOUT_SECONDS', 24),
+        'providers' => [
+            'openrouter' => [
+                'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'), 'key' => env('OPENROUTER_API_KEY'),
+                'enabled' => env('OPENROUTER_ENABLED', false), 'model' => env('OPENROUTER_MODEL', 'google/gemini-4-carbon'),
+                'request_timeout_seconds' => env('OPENROUTER_TIMEOUT_SECONDS', 9), 'cooldown_default_seconds' => env('OPENROUTER_COOLDOWN_DEFAULT_SECONDS', 60), 'cooldown_max_seconds' => env('OPENROUTER_COOLDOWN_MAX_SECONDS', 300),
+            ],
+            'navyai' => [
+                'base_url' => env('NAVYAI_BASE_URL', 'https://api.navy/v1'), 'key' => env('NAVYAI_API_KEY'),
+                'enabled' => env('NAVYAI_ENABLED', false), 'model' => env('NAVYAI_MODEL', 'gpt-6-astra'),
+                'request_timeout_seconds' => env('NAVYAI_TIMEOUT_SECONDS', 9), 'cooldown_default_seconds' => env('NAVYAI_COOLDOWN_DEFAULT_SECONDS', 60), 'cooldown_max_seconds' => env('NAVYAI_COOLDOWN_MAX_SECONDS', 300),
+            ],
+            'freellmapi' => [
+                'base_url' => env('FREELLMAPI_BASE_URL'), 'key' => env('FREELLMAPI_API_KEY'), 'enabled' => env('FREELLMAPI_COPILOT_ENABLED', false),
+                'model' => env('FREELLMAPI_PRIMARY_MODEL', 'gemini-3.5-flash'), 'request_timeout_seconds' => env('FREELLMAPI_TIMEOUT_SECONDS', 9),
+                'cooldown_default_seconds' => env('FREELLMAPI_MODEL_COOLDOWN_DEFAULT_SECONDS', 60), 'cooldown_max_seconds' => env('FREELLMAPI_MODEL_COOLDOWN_MAX_SECONDS', 300),
+            ],
+        ],
+    ],
 ];

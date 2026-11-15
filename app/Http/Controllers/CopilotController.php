@@ -8,7 +8,7 @@ use App\Services\CopilotCapabilityRegistry;
 use App\Services\CopilotProfileUpdateService;
 use App\Services\CopilotToolDispatcher;
 use App\Services\FreeLlmApiCopilotException;
-use App\Services\FreeLlmApiCopilotService;
+use App\Services\CopilotProviderRouter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +20,7 @@ class CopilotController extends Controller
     public function message(
         Request $request,
         string $role,
-        FreeLlmApiCopilotService $freeLlmApi,
+        CopilotProviderRouter $providerRouter,
         CopilotCapabilityRegistry $registry,
         CopilotToolDispatcher $dispatcher,
         CopilotActionService $actions,
@@ -56,7 +56,7 @@ class CopilotController extends Controller
             }
 
             if ($reply === null) {
-                $reply = $freeLlmApi->reply($role, $message, $account, $registry, $dispatcher, $history);
+                $reply = $providerRouter->reply($role, $message, $account, $registry, $dispatcher, $history);
             }
         } catch (FreeLlmApiCopilotException $e) {
             // Provider 429s are returned as 503, never 429: the frontend reserves 429 for this

@@ -56,3 +56,29 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Copilot AI providers
+
+Local development uses the FreeLLMAPI desktop gateway. Production selects OpenRouter, with NavyAI as the secondary provider. Set these environment variables in Render and enter keys through Render's secret fields; do not commit credentials:
+
+```dotenv
+APP_ENV=production
+AI_PROVIDER=openrouter
+AI_FALLBACK_PROVIDER=navyai
+AI_PROVIDER_FALLBACK_ENABLED=true
+AI_TOTAL_TIMEOUT_SECONDS=24
+OPENROUTER_API_KEY=
+OPENROUTER_ENABLED=true
+OPENROUTER_MODEL=google/gemini-4-carbon
+OPENROUTER_TIMEOUT_SECONDS=9
+OPENROUTER_COOLDOWN_DEFAULT_SECONDS=60
+OPENROUTER_COOLDOWN_MAX_SECONDS=300
+NAVYAI_API_KEY=
+NAVYAI_ENABLED=true
+NAVYAI_MODEL=gpt-6-astra
+NAVYAI_TIMEOUT_SECONDS=9
+NAVYAI_COOLDOWN_DEFAULT_SECONDS=60
+NAVYAI_COOLDOWN_MAX_SECONDS=300
+```
+
+The selected IDs belong to their own provider catalogs. Both currently advertise tool/function calling. Provider keys remain server-side.
