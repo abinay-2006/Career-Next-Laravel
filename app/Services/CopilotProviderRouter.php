@@ -116,6 +116,25 @@ class CopilotProviderRouter
                 if ($blockedReason !== null) {
                     if (count($failures) > 1) {
                         Log::warning('Copilot all AI providers failed.', ['failed_providers' => $failures]);
+
+                        $failureReasons = array_map(static fn(string $failure): string => (string) substr(strrchr($failure, ':'), 1), array_values($failures));
+                        $authorizationReasons = [
+                            FreeLlmApiCopilotException::INVALID_CREDENTIALS,
+                            FreeLlmApiCopilotException::ACCOUNT_PERMISSION_DENIED,
+                        ];
+                        if (count(array_diff($failureReasons, $authorizationReasons)) === 0) {
+                            $distinctReasons = array_values(array_unique($failureReasons));
+                            $reason = count($distinctReasons) === 1
+                                ? $distinctReasons[0]
+                                : FreeLlmApiCopilotException::PROVIDERS_REJECTED_ACCESS;
+                            $message = match ($reason) {
+                                FreeLlmApiCopilotException::INVALID_CREDENTIALS => FreeLlmApiCopilotService::AUTHENTICATION_MESSAGE,
+                                FreeLlmApiCopilotException::ACCOUNT_PERMISSION_DENIED => FreeLlmApiCopilotService::ACCOUNT_PERMISSION_MESSAGE,
+                                default => FreeLlmApiCopilotService::PROVIDERS_REJECTED_ACCESS_MESSAGE,
+                            };
+
+                            throw new FreeLlmApiCopilotException($message, $reason, $e, null, $e->providerStatus);
+                        }
                     }
                     throw $e;
                 }

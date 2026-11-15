@@ -57,6 +57,7 @@ class CopilotProviderRouterTest extends TestCase
         $catalogue = $this->requestsTo('openrouter.ai/api/v1/models');
         $this->assertCount(1, $catalogue, 'the catalogue is cached between requests');
         $this->assertSame('Bearer or-test', $catalogue[0]->header('Authorization')[0]);
+        $this->assertStringContainsString('/api/v1/models/user', $catalogue[0]->url());
         $this->assertStringContainsString('supported_parameters=tools', $catalogue[0]->url());
     }
 
@@ -198,8 +199,12 @@ class CopilotProviderRouterTest extends TestCase
             ->push('<!DOCTYPE html><title>Attention Required! | Cloudflare</title>', 403, ['Content-Type' => 'text/html; charset=UTF-8', 'Server' => 'cloudflare', 'CF-RAY' => 'abc'])]);
         Log::spy();
 
-        $this->assertSame(FreeLlmApiCopilotException::AUTHENTICATION, $this->resolveFailure('navyai')->reason);
-        $this->assertSame(FreeLlmApiCopilotException::PERMISSION, $this->resolveFailure('navyai')->reason);
+        $authentication = $this->resolveFailure('navyai');
+        $this->assertSame(FreeLlmApiCopilotException::AUTHENTICATION, $authentication->reason);
+        $this->assertSame(FreeLlmApiCopilotService::AUTHENTICATION_MESSAGE, $authentication->getMessage());
+        $permission = $this->resolveFailure('navyai');
+        $this->assertSame(FreeLlmApiCopilotException::ACCOUNT_PERMISSION_DENIED, $permission->reason);
+        $this->assertSame(FreeLlmApiCopilotService::ACCOUNT_PERMISSION_MESSAGE, $permission->getMessage());
         $edge = $this->resolveFailure('navyai');
         $this->assertSame(FreeLlmApiCopilotException::UPSTREAM, $edge->reason, 'a CDN block is not a credential problem');
         $this->assertSame(403, $edge->providerStatus);
@@ -320,6 +325,8 @@ class CopilotProviderRouterTest extends TestCase
         $this->assertSame('Navy after bad OpenRouter key', $this->reply());
         $openRouterRequests = $this->requestsTo('openrouter.ai/api/v1/chat/completions');
         $this->assertCount(1, $openRouterRequests);
+        $this->assertSame(['Bearer or-test'], $openRouterRequests[0]->header('Authorization'));
+        $this->assertSame(self::OR_CHAT, $openRouterRequests[0]->url());
         $this->assertSame('vendor/a', $openRouterRequests[0]['model']);
         $this->assertSame(['navy/a'], array_map(fn(Request $r) => $r['model'], $this->requestsTo('api.navy/v1/chat/completions')));
         Log::shouldHaveReceived('warning')->withArgs(fn(string $message, array $context) =>
@@ -351,6 +358,46 @@ class CopilotProviderRouterTest extends TestCase
             && $context['provider_error_code'] === 'account_access_denied'
             && $context['failure_type'] === FreeLlmApiCopilotException::ACCOUNT_PERMISSION_DENIED
         );
+    }
+
+    public function test_account_level_401_and_403_on_navyai_do_not_rotate_models(): void
+    {
+        config(['services.ai.provider' => 'navyai', 'services.ai.provider_fallback_enabled' => false]);
+        Http::fake([
+            self::NAVY_MODELS => Http::response(['data' => [self::navyModel('navy/a', 128000), self::navyModel('navy/b', 64000)]]),
+            self::NAVY_CHAT => Http::sequence()
+                ->push(['error' => ['code' => 'invalid_api_key']], 401)
+                ->push(['error' => ['code' => 'account_access_denied']], 403),
+        ]);
+
+        $invalid = $this->replyFailure();
+        $forbidden = $this->replyFailure();
+
+        $this->assertSame(FreeLlmApiCopilotException::INVALID_CREDENTIALS, $invalid->reason);
+        $this->assertSame(FreeLlmApiCopilotService::AUTHENTICATION_MESSAGE, $invalid->getMessage());
+        $this->assertSame(FreeLlmApiCopilotException::ACCOUNT_PERMISSION_DENIED, $forbidden->reason);
+        $this->assertSame(FreeLlmApiCopilotService::ACCOUNT_PERMISSION_MESSAGE, $forbidden->getMessage());
+        $requests = $this->requestsTo('api.navy/v1/chat/completions');
+        $this->assertSame(['navy/a', 'navy/a'], array_map(fn(Request $request) => $request['model'], $requests));
+        foreach ($requests as $request) {
+            $this->assertSame(['Bearer navy-test'], $request->header('Authorization'));
+            $this->assertSame(self::NAVY_CHAT, $request->url());
+        }
+    }
+
+    public function test_both_providers_rejecting_credentials_or_access_returns_an_aggregate_safe_error(): void
+    {
+        Http::fake([
+            self::OR_MODELS => Http::response(['error' => ['code' => 'invalid_api_key']], 401),
+            self::NAVY_MODELS => Http::response(['error' => ['code' => 'account_access_denied']], 403),
+        ]);
+
+        $error = $this->replyFailure();
+
+        $this->assertSame(FreeLlmApiCopilotException::PROVIDERS_REJECTED_ACCESS, $error->reason);
+        $this->assertSame(FreeLlmApiCopilotService::PROVIDERS_REJECTED_ACCESS_MESSAGE, $error->getMessage());
+        $this->assertSame([], $this->requestsTo('openrouter.ai/api/v1/chat/completions'));
+        $this->assertSame([], $this->requestsTo('api.navy/v1/chat/completions'));
     }
 
     public function test_model_specific_403_rotates_once_and_temporarily_excludes_refused_model(): void
@@ -421,11 +468,19 @@ class CopilotProviderRouterTest extends TestCase
             self::NAVY_MODELS => Http::response(['data' => [self::navyModel('navy-strong', 128000)]]),
             self::NAVY_CHAT => Http::response(self::answer('Navy answer')),
         ]);
+        Log::spy();
 
         $this->assertSame('Navy answer', $this->reply());
         $this->assertSame('Navy answer', $this->reply());
 
         $this->assertCount(1, $this->requestsTo('openrouter.ai/api/v1/chat/completions'), 'credits are account-wide: no second model, no request during the pause');
+        Log::shouldHaveReceived('warning')->withArgs(fn(string $message, array $context) =>
+            $message === 'OpenRouter Copilot unsuccessful response.'
+            && $context['provider'] === 'openrouter' && $context['operation'] === 'completion'
+            && $context['http_status'] === 402 && $context['provider_error_code'] === '402'
+            && $context['failure_type'] === FreeLlmApiCopilotException::QUOTA
+            && $context['limit_scope'] === 'gateway'
+        );
     }
 
     public function test_navyai_edge_block_on_completion_is_not_retried_per_model(): void
@@ -535,6 +590,8 @@ class CopilotProviderRouterTest extends TestCase
         $requests = $this->requestsTo('openrouter.ai/api/v1/chat/completions');
         $this->assertCount(2, $requests);
         foreach ($requests as $request) {
+            $this->assertSame(['Bearer or-test'], $request->header('Authorization'));
+            $this->assertSame(self::OR_CHAT, $request->url());
             $this->assertSame('vendor/agent', $request['model']);
             $this->assertArrayNotHasKey('plugins', $request->data());
             $this->assertFalse($request['parallel_tool_calls']);
@@ -559,6 +616,13 @@ class CopilotProviderRouterTest extends TestCase
 
         $requests = $this->requestsTo('api.navy/v1/chat/completions');
         $this->assertSame(['navy-strong', 'navy-strong'], [$requests[0]['model'], $requests[1]['model']]);
+        $catalogue = $this->requestsTo('api.navy/v1/models');
+        $this->assertSame(['Bearer navy-test'], $catalogue[0]->header('Authorization'));
+        $this->assertSame('https://api.navy/v1/models', $catalogue[0]->url());
+        foreach ($requests as $request) {
+            $this->assertSame(['Bearer navy-test'], $request->header('Authorization'));
+            $this->assertSame(self::NAVY_CHAT, $request->url());
+        }
         $this->assertArrayNotHasKey('parallel_tool_calls', $requests[0]->data());
         $this->assertSame('navy-call-1', collect($requests[1]['messages'])->firstWhere('role', 'tool')['tool_call_id']);
     }

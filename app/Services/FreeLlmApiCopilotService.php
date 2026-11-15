@@ -63,6 +63,9 @@ class FreeLlmApiCopilotService
     public const ACCOUNT_PERMISSION_MESSAGE =
     'The AI account does not have permission to use this service. Please contact support.';
 
+    public const PROVIDERS_REJECTED_ACCESS_MESSAGE =
+    'The configured AI providers rejected access. Please verify their API credentials and account permissions.';
+
     public const MODEL_PERMISSION_MESSAGE = self::PERMISSION_MESSAGE;
 
     public const UPSTREAM_MESSAGE =
@@ -1006,11 +1009,16 @@ class FreeLlmApiCopilotService
     {
         $error = $this->errorObject($response);
         $metadata = is_array($error['metadata'] ?? null) ? $error['metadata'] : [];
+        $numericCode = null;
         foreach ([$error['code'] ?? null, $error['type'] ?? null, $metadata['code'] ?? null, $metadata['type'] ?? null] as $candidate) {
+            if (is_int($candidate) && $candidate >= 0 && $candidate <= 9999) $candidate = (string) $candidate;
             $safe = $this->safeIdentifier($candidate);
-            if ($safe !== null && !ctype_digit($safe)) return strtolower($safe);
+            if ($safe !== null) {
+                if (!ctype_digit($safe)) return strtolower($safe);
+                $numericCode ??= $safe;
+            }
         }
-        return null;
+        return $numericCode;
     }
 
     private function safeIdentifier(mixed $value): ?string

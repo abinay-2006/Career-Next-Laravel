@@ -19,6 +19,7 @@ class FreeLlmApiCopilotException extends RuntimeException
     public const MODEL_UNAVAILABLE = 'model_unavailable';
     public const UNSUPPORTED_TOOL_CALLING = 'unsupported_tool_calling';
     public const PROVIDER_OUTAGE = 'provider_outage';
+    public const PROVIDERS_REJECTED_ACCESS = 'providers_rejected_access';
     // Compatibility aliases used by existing callers/tests.
     public const AUTHENTICATION = self::INVALID_CREDENTIALS;
     public const PERMISSION = self::ACCOUNT_PERMISSION_DENIED;

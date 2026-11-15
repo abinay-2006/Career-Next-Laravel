@@ -201,7 +201,12 @@ class CopilotProviderModelResolver
                 'failure_type' => $edgeBlocked ? 'edge_blocked' : $reason, 'provider_error_code' => self::safeErrorCode($response), 'content_type' => self::contentType($response),
                 'edge' => self::edgeName($response), 'elapsed_ms' => self::elapsedMs($startedAt),
             ]);
-            throw new FreeLlmApiCopilotException(FreeLlmApiCopilotService::MODEL_CATALOG_MESSAGE, $reason, null, null, $status);
+            $message = match ($reason) {
+                FreeLlmApiCopilotException::AUTHENTICATION => FreeLlmApiCopilotService::AUTHENTICATION_MESSAGE,
+                FreeLlmApiCopilotException::PERMISSION => FreeLlmApiCopilotService::ACCOUNT_PERMISSION_MESSAGE,
+                default => FreeLlmApiCopilotService::MODEL_CATALOG_MESSAGE,
+            };
+            throw new FreeLlmApiCopilotException($message, $reason, null, null, $status);
         }
 
         $items = $response->json('data');
@@ -273,10 +278,14 @@ class CopilotProviderModelResolver
         }
         $error = is_array($json) && is_array($json['error'] ?? null) ? $json['error'] : [];
         $metadata = is_array($error['metadata'] ?? null) ? $error['metadata'] : [];
+        $numericCode = null;
         foreach ([$error['code'] ?? null, $error['type'] ?? null, $metadata['code'] ?? null, $metadata['type'] ?? null] as $code) {
-            if (is_string($code) && preg_match('/^[A-Za-z0-9_.:\/@+-]{1,96}$/', $code) === 1 && !ctype_digit($code)) return strtolower($code);
+            if (is_int($code) && $code >= 0 && $code <= 9999) $code = (string) $code;
+            if (!is_string($code) || preg_match('/^[A-Za-z0-9_.:\/@+-]{1,96}$/', $code) !== 1) continue;
+            if (!ctype_digit($code)) return strtolower($code);
+            $numericCode ??= $code;
         }
-        return null;
+        return $numericCode;
     }
 
     /** Select only on explicit chat/tool compatibility metadata, never price or inferred account access. */
