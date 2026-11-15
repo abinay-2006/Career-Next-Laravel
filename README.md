@@ -59,25 +59,31 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 ## Copilot AI providers
 
-Local development uses the FreeLLMAPI desktop gateway. Production selects OpenRouter, with NavyAI as the secondary provider. Set these environment variables in Render and enter keys through Render's secret fields; do not commit credentials:
+Local development uses the FreeLLMAPI desktop gateway (`http://127.0.0.1:31415/v1`) with its curated `FREELLMAPI_*_MODEL` chain. Production uses OpenRouter, with NavyAI as the fallback provider. FreeLLMAPI is never contacted when `APP_ENV=production`, and hosted providers must use public HTTPS base URLs. Set these environment variables in Render and enter keys through Render's secret fields; do not commit credentials:
 
 ```dotenv
 APP_ENV=production
+LOG_CHANNEL=stderr
 AI_PROVIDER=openrouter
 AI_FALLBACK_PROVIDER=navyai
 AI_PROVIDER_FALLBACK_ENABLED=true
 AI_TOTAL_TIMEOUT_SECONDS=24
 OPENROUTER_API_KEY=
 OPENROUTER_ENABLED=true
-OPENROUTER_AUTO_ROUTER_COST_TIER=max
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
 OPENROUTER_TIMEOUT_SECONDS=9
-OPENROUTER_COOLDOWN_DEFAULT_SECONDS=60
-OPENROUTER_COOLDOWN_MAX_SECONDS=300
 NAVYAI_API_KEY=
 NAVYAI_ENABLED=true
+NAVYAI_BASE_URL=https://api.navy/v1
 NAVYAI_TIMEOUT_SECONDS=9
-NAVYAI_COOLDOWN_DEFAULT_SECONDS=60
-NAVYAI_COOLDOWN_MAX_SECONDS=300
+FREELLMAPI_COPILOT_ENABLED=false
 ```
 
-OpenRouter uses its `openrouter/auto` Auto Router with the `max` cost tier, selecting from its most capable candidates and automatically considering tool support. NavyAI requires a concrete model ID; the app reads `GET /v1/models` and chooses a currently listed chat model whose catalog metadata confirms premium reasoning and tool/function calling support. FreeLLMAPI keeps its existing local model settings. Provider keys remain server-side.
+No hosted model ID is configured. For every request the app resolves a ranked chain of up to three models from the provider's live catalogue (`GET /models`), cached for `AI_MODEL_CATALOG_CACHE_SECONDS` (a last-known-good copy is kept for `AI_MODEL_CATALOG_STALE_SECONDS` and used only when a refresh fails):
+
+- **OpenRouter**: models that publish both `tools` and `tool_choice` in `supported_parameters`, take text and return only text, serve `/api/v1/chat/completions`, are not routers/aliases or about to expire, and cost no more than `OPENROUTER_MAX_PROMPT_PRICE_PER_MILLION` / `OPENROUTER_MAX_COMPLETION_PRICE_PER_MILLION` (defaults 1 and 5 USD). Ranked by OpenRouter's published Artificial Analysis agentic and intelligence indices, then price.
+- **NavyAI**: `/v1/chat/completions` models with `supports_tools` or `supports_function_calling`, `metadata_status: known` and text-only output. `premium` is not required. Models with a `required_plan` are used only when that plan is listed in `NAVYAI_ALLOWED_PLANS`. Ranked by reasoning support and published capacity, then lower `token_multiplier`; a premium first choice is always followed by a non-premium model.
+
+A model the provider refuses (403/404) is skipped for a few minutes and the next discovered model is tried. Provider failover happens only before any Copilot tool has executed, so an operation is never replayed. `OPENROUTER_MODEL`, `NAVYAI_MODEL` and `OPENROUTER_AUTO_ROUTER_COST_TIER` are obsolete and ignored.
+
+Logs are written per provider (`OpenRouter Copilot ...`, `NavyAI Copilot ...`, `Copilot provider ...`) with provider, operation (`model_discovery` / `completion`), HTTP status, failure type, model ID and timing, never keys, prompts or response bodies. A `failure_type` of `edge_blocked` means a CDN or bot-protection layer in front of the provider refused traffic from the hosting network.
