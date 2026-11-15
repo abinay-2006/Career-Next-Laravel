@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\ActivityLogger;
+use App\Services\AdminAccountManagementService;
+use App\Models\Admin;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
@@ -152,7 +154,23 @@ class ManageUsersController extends Controller
             return $this->actionError($request, 'Invalid user type.', 422);
         }
 
-        return $this->updateStatus($request, $type, $id, 'Suspended', 'Account suspended.');
+        $actor = auth('admin')->user();
+        abort_unless($actor instanceof Admin, 403);
+        $result = app(AdminAccountManagementService::class)->suspend($actor, $type, (int) $id);
+        if (!$result['success']) {
+            return $this->actionError($request, $result['message'], 404);
+        }
+
+        $payload = [
+            'success' => true,
+            'message' => ($result['changed'] ?? false) ? 'Account suspended.' : 'Account was already suspended.',
+            'status' => 'Suspended',
+            'counts' => $this->summaryCounts(),
+        ];
+
+        return $request->expectsJson()
+            ? response()->json($payload)
+            : redirect()->route('admin.manageUsers')->with('success', $payload['message']);
     }
 
     public function destroy(Request $request, $type, $id)

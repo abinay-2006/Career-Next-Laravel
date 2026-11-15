@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="{{ asset('assets/css/news.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/resume-builder.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/my-resume.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/copilot.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/job-requirements.css') }}">
     @vite('resources/js/app.js')
     <link rel="stylesheet" href="{{ asset('assets/css/theme.css') }}">
@@ -41,5 +42,7 @@
     @yield('scripts')
     <script src="{{ asset('assets/js/admin-navigation.js') }}"></script>
     <script src="{{ asset('assets/js/dashboard-analytics.js') }}"></script>
+    <x-copilot role="jobseeker" />
+    <script src="{{ asset('assets/js/copilot.js') }}?v={{ @filemtime(public_path('assets/js/copilot.js')) ?: '1' }}" defer></script>
 </body>
 </html>

@@ -417,6 +417,7 @@
 
         </div>
       </div>
+      <x-job-quality-report form-id="editJobForm" />
       <div style="display:flex;gap:10px;justify-content:flex-end;padding:16px 28px 24px;border-top:1px solid var(--theme-border);">
         <button type="button" class="btn-confirm-cancel" onclick="closeEditModal()"><i class="fas fa-xmark"></i> Cancel</button>
         <button type="submit" class="btn-submit" style="margin:0;"><i class="fas fa-floppy-disk"></i> Save Changes</button>

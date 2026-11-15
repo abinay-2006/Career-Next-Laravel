@@ -37,4 +37,24 @@ return [
     'brevo' => [
         'key' => env('BREVO_API_KEY'),
     ],
+    'freellmapi' => [
+        'base_url' => env('FREELLMAPI_BASE_URL'),
+        'key' => env('FREELLMAPI_API_KEY'),
+        'enabled' => env('FREELLMAPI_COPILOT_ENABLED', false),
+
+        // Curated Copilot model chain (max three), tried in order. Defaults were chosen from the local
+        // gateway catalog and validated with a live tool-call round trip; set a slot to an empty value
+        // to disable it. Every model must support OpenAI-style tool calling.
+        'models' => [
+            'primary' => env('FREELLMAPI_PRIMARY_MODEL', 'gemini-3.5-flash'),
+            'secondary' => env('FREELLMAPI_SECONDARY_MODEL', 'nemotron-3-ultra-550b'),
+            'tertiary' => env('FREELLMAPI_TERTIARY_MODEL', 'gpt-oss-120b'),
+        ],
+        'model_fallback_enabled' => env('FREELLMAPI_MODEL_FALLBACK_ENABLED', true),
+        'max_model_attempts' => env('FREELLMAPI_MAX_MODEL_ATTEMPTS', 3),
+        // Local per-model cooldown after a model-level 429: Retry-After when valid, otherwise the
+        // default; never longer than the max, after which one request may probe the model again.
+        'model_cooldown_default_seconds' => env('FREELLMAPI_MODEL_COOLDOWN_DEFAULT_SECONDS', 60),
+        'model_cooldown_max_seconds' => env('FREELLMAPI_MODEL_COOLDOWN_MAX_SECONDS', 300),
+    ],
 ];
