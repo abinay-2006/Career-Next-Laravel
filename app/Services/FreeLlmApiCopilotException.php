@@ -13,9 +13,16 @@ class FreeLlmApiCopilotException extends RuntimeException
     public const INVALID_RESPONSE = 'invalid_response';
     public const EMPTY_COMPLETION = 'empty_completion';
     public const CONNECTION = 'connection';
-    public const AUTHENTICATION = 'authentication';
-    public const PERMISSION = 'permission';
-    public const UPSTREAM = 'upstream';
+    public const INVALID_CREDENTIALS = 'invalid_credentials';
+    public const ACCOUNT_PERMISSION_DENIED = 'account_permission_denied';
+    public const MODEL_PERMISSION_DENIED = 'model_permission_denied';
+    public const MODEL_UNAVAILABLE = 'model_unavailable';
+    public const UNSUPPORTED_TOOL_CALLING = 'unsupported_tool_calling';
+    public const PROVIDER_OUTAGE = 'provider_outage';
+    // Compatibility aliases used by existing callers/tests.
+    public const AUTHENTICATION = self::INVALID_CREDENTIALS;
+    public const PERMISSION = self::ACCOUNT_PERMISSION_DENIED;
+    public const UPSTREAM = self::PROVIDER_OUTAGE;
     /** Every configured model was tried (or cooling down) and failed for differing reasons. */
     public const MODELS_UNAVAILABLE = 'models_unavailable';
 

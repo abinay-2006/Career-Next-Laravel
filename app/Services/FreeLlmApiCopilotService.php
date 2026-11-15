@@ -21,9 +21,6 @@ use Illuminate\Support\Facades\Log;
  */
 class FreeLlmApiCopilotService
 {
-    /** Default primary model, used only when the model configuration block is missing entirely. */
-    public const MODEL = 'gemini-3.5-flash';
-
     public const UNAVAILABLE_MESSAGE =
     'Career Next data and operations are temporarily unavailable. Please try again shortly.';
 
@@ -62,6 +59,11 @@ class FreeLlmApiCopilotService
 
     public const PERMISSION_MESSAGE =
     'The AI service does not allow access to the configured model. Please contact support.';
+
+    public const ACCOUNT_PERMISSION_MESSAGE =
+    'The AI account does not have permission to use this service. Please contact support.';
+
+    public const MODEL_PERMISSION_MESSAGE = self::PERMISSION_MESSAGE;
 
     public const UPSTREAM_MESSAGE =
     'The AI service is temporarily unavailable. Please try again shortly.';
@@ -474,7 +476,7 @@ class FreeLlmApiCopilotService
     {
         $configured = config('services.freellmapi.models');
         if ($configured === null) {
-            $configured = ['primary' => self::MODEL];
+            $configured = [];
         }
 
         $candidates = is_array($configured)
@@ -701,14 +703,40 @@ class FreeLlmApiCopilotService
             throw new FreeLlmApiCopilotException(self::UPSTREAM_MESSAGE, FreeLlmApiCopilotException::UPSTREAM, null, null, $status, false);
         }
 
-        // Hosted catalogues list models the account may still be refused (unknown model, plan-gated
-        // model): another discovered model may work, and the refused one is skipped for a while.
-        $modelRefused = $hosted && in_array($status, [403, 404], true);
-        if ($modelRefused) {
-            if ($status === 404) {
-                $reason = FreeLlmApiCopilotException::UNAVAILABLE;
-                $message = self::MODEL_UNAVAILABLE_MESSAGE;
-            }
+        $providerErrorCode = $this->safeErrorCode($response);
+        $code = strtolower((string) $providerErrorCode);
+        $modelPermissionDenied = $hosted && $status === 403 && in_array($code, [
+            'model_access_denied', 'model_permission_denied', 'model_not_authorized', 'model_not_allowed',
+            'model_not_available', 'model_unavailable', 'model_not_found', 'model_not_supported',
+        ], true);
+        $modelUnavailable = $hosted && $status === 404;
+        $unsupportedTools = $hosted && in_array($status, [400, 422], true) && in_array($code, [
+            'tool_calling_not_supported', 'unsupported_tool_calling', 'tools_not_supported',
+            'tool_choice_not_supported', 'tool_use_not_supported',
+        ], true);
+
+        // A catalog entry does not establish account access. Retry a 403 only when its structured,
+        // sanitized code explicitly scopes the refusal to the selected model. Generic 403 and every
+        // 401 remain provider/account-wide and are handled by the router's different-provider fallback.
+        $modelRefused = $modelPermissionDenied || $modelUnavailable;
+        if ($modelPermissionDenied) {
+            $reason = FreeLlmApiCopilotException::MODEL_PERMISSION_DENIED;
+            $message = self::MODEL_PERMISSION_MESSAGE;
+        } elseif ($modelUnavailable) {
+            $reason = FreeLlmApiCopilotException::MODEL_UNAVAILABLE;
+            $message = self::MODEL_UNAVAILABLE_MESSAGE;
+        } elseif ($unsupportedTools) {
+            $reason = FreeLlmApiCopilotException::UNSUPPORTED_TOOL_CALLING;
+            $message = self::UNAVAILABLE_MESSAGE;
+        } elseif ($hosted && $status === 403) {
+            $reason = FreeLlmApiCopilotException::ACCOUNT_PERMISSION_DENIED;
+            $message = self::ACCOUNT_PERMISSION_MESSAGE;
+        } elseif ($hosted && $status === 401) {
+            $reason = FreeLlmApiCopilotException::INVALID_CREDENTIALS;
+            $message = self::AUTHENTICATION_MESSAGE;
+        }
+
+        if ($modelRefused || $unsupportedTools) {
             CopilotProviderModelResolver::markDenied($this->providerName(), $model, $this->cooldownMaxSeconds());
         }
 
@@ -738,15 +766,16 @@ class FreeLlmApiCopilotService
                 : $this->startModelCooldown($model, $reason, $retryAfter);
         }
 
-        $modelSpecific = $modelRefused
+        $modelSpecific = $modelRefused || $unsupportedTools
             || ($status === 429 && $scope === 'model')
             || in_array($reason, [FreeLlmApiCopilotException::UPSTREAM, FreeLlmApiCopilotException::TIMEOUT], true);
 
         $this->log('warning', 'unsuccessful response.', [
             'model' => $model,
+            'selected_model_id' => $model,
             'http_status' => $status,
             'failure_type' => $reason,
-            'error_code' => $this->safeErrorCode($response),
+            'provider_error_code' => $providerErrorCode,
             'limit_scope' => $scope,
             'retry_after_seconds' => $retryAfter,
             'elapsed_ms' => $this->elapsedMs($startedAt),
@@ -760,7 +789,7 @@ class FreeLlmApiCopilotService
     {
         return match (true) {
             $status === 401 => [FreeLlmApiCopilotException::AUTHENTICATION, self::AUTHENTICATION_MESSAGE],
-            $status === 403 => [FreeLlmApiCopilotException::PERMISSION, self::PERMISSION_MESSAGE],
+            $status === 403 => [FreeLlmApiCopilotException::ACCOUNT_PERMISSION_DENIED, self::ACCOUNT_PERMISSION_MESSAGE],
             $status === 408, $status === 504 => [FreeLlmApiCopilotException::TIMEOUT, self::TIMEOUT_MESSAGE],
             $status === 429 => [FreeLlmApiCopilotException::RATE_LIMITED, self::RATE_LIMIT_MESSAGE],
             $status >= 500 && $status <= 599 => [FreeLlmApiCopilotException::UPSTREAM, self::UPSTREAM_MESSAGE],
@@ -975,7 +1004,13 @@ class FreeLlmApiCopilotService
     /** Only short machine identifiers (e.g. "rate_limit_exceeded") are ever logged. */
     private function safeErrorCode(Response $response): ?string
     {
-        return $this->safeIdentifier($this->errorObject($response)['code'] ?? null);
+        $error = $this->errorObject($response);
+        $metadata = is_array($error['metadata'] ?? null) ? $error['metadata'] : [];
+        foreach ([$error['code'] ?? null, $error['type'] ?? null, $metadata['code'] ?? null, $metadata['type'] ?? null] as $candidate) {
+            $safe = $this->safeIdentifier($candidate);
+            if ($safe !== null && !ctype_digit($safe)) return strtolower($safe);
+        }
+        return null;
     }
 
     private function safeIdentifier(mixed $value): ?string

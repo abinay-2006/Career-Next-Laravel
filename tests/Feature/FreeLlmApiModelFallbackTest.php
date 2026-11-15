@@ -223,7 +223,7 @@ class FreeLlmApiModelFallbackTest extends TestCase
         $this->queue(self::P, self::failWith(401, [], 'invalid_api_key'), self::failWith(403, [], 'forbidden'));
 
         $this->ask()->assertStatus(502)->assertExactJson(['message' => Service::AUTHENTICATION_MESSAGE]);
-        $this->ask('again')->assertStatus(502)->assertExactJson(['message' => Service::PERMISSION_MESSAGE]);
+        $this->ask('again')->assertStatus(502)->assertExactJson(['message' => Service::ACCOUNT_PERMISSION_MESSAGE]);
         $this->assertSame([self::P, self::P], $this->models());
     }
 
@@ -377,12 +377,16 @@ class FreeLlmApiModelFallbackTest extends TestCase
         $this->assertSame([self::S], $this->models());
     }
 
-    public function test_missing_model_block_uses_the_existing_default_model(): void
+    public function test_missing_model_block_fails_without_a_hardcoded_provider_model(): void
     {
-        config(['services.freellmapi.models' => null]);
-        $this->queue(Service::MODEL, self::answer('Default model'));
-        $this->ask()->assertOk()->assertJsonPath('reply', 'Default model');
-        $this->assertSame([Service::MODEL], $this->models());
+        config([
+            'services.freellmapi.models' => null,
+            'services.ai.provider' => 'freellmapi',
+            'services.ai.provider_fallback_enabled' => false,
+            'services.ai.providers.freellmapi.model' => '',
+        ]);
+        $this->ask()->assertStatus(503)->assertExactJson(['message' => Service::UNAVAILABLE_MESSAGE]);
+        $this->assertSame([], $this->models());
     }
 
     // ---- Regression: per-round failure classification and pinned follow-up timeout ----
