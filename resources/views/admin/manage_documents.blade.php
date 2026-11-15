@@ -554,14 +554,7 @@
                             <i class="fas fa-magnifying-glass"></i> Search
                         </label>
 
-                        <input
-                            type="text"
-                            name="search"
-                            id="search"
-                            class="form-input"
-                            placeholder="Search by user or filename..."
-                            value="{{ $search }}"
-                        >
+                        
                     </div>
 
                     <div class="form-group">
