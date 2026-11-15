@@ -24,6 +24,12 @@ class FreeLlmApiCopilotService
     public const UNAVAILABLE_MESSAGE =
     'Career Next data and operations are temporarily unavailable. Please try again shortly.';
 
+    public const MODEL_UNAVAILABLE_MESSAGE =
+    'The AI provider has no currently available tool-capable model. Please try again shortly.';
+
+    public const MODEL_CATALOG_MESSAGE =
+    'The AI provider could not resolve an available tool-capable model. Please try again shortly.';
+
     /** Used only when the gateway explicitly reports quota exhaustion. %s = wait phrase. */
     public const QUOTA_MESSAGE =
     'The AI assistant\'s provider has used up its current quota. Please try again %s.';
@@ -304,6 +310,13 @@ class FreeLlmApiCopilotService
                 if ($tools !== []) {
                     $payload['tools'] = $tools;
                     $payload['tool_choice'] = 'auto';
+                }
+
+                if (config('services.freellmapi.provider_name') === 'openrouter') {
+                    $payload['plugins'] = [[
+                        'id' => 'auto-router',
+                        'cost_tier' => config('services.freellmapi.auto_router_cost_tier', 'high'),
+                    ]];
                 }
 
                 if ($deadline - microtime(true) < 1) {
@@ -618,6 +631,12 @@ class FreeLlmApiCopilotService
 
         $status = $response->status();
         [$reason, $message] = $this->classifyStatus($status);
+        $modelSpecificNotFound = $status === 404
+            && in_array(config('services.freellmapi.provider_name'), ['openrouter', 'navyai'], true);
+        if ($modelSpecificNotFound) {
+            $reason = FreeLlmApiCopilotException::UNAVAILABLE;
+            $message = self::MODEL_UNAVAILABLE_MESSAGE;
+        }
         $retryAfter = null;
         $scope = null;
 
@@ -639,7 +658,8 @@ class FreeLlmApiCopilotService
                 : $this->startModelCooldown($model, $reason, $retryAfter);
         }
 
-        $modelSpecific = ($status === 429 && $scope === 'model')
+        $modelSpecific = $modelSpecificNotFound
+            || ($status === 429 && $scope === 'model')
             || in_array($reason, [FreeLlmApiCopilotException::UPSTREAM, FreeLlmApiCopilotException::TIMEOUT], true);
 
         Log::warning('FreeLLMAPI Copilot unsuccessful response.', [

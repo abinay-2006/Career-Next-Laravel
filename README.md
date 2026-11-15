@@ -69,16 +69,15 @@ AI_PROVIDER_FALLBACK_ENABLED=true
 AI_TOTAL_TIMEOUT_SECONDS=24
 OPENROUTER_API_KEY=
 OPENROUTER_ENABLED=true
-OPENROUTER_MODEL=google/gemini-4-carbon
+OPENROUTER_AUTO_ROUTER_COST_TIER=max
 OPENROUTER_TIMEOUT_SECONDS=9
 OPENROUTER_COOLDOWN_DEFAULT_SECONDS=60
 OPENROUTER_COOLDOWN_MAX_SECONDS=300
 NAVYAI_API_KEY=
 NAVYAI_ENABLED=true
-NAVYAI_MODEL=gpt-6-astra
 NAVYAI_TIMEOUT_SECONDS=9
 NAVYAI_COOLDOWN_DEFAULT_SECONDS=60
 NAVYAI_COOLDOWN_MAX_SECONDS=300
 ```
 
-The selected IDs belong to their own provider catalogs. Both currently advertise tool/function calling. Provider keys remain server-side.
+OpenRouter uses its `openrouter/auto` Auto Router with the `max` cost tier, selecting from its most capable candidates and automatically considering tool support. NavyAI requires a concrete model ID; the app reads `GET /v1/models` and chooses a currently listed chat model whose catalog metadata confirms premium reasoning and tool/function calling support. FreeLLMAPI keeps its existing local model settings. Provider keys remain server-side.

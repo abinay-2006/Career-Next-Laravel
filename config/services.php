@@ -65,12 +65,13 @@ return [
         'providers' => [
             'openrouter' => [
                 'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'), 'key' => env('OPENROUTER_API_KEY'),
-                'enabled' => env('OPENROUTER_ENABLED', false), 'model' => env('OPENROUTER_MODEL', 'google/gemini-4-carbon'),
+                'enabled' => env('OPENROUTER_ENABLED', false),
+                'auto_router_cost_tier' => env('OPENROUTER_AUTO_ROUTER_COST_TIER', 'max'),
                 'request_timeout_seconds' => env('OPENROUTER_TIMEOUT_SECONDS', 9), 'cooldown_default_seconds' => env('OPENROUTER_COOLDOWN_DEFAULT_SECONDS', 60), 'cooldown_max_seconds' => env('OPENROUTER_COOLDOWN_MAX_SECONDS', 300),
             ],
             'navyai' => [
                 'base_url' => env('NAVYAI_BASE_URL', 'https://api.navy/v1'), 'key' => env('NAVYAI_API_KEY'),
-                'enabled' => env('NAVYAI_ENABLED', false), 'model' => env('NAVYAI_MODEL', 'gpt-6-astra'),
+                'enabled' => env('NAVYAI_ENABLED', false),
                 'request_timeout_seconds' => env('NAVYAI_TIMEOUT_SECONDS', 9), 'cooldown_default_seconds' => env('NAVYAI_COOLDOWN_DEFAULT_SECONDS', 60), 'cooldown_max_seconds' => env('NAVYAI_COOLDOWN_MAX_SECONDS', 300),
             ],
             'freellmapi' => [
