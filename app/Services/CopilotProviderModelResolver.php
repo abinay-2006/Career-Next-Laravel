@@ -19,7 +19,7 @@ class CopilotProviderModelResolver
 
         try {
             // NavyAI documents this model catalog as public; do not send the inference API key here.
-            $response = Http::acceptJson()->timeout(min(5, $remaining))->connectTimeout(min(3, $remaining))->get($baseUrl.'/models');
+            $response = Http::acceptJson()->timeout(min(5, $remaining))->connectTimeout(min(3, $remaining))->get($baseUrl . '/models');
         } catch (ConnectionException $e) {
             Log::warning('Copilot provider model catalog request failed.', ['provider' => 'navyai', 'failure_type' => 'connection', 'exception' => $e::class]);
             throw new FreeLlmApiCopilotException(FreeLlmApiCopilotService::MODEL_CATALOG_MESSAGE, FreeLlmApiCopilotException::UNAVAILABLE, $e, null, null, true);
@@ -50,7 +50,6 @@ class CopilotProviderModelResolver
             return is_string($model['id'] ?? null)
                 && preg_match('/^[A-Za-z0-9][A-Za-z0-9._:\/@+-]{0,191}$/', $model['id']) === 1
                 && $supportsTools && $chatEndpoint
-                && ($model['premium'] ?? false) === true
                 && ($model['supports_reasoning'] ?? false) === true
                 && ($model['metadata_status'] ?? null) === 'known';
         }));
@@ -60,7 +59,7 @@ class CopilotProviderModelResolver
             throw new FreeLlmApiCopilotException(FreeLlmApiCopilotService::MODEL_UNAVAILABLE_MESSAGE, FreeLlmApiCopilotException::UNAVAILABLE, null, null, $response->status(), true);
         }
 
-        // Restrict selection to known premium reasoning models with explicit tool support, then
+        // Restrict selection to known reasoning models with explicit tool support, then
         // prefer greater published output/context capacity and use the ID only for stable ties.
         usort($candidates, function (array $a, array $b): int {
             $capacityA = [(int) ($a['max_output_tokens'] ?? 0), (int) ($a['context_window'] ?? 0)];
