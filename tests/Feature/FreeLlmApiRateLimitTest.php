@@ -78,7 +78,7 @@ class FreeLlmApiRateLimitTest extends TestCase
         Http::assertSentCount(1); // never retried inside the request
 
         Log::shouldHaveReceived('warning')->withArgs(fn (string $msg, array $ctx) => $msg === 'FreeLLMAPI Copilot unsuccessful response.'
-            && $ctx['http_status'] === 429 && $ctx['failure_type'] === 'rate_limited' && $ctx['error_code'] === 'rate_limit_exceeded'
+            && $ctx['http_status'] === 429 && $ctx['failure_type'] === 'rate_limited' && $ctx['provider_error_code'] === 'rate_limit_exceeded'
             && $ctx['retry_after_seconds'] === 2862 && !str_contains(json_encode($ctx), 'test-key'));
     }
 
@@ -165,7 +165,7 @@ class FreeLlmApiRateLimitTest extends TestCase
     {
         return [
             '401 authentication' => [401, 502, Service::AUTHENTICATION_MESSAGE],
-            '403 permission' => [403, 502, Service::PERMISSION_MESSAGE],
+            '403 account permission' => [403, 502, Service::ACCOUNT_PERMISSION_MESSAGE],
             '408 timeout' => [408, 504, Service::TIMEOUT_MESSAGE],
             '500 upstream' => [500, 503, Service::UPSTREAM_MESSAGE],
             '502 upstream' => [502, 503, Service::UPSTREAM_MESSAGE],

@@ -45,6 +45,9 @@ class CopilotProviderModelResolver
         }
 
         $candidates = $this->candidates($provider, $baseUrl, (string) ($block['key'] ?? ''), $block, $deadline);
+        if ($provider === 'navyai' && ($block['check_model_availability'] ?? true)) {
+            $candidates = $this->filterNavyAvailability($candidates, $baseUrl, $deadline);
+        }
         $available = array_values(array_filter($candidates, fn(array $c): bool => !$this->isDenied($provider, $c['id'])));
 
         if ($available === []) {
@@ -55,7 +58,9 @@ class CopilotProviderModelResolver
             throw new FreeLlmApiCopilotException(FreeLlmApiCopilotService::MODEL_UNAVAILABLE_MESSAGE, FreeLlmApiCopilotException::UNAVAILABLE, null, null, null, true);
         }
 
-        $chain = self::diversify($available);
+        // Catalogues cannot prove that an API account can invoke every listed model. Keep this
+        // ordered chain capability-based; runtime authorization failures prune a model separately.
+        $chain = array_slice(array_column($available, 'id'), 0, self::MAX_CANDIDATES);
         Log::info('Copilot provider models resolved.', ['provider' => $provider, 'operation' => 'model_discovery', 'models' => $chain, 'eligible_models' => count($available)]);
 
         return $chain;
@@ -107,10 +112,13 @@ class CopilotProviderModelResolver
         return false;
     }
 
-    /** @return list<array{id: string, premium: bool}> ranked eligible candidates */
+    /** @return list<array{id: string}> ranked eligible candidates */
     private function candidates(string $provider, string $baseUrl, string $key, array $block, float $deadline): array
     {
-        $fingerprint = hash('sha256', json_encode([$baseUrl, self::eligibilitySettings($provider, $block)]));
+        $fingerprint = hash('sha256', json_encode([
+            $baseUrl, hash('sha256', $key), self::eligibilitySettings($provider, $block),
+            (bool) ($block['check_model_availability'] ?? true),
+        ]));
         $fresh = $this->cacheGet(self::catalogKey($provider, 'fresh'));
         if (is_array($fresh) && ($fresh['fingerprint'] ?? null) === $fingerprint && is_array($fresh['candidates'] ?? null)) {
             return $fresh['candidates'];
@@ -120,7 +128,8 @@ class CopilotProviderModelResolver
             $candidates = $this->fetchCandidates($provider, $baseUrl, $key, $block, $deadline);
         } catch (FreeLlmApiCopilotException $e) {
             $stale = $this->cacheGet(self::catalogKey($provider, 'stale'));
-            if (is_array($stale) && ($stale['fingerprint'] ?? null) === $fingerprint && is_array($stale['candidates'] ?? null) && $stale['candidates'] !== []) {
+            $authorizationFailure = in_array($e->reason, [FreeLlmApiCopilotException::AUTHENTICATION, FreeLlmApiCopilotException::PERMISSION], true);
+            if (!$authorizationFailure && is_array($stale) && ($stale['fingerprint'] ?? null) === $fingerprint && is_array($stale['candidates'] ?? null) && $stale['candidates'] !== []) {
                 Log::warning('Copilot provider catalogue unavailable; using last known good catalogue.', [
                     'provider' => $provider, 'operation' => 'model_discovery', 'failure_type' => $e->reason,
                     'http_status' => $e->providerStatus, 'catalogue_age_seconds' => max(0, time() - (int) ($stale['fetched_at'] ?? time())),
@@ -139,7 +148,7 @@ class CopilotProviderModelResolver
         return $candidates;
     }
 
-    /** @return list<array{id: string, premium: bool}> */
+    /** @return list<array{id: string}> */
     private function fetchCandidates(string $provider, string $baseUrl, string $key, array $block, float $deadline): array
     {
         $remaining = $deadline - microtime(true);
@@ -150,12 +159,15 @@ class CopilotProviderModelResolver
         $startedAt = microtime(true);
         // OpenRouter filters its catalogue server side; eligibility is still verified below.
         $query = $provider === 'openrouter' ? ['supported_parameters' => 'tools'] : [];
+        // OpenRouter's user catalog applies account-level provider preferences and guardrails.
+        // It still cannot guarantee upstream model access, which is handled on completion errors.
+        $catalogPath = $provider === 'openrouter' ? '/models/user' : '/models';
 
         try {
             $request = Http::acceptJson()->timeout(min(self::CATALOG_TIMEOUT_SECONDS, $remaining))->connectTimeout(min(self::CONNECT_TIMEOUT_SECONDS, $remaining));
             // The key only ever goes to the provider's own HTTPS host (checked in isSafeHostedBaseUrl).
             if ($key !== '') $request = $request->withToken($key);
-            $response = $request->get($baseUrl . '/models', $query);
+            $response = $request->get($baseUrl . $catalogPath, $query);
         } catch (ConnectionException $e) {
             $text = strtolower($e->getMessage());
             $isTimeout = str_contains($text, 'curl error 28') || str_contains($text, 'timed out') || str_contains($text, 'timeout');
@@ -186,7 +198,7 @@ class CopilotProviderModelResolver
             };
             Log::warning('Copilot provider catalogue returned an unsuccessful response.', [
                 'provider' => $provider, 'operation' => 'model_discovery', 'http_status' => $status,
-                'failure_type' => $edgeBlocked ? 'edge_blocked' : $reason, 'content_type' => self::contentType($response),
+                'failure_type' => $edgeBlocked ? 'edge_blocked' : $reason, 'provider_error_code' => self::safeErrorCode($response), 'content_type' => self::contentType($response),
                 'edge' => self::edgeName($response), 'elapsed_ms' => self::elapsedMs($startedAt),
             ]);
             throw new FreeLlmApiCopilotException(FreeLlmApiCopilotService::MODEL_CATALOG_MESSAGE, $reason, null, null, $status);
@@ -212,17 +224,64 @@ class CopilotProviderModelResolver
         return $candidates;
     }
 
-    /**
-     * OpenRouter: chat-completions models that publish both `tools` and `tool_choice` support, accept
-     * text and answer with text only, have non-negative published pricing within the configured
-     * ceilings, and are not routers, aliases or about to expire. Ranked by the agentic and
-     * intelligence indices OpenRouter publishes, then lower price, then larger context.
-     *
-     * @return list<array{id: string, premium: bool}>
-     */
+    /** Apply NavyAI's public health metadata only where it explicitly reports a model is unhealthy. */
+    private function filterNavyAvailability(array $candidates, string $baseUrl, float $deadline): array
+    {
+        $remaining = $deadline - microtime(true);
+        if ($remaining < 1) return $candidates;
+
+        try {
+            $request = Http::acceptJson()->timeout(min(2, $remaining))->connectTimeout(min(1, $remaining));
+            // The documented status endpoint is public; do not send credentials to it.
+            $response = $request->get($baseUrl . '/models/status');
+        } catch (ConnectionException $e) {
+            Log::notice('NavyAI model availability metadata could not be fetched.', [
+                'provider' => 'navyai', 'operation' => 'model_availability', 'failure_type' => 'connection',
+            ]);
+            return $candidates;
+        }
+
+        $models = $response->successful() ? $response->json('models') : null;
+        if (!is_array($models)) {
+            Log::notice('NavyAI model availability metadata is unavailable or malformed.', [
+                'provider' => 'navyai', 'operation' => 'model_availability',
+                'http_status' => $response->status(), 'failure_type' => 'availability_metadata_unavailable',
+                'provider_error_code' => self::safeErrorCode($response),
+            ]);
+            return $candidates;
+        }
+
+        $filtered = array_values(array_filter($candidates, static function (array $candidate) use ($models): bool {
+            $status = $models[$candidate['id']]['lastStatus'] ?? null;
+            return !is_string($status) || strtolower($status) === 'ok';
+        }));
+
+        Log::info('NavyAI model availability metadata applied.', [
+            'provider' => 'navyai', 'operation' => 'model_availability',
+            'listed_candidates' => count($candidates), 'available_candidates' => count($filtered),
+        ]);
+
+        return $filtered;
+    }
+
+    private static function safeErrorCode(Response $response): ?string
+    {
+        try {
+            $json = json_decode($response->body(), true, 12, JSON_THROW_ON_ERROR);
+        } catch (\JsonException) {
+            return null;
+        }
+        $error = is_array($json) && is_array($json['error'] ?? null) ? $json['error'] : [];
+        $metadata = is_array($error['metadata'] ?? null) ? $error['metadata'] : [];
+        foreach ([$error['code'] ?? null, $error['type'] ?? null, $metadata['code'] ?? null, $metadata['type'] ?? null] as $code) {
+            if (is_string($code) && preg_match('/^[A-Za-z0-9_.:\/@+-]{1,96}$/', $code) === 1 && !ctype_digit($code)) return strtolower($code);
+        }
+        return null;
+    }
+
+    /** Select only on explicit chat/tool compatibility metadata, never price or inferred account access. */
     private function rankOpenRouter(array $items, array $block): array
     {
-        $settings = self::eligibilitySettings('openrouter', $block);
         $eligible = [];
 
         foreach ($items as $model) {
@@ -241,27 +300,13 @@ class CopilotProviderModelResolver
             if (is_array($endpoints) && !in_array('/api/v1/chat/completions', $endpoints, true)) continue;
 
             $expires = $model['expiration_date'] ?? null;
-            if (is_string($expires) && $expires !== '' && (strtotime($expires) === false || strtotime($expires) <= time() + 86400)) continue;
+            if (is_string($expires) && $expires !== '' && (strtotime($expires) === false || strtotime($expires) <= time())) continue;
 
             $context = $model['context_length'] ?? null;
             if (!is_int($context) || $context < self::MIN_CONTEXT_TOKENS) continue;
-
-            $prompt = self::price($model['pricing']['prompt'] ?? null);
-            $completion = self::price($model['pricing']['completion'] ?? null);
-            $perRequest = self::price($model['pricing']['request'] ?? '0');
-            if ($prompt === null || $completion === null || $perRequest === null || $perRequest > 0) continue;
-            if ($prompt * 1_000_000 > $settings['max_prompt'] + 1e-9 || $completion * 1_000_000 > $settings['max_completion'] + 1e-9) continue;
-
-            $scores = $model['benchmarks']['artificial_analysis'] ?? [];
             $eligible[] = [
                 'id' => $id,
-                'premium' => false,
-                'rank' => [
-                    is_numeric($scores['agentic_index'] ?? null) ? (float) $scores['agentic_index'] : -1.0,
-                    is_numeric($scores['intelligence_index'] ?? null) ? (float) $scores['intelligence_index'] : -1.0,
-                    -($prompt + $completion),
-                    $context,
-                ],
+                'rank' => [$context ?? 0],
             ];
         }
 
@@ -269,12 +314,9 @@ class CopilotProviderModelResolver
     }
 
     /**
-     * NavyAI: chat-completions models with explicit tool/function-calling support and known
-     * metadata that answer with text only. `premium` is NOT an eligibility requirement; models
-     * gated by `required_plan` are used only when that plan is listed in NAVYAI_ALLOWED_PLANS.
-     * Ranked by reasoning support, published output/context capacity, then lower token multiplier.
+     * NavyAI: use explicit capability, plan, endpoint and current availability metadata only.
      *
-     * @return list<array{id: string, premium: bool}>
+     * @return list<array{id: string}>
      */
     private function rankNavyAi(array $items, array $block): array
     {
@@ -297,62 +339,23 @@ class CopilotProviderModelResolver
             $context = $model['context_window'] ?? null;
             if (is_int($context) && $context < self::MIN_CONTEXT_TOKENS) continue;
 
-            $multiplier = is_numeric($model['token_multiplier'] ?? null) ? (float) $model['token_multiplier'] : 1000.0;
-            $eligible[] = [
-                'id' => $model['id'],
-                'premium' => ($model['premium'] ?? false) === true,
-                'rank' => [
-                    ($model['supports_reasoning'] ?? false) === true ? 1 : 0,
-                    is_int($model['max_output_tokens'] ?? null) ? $model['max_output_tokens'] : 0,
-                    is_int($context) ? $context : 0,
-                    -$multiplier,
-                ],
-            ];
+            $eligible[] = ['id' => $model['id'], 'rank' => [$context ?? 0]];
         }
 
         return self::sorted($eligible);
     }
 
-    /** @return list<array{id: string, premium: bool}> */
+    /** @return list<array{id: string}> */
     private static function sorted(array $eligible): array
     {
         usort($eligible, fn(array $a, array $b): int => ($b['rank'] <=> $a['rank']) ?: strcmp($a['id'], $b['id']));
-        return array_map(fn(array $c): array => ['id' => $c['id'], 'premium' => $c['premium']], $eligible);
-    }
-
-    /**
-     * Best-ranked model first. When it is a premium model, the best non-premium model is placed second,
-     * because the catalogue does not state whether premium access applies to this account; the chain
-     * then cannot consist solely of models the account may be refused.
-     *
-     * @param list<array{id: string, premium: bool}> $ranked
-     * @return list<string>
-     */
-    private static function diversify(array $ranked): array
-    {
-        $chain = [$ranked[0]['id']];
-        if ($ranked[0]['premium']) {
-            foreach ($ranked as $candidate) {
-                if (!$candidate['premium']) {
-                    $chain[] = $candidate['id'];
-                    break;
-                }
-            }
-        }
-        foreach ($ranked as $candidate) {
-            if (count($chain) >= self::MAX_CANDIDATES) break;
-            if (!in_array($candidate['id'], $chain, true)) $chain[] = $candidate['id'];
-        }
-        return array_slice($chain, 0, self::MAX_CANDIDATES);
+        return array_map(fn(array $c): array => ['id' => $c['id']], $eligible);
     }
 
     private static function eligibilitySettings(string $provider, array $block): array
     {
         if ($provider === 'openrouter') {
-            return [
-                'max_prompt' => max(0.0, (float) ($block['max_prompt_price_per_million'] ?? 1)),
-                'max_completion' => max(0.0, (float) ($block['max_completion_price_per_million'] ?? 5)),
-            ];
+            return [];
         }
         $plans = array_filter(array_map(fn($p) => strtolower(trim((string) $p)), explode(',', (string) ($block['allowed_plans'] ?? ''))));
         sort($plans);
@@ -385,13 +388,6 @@ class CopilotProviderModelResolver
     private static function validId(mixed $id): bool
     {
         return is_string($id) && preg_match(self::MODEL_ID_PATTERN, $id) === 1;
-    }
-
-    private static function price(mixed $value): ?float
-    {
-        if (!is_string($value) && !is_int($value) && !is_float($value)) return null;
-        if (!is_numeric($value) || (float) $value < 0) return null;
-        return (float) $value;
     }
 
     private function isDenied(string $provider, string $model): bool

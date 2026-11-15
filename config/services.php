@@ -42,13 +42,11 @@ return [
         'key' => env('FREELLMAPI_API_KEY'),
         'enabled' => env('FREELLMAPI_COPILOT_ENABLED', false),
 
-        // Curated Copilot model chain (max three), tried in order. Defaults were chosen from the local
-        // gateway catalog and validated with a live tool-call round trip; set a slot to an empty value
-        // to disable it. Every model must support OpenAI-style tool calling.
+        // Local-development-only curated model chain (max three). Model IDs must be explicitly configured.
         'models' => [
-            'primary' => env('FREELLMAPI_PRIMARY_MODEL', 'gemini-3.5-flash'),
-            'secondary' => env('FREELLMAPI_SECONDARY_MODEL', 'nemotron-3-ultra-550b'),
-            'tertiary' => env('FREELLMAPI_TERTIARY_MODEL', 'gpt-oss-120b'),
+            'primary' => env('FREELLMAPI_PRIMARY_MODEL', ''),
+            'secondary' => env('FREELLMAPI_SECONDARY_MODEL', ''),
+            'tertiary' => env('FREELLMAPI_TERTIARY_MODEL', ''),
         ],
         'model_fallback_enabled' => env('FREELLMAPI_MODEL_FALLBACK_ENABLED', true),
         'max_model_attempts' => env('FREELLMAPI_MAX_MODEL_ATTEMPTS', 3),
@@ -72,9 +70,6 @@ return [
             'openrouter' => [
                 'base_url' => env('OPENROUTER_BASE_URL', 'https://openrouter.ai/api/v1'), 'key' => env('OPENROUTER_API_KEY'),
                 'enabled' => env('OPENROUTER_ENABLED', false),
-                // Price ceilings (USD per million tokens) for dynamically selected models.
-                'max_prompt_price_per_million' => env('OPENROUTER_MAX_PROMPT_PRICE_PER_MILLION', 1),
-                'max_completion_price_per_million' => env('OPENROUTER_MAX_COMPLETION_PRICE_PER_MILLION', 5),
                 'request_timeout_seconds' => env('OPENROUTER_TIMEOUT_SECONDS', 9), 'cooldown_default_seconds' => env('OPENROUTER_COOLDOWN_DEFAULT_SECONDS', 60), 'cooldown_max_seconds' => env('OPENROUTER_COOLDOWN_MAX_SECONDS', 300),
             ],
             'navyai' => [
@@ -83,11 +78,12 @@ return [
                 // Comma-separated NavyAI plans this account holds (e.g. "Plus"); models whose catalogue
                 // entry has a `required_plan` outside this list are never selected.
                 'allowed_plans' => env('NAVYAI_ALLOWED_PLANS', ''),
+                'check_model_availability' => env('NAVYAI_CHECK_MODEL_AVAILABILITY', true),
                 'request_timeout_seconds' => env('NAVYAI_TIMEOUT_SECONDS', 9), 'cooldown_default_seconds' => env('NAVYAI_COOLDOWN_DEFAULT_SECONDS', 60), 'cooldown_max_seconds' => env('NAVYAI_COOLDOWN_MAX_SECONDS', 300),
             ],
             'freellmapi' => [
                 'base_url' => env('FREELLMAPI_BASE_URL'), 'key' => env('FREELLMAPI_API_KEY'), 'enabled' => env('FREELLMAPI_COPILOT_ENABLED', false),
-                'model' => env('FREELLMAPI_PRIMARY_MODEL', 'gemini-3.5-flash'), 'request_timeout_seconds' => env('FREELLMAPI_TIMEOUT_SECONDS', 9),
+                'model' => env('FREELLMAPI_PRIMARY_MODEL', ''), 'request_timeout_seconds' => env('FREELLMAPI_TIMEOUT_SECONDS', 9),
                 'cooldown_default_seconds' => env('FREELLMAPI_MODEL_COOLDOWN_DEFAULT_SECONDS', 60), 'cooldown_max_seconds' => env('FREELLMAPI_MODEL_COOLDOWN_MAX_SECONDS', 300),
             ],
         ],
